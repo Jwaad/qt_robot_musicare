@@ -1,0 +1,92 @@
+#!/usr/bin/env python
+
+import pygame
+import time
+from random import randint
+import numpy as np
+
+###CLASS CREATION
+
+class Guess_The_Mood_Game():
+
+    def __init__(self):
+        pygame.init() #start py engine
+        self.window_x = 1000 #Width of window
+        self.window_y = 500  #Height of window
+        self.window = pygame.display.set_mode( (self.window_x, self.window_y) ) #Create window and set size
+        pygame.display.set_caption("Guess the mood of the music!") #Label window
+        self.run = True # Close game if false
+        self.quit = False #Check to see if the game ended or it was quit
+
+
+    def DrawBackground(self):
+        "Draws the background, and loads it each frame"
+        self.window.fill((0, 0, 0)) #Fill background black
+        
+        #Draw things onto screen
+        font = pygame.font.Font('freesansbold.ttf', 16)
+        message = "THIS MESSAGE WAS PLACED IN THE CENTER OF THE SCREEN" #message = "Points: " + str(self.points)
+        text = font.render(message, True, (255,255,255), (0,0,0) )
+        textRect = text.get_rect()       #size of the box that contains the text
+        x = self.window_x/2
+        y = self.window_y/2
+        textRect.center = (x, y)  #set center of that box IE place it somewhere on the screen
+        self.window.blit(text, textRect) #draw these things onto the window
+
+
+    def PlaySong(self):
+        """Plays the song, and displays some kind of graphic to illustrate that the song is playing"""
+        #play sound here
+        pass
+    
+    
+    def GiveUserOptions(self):
+        """Display clickable options for the user to choose from "happy" "sad" "I don't know" """
+        #Display options
+        #check if its right, return score somewhere
+        #have qt talk to the person
+        pass
+
+
+    def PlayTutorial(self):
+        """Hard coded sequence where QT talks to the user and explains how to play the game, using an obviously happy song as an example. """
+        #Some gibber gabber about im this game is etc
+        #Lets do one together!
+        #PlaySong(some song)
+        #
+        pass
+
+
+    def Main(self):
+        """Main loop to run the game"""
+        #limit how much a player can move while block is mid fall to 15x a second
+        game_fps = 15
+
+        while self.run == True:
+
+            #Draw game
+            self.DrawBackground()
+            pygame.display.update() #Update all drawn objects
+
+    
+            #Check if the user clicks the X
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT: #If the x is clicked
+                    self.run = False
+                    self.quit = True
+
+        #Check if the game ended or if it was stopped
+        if self.quit:
+            print("You have quit the game.")
+        else:
+            print("The game has been completed")
+        print("You got :", "7/10", "correct!")
+
+        pygame.quit
+
+if __name__ == '__main__':
+    #Initialise game
+    game_object = Guess_The_Mood_Game()
+
+    #Run the game
+    game_object.Main()

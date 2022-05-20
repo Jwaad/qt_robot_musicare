@@ -1,0 +1,8 @@
+prefix=/home/qtrobot/catkin_ws/devel
+
+Name: musi-care
+Description: Description of musi-care
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

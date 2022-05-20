@@ -1,0 +1,34 @@
+#!/usr/bin/env python
+
+import cv2
+
+import rospy
+from sensor_msgs.msg import Image
+from cv_bridge import CvBridge
+#from std_msgs.msg import String
+
+bridge = CvBridge()
+
+def DisplayImage(image):
+    cv2.imshow("QT Vision", image)
+    if image == None:
+        print("No image received")
+    key = cv2.waitKey(1)
+    if key == 27: #Exit on esc
+        cv2.destroyAllWindows()
+
+def ProcessImage(data):
+    image = bridge.imgmsg_to_cv2(data, "bgr8")
+    DisplayImage(image)
+
+def DisplayImageSteam():
+    rospy.init_node('Display_Face_Track',anonymous=False)
+    rospy.Subscriber("/face_recognition/out", Image, ProcessImage)
+    rospy.spin() #Keep sub running til externally closed
+
+if __name__ == '__main__':
+    try:
+        DisplayImageSteam()
+    except:
+        print("Something has gone wrong in Display_Face_Track node.")
+        pass

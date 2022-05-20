@@ -1,0 +1,8 @@
+prefix=/home/qtrobot/catkin_ws/install
+
+Name: jwaad_test
+Description: Description of jwaad_test
+Version: 0.0.0
+Cflags: -I${prefix}/include
+Libs: -L${prefix}/lib 
+Requires: actionlib_msgs

@@ -1,0 +1,5 @@
+string action_type
+string action_content
+bool action_blocking
+---
+bool status

@@ -1,0 +1,4 @@
+<launch>
+    <node pkg="jwaad_test" type="publish_nuitrack_data" name="publish_nuitrack_data" output="screen"/>
+    <node pkg="jwaad_test" type="subcribe_to_nuitrack_feed" name="subscribe_to_nuitrack_feed" output="screen"/>
+</launch>

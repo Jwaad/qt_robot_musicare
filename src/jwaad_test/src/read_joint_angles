@@ -1,0 +1,83 @@
+#!/usr/bin/env python
+import rospy
+from qt_robot_interface.srv import *
+from qt_gesture_controller.srv import *
+from qt_motors_controller.srv import *
+from sensor_msgs.msg import JointState
+import tty
+import sys
+import termios
+
+def keyboard_input(): #returns button presses, only space and esc
+    fd = sys.stdin.fileno()
+    old_settings = termios.tcgetattr(fd)
+    try:
+        tty.setraw(sys.stdin.fileno())
+        ch = ord(sys.stdin.read(1)) #ORD CHANGES DATA FROM ASCII TO UNICODE
+    finally:
+        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+    return ch
+        
+        
+if __name__ == '__main__':
+    rospy.init_node('find_joint_angles')
+    sys.stdin.reconfigure(encoding='utf-8') #make terminal return the char entered into it
+
+    setControlMode = rospy.ServiceProxy('/qt_robot/motors/setControlMode', set_control_mode)    
+
+    part = "right_arm" #set this to the joint you want to see the angles of, we can only do 1 at a time with this script
+    #part = "left_arm" 
+
+    #Angles of specifc parts of QT, needed as these angles all come packaged together
+    err = False
+    if part== "head":
+        joint_indexs = [0,1] #pitch, yaw
+    elif part== "left_arm":
+        joint_indexs = [3,4,2] #For some reason the jointstates gives us these numbers in a random order so we just manually flip em back for our own convinience
+    elif part== "right_arm":
+        joint_indexs = [6,7,5] # shoulder-pitch, shoulder-roll, elbow
+    else:
+        print("ERROR: CHECK IF ROBOT PART IS SPELLED CORRECTLY")
+        err = True
+    
+    try:
+        if not err: #if we err, do nothing
+            
+            input('Press enter to START reading joint angles, doing so will disable the motors.')
+            setControlMode([part], 0) #make the part that you want to test limp
+            
+            saved_angles = []
+            done = False
+            
+            print("Press space to save joint angles, or escape to exit.")
+            while not done:
+                            
+                #quit or save angles
+                key = keyboard_input()
+                if key == 32: #ch 32 is spacebar
+                    #get and print angles of our selected part
+                    joint_states = rospy.wait_for_message("/qt_robot/joints/state", JointState)
+                    part_angles = []
+                    for index in joint_indexs:
+                        part_angles.append(joint_states.position[index])
+                    #print(part + ":", part_angles) #optional print parameter                  
+                    saved_angles.append(part_angles)
+                    print("Joint angles saved")
+                elif key == 27: #char 27 is escape
+                    print("Program ended\n")
+                    done = True
+
+            setControlMode([part], 1)
+            print("Saved angles:")
+            for angles in saved_angles:
+                print(angles)
+            print()
+
+    except KeyboardInterrupt:
+        pass
+        
+        
+        
+        
+        
+        

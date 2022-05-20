@@ -1,0 +1,93 @@
+#! /usr/bin/env python
+
+from __future__ import print_function
+
+import rospy
+import actionlib
+import cv2
+from sensor_msgs.msg import Image
+from cv_bridge import CvBridge, CvBridgeError
+from qt_nuitrack_app.msg import Faces, FaceInfo
+from std_msgs.msg import Int16MultiArray
+
+import jwaad_test.msg
+
+
+class face_tracker:
+    faces = None
+    faces_time = None
+
+    def __init__(self):
+        self.bridge = CvBridge()
+        self.offsets_pub = rospy.Publisher("face_track_offsets", Int16MultiArray, queue_size=10)
+        self.image_sub = rospy.Subscriber("/camera/color/image_raw", Image, self.image_callback)
+        self.face_sub = rospy.Subscriber("/qt_nuitrack_app/faces", Faces, self.face_callback)
+        self.debug = True #Enables camera and optionally printing of offsets
+        self.print_offsets = False
+
+    #Turn face_rect into xywh, the img here is only for the img resolution.
+    def unpack_rect(self, rect, img):
+        rows, cols, channels = img.shape
+        x = int(rect[0]*cols)
+        y = int(rect[1]*rows)
+        w = int(rect[2]*cols)
+        h = int(rect[3]*rows)
+        return x, y, w, h
+        
+    def publish_msg(self, data):
+        msg = Int16MultiArray()
+        msg.data = data
+        self.offsets_pub.publish(msg) 
+        
+    def face_callback(self, data):
+        self.faces = data.faces
+        self.faces_time = rospy.Time.now()
+        (rows, cols, channels) = self.cv_image.shape
+        new_faces = self.faces
+        new_faces_time = self.faces_time
+
+        if new_faces and (rospy.Time.now()-new_faces_time) < rospy.Duration(5.0):
+            for face in new_faces:
+                rect = face.rectangle
+                x,y,w,h = self.unpack_rect(rect, self.cv_image) #Explode rect out for easier readability
+                rect_center_x = int(x + (w/2))
+                rect_center_y = int(y + (h/2))
+                img_center_x = int(cols/2)
+                img_center_y = int(rows/2)
+                x_offset = img_center_x - rect_center_x
+                y_offset = img_center_y - rect_center_y
+                offsets = [x_offset, y_offset]
+                self.publish_msg(offsets) #Publish offsets of face, from camera center
+                
+                #Drawn nice stuff and display it on a cv2.image
+                if self.debug: #Visualisation for debugging only
+                    offsets_message = "X Offsets: " + str(x_offset) + " Y Offsets: " + str(y_offset)
+                    if self.print_offsets:
+                        print(offsets_message)
+                    cv2.rectangle(self.cv_image, (int(cols/4), int(rows/4)), (int((cols*3)/4), int((rows*3)/4)), (0,255,0), 2) #Auto track border 
+                    cv2.line(self.cv_image,(img_center_x, img_center_y), (rect_center_x,img_center_y), (0,0,255), 3) #Draw a horizontal line, from center screen to middle of face rect 
+                    cv2.line(self.cv_image,(img_center_x, img_center_y ), (img_center_x, rect_center_y), (0,0,255), 3) #Draw a vertical line, from center screen to middle of face rect
+                    message = "X Error: " + str(x_offset) + "Y Error: " + str(y_offset)
+                    self.cv_image = cv2.putText(self.cv_image, message, (5, rows-5), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+                    self.display_tracking(rect, self.cv_image)
+                    
+    def display_tracking(self, rect, image):
+        x,y,w,h = self.unpack_rect(rect, image)
+        #print(x,w,y,h)
+        cv2.rectangle(image, (x, y), (x+w, y+h), (255,0,0), 2)
+        cv2.imshow("QT Vision", image)
+        key = cv2.waitKey(1)
+
+    def image_callback(self, data):
+        try:
+            self.cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
+        except CvBridgeError as e:
+            print(e)
+
+if __name__ == '__main__':
+    rospy.init_node('face_offsets_calculator', anonymous=False)
+    ft = face_tracker()
+    try:
+        rospy.spin()
+    except KeyboardInterrupt:
+        print("Shutting down")

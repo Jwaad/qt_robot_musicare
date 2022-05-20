@@ -1,0 +1,5 @@
+<launch>
+    <node pkg="musi_care" type="sound_player" name="sound_player" output="screen"/>
+    <node pkg="musi_care" type="qt_command_node" name="qt_command_node" output="screen"/>
+    <node pkg="musi_care" type="clap_to_beat_game" name="clap_to_beat_game" output="screen"/>
+</launch>

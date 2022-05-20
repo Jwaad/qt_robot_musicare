@@ -1,0 +1,125 @@
+#!/usr/bin/env python
+from __future__ import print_function
+
+import sys
+import rospy
+from std_msgs.msg import String
+from qt_robot_interface.srv import *
+import cv2
+import threading
+
+from sensor_msgs.msg import Image
+from cv_bridge import CvBridge, CvBridgeError
+from qt_nuitrack_app.msg import Faces, FaceInfo
+
+
+class image_converter:
+    faces = None
+    faces_time = None
+    
+
+    def __init__(self):
+        self.person_previously_seen = False
+        self.lock = threading.Lock()
+        self.bridge = CvBridge()
+        self.image_pub = rospy.Publisher("/face_recognition/out", Image, queue_size=1)
+        self.speech_pub = rospy.Publisher('/qt_robot/speech/say', String, queue_size=10)
+        self.image_sub = rospy.Subscriber("/camera/color/image_raw",Image,self.image_callback)
+        self.face_sub = rospy.Subscriber("/qt_nuitrack_app/faces", Faces, self.face_callback)
+       
+    def say_message(self, message):
+        wtime_begin = rospy.get_time()
+        while (self.speech_pub.get_num_connections() == 0) :
+            rospy.loginfo("waiting for publisher connection")
+            if rospy.get_time() - wtime_begin > 5.0:
+                rospy.logerr("Timeout while waiting for publisher connection!")
+                sys.exit()
+            #rospy.sleep(0.2)
+        # publish a text message to TTS
+        #self.speech_pub.publish(message)
+       
+    def service_say_message(self, message):
+        rospy.wait_for_service('/qt_robot/speech/say')
+        self.qt_speech = rospy.ServiceProxy('/qt_robot/speech/say', speech_say) #The Service Type / class: speech_say
+        self.qt_speech(message)
+
+    def face_callback(self, data):
+        # print("face_callback")
+        self.lock.acquire()
+        self.faces = data.faces
+        self.faces_time = rospy.Time.now()
+        self.lock.release()
+
+    def image_callback(self,data):
+        try:
+            cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
+        except CvBridgeError as e:
+            print(e)
+
+        (rows, cols, channels) = cv_image.shape
+        self.lock.acquire()
+        new_faces = self.faces
+        new_faces_time = self.faces_time
+        self.lock.release()
+
+        if new_faces and (rospy.Time.now()-new_faces_time) < rospy.Duration(5.0):
+            #QT Greets the new face
+            if self.person_previously_seen == False:
+                self.say_message("Hello! Naice to see you!")
+                self.person_previously_seen = True
+            for face in new_faces:
+                rect = face.rectangle
+                cv2.rectangle(cv_image, (int(rect[0]*cols),int(rect[1]*rows)), (int(rect[0]*cols+rect[2]*cols), int(rect[1]*rows+rect[3]*rows)), (0,255,0), 2)
+                
+                x = int(rect[0]*cols)
+                y = int(rect[1]*rows)
+                w = int(rect[2]*cols)
+                h = int(rect[3]*rows)
+                #cv2.putText(cv_image, "Gender:", (x, y+h+10), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,255), lineType=cv2.LINE_AA)
+                cv2.putText(cv_image, "Gender: %s" % face.gender, (x, y+h+20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,0), 1, lineType=cv2.LINE_AA)
+                cv2.putText(cv_image, "Age: %d" % face.age_years, (x, y+h+40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,0), 1, lineType=cv2.LINE_AA)
+
+                # Neutral
+                cv2.putText(cv_image, "Neutral:", (x, y+h+60), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,0), 1, lineType=cv2.LINE_AA)
+                cv2.rectangle(cv_image, (x+80,y+h+50),
+                                      (x+80+int(face.emotion_neutral*100), y+h+10+50), (0,255,0), cv2.FILLED)
+                cv2.rectangle(cv_image, (x+80,y+h+50),
+                                      (x+80+100, y+h+10+50), (255,255,255), 1)
+                # Angry
+                cv2.putText(cv_image, "Angry:", (x, y+h+80), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,0), 1, lineType=cv2.LINE_AA)
+                cv2.rectangle(cv_image, (x+80,y+h+70),
+                                      (x+80+int(face.emotion_angry*100), y+h+10+70), (0,255,0), cv2.FILLED)
+                cv2.rectangle(cv_image, (x+80,y+h+70),
+                                      (x+80+100, y+h+10+70), (255,255,255), 1)
+
+                # Happy
+                cv2.putText(cv_image, "Happy:", (x, y+h+100), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,0), 1, lineType=cv2.LINE_AA)
+                cv2.rectangle(cv_image, (x+80,y+h+90),
+                                      (x+80+int(face.emotion_happy*100), y+h+10+90), (0,255,0), cv2.FILLED)
+                cv2.rectangle(cv_image, (x+80,y+h+90),
+                                      (x+80+100, y+h+10+90), (255,255,255), 1)
+
+                cv2.putText(cv_image, "Surprise:", (x, y+h+120), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,0), 1, lineType=cv2.LINE_AA)
+                cv2.rectangle(cv_image, (x+80,y+h+110),
+                                      (x+80+int(face.emotion_surprise*100), y+h+10+110), (0,255,0), cv2.FILLED)
+                cv2.rectangle(cv_image, (x+80,y+h+110),
+                                      (x+80+100, y+h+10+110), (255,255,255), 1)
+        else:
+            if self.person_previously_seen:
+                self.say_message("Hey! Where did you go!")
+                self.person_previously_seen = False
+                
+        
+        try:
+            self.image_pub.publish(self.bridge.cv2_to_imgmsg(cv_image, "bgr8"))
+        except CvBridgeError as e:
+            print(e)
+
+
+if __name__ == '__main__':
+    rospy.init_node('qt_face_recognition', anonymous=True)
+    ic = image_converter()
+    try:
+        rospy.spin()
+    except KeyboardInterrupt:
+        print("Shutting down")

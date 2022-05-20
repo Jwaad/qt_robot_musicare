@@ -1,0 +1,417 @@
+#!/usr/bin/env python
+
+#TEST CODE
+#This code is all to get the functionality of the program. it will be cleaned up once complete.
+
+#Gets the BPM of the track as well as all of the timings of each beat.
+
+from aubio import source, tempo
+from numpy import median, diff
+from std_msgs.msg import Float64MultiArray
+from std_msgs.msg import String
+from qt_motors_controller.srv import *
+import rospy
+import time
+import tty
+import sys
+import termios
+import os
+import pyaudio
+import struct
+import math
+
+"""
+def get_file_bpm(path, params=None):
+    #Calculate the beats per minute (bpm) of a given file.
+    #path: path to the file
+    #param: dictionary of parameters
+    
+    if params is None:
+        params = {}
+        
+    # default:
+    samplerate, win_s, hop_s = 44100, 1024, 512
+
+    # manual settings
+    if 'samplerate' in params:
+        samplerate = params["samplerate"]
+    if 'win_s' in params:
+        win_s = params["win_s"]
+    if 'hop_s' in params:
+        hop_s = params["hop_s"]
+
+    s = source(path, samplerate, hop_s)
+    samplerate = s.samplerate
+    o = tempo("specdiff", win_s, hop_s, samplerate)
+    # List of beats, in samples
+    beats = []
+    # Total number of frames read
+    total_frames = 0
+
+    while True:
+        samples, read = s()
+        is_beat = o(samples)
+        if is_beat:
+            this_beat = o.get_last_s()
+            beats.append(this_beat)
+            #if o.get_confidence() > .2 and len(beats) > 2.:
+            #    break
+        total_frames += read
+        if read < hop_s:
+            break
+
+    def beats_to_bpm(beats, path):
+        # if enough beats are found, convert to periods then to bpm
+        if len(beats) > 1:
+            if len(beats) < 4:
+                print("few beats found in {:s}".format(path))
+            bpms = 60./diff(beats)
+            return median(bpms), beats
+        else:
+            print("not enough beats found in {:s}".format(path))
+            return 0, [0,0,0]
+    
+    return beats_to_bpm(beats, path)
+
+
+if __name__ == '__main__':
+    song = r"/home/qtrobot/catkin_ws/src/musi_care/src/game_assets/guess_tone_game/music/happy/happy_2.wav" #file path to song
+    import os
+    if os.path.exists(song):
+        myparams = {"samplerate":44100, "win_s":1024,"hop_s":512} 
+        beat_data = get_file_bpm(song, params = myparams)
+        bpm = beat_data[0]
+        beat_timings = beat_data[1]
+        #rounded_bpm = int(round(bpm))#round bpm to nearest 100
+        #print(rounded_bpm)
+        #print(beat_timings)
+    else:   
+        print("File does not exist, check spelling of directory")
+
+
+
+###QT clapping to the beat
+rospy.init_node('clap_to_beat_game',anonymous=False)
+#rospy.sleep(1)
+#sys.stdin.reconfigure(encoding='utf-8') #make terminal return the char entered into it
+right_arm_pos_pub = rospy.Publisher('/qt_robot/right_arm_position/command', Float64MultiArray, queue_size=10)
+left_arm_pos_pub = rospy.Publisher('/qt_robot/left_arm_position/command', Float64MultiArray, queue_size=10)
+right_arm_hit = False
+left_arm_hit = True #default to using right arm 1st
+timers = {}
+
+
+rospy.wait_for_service('/qt_robot/motors/setControlMode')
+set_mode = rospy.ServiceProxy('/qt_robot/motors/setControlMode', set_control_mode)
+mode_changed = set_mode(["right_arm", "left_arm"], 1)
+if mode_changed:
+    print("Motors successfully set control mode 1")
+else:
+    print("Motor control mode could not be changed")
+    
+rospy.wait_for_service('/qt_robot/motors/setVelocity')
+set_vel = rospy.ServiceProxy('/qt_robot/motors/setVelocity', set_velocity)
+speed_changed = set_vel(["right_arm", "left_arm"], 100)
+if speed_changed:
+    print("Motors successfully set to max speed")
+else:
+    print("Motor speed could not be changed")
+
+def move_right_arm(joint_angles):
+    #Function that moves the right arm to specified locations
+    arm_msg = Float64MultiArray()
+    arm_msg.data = [joint_angles[0], joint_angles[1], joint_angles[2]]
+    right_arm_pos_pub.publish(arm_msg)
+
+def move_left_arm(joint_angles):
+    #Function that moves the left arm to specified locations
+    arm_msg = Float64MultiArray()
+    arm_msg.data = [-joint_angles[0], joint_angles[1], joint_angles[2]]
+    left_arm_pos_pub.publish(arm_msg)
+
+def drum_at_bpm(bpm): #function that uses left or right arm to hit drum
+    global right_arm_hit
+    global left_arm_hit
+    
+    raised_arm =  [10.800000190734863, -59.29999923706055, -42.0] 
+    hitting_drum = [-10.699999809265137, -59.599998474121094, -40.70000076293945]
+    timer_id = 0 #should be unique
+    hit_delay = 60 / bpm 
+    
+    if is_timer_done(timer_id):
+        if left_arm_hit and not right_arm_hit: #move left arm back up and move right arm down
+            #print("Hitting with right")
+            move_right_arm(hitting_drum)
+            move_left_arm(raised_arm)
+            right_arm_hit = True
+            left_arm_hit = False
+            set_timer(timer_id, hit_delay)
+            return True
+        elif right_arm_hit and not left_arm_hit: #move right arm back up and left arm down
+            #print("Hitting with left")
+            move_right_arm(raised_arm)
+            move_left_arm(hitting_drum) 
+            right_arm_hit = False
+            left_arm_hit = True
+            set_timer(timer_id, hit_delay)
+            return True
+        else:
+            print("Somehow both arms have hit the drum at once")
+            return False
+    return False
+        
+def hit_drum(): #function that uses left or right arm to hit drum
+    global right_arm_hit
+    global left_arm_hit
+    
+    raised_arm =  [10.800000190734863, -59.29999923706055, -42.0] 
+    hitting_drum = [-10.699999809265137, -59.599998474121094, -40.70000076293945]
+    if left_arm_hit and not right_arm_hit: #move left arm back up and move right arm down
+        #print("Hitting with right")
+        move_right_arm(hitting_drum)
+        move_left_arm(raised_arm)
+        right_arm_hit = True
+        left_arm_hit = False
+        return True
+    elif right_arm_hit and not left_arm_hit: #move right arm back up and left arm down
+        #print("Hitting with left")
+        move_right_arm(raised_arm)
+        move_left_arm(hitting_drum) 
+        right_arm_hit = False
+        left_arm_hit = True
+        return True
+    else:
+        print("Somehow both arms have hit the drum at once")
+        return False
+    return False
+
+def keyboard_input(): #returns button presses, only space and esc
+    fd = sys.stdin.fileno()
+    old_settings = termios.tcgetattr(fd)
+    try:
+        tty.setraw(sys.stdin.fileno())
+        ch = ord(sys.stdin.read(1)) #ORD CHANGES DATA FROM ASCII TO UNICODE
+    finally:
+        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+    return ch
+
+def default_pos():
+    print("moving back to default pos")
+    move_right_arm([0,0,0])
+    move_left_arm([0,0,0])
+    rospy.sleep(1)
+    return
+    
+#test_beats = [1.5,2.5,3.5,4.5,5.5,6.5,7.5,8.5,9.5,10.5] #practise beat timings
+
+##Drum stick hitting a raised drum
+raised_arm =  [10.800000190734863, -59.29999923706055, -42.0]
+hitting_drum = [-10.699999809265137, -59.599998474121094, -40.70000076293945]
+
+quit = False
+
+qt_beat_hits = []
+
+song = r"/home/qtrobot/catkin_ws/src/musi_care/src/game_assets/guess_tone_game/music/happy/happy_2.wav" #file path to song
+if os.path.exists(song):
+    myparams = {"samplerate":44100, "win_s":1024,"hop_s":512} 
+    beat_data = get_file_bpm(song, params = myparams)
+    bpm = beat_data[0]
+    beat_timings = beat_data[1]
+    #rounded_bpm = int(round(bpm))#round bpm to nearest 100
+    #print(rounded_bpm)
+    #print(beat_timings)
+else:   
+    print("File does not exist, check spelling of directory")
+        
+def set_timer(timer_id, delay):
+    #function that creates a unique timer linked to an ID, then returns true when that timer is complete
+    global timers
+    goal_time = rospy.get_time() + delay
+    timers[timer_id] = goal_time
+   
+def is_timer_done(timer_id):
+    global timers
+    current_time = rospy.get_time()
+    try:
+        if current_time >= timers[timer_id]:
+            return True
+        else:
+            return False
+    except(KeyError):
+        return True
+
+def get_next_beat(beats, time_elapsed):
+     for beat in beats:
+        if time_elapsed < beat:
+            return beat
+     return "Done"
+
+track_start = rospy.get_time()
+test_beats = [1.5,2.5,3.5,4.5,5.5,6.5,7.5,8.5,9.5,10.5] #practise beat timings
+    
+wait_for_beat = True
+prev_beat = 0
+times_hit = []
+while not quit:
+    time_to_hit = 0.2 #how long it takes for QT to hit the drum
+    time_elapsed =  rospy.get_time() - track_start  #time in seconds since song started
+    
+    #hit the drum when it's time to
+    if wait_for_beat:
+        beat = get_next_beat(beat_timings, time_elapsed)
+        if beat == "Done": 
+            quit = True
+        elif beat != prev_beat:
+            next_beat = beat
+            prev_beat = beat
+            wait_for_beat = False
+    else:
+        if time_elapsed > next_beat - time_to_hit: #hit drum at specific times
+            drum_hit = hit_drum()
+            times_hit.append(rospy.get_time() - track_start + time_to_hit)
+            wait_for_beat = True
+            
+    #shutdown if need be        
+    if rospy.is_shutdown():
+        quit = True
+#print(times_hit)
+#print(beat_timings)
+"""
+
+
+###Detect claps
+
+
+INITIAL_TAP_THRESHOLD = 0.025
+FORMAT = pyaudio.paInt16 
+SHORT_NORMALIZE = (1.0/32768.0)
+CHANNELS = 2
+RATE = 44100  
+INPUT_BLOCK_TIME = 0.05
+INPUT_FRAMES_PER_BLOCK = int(RATE*INPUT_BLOCK_TIME)
+# if we get this many noisy blocks in a row, increase the threshold
+OVERSENSITIVE = 15.0/INPUT_BLOCK_TIME                    
+# if we get this many quiet blocks in a row, decrease the threshold
+UNDERSENSITIVE = 120.0/INPUT_BLOCK_TIME 
+# if the noise was longer than this many blocks, it's not a 'tap'
+MAX_TAP_BLOCKS = 0.15/INPUT_BLOCK_TIME
+
+
+
+def get_rms( block ):
+    # RMS amplitude is defined as the square root of the 
+    # mean over time of the square of the amplitude.
+    # so we need to convert this string of bytes into 
+    # a string of 16-bit samples...
+
+    # we will get one short out for each 
+    # two chars in the string.
+    count = len(block)/2
+    format = "%dh"%(count)
+    shorts = struct.unpack( format, block )
+
+    # iterate over the block.
+    sum_squares = 0.0
+    for sample in shorts:
+        # sample is a signed short in +/- 32768. 
+        # normalize it to 1.0
+        n = sample * SHORT_NORMALIZE
+        sum_squares += n*n
+
+    return math.sqrt( sum_squares / count )
+
+class TapTester(object):
+    def __init__(self):
+        self.pa = pyaudio.PyAudio()
+        self.stream = self.open_mic_stream()
+        self.tap_threshold = INITIAL_TAP_THRESHOLD
+        self.noisycount = MAX_TAP_BLOCKS+1 
+        self.quietcount = 0 
+        self.errorcount = 0 
+
+    def stop(self):
+        self.stream.close()
+
+    def find_input_device(self):
+        device_index = None            
+        for i in range( self.pa.get_device_count() ):     
+            devinfo = self.pa.get_device_info_by_index(i)   
+            print( "Device %d: %s"%(i,devinfo["name"]) )
+
+            for keyword in ["mic","input"]:
+                if keyword in devinfo["name"].lower():
+                    print( "Found an input: device %d - %s"%(i,devinfo["name"]) )
+                    device_index = i
+                    return device_index
+
+        if device_index == None:
+            print( "No preferred input found; using default input device." )
+
+        return device_index
+
+    def open_mic_stream( self ):
+        device_index = self.find_input_device()
+
+        stream = self.pa.open(   format = FORMAT,
+                                 channels = CHANNELS,
+                                 rate = RATE,
+                                 input = True,
+                                 input_device_index = device_index,
+                                 frames_per_buffer = INPUT_FRAMES_PER_BLOCK)
+
+        return stream
+
+    def tapDetected(self): #DETECTED
+        print ("Clap")
+        #get time of clap here
+            
+    def listen(self):
+        try:
+            block = self.stream.read(INPUT_FRAMES_PER_BLOCK)
+        except e:
+            # dammit. 
+            self.errorcount += 1
+            print( "(%d) Error recording: %s"%(self.errorcount,e) )
+            self.noisycount = 1
+            return
+
+        amplitude = get_rms( block )
+        if amplitude > self.tap_threshold:
+            # noisy block
+            self.quietcount = 0
+            self.noisycount += 1
+        else:            
+            # quiet block.
+
+            if 1 <= self.noisycount <= MAX_TAP_BLOCKS:
+                self.tapDetected()
+            self.noisycount = 0
+            self.quietcount += 1
+            
+     
+
+if __name__ == "__main__":
+    tt = TapTester()
+    
+    print("Done init")
+    for i in range(1000):
+        tt.listen()
+
+
+
+
+
+#NEXT TASK
+#detect clap in human and all that that entails
+
+#Neaten code up
+
+#MAKE GUI AND GAME that loads songs in, starting with lowest BPM and goes up each level
+
+
+
+###Reading human clapping to the beat
+
+
+

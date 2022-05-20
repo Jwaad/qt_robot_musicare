@@ -1,0 +1,118 @@
+#!/usr/bin/env python
+
+import rospy
+import tty
+import sys
+import termios
+from std_msgs.msg import String
+from std_msgs.msg import Float64MultiArray
+from sensor_msgs.msg import JointState
+
+#NOTE: To be added : Add safety ranges.
+#Sudo code
+#if new_pitch in range (-15 -15): 
+#    do movement
+#else:
+#   pass
+
+#Read keyboard input (changes terminal to respond only to keyboard. This may cause issues, but this code is only for testing)
+
+#THE BELOW CODE WAS NOT WRITTEN BY ME:
+class Getch:
+    def __init__(self):
+        sys.stdin.reconfigure(encoding='utf-8')
+
+    def __call__(self):
+        fd = sys.stdin.fileno()
+        old_settings = termios.tcgetattr(fd)
+        try:
+            tty.setraw(sys.stdin.fileno())
+            ch = ord(sys.stdin.read(1)) #ORD CHANGES DATA FROM ASCII TO UNICODE
+        finally:
+            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+        return ch
+
+getch = Getch()
+### END OF BORROWED CODE
+
+#Variables
+end_program = False
+
+#Initialise as node
+rospy.init_node('qt_head_controller',anonymous=False)
+
+def GetJointStates():  #Get and return head joint states
+    data = rospy.wait_for_message("/qt_robot/joints/state", JointState)
+    return data
+    
+def CreateHeadMoveMessage(joint_data, yaw_offset, pitch_offset):
+    head_ref = Float64MultiArray()
+    head_yaw = 0
+    head_pitch = 0
+    head_yaw = joint_data.position[1] + float(yaw_offset)
+    head_pitch = joint_data.position[0] + float(pitch_offset)
+    #print("Before:", "Pitch:", joint_data.position[0],"Yaw:", joint_data.position[1])
+    #print("After:", "Pitch:", head_pitch,"Yaw:", head_yaw)
+    head_ref.data = [head_yaw, head_pitch]
+    return head_ref
+    
+def MoveHead(joint_data, yaw_offset, pitch_offset):
+    new_head_pos = Float64MultiArray()
+    new_head_pos = CreateHeadMoveMessage(joint_data, yaw_offset, pitch_offset)
+    #print(new_head_pos)
+    #print()
+    head_position_pub.publish(new_head_pos)
+
+def MoveHeadToDefault():
+    head_ref = Float64MultiArray()
+    head_ref.data = [0, 0]
+    head_position_pub.publish(head_ref)
+
+
+#Create publishers
+head_position_pub = rospy.Publisher('/qt_robot/head_position/command', Float64MultiArray, queue_size=10)
+
+tutorial = """
+-----------------------QT CONTROL HEAD-----------------------
+This program will let you use the keyboard to control QT's head.
+All movement inputs equate to 5 degrees of movement in the chosen direction
+
+Controls:
+W - Tilts head upwards
+S - Tilts head downwards
+A - Rotate head to QT's right
+D - Rotate head to QT's left
+Space - Moves head back to home (0,0)
+ESC - Ends program
+------------------------------------------------------------- """
+print(tutorial)
+
+while not end_program:
+    key_press = getch()     #Read keypress
+    #print(key_press)
+    if key_press >= 0: #Save computation by checking for this instead of always calling for joint states
+        joint_data = GetJointStates()
+        #print(joint_data)
+        if key_press == 100:    #d = right
+            print("Turning head right")
+            MoveHead(joint_data, 5.0, 0.0) #rotate head to user's right (qt's left)            
+        elif key_press == 97:   #a = left
+            print("Turning head left")
+            MoveHead(joint_data, -5.0, 0.0) #rotate head to user's left (qt's right)  
+        elif key_press == 115:  #s = Down
+            print("Tilting head downwards")
+            MoveHead(joint_data, 0.0, 5.0) #tilt head downward  
+        elif key_press == 119:  #w = up
+            print("Tilting head upwards")
+            MoveHead(joint_data, 0.0, -5.0) #tilt head upward  
+        elif key_press == 32:    #space = Default head pos
+            print("Returning head to default position")
+            MoveHeadToDefault()
+        elif key_press == 27 or key_press == 3:   #ESC key (and every other special char, such as the arrow keys)
+            print("Program ended")
+            end_program = True
+    #Check if node should close and alternatively end
+    if rospy.is_shutdown():
+        end_program = True
+        
+        

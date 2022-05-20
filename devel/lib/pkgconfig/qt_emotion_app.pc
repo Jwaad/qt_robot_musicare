@@ -1,0 +1,8 @@
+prefix=/home/qtrobot/catkin_ws/devel
+
+Name: qt_emotion_app
+Description: Description of qt_emotion_app
+Version: 1.0.1
+Cflags: -I/home/qtrobot/catkin_ws/devel/include -I/home/qtrobot/catkin_ws/src/qt_emotion_game/include
+Libs: -L${prefix}/lib -lqt_emotion_app -lstd_msgs -lmessage_runtime
+Requires: qt_gesture_controller qt_motors_controller

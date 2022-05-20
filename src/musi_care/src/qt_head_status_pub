@@ -1,0 +1,57 @@
+#! /usr/bin/env python
+
+#CHANGE THIS TO A SERVICE INSTEAD, SO ITS CHECKS WHEN ASKED INSTEAD OF ALWAYS CHECKING
+
+import rospy
+from std_msgs.msg import Bool
+from sensor_msgs.msg import JointState
+
+#Get the current pose of the QT head
+def GetYawPitch():  #Get and return head joint states
+    data = rospy.wait_for_message("/qt_robot/joints/state", JointState)
+    yaw = data.position[0]
+    pitch = data.position[1]
+    return yaw, pitch
+
+def Main():
+    status_pub = rospy.Publisher('qt_head_status', Bool, queue_size=10)
+    rospy.init_node('qt_head_status_pub', anonymous=True) 
+    rate = rospy.Rate(10) # 10x a second. This is limited by joinstates slow publish rate. increasing this wont increase the this publisher
+
+    while not rospy.is_shutdown():
+        my_range = 2
+        yaw_sample = []
+        pitch_sample = []
+        sample_start = rospy.get_time()
+        for i in range(my_range):
+            yaw, pitch = GetYawPitch()
+            yaw_sample.append(yaw)
+            pitch_sample.append(pitch)           
+            
+        sampling_time = rospy.get_time() - sample_start     #Time taken to take all samples
+        
+        #Get distances and speeds
+        yaw_distance = yaw_sample[my_range-1] - yaw_sample[0] 
+        yaw_speed = yaw_distance / sampling_time            #Angles's moved per second in X
+        pitch_distance = pitch_sample[my_range-1] - pitch_sample[0] 
+        pitch_speed = pitch_distance / sampling_time        #Pixel's moved per second in Y
+        #print("Yaw Speed:", yaw_speed ,"Pitch speed:", pitch_speed)
+        
+        #Create and publish message
+        head_status = Bool()
+        cuttoff_speed = 1.2
+        if (abs(yaw_speed) <= cuttoff_speed) and (abs(pitch_speed) <= cuttoff_speed):
+            head_status.data = True
+        else:
+            head_status.data = False
+        #rospy.loginfo(head_status.data)
+        status_pub.publish(head_status)
+        rate.sleep()
+
+
+if __name__ == '__main__':
+    try:
+        Main()
+    except rospy.ROSInterruptException:
+        pass   
+

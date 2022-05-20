@@ -1,0 +1,46 @@
+#NOTES
+Only the information inside the curly brackets are used, so you can write whatever you want else where, it might slow down the opening of the file by 0.001s though.
+
+Song data should be seperated with a pound sign followed by a hashtag in between to differentiate them and made the code that reads them easier
+The directory that the code defaults in is the folder that contains the "happy" and "sad" folders, so the song_names should also include the folder theyre in.
+Data should have the label of the data followed by an equals sign, and then the data all empty spaces are removed and ignored, so the spaces after the equals are of no consequence
+the order of the brackets matters, the top most bracket is easy, then next bracket is medium, then the 3rd will be hard.
+Songs should be put in order of their level numbers
+
+#Database
+
+EASY MODE
+{
+song_name = follow_the_van.wav
+mood = happy
+hint = This song makes me want to, smile!
+£#
+song_name = sad_1.wav
+mood = sad
+hint = This song makes me want a, hug...
+£#
+song_name = happy/happy_2.wav
+mood = happy
+hint = This song makes me want to dance!
+£#
+song_name = happy/happy_3.wav
+mood = happy
+hint = This song makes me want to dance!
+£#
+}
+
+MEDIUM MODE
+{
+song_name = happy/happy_1.wav
+mood = happy
+hint = Hint coming soon!
+£#
+}
+
+HARD MODE
+{
+song_name = happy/happy_1.wav
+mood = happy
+hint = Hint coming soon!
+£#
+}

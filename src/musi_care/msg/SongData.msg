@@ -1,0 +1,3 @@
+string track_title
+float32 track_elapsed_time
+float32 track_total_time

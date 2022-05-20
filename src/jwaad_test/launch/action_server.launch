@@ -1,0 +1,7 @@
+<launch>
+    <node pkg="musi-care" type="face_offsets_publisher" name="face_offsets_publisher" output="screen"/>
+    <node pkg="musi-care" type="qt_head_status_pub" name="qt_head_status_pub" output="screen"/>
+    <node pkg="jwaad_test" type="FaceLockOnActionServer.py" name="face_lock_on_action_server" output="screen"/>
+    <node pkg="jwaad_test" type="face_lock_on_action_client.py" name="face_lock_on_action_client" output="screen"/>
+</launch>
+

@@ -1,0 +1,98 @@
+#!/usr/bin/env python
+
+import sys
+import rospy
+from qt_robot_interface import *
+from std_msgs.msg import String
+from std_msgs.msg import Float64MultiArray
+from qt_robot_interface.srv import *
+
+#Move arms symmetrically using on set of motor angles
+def FormatSymmetricArmPos(shoulder_pitch_raw, shoulder_roll_raw, elbow_roll_raw):
+    #Initialise data types
+    Right_ref = Float64MultiArray()
+    Left_ref = Float64MultiArray()
+    
+    #This stage is pointless, but a precaution none the less i suppose
+    shoulder_pitch = int(shoulder_pitch_raw)
+    shoulder_roll = int(shoulder_roll_raw)
+    elbow_roll = int(elbow_roll_raw)
+    
+    #Add arm positions into messages
+    Right_ref.data = [shoulder_pitch, shoulder_roll, elbow_roll]
+    Left_ref.data = [-shoulder_pitch, shoulder_roll, elbow_roll] #Left arm's shoulder pitch is reverse from right
+    
+    return Right_ref, Left_ref
+
+
+#Safely and slowly let the motor movement finish (This is non blocking, I think)
+def LetArmMovementFinish():
+    global right_pub
+    global left_pub
+    wtime_begin = rospy.get_time() #Get current time
+    while (right_pub.get_num_connections() == 0) and (left_pub.get_num_connections() == 0) : #idk whats happening here really (i think it's saying, check to make sure there's nothin else publishing to these topics)
+        rospy.loginfo("waiting for subscriber connections...")  # Log that we are waiting for connections to be freed
+        if rospy.get_time() - wtime_begin > 10.0: #If it takes longer than 10s just cancel
+            rospy.logerr("Timeout while waiting for subscribers connection!")
+            sys.exit()
+        rospy.sleep(0.2) #Prevent log overflow
+
+        
+#Initialise Node
+rospy.init_node('qt_jwaad_test')
+
+#Make publishers
+emotion_show_pub = rospy.Publisher('/qt_robot/emotion/show', String, queue_size=10) #Create publisher to publish to emotion/show topic
+right_pub = rospy.Publisher('/qt_robot/right_arm_position/command',     Float64MultiArray, queue_size=1) #Create publishers to each arm's position to connect to it's specific topic
+left_pub = rospy.Publisher('/qt_robot/left_arm_position/command',     Float64MultiArray, queue_size=1)
+
+#Create string for QT to say, and log it
+qt_voiceline = 'I am running the test code QT Range of motion' 
+rospy.loginfo(qt_voiceline)
+
+#Safely and slowly send QT the emotion (This is non blocking)
+wtime_begin = rospy.get_time()
+while (emotion_show_pub.get_num_connections() == 0) :
+    rospy.loginfo("waiting for publisher connection")
+    if rospy.get_time() - wtime_begin > 5.0:
+        rospy.logerr("Timeout while waiting for publisher connection!")
+        sys.exit()
+    rospy.sleep(0.2) #Roughly the time taken for the publisher to be freed up, so instead of continuously polling, we just artifically block (for now)
+emotion_show_pub.publish("QT/happy") #publish emotion to QTrobot
+ 
+#Tell QT to say something with TTS (This is blocking)
+rospy.wait_for_service('/qt_robot/speech/say')
+qt_speech = rospy.ServiceProxy('/qt_robot/speech/say', speech_say) #The Service Type / class: speech_say
+qt_say = qt_speech(qt_voiceline)
+    
+rospy.loginfo("publishing motor command...") #log that we are about to move motors
+try: 
+    #Move arms into "double front bicep" flexing position
+    right_arm_pos, left_arm_pos = FormatSymmetricArmPos(90,0,-70) 
+    #Publish arm positions
+    LetArmMovementFinish()
+    right_pub.publish(right_arm_pos)
+    left_pub.publish(left_arm_pos)  
+    
+    #Replace this with system to check if action completed
+    rospy.sleep(4) #Give the robot some seconds to move to it's position before moving back to default
+    
+    #Move back to default position
+    right_arm_pos, left_arm_pos = FormatSymmetricArmPos(-90,-70,0)
+    #Publish arm positions
+    LetArmMovementFinish()
+    right_pub.publish(right_arm_pos)
+    left_pub.publish(left_arm_pos)
+            
+except rospy.ROSInterruptException:
+    rospy.logerr("could not publish motor command!")
+
+rospy.loginfo("motor command published") #Finished successfully
+
+    
+    
+    
+    
+    
+    
+    

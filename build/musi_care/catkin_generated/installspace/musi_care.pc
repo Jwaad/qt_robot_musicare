@@ -1,0 +1,8 @@
+prefix=/home/qtrobot/catkin_ws/install
+
+Name: musi_care
+Description: Description of musi_care
+Version: 0.0.0
+Cflags: -I${prefix}/include
+Libs: -L${prefix}/lib 
+Requires: message_runtime
