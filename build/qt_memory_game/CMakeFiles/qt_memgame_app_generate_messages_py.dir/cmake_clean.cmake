@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "/home/qtrobot/catkin_ws/devel/lib/python3/dist-packages/qt_memgame_app/srv/__init__.py"
-  "/home/qtrobot/catkin_ws/devel/lib/python3/dist-packages/qt_memgame_app/srv/_suspend.py"
+  "/home/jwaad/catkin_ws/devel/lib/python3/dist-packages/qt_memgame_app/srv/__init__.py"
+  "/home/jwaad/catkin_ws/devel/lib/python3/dist-packages/qt_memgame_app/srv/_suspend.py"
   "CMakeFiles/qt_memgame_app_generate_messages_py"
 )
 

@@ -67,14 +67,14 @@ set(qt_emotion_app_CONFIG_INCLUDED TRUE)
 
 # set variables for source/devel/install prefixes
 if("TRUE" STREQUAL "TRUE")
-  set(qt_emotion_app_SOURCE_PREFIX /home/qtrobot/catkin_ws/src/qt_emotion_game)
-  set(qt_emotion_app_DEVEL_PREFIX /home/qtrobot/catkin_ws/devel)
+  set(qt_emotion_app_SOURCE_PREFIX /home/jwaad/catkin_ws/src/qt_emotion_game)
+  set(qt_emotion_app_DEVEL_PREFIX /home/jwaad/catkin_ws/devel)
   set(qt_emotion_app_INSTALL_PREFIX "")
   set(qt_emotion_app_PREFIX ${qt_emotion_app_DEVEL_PREFIX})
 else()
   set(qt_emotion_app_SOURCE_PREFIX "")
   set(qt_emotion_app_DEVEL_PREFIX "")
-  set(qt_emotion_app_INSTALL_PREFIX /home/qtrobot/catkin_ws/install)
+  set(qt_emotion_app_INSTALL_PREFIX /home/jwaad/catkin_ws/install)
   set(qt_emotion_app_PREFIX ${qt_emotion_app_INSTALL_PREFIX})
 endif()
 
@@ -91,9 +91,9 @@ endif()
 # flag project as catkin-based to distinguish if a find_package()-ed project is a catkin project
 set(qt_emotion_app_FOUND_CATKIN_PROJECT TRUE)
 
-if(NOT "/home/qtrobot/catkin_ws/devel/include;/home/qtrobot/catkin_ws/src/qt_emotion_game/include " STREQUAL " ")
+if(NOT "/home/jwaad/catkin_ws/devel/include;/home/jwaad/catkin_ws/src/qt_emotion_game/include " STREQUAL " ")
   set(qt_emotion_app_INCLUDE_DIRS "")
-  set(_include_dirs "/home/qtrobot/catkin_ws/devel/include;/home/qtrobot/catkin_ws/src/qt_emotion_game/include")
+  set(_include_dirs "/home/jwaad/catkin_ws/devel/include;/home/jwaad/catkin_ws/src/qt_emotion_game/include")
   if(NOT " " STREQUAL " ")
     set(_report "Check the issue tracker '' and consider creating a ticket if the problem has not been reported yet.")
   elseif(NOT " " STREQUAL " ")
@@ -110,7 +110,7 @@ if(NOT "/home/qtrobot/catkin_ws/devel/include;/home/qtrobot/catkin_ws/src/qt_emo
         message(FATAL_ERROR "Project 'qt_emotion_app' specifies '${idir}' as an include dir, which is not found.  It does not exist in '${include}'.  ${_report}")
       endif()
     else()
-      message(FATAL_ERROR "Project 'qt_emotion_app' specifies '${idir}' as an include dir, which is not found.  It does neither exist as an absolute directory nor in '/home/qtrobot/catkin_ws/src/qt_emotion_game/${idir}'.  ${_report}")
+      message(FATAL_ERROR "Project 'qt_emotion_app' specifies '${idir}' as an include dir, which is not found.  It does neither exist as an absolute directory nor in '/home/jwaad/catkin_ws/src/qt_emotion_game/${idir}'.  ${_report}")
     endif()
     _list_append_unique(qt_emotion_app_INCLUDE_DIRS ${include})
   endforeach()
@@ -154,7 +154,7 @@ foreach(library ${libraries})
     set(lib_path "")
     set(lib "${library}-NOTFOUND")
     # since the path where the library is found is returned we have to iterate over the paths manually
-    foreach(path /home/qtrobot/catkin_ws/devel/lib;/opt/ros/noetic/lib)
+    foreach(path /home/jwaad/catkin_ws/devel/lib;/home/jwaad/catkin_ws/devel/lib;/opt/ros/noetic/lib)
       find_library(lib ${library}
         PATHS ${path}
         NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
@@ -211,7 +211,7 @@ foreach(depend ${depends})
   _unpack_libraries_with_build_configuration(qt_emotion_app_LIBRARIES ${qt_emotion_app_LIBRARIES})
 
   _list_append_unique(qt_emotion_app_LIBRARY_DIRS ${${qt_emotion_app_dep}_LIBRARY_DIRS})
-  list(APPEND qt_emotion_app_EXPORTED_TARGETS ${${qt_emotion_app_dep}_EXPORTED_TARGETS})
+  _list_append_deduplicate(qt_emotion_app_EXPORTED_TARGETS ${${qt_emotion_app_dep}_EXPORTED_TARGETS})
 endforeach()
 
 set(pkg_cfg_extras "qt_emotion_app-msg-extras.cmake")

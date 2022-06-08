@@ -67,14 +67,14 @@ set(tutorial_qt_respeaker_CONFIG_INCLUDED TRUE)
 
 # set variables for source/devel/install prefixes
 if("FALSE" STREQUAL "TRUE")
-  set(tutorial_qt_respeaker_SOURCE_PREFIX /home/qtrobot/catkin_ws/src/tutorial_qt_respeaker)
-  set(tutorial_qt_respeaker_DEVEL_PREFIX /home/qtrobot/catkin_ws/devel)
+  set(tutorial_qt_respeaker_SOURCE_PREFIX /home/jwaad/catkin_ws/src/tutorial_qt_respeaker)
+  set(tutorial_qt_respeaker_DEVEL_PREFIX /home/jwaad/catkin_ws/devel)
   set(tutorial_qt_respeaker_INSTALL_PREFIX "")
   set(tutorial_qt_respeaker_PREFIX ${tutorial_qt_respeaker_DEVEL_PREFIX})
 else()
   set(tutorial_qt_respeaker_SOURCE_PREFIX "")
   set(tutorial_qt_respeaker_DEVEL_PREFIX "")
-  set(tutorial_qt_respeaker_INSTALL_PREFIX /home/qtrobot/catkin_ws/install)
+  set(tutorial_qt_respeaker_INSTALL_PREFIX /home/jwaad/catkin_ws/install)
   set(tutorial_qt_respeaker_PREFIX ${tutorial_qt_respeaker_INSTALL_PREFIX})
 endif()
 
@@ -154,7 +154,7 @@ foreach(library ${libraries})
     set(lib_path "")
     set(lib "${library}-NOTFOUND")
     # since the path where the library is found is returned we have to iterate over the paths manually
-    foreach(path /home/qtrobot/catkin_ws/install/lib;/opt/ros/noetic/lib)
+    foreach(path /home/jwaad/catkin_ws/install/lib;/home/jwaad/catkin_ws/devel/lib;/opt/ros/noetic/lib)
       find_library(lib ${library}
         PATHS ${path}
         NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
@@ -211,7 +211,7 @@ foreach(depend ${depends})
   _unpack_libraries_with_build_configuration(tutorial_qt_respeaker_LIBRARIES ${tutorial_qt_respeaker_LIBRARIES})
 
   _list_append_unique(tutorial_qt_respeaker_LIBRARY_DIRS ${${tutorial_qt_respeaker_dep}_LIBRARY_DIRS})
-  list(APPEND tutorial_qt_respeaker_EXPORTED_TARGETS ${${tutorial_qt_respeaker_dep}_EXPORTED_TARGETS})
+  _list_append_deduplicate(tutorial_qt_respeaker_EXPORTED_TARGETS ${${tutorial_qt_respeaker_dep}_EXPORTED_TARGETS})
 endforeach()
 
 set(pkg_cfg_extras "")

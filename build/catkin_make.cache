@@ -1,2 +1,2 @@
-find-object:jwaad_test:musi_care:qt_emotion_game:qt_gesture_recognition:qt_idle_app:qt_memory_game:tutorial_qt_respeaker
--DCATKIN_DEVEL_PREFIX=/home/qtrobot/catkin_ws/devel -DCMAKE_INSTALL_PREFIX=/home/qtrobot/catkin_ws/install -G Unix Makefiles
+jwaad_test:musi_care
+-DCATKIN_DEVEL_PREFIX=/home/jwaad/catkin_ws/devel -DCMAKE_INSTALL_PREFIX=/home/jwaad/catkin_ws/install -G Unix Makefiles

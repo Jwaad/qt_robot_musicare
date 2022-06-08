@@ -5,10 +5,3 @@ from ._FaceLockOnActionResult import *
 from ._FaceLockOnFeedback import *
 from ._FaceLockOnGoal import *
 from ._FaceLockOnResult import *
-from ._face_lock_onAction import *
-from ._face_lock_onActionFeedback import *
-from ._face_lock_onActionGoal import *
-from ._face_lock_onActionResult import *
-from ._face_lock_onFeedback import *
-from ._face_lock_onGoal import *
-from ._face_lock_onResult import *

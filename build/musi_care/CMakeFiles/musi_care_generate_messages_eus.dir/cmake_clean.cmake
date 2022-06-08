@@ -1,8 +1,8 @@
 file(REMOVE_RECURSE
-  "/home/qtrobot/catkin_ws/devel/share/roseus/ros/musi_care/manifest.l"
-  "/home/qtrobot/catkin_ws/devel/share/roseus/ros/musi_care/msg/SongData.l"
-  "/home/qtrobot/catkin_ws/devel/share/roseus/ros/musi_care/srv/qt_command.l"
-  "/home/qtrobot/catkin_ws/devel/share/roseus/ros/musi_care/srv/sound_player_srv.l"
+  "/home/jwaad/catkin_ws/devel/share/roseus/ros/musi_care/manifest.l"
+  "/home/jwaad/catkin_ws/devel/share/roseus/ros/musi_care/msg/SongData.l"
+  "/home/jwaad/catkin_ws/devel/share/roseus/ros/musi_care/srv/qt_command.l"
+  "/home/jwaad/catkin_ws/devel/share/roseus/ros/musi_care/srv/sound_player_srv.l"
   "CMakeFiles/musi_care_generate_messages_eus"
 )
 

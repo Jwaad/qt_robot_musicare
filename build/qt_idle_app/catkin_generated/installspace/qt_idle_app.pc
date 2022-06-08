@@ -1,4 +1,4 @@
-prefix=/home/qtrobot/catkin_ws/install
+prefix=/home/jwaad/catkin_ws/install
 
 Name: qt_idle_app
 Description: Description of qt_idle_app

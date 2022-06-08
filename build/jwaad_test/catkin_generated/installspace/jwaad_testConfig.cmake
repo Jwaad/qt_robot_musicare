@@ -67,14 +67,14 @@ set(jwaad_test_CONFIG_INCLUDED TRUE)
 
 # set variables for source/devel/install prefixes
 if("FALSE" STREQUAL "TRUE")
-  set(jwaad_test_SOURCE_PREFIX /home/qtrobot/catkin_ws/src/jwaad_test)
-  set(jwaad_test_DEVEL_PREFIX /home/qtrobot/catkin_ws/devel)
+  set(jwaad_test_SOURCE_PREFIX /home/jwaad/catkin_ws/src/jwaad_test)
+  set(jwaad_test_DEVEL_PREFIX /home/jwaad/catkin_ws/devel)
   set(jwaad_test_INSTALL_PREFIX "")
   set(jwaad_test_PREFIX ${jwaad_test_DEVEL_PREFIX})
 else()
   set(jwaad_test_SOURCE_PREFIX "")
   set(jwaad_test_DEVEL_PREFIX "")
-  set(jwaad_test_INSTALL_PREFIX /home/qtrobot/catkin_ws/install)
+  set(jwaad_test_INSTALL_PREFIX /home/jwaad/catkin_ws/install)
   set(jwaad_test_PREFIX ${jwaad_test_INSTALL_PREFIX})
 endif()
 
@@ -154,7 +154,7 @@ foreach(library ${libraries})
     set(lib_path "")
     set(lib "${library}-NOTFOUND")
     # since the path where the library is found is returned we have to iterate over the paths manually
-    foreach(path /home/qtrobot/catkin_ws/install/lib;/opt/ros/noetic/lib)
+    foreach(path /home/jwaad/catkin_ws/install/lib;/home/jwaad/catkin_ws/devel/lib;/opt/ros/noetic/lib)
       find_library(lib ${library}
         PATHS ${path}
         NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
@@ -211,7 +211,7 @@ foreach(depend ${depends})
   _unpack_libraries_with_build_configuration(jwaad_test_LIBRARIES ${jwaad_test_LIBRARIES})
 
   _list_append_unique(jwaad_test_LIBRARY_DIRS ${${jwaad_test_dep}_LIBRARY_DIRS})
-  list(APPEND jwaad_test_EXPORTED_TARGETS ${${jwaad_test_dep}_EXPORTED_TARGETS})
+  _list_append_deduplicate(jwaad_test_EXPORTED_TARGETS ${${jwaad_test_dep}_EXPORTED_TARGETS})
 endforeach()
 
 set(pkg_cfg_extras "jwaad_test-msg-extras.cmake")

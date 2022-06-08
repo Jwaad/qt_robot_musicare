@@ -1,5 +1,5 @@
 file(REMOVE_RECURSE
-  "/home/qtrobot/catkin_ws/devel/share/gennodejs/ros/qt_emotion_app/srv/suspend.js"
+  "/home/jwaad/catkin_ws/devel/share/gennodejs/ros/qt_emotion_app/srv/suspend.js"
   "CMakeFiles/qt_emotion_app_generate_messages_nodejs"
 )
 

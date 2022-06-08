@@ -1,8 +1,8 @@
-# Install script for directory: /home/qtrobot/catkin_ws/src/musi_care
+# Install script for directory: /home/jwaad/catkin_ws/src/musi_care
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/home/qtrobot/catkin_ws/install")
+  set(CMAKE_INSTALL_PREFIX "/home/jwaad/catkin_ws/install")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -38,60 +38,60 @@ if(NOT DEFINED CMAKE_CROSSCOMPILING)
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/musi_care/msg" TYPE FILE FILES "/home/qtrobot/catkin_ws/src/musi_care/msg/SongData.msg")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/musi_care/msg" TYPE FILE FILES "/home/jwaad/catkin_ws/src/musi_care/msg/SongData.msg")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/musi_care/srv" TYPE FILE FILES
-    "/home/qtrobot/catkin_ws/src/musi_care/srv/qt_command.srv"
-    "/home/qtrobot/catkin_ws/src/musi_care/srv/sound_player_srv.srv"
+    "/home/jwaad/catkin_ws/src/musi_care/srv/qt_command.srv"
+    "/home/jwaad/catkin_ws/src/musi_care/srv/sound_player_srv.srv"
     )
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/musi_care/cmake" TYPE FILE FILES "/home/qtrobot/catkin_ws/build/musi_care/catkin_generated/installspace/musi_care-msg-paths.cmake")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/musi_care/cmake" TYPE FILE FILES "/home/jwaad/catkin_ws/build/musi_care/catkin_generated/installspace/musi_care-msg-paths.cmake")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/include" TYPE DIRECTORY FILES "/home/qtrobot/catkin_ws/devel/include/musi_care")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/include" TYPE DIRECTORY FILES "/home/jwaad/catkin_ws/devel/include/musi_care")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/roseus/ros" TYPE DIRECTORY FILES "/home/qtrobot/catkin_ws/devel/share/roseus/ros/musi_care")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/roseus/ros" TYPE DIRECTORY FILES "/home/jwaad/catkin_ws/devel/share/roseus/ros/musi_care")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/common-lisp/ros" TYPE DIRECTORY FILES "/home/qtrobot/catkin_ws/devel/share/common-lisp/ros/musi_care")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/common-lisp/ros" TYPE DIRECTORY FILES "/home/jwaad/catkin_ws/devel/share/common-lisp/ros/musi_care")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/gennodejs/ros" TYPE DIRECTORY FILES "/home/qtrobot/catkin_ws/devel/share/gennodejs/ros/musi_care")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/gennodejs/ros" TYPE DIRECTORY FILES "/home/jwaad/catkin_ws/devel/share/gennodejs/ros/musi_care")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  execute_process(COMMAND "/usr/bin/python3" -m compileall "/home/qtrobot/catkin_ws/devel/lib/python3/dist-packages/musi_care")
+  execute_process(COMMAND "/usr/bin/python3" -m compileall "/home/jwaad/catkin_ws/devel/lib/python3/dist-packages/musi_care")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/python3/dist-packages" TYPE DIRECTORY FILES "/home/qtrobot/catkin_ws/devel/lib/python3/dist-packages/musi_care")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/python3/dist-packages" TYPE DIRECTORY FILES "/home/jwaad/catkin_ws/devel/lib/python3/dist-packages/musi_care")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/qtrobot/catkin_ws/build/musi_care/catkin_generated/installspace/musi_care.pc")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/jwaad/catkin_ws/build/musi_care/catkin_generated/installspace/musi_care.pc")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/musi_care/cmake" TYPE FILE FILES "/home/qtrobot/catkin_ws/build/musi_care/catkin_generated/installspace/musi_care-msg-extras.cmake")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/musi_care/cmake" TYPE FILE FILES "/home/jwaad/catkin_ws/build/musi_care/catkin_generated/installspace/musi_care-msg-extras.cmake")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/musi_care/cmake" TYPE FILE FILES
-    "/home/qtrobot/catkin_ws/build/musi_care/catkin_generated/installspace/musi_careConfig.cmake"
-    "/home/qtrobot/catkin_ws/build/musi_care/catkin_generated/installspace/musi_careConfig-version.cmake"
+    "/home/jwaad/catkin_ws/build/musi_care/catkin_generated/installspace/musi_careConfig.cmake"
+    "/home/jwaad/catkin_ws/build/musi_care/catkin_generated/installspace/musi_careConfig-version.cmake"
     )
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/musi_care" TYPE FILE FILES "/home/qtrobot/catkin_ws/src/musi_care/package.xml")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/musi_care" TYPE FILE FILES "/home/jwaad/catkin_ws/src/musi_care/package.xml")
 endif()
 

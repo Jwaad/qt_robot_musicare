@@ -4,8 +4,8 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/home/qtrobot/catkin_ws/src/qt_memory_game/src/main.cpp" "/home/qtrobot/catkin_ws/build/qt_memory_game/CMakeFiles/qt_memgame_app.dir/src/main.cpp.o"
-  "/home/qtrobot/catkin_ws/src/qt_memory_game/src/qt_memgame_app.cpp" "/home/qtrobot/catkin_ws/build/qt_memory_game/CMakeFiles/qt_memgame_app.dir/src/qt_memgame_app.cpp.o"
+  "/home/jwaad/catkin_ws/src/qt_memory_game/src/main.cpp" "/home/jwaad/catkin_ws/build/qt_memory_game/CMakeFiles/qt_memgame_app.dir/src/main.cpp.o"
+  "/home/jwaad/catkin_ws/src/qt_memory_game/src/qt_memgame_app.cpp" "/home/jwaad/catkin_ws/build/qt_memory_game/CMakeFiles/qt_memgame_app.dir/src/qt_memgame_app.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 
@@ -18,8 +18,8 @@ set(CMAKE_TARGET_DEFINITIONS_CXX
 
 # The include file search paths:
 set(CMAKE_CXX_TARGET_INCLUDE_PATH
-  "/home/qtrobot/catkin_ws/devel/include"
-  "/home/qtrobot/catkin_ws/src/qt_memory_game/./include"
+  "/home/jwaad/catkin_ws/devel/include"
+  "/home/jwaad/catkin_ws/src/qt_memory_game/./include"
   "/opt/ros/noetic/include"
   "/opt/ros/noetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp"
   )

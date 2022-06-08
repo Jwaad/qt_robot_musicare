@@ -43,10 +43,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/qtrobot/catkin_ws/src
+CMAKE_SOURCE_DIR = /home/jwaad/catkin_ws/src
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/qtrobot/catkin_ws/build
+CMAKE_BINARY_DIR = /home/jwaad/catkin_ws/build
 
 # Utility rule file for qt_gesturegame_app_genpy.
 
@@ -63,10 +63,10 @@ qt_gesture_recognition/CMakeFiles/qt_gesturegame_app_genpy.dir/build: qt_gesture
 .PHONY : qt_gesture_recognition/CMakeFiles/qt_gesturegame_app_genpy.dir/build
 
 qt_gesture_recognition/CMakeFiles/qt_gesturegame_app_genpy.dir/clean:
-	cd /home/qtrobot/catkin_ws/build/qt_gesture_recognition && $(CMAKE_COMMAND) -P CMakeFiles/qt_gesturegame_app_genpy.dir/cmake_clean.cmake
+	cd /home/jwaad/catkin_ws/build/qt_gesture_recognition && $(CMAKE_COMMAND) -P CMakeFiles/qt_gesturegame_app_genpy.dir/cmake_clean.cmake
 .PHONY : qt_gesture_recognition/CMakeFiles/qt_gesturegame_app_genpy.dir/clean
 
 qt_gesture_recognition/CMakeFiles/qt_gesturegame_app_genpy.dir/depend:
-	cd /home/qtrobot/catkin_ws/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/qtrobot/catkin_ws/src /home/qtrobot/catkin_ws/src/qt_gesture_recognition /home/qtrobot/catkin_ws/build /home/qtrobot/catkin_ws/build/qt_gesture_recognition /home/qtrobot/catkin_ws/build/qt_gesture_recognition/CMakeFiles/qt_gesturegame_app_genpy.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/jwaad/catkin_ws/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/jwaad/catkin_ws/src /home/jwaad/catkin_ws/src/qt_gesture_recognition /home/jwaad/catkin_ws/build /home/jwaad/catkin_ws/build/qt_gesture_recognition /home/jwaad/catkin_ws/build/qt_gesture_recognition/CMakeFiles/qt_gesturegame_app_genpy.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : qt_gesture_recognition/CMakeFiles/qt_gesturegame_app_genpy.dir/depend
 

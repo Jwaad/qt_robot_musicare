@@ -43,10 +43,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/qtrobot/catkin_ws/src
+CMAKE_SOURCE_DIR = /home/jwaad/catkin_ws/src
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/qtrobot/catkin_ws/build
+CMAKE_BINARY_DIR = /home/jwaad/catkin_ws/build
 
 # Utility rule file for qt_memgame_app_generate_messages.
 
@@ -63,10 +63,10 @@ qt_memory_game/CMakeFiles/qt_memgame_app_generate_messages.dir/build: qt_memgame
 .PHONY : qt_memory_game/CMakeFiles/qt_memgame_app_generate_messages.dir/build
 
 qt_memory_game/CMakeFiles/qt_memgame_app_generate_messages.dir/clean:
-	cd /home/qtrobot/catkin_ws/build/qt_memory_game && $(CMAKE_COMMAND) -P CMakeFiles/qt_memgame_app_generate_messages.dir/cmake_clean.cmake
+	cd /home/jwaad/catkin_ws/build/qt_memory_game && $(CMAKE_COMMAND) -P CMakeFiles/qt_memgame_app_generate_messages.dir/cmake_clean.cmake
 .PHONY : qt_memory_game/CMakeFiles/qt_memgame_app_generate_messages.dir/clean
 
 qt_memory_game/CMakeFiles/qt_memgame_app_generate_messages.dir/depend:
-	cd /home/qtrobot/catkin_ws/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/qtrobot/catkin_ws/src /home/qtrobot/catkin_ws/src/qt_memory_game /home/qtrobot/catkin_ws/build /home/qtrobot/catkin_ws/build/qt_memory_game /home/qtrobot/catkin_ws/build/qt_memory_game/CMakeFiles/qt_memgame_app_generate_messages.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/jwaad/catkin_ws/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/jwaad/catkin_ws/src /home/jwaad/catkin_ws/src/qt_memory_game /home/jwaad/catkin_ws/build /home/jwaad/catkin_ws/build/qt_memory_game /home/jwaad/catkin_ws/build/qt_memory_game/CMakeFiles/qt_memgame_app_generate_messages.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : qt_memory_game/CMakeFiles/qt_memgame_app_generate_messages.dir/depend
 

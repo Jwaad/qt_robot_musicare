@@ -43,33 +43,33 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/qtrobot/catkin_ws/src
+CMAKE_SOURCE_DIR = /home/jwaad/catkin_ws/src
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/qtrobot/catkin_ws/build
+CMAKE_BINARY_DIR = /home/jwaad/catkin_ws/build
 
 # Utility rule file for qt_gesturegame_app_generate_messages_py.
 
 # Include the progress variables for this target.
 include qt_gesture_recognition/CMakeFiles/qt_gesturegame_app_generate_messages_py.dir/progress.make
 
-qt_gesture_recognition/CMakeFiles/qt_gesturegame_app_generate_messages_py: /home/qtrobot/catkin_ws/devel/lib/python3/dist-packages/qt_gesturegame_app/srv/_suspend.py
-qt_gesture_recognition/CMakeFiles/qt_gesturegame_app_generate_messages_py: /home/qtrobot/catkin_ws/devel/lib/python3/dist-packages/qt_gesturegame_app/srv/__init__.py
+qt_gesture_recognition/CMakeFiles/qt_gesturegame_app_generate_messages_py: /home/jwaad/catkin_ws/devel/lib/python3/dist-packages/qt_gesturegame_app/srv/_suspend.py
+qt_gesture_recognition/CMakeFiles/qt_gesturegame_app_generate_messages_py: /home/jwaad/catkin_ws/devel/lib/python3/dist-packages/qt_gesturegame_app/srv/__init__.py
 
 
-/home/qtrobot/catkin_ws/devel/lib/python3/dist-packages/qt_gesturegame_app/srv/_suspend.py: /opt/ros/noetic/lib/genpy/gensrv_py.py
-/home/qtrobot/catkin_ws/devel/lib/python3/dist-packages/qt_gesturegame_app/srv/_suspend.py: /home/qtrobot/catkin_ws/src/qt_gesture_recognition/srv/suspend.srv
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/qtrobot/catkin_ws/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Generating Python code from SRV qt_gesturegame_app/suspend"
-	cd /home/qtrobot/catkin_ws/build/qt_gesture_recognition && ../catkin_generated/env_cached.sh /usr/bin/python3 /opt/ros/noetic/share/genpy/cmake/../../../lib/genpy/gensrv_py.py /home/qtrobot/catkin_ws/src/qt_gesture_recognition/srv/suspend.srv -Istd_msgs:/opt/ros/noetic/share/std_msgs/cmake/../msg -p qt_gesturegame_app -o /home/qtrobot/catkin_ws/devel/lib/python3/dist-packages/qt_gesturegame_app/srv
+/home/jwaad/catkin_ws/devel/lib/python3/dist-packages/qt_gesturegame_app/srv/_suspend.py: /opt/ros/noetic/lib/genpy/gensrv_py.py
+/home/jwaad/catkin_ws/devel/lib/python3/dist-packages/qt_gesturegame_app/srv/_suspend.py: /home/jwaad/catkin_ws/src/qt_gesture_recognition/srv/suspend.srv
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/jwaad/catkin_ws/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Generating Python code from SRV qt_gesturegame_app/suspend"
+	cd /home/jwaad/catkin_ws/build/qt_gesture_recognition && ../catkin_generated/env_cached.sh /usr/bin/python3 /opt/ros/noetic/share/genpy/cmake/../../../lib/genpy/gensrv_py.py /home/jwaad/catkin_ws/src/qt_gesture_recognition/srv/suspend.srv -Istd_msgs:/opt/ros/noetic/share/std_msgs/cmake/../msg -p qt_gesturegame_app -o /home/jwaad/catkin_ws/devel/lib/python3/dist-packages/qt_gesturegame_app/srv
 
-/home/qtrobot/catkin_ws/devel/lib/python3/dist-packages/qt_gesturegame_app/srv/__init__.py: /opt/ros/noetic/lib/genpy/genmsg_py.py
-/home/qtrobot/catkin_ws/devel/lib/python3/dist-packages/qt_gesturegame_app/srv/__init__.py: /home/qtrobot/catkin_ws/devel/lib/python3/dist-packages/qt_gesturegame_app/srv/_suspend.py
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/qtrobot/catkin_ws/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Generating Python srv __init__.py for qt_gesturegame_app"
-	cd /home/qtrobot/catkin_ws/build/qt_gesture_recognition && ../catkin_generated/env_cached.sh /usr/bin/python3 /opt/ros/noetic/share/genpy/cmake/../../../lib/genpy/genmsg_py.py -o /home/qtrobot/catkin_ws/devel/lib/python3/dist-packages/qt_gesturegame_app/srv --initpy
+/home/jwaad/catkin_ws/devel/lib/python3/dist-packages/qt_gesturegame_app/srv/__init__.py: /opt/ros/noetic/lib/genpy/genmsg_py.py
+/home/jwaad/catkin_ws/devel/lib/python3/dist-packages/qt_gesturegame_app/srv/__init__.py: /home/jwaad/catkin_ws/devel/lib/python3/dist-packages/qt_gesturegame_app/srv/_suspend.py
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/jwaad/catkin_ws/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Generating Python srv __init__.py for qt_gesturegame_app"
+	cd /home/jwaad/catkin_ws/build/qt_gesture_recognition && ../catkin_generated/env_cached.sh /usr/bin/python3 /opt/ros/noetic/share/genpy/cmake/../../../lib/genpy/genmsg_py.py -o /home/jwaad/catkin_ws/devel/lib/python3/dist-packages/qt_gesturegame_app/srv --initpy
 
 qt_gesturegame_app_generate_messages_py: qt_gesture_recognition/CMakeFiles/qt_gesturegame_app_generate_messages_py
-qt_gesturegame_app_generate_messages_py: /home/qtrobot/catkin_ws/devel/lib/python3/dist-packages/qt_gesturegame_app/srv/_suspend.py
-qt_gesturegame_app_generate_messages_py: /home/qtrobot/catkin_ws/devel/lib/python3/dist-packages/qt_gesturegame_app/srv/__init__.py
+qt_gesturegame_app_generate_messages_py: /home/jwaad/catkin_ws/devel/lib/python3/dist-packages/qt_gesturegame_app/srv/_suspend.py
+qt_gesturegame_app_generate_messages_py: /home/jwaad/catkin_ws/devel/lib/python3/dist-packages/qt_gesturegame_app/srv/__init__.py
 qt_gesturegame_app_generate_messages_py: qt_gesture_recognition/CMakeFiles/qt_gesturegame_app_generate_messages_py.dir/build.make
 
 .PHONY : qt_gesturegame_app_generate_messages_py
@@ -80,10 +80,10 @@ qt_gesture_recognition/CMakeFiles/qt_gesturegame_app_generate_messages_py.dir/bu
 .PHONY : qt_gesture_recognition/CMakeFiles/qt_gesturegame_app_generate_messages_py.dir/build
 
 qt_gesture_recognition/CMakeFiles/qt_gesturegame_app_generate_messages_py.dir/clean:
-	cd /home/qtrobot/catkin_ws/build/qt_gesture_recognition && $(CMAKE_COMMAND) -P CMakeFiles/qt_gesturegame_app_generate_messages_py.dir/cmake_clean.cmake
+	cd /home/jwaad/catkin_ws/build/qt_gesture_recognition && $(CMAKE_COMMAND) -P CMakeFiles/qt_gesturegame_app_generate_messages_py.dir/cmake_clean.cmake
 .PHONY : qt_gesture_recognition/CMakeFiles/qt_gesturegame_app_generate_messages_py.dir/clean
 
 qt_gesture_recognition/CMakeFiles/qt_gesturegame_app_generate_messages_py.dir/depend:
-	cd /home/qtrobot/catkin_ws/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/qtrobot/catkin_ws/src /home/qtrobot/catkin_ws/src/qt_gesture_recognition /home/qtrobot/catkin_ws/build /home/qtrobot/catkin_ws/build/qt_gesture_recognition /home/qtrobot/catkin_ws/build/qt_gesture_recognition/CMakeFiles/qt_gesturegame_app_generate_messages_py.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/jwaad/catkin_ws/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/jwaad/catkin_ws/src /home/jwaad/catkin_ws/src/qt_gesture_recognition /home/jwaad/catkin_ws/build /home/jwaad/catkin_ws/build/qt_gesture_recognition /home/jwaad/catkin_ws/build/qt_gesture_recognition/CMakeFiles/qt_gesturegame_app_generate_messages_py.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : qt_gesture_recognition/CMakeFiles/qt_gesturegame_app_generate_messages_py.dir/depend
 

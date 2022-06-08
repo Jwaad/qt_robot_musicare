@@ -67,14 +67,14 @@ set(qt_idle_app_CONFIG_INCLUDED TRUE)
 
 # set variables for source/devel/install prefixes
 if("FALSE" STREQUAL "TRUE")
-  set(qt_idle_app_SOURCE_PREFIX /home/qtrobot/catkin_ws/src/qt_idle_app)
-  set(qt_idle_app_DEVEL_PREFIX /home/qtrobot/catkin_ws/devel)
+  set(qt_idle_app_SOURCE_PREFIX /home/jwaad/catkin_ws/src/qt_idle_app)
+  set(qt_idle_app_DEVEL_PREFIX /home/jwaad/catkin_ws/devel)
   set(qt_idle_app_INSTALL_PREFIX "")
   set(qt_idle_app_PREFIX ${qt_idle_app_DEVEL_PREFIX})
 else()
   set(qt_idle_app_SOURCE_PREFIX "")
   set(qt_idle_app_DEVEL_PREFIX "")
-  set(qt_idle_app_INSTALL_PREFIX /home/qtrobot/catkin_ws/install)
+  set(qt_idle_app_INSTALL_PREFIX /home/jwaad/catkin_ws/install)
   set(qt_idle_app_PREFIX ${qt_idle_app_INSTALL_PREFIX})
 endif()
 
@@ -154,7 +154,7 @@ foreach(library ${libraries})
     set(lib_path "")
     set(lib "${library}-NOTFOUND")
     # since the path where the library is found is returned we have to iterate over the paths manually
-    foreach(path /home/qtrobot/catkin_ws/install/lib;/opt/ros/noetic/lib)
+    foreach(path /home/jwaad/catkin_ws/install/lib;/home/jwaad/catkin_ws/devel/lib;/opt/ros/noetic/lib)
       find_library(lib ${library}
         PATHS ${path}
         NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
@@ -211,7 +211,7 @@ foreach(depend ${depends})
   _unpack_libraries_with_build_configuration(qt_idle_app_LIBRARIES ${qt_idle_app_LIBRARIES})
 
   _list_append_unique(qt_idle_app_LIBRARY_DIRS ${${qt_idle_app_dep}_LIBRARY_DIRS})
-  list(APPEND qt_idle_app_EXPORTED_TARGETS ${${qt_idle_app_dep}_EXPORTED_TARGETS})
+  _list_append_deduplicate(qt_idle_app_EXPORTED_TARGETS ${${qt_idle_app_dep}_EXPORTED_TARGETS})
 endforeach()
 
 set(pkg_cfg_extras "qt_idle_app-msg-extras.cmake")

@@ -1,8 +1,8 @@
-prefix=/home/qtrobot/catkin_ws/devel
+prefix=/home/jwaad/catkin_ws/devel
 
 Name: qt_idle_app
 Description: Description of qt_idle_app
 Version: 0.0.0
-Cflags: -I/home/qtrobot/catkin_ws/devel/include -I/home/qtrobot/catkin_ws/src/qt_idle_app/include
+Cflags: -I/home/jwaad/catkin_ws/devel/include -I/home/jwaad/catkin_ws/src/qt_idle_app/include
 Libs: -L${prefix}/lib -lqt_idle_app -lstd_msgs -lmessage_runtime
 Requires: qt_gesture_controller qt_motors_controller

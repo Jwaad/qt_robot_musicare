@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "/home/qtrobot/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app"
-  "/home/qtrobot/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app.pdb"
+  "/home/jwaad/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app"
+  "/home/jwaad/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app.pdb"
   "CMakeFiles/qt_gesturegame_app.dir/src/main.cpp.o"
   "CMakeFiles/qt_gesturegame_app.dir/src/qt_gesturegame_app.cpp.o"
 )

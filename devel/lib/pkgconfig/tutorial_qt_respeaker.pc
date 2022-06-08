@@ -1,4 +1,4 @@
-prefix=/home/qtrobot/catkin_ws/devel
+prefix=/home/jwaad/catkin_ws/devel
 
 Name: tutorial_qt_respeaker
 Description: Description of tutorial_qt_respeaker

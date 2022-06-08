@@ -1,8 +1,8 @@
-# Install script for directory: /home/qtrobot/catkin_ws/src/tutorial_qt_respeaker
+# Install script for directory: /home/jwaad/catkin_ws/src/tutorial_qt_respeaker
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/home/qtrobot/catkin_ws/install")
+  set(CMAKE_INSTALL_PREFIX "/home/jwaad/catkin_ws/install")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -38,17 +38,17 @@ if(NOT DEFINED CMAKE_CROSSCOMPILING)
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/qtrobot/catkin_ws/build/tutorial_qt_respeaker/catkin_generated/installspace/tutorial_qt_respeaker.pc")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/jwaad/catkin_ws/build/tutorial_qt_respeaker/catkin_generated/installspace/tutorial_qt_respeaker.pc")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/tutorial_qt_respeaker/cmake" TYPE FILE FILES
-    "/home/qtrobot/catkin_ws/build/tutorial_qt_respeaker/catkin_generated/installspace/tutorial_qt_respeakerConfig.cmake"
-    "/home/qtrobot/catkin_ws/build/tutorial_qt_respeaker/catkin_generated/installspace/tutorial_qt_respeakerConfig-version.cmake"
+    "/home/jwaad/catkin_ws/build/tutorial_qt_respeaker/catkin_generated/installspace/tutorial_qt_respeakerConfig.cmake"
+    "/home/jwaad/catkin_ws/build/tutorial_qt_respeaker/catkin_generated/installspace/tutorial_qt_respeakerConfig-version.cmake"
     )
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/tutorial_qt_respeaker" TYPE FILE FILES "/home/qtrobot/catkin_ws/src/tutorial_qt_respeaker/package.xml")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/tutorial_qt_respeaker" TYPE FILE FILES "/home/jwaad/catkin_ws/src/tutorial_qt_respeaker/package.xml")
 endif()
 

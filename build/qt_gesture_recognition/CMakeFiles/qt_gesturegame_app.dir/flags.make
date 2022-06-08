@@ -6,5 +6,5 @@ CXX_FLAGS =   -std=c++11
 
 CXX_DEFINES = -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\"qt_gesturegame_app\"
 
-CXX_INCLUDES = -I/home/qtrobot/catkin_ws/devel/include -I/home/qtrobot/catkin_ws/src/qt_gesture_recognition/./include -I/opt/ros/noetic/include -I/opt/ros/noetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp 
+CXX_INCLUDES = -I/home/jwaad/catkin_ws/devel/include -I/home/jwaad/catkin_ws/src/qt_gesture_recognition/./include -I/opt/ros/noetic/include -I/opt/ros/noetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp 
 

@@ -1,5 +1,0 @@
-string language
-int16  pitch
-int16  speed
----
-bool status

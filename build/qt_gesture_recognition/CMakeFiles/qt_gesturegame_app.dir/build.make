@@ -43,10 +43,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/qtrobot/catkin_ws/src
+CMAKE_SOURCE_DIR = /home/jwaad/catkin_ws/src
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/qtrobot/catkin_ws/build
+CMAKE_BINARY_DIR = /home/jwaad/catkin_ws/build
 
 # Include any dependencies generated for this target.
 include qt_gesture_recognition/CMakeFiles/qt_gesturegame_app.dir/depend.make
@@ -58,30 +58,30 @@ include qt_gesture_recognition/CMakeFiles/qt_gesturegame_app.dir/progress.make
 include qt_gesture_recognition/CMakeFiles/qt_gesturegame_app.dir/flags.make
 
 qt_gesture_recognition/CMakeFiles/qt_gesturegame_app.dir/src/qt_gesturegame_app.cpp.o: qt_gesture_recognition/CMakeFiles/qt_gesturegame_app.dir/flags.make
-qt_gesture_recognition/CMakeFiles/qt_gesturegame_app.dir/src/qt_gesturegame_app.cpp.o: /home/qtrobot/catkin_ws/src/qt_gesture_recognition/src/qt_gesturegame_app.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/qtrobot/catkin_ws/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object qt_gesture_recognition/CMakeFiles/qt_gesturegame_app.dir/src/qt_gesturegame_app.cpp.o"
-	cd /home/qtrobot/catkin_ws/build/qt_gesture_recognition && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/qt_gesturegame_app.dir/src/qt_gesturegame_app.cpp.o -c /home/qtrobot/catkin_ws/src/qt_gesture_recognition/src/qt_gesturegame_app.cpp
+qt_gesture_recognition/CMakeFiles/qt_gesturegame_app.dir/src/qt_gesturegame_app.cpp.o: /home/jwaad/catkin_ws/src/qt_gesture_recognition/src/qt_gesturegame_app.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/jwaad/catkin_ws/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object qt_gesture_recognition/CMakeFiles/qt_gesturegame_app.dir/src/qt_gesturegame_app.cpp.o"
+	cd /home/jwaad/catkin_ws/build/qt_gesture_recognition && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/qt_gesturegame_app.dir/src/qt_gesturegame_app.cpp.o -c /home/jwaad/catkin_ws/src/qt_gesture_recognition/src/qt_gesturegame_app.cpp
 
 qt_gesture_recognition/CMakeFiles/qt_gesturegame_app.dir/src/qt_gesturegame_app.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/qt_gesturegame_app.dir/src/qt_gesturegame_app.cpp.i"
-	cd /home/qtrobot/catkin_ws/build/qt_gesture_recognition && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/qtrobot/catkin_ws/src/qt_gesture_recognition/src/qt_gesturegame_app.cpp > CMakeFiles/qt_gesturegame_app.dir/src/qt_gesturegame_app.cpp.i
+	cd /home/jwaad/catkin_ws/build/qt_gesture_recognition && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/jwaad/catkin_ws/src/qt_gesture_recognition/src/qt_gesturegame_app.cpp > CMakeFiles/qt_gesturegame_app.dir/src/qt_gesturegame_app.cpp.i
 
 qt_gesture_recognition/CMakeFiles/qt_gesturegame_app.dir/src/qt_gesturegame_app.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/qt_gesturegame_app.dir/src/qt_gesturegame_app.cpp.s"
-	cd /home/qtrobot/catkin_ws/build/qt_gesture_recognition && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/qtrobot/catkin_ws/src/qt_gesture_recognition/src/qt_gesturegame_app.cpp -o CMakeFiles/qt_gesturegame_app.dir/src/qt_gesturegame_app.cpp.s
+	cd /home/jwaad/catkin_ws/build/qt_gesture_recognition && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/jwaad/catkin_ws/src/qt_gesture_recognition/src/qt_gesturegame_app.cpp -o CMakeFiles/qt_gesturegame_app.dir/src/qt_gesturegame_app.cpp.s
 
 qt_gesture_recognition/CMakeFiles/qt_gesturegame_app.dir/src/main.cpp.o: qt_gesture_recognition/CMakeFiles/qt_gesturegame_app.dir/flags.make
-qt_gesture_recognition/CMakeFiles/qt_gesturegame_app.dir/src/main.cpp.o: /home/qtrobot/catkin_ws/src/qt_gesture_recognition/src/main.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/qtrobot/catkin_ws/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object qt_gesture_recognition/CMakeFiles/qt_gesturegame_app.dir/src/main.cpp.o"
-	cd /home/qtrobot/catkin_ws/build/qt_gesture_recognition && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/qt_gesturegame_app.dir/src/main.cpp.o -c /home/qtrobot/catkin_ws/src/qt_gesture_recognition/src/main.cpp
+qt_gesture_recognition/CMakeFiles/qt_gesturegame_app.dir/src/main.cpp.o: /home/jwaad/catkin_ws/src/qt_gesture_recognition/src/main.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/jwaad/catkin_ws/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object qt_gesture_recognition/CMakeFiles/qt_gesturegame_app.dir/src/main.cpp.o"
+	cd /home/jwaad/catkin_ws/build/qt_gesture_recognition && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/qt_gesturegame_app.dir/src/main.cpp.o -c /home/jwaad/catkin_ws/src/qt_gesture_recognition/src/main.cpp
 
 qt_gesture_recognition/CMakeFiles/qt_gesturegame_app.dir/src/main.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/qt_gesturegame_app.dir/src/main.cpp.i"
-	cd /home/qtrobot/catkin_ws/build/qt_gesture_recognition && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/qtrobot/catkin_ws/src/qt_gesture_recognition/src/main.cpp > CMakeFiles/qt_gesturegame_app.dir/src/main.cpp.i
+	cd /home/jwaad/catkin_ws/build/qt_gesture_recognition && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/jwaad/catkin_ws/src/qt_gesture_recognition/src/main.cpp > CMakeFiles/qt_gesturegame_app.dir/src/main.cpp.i
 
 qt_gesture_recognition/CMakeFiles/qt_gesturegame_app.dir/src/main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/qt_gesturegame_app.dir/src/main.cpp.s"
-	cd /home/qtrobot/catkin_ws/build/qt_gesture_recognition && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/qtrobot/catkin_ws/src/qt_gesture_recognition/src/main.cpp -o CMakeFiles/qt_gesturegame_app.dir/src/main.cpp.s
+	cd /home/jwaad/catkin_ws/build/qt_gesture_recognition && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/jwaad/catkin_ws/src/qt_gesture_recognition/src/main.cpp -o CMakeFiles/qt_gesturegame_app.dir/src/main.cpp.s
 
 # Object files for target qt_gesturegame_app
 qt_gesturegame_app_OBJECTS = \
@@ -91,40 +91,40 @@ qt_gesturegame_app_OBJECTS = \
 # External object files for target qt_gesturegame_app
 qt_gesturegame_app_EXTERNAL_OBJECTS =
 
-/home/qtrobot/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app: qt_gesture_recognition/CMakeFiles/qt_gesturegame_app.dir/src/qt_gesturegame_app.cpp.o
-/home/qtrobot/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app: qt_gesture_recognition/CMakeFiles/qt_gesturegame_app.dir/src/main.cpp.o
-/home/qtrobot/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app: qt_gesture_recognition/CMakeFiles/qt_gesturegame_app.dir/build.make
-/home/qtrobot/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app: /opt/ros/noetic/lib/libroscpp.so
-/home/qtrobot/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app: /usr/lib/x86_64-linux-gnu/libpthread.so
-/home/qtrobot/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app: /usr/lib/x86_64-linux-gnu/libboost_chrono.so.1.71.0
-/home/qtrobot/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app: /usr/lib/x86_64-linux-gnu/libboost_filesystem.so.1.71.0
-/home/qtrobot/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app: /opt/ros/noetic/lib/librosconsole.so
-/home/qtrobot/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app: /opt/ros/noetic/lib/librosconsole_log4cxx.so
-/home/qtrobot/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app: /opt/ros/noetic/lib/librosconsole_backend_interface.so
-/home/qtrobot/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app: /usr/lib/x86_64-linux-gnu/liblog4cxx.so
-/home/qtrobot/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app: /usr/lib/x86_64-linux-gnu/libboost_regex.so.1.71.0
-/home/qtrobot/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app: /opt/ros/noetic/lib/libxmlrpcpp.so
-/home/qtrobot/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app: /opt/ros/noetic/lib/libroscpp_serialization.so
-/home/qtrobot/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app: /opt/ros/noetic/lib/librostime.so
-/home/qtrobot/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app: /usr/lib/x86_64-linux-gnu/libboost_date_time.so.1.71.0
-/home/qtrobot/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app: /opt/ros/noetic/lib/libcpp_common.so
-/home/qtrobot/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app: /usr/lib/x86_64-linux-gnu/libboost_system.so.1.71.0
-/home/qtrobot/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app: /usr/lib/x86_64-linux-gnu/libboost_thread.so.1.71.0
-/home/qtrobot/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app: /usr/lib/x86_64-linux-gnu/libconsole_bridge.so.0.4
-/home/qtrobot/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app: qt_gesture_recognition/CMakeFiles/qt_gesturegame_app.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/qtrobot/catkin_ws/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX executable /home/qtrobot/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app"
-	cd /home/qtrobot/catkin_ws/build/qt_gesture_recognition && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/qt_gesturegame_app.dir/link.txt --verbose=$(VERBOSE)
+/home/jwaad/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app: qt_gesture_recognition/CMakeFiles/qt_gesturegame_app.dir/src/qt_gesturegame_app.cpp.o
+/home/jwaad/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app: qt_gesture_recognition/CMakeFiles/qt_gesturegame_app.dir/src/main.cpp.o
+/home/jwaad/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app: qt_gesture_recognition/CMakeFiles/qt_gesturegame_app.dir/build.make
+/home/jwaad/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app: /opt/ros/noetic/lib/libroscpp.so
+/home/jwaad/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app: /usr/lib/x86_64-linux-gnu/libpthread.so
+/home/jwaad/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app: /usr/lib/x86_64-linux-gnu/libboost_chrono.so.1.71.0
+/home/jwaad/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app: /usr/lib/x86_64-linux-gnu/libboost_filesystem.so.1.71.0
+/home/jwaad/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app: /opt/ros/noetic/lib/librosconsole.so
+/home/jwaad/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app: /opt/ros/noetic/lib/librosconsole_log4cxx.so
+/home/jwaad/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app: /opt/ros/noetic/lib/librosconsole_backend_interface.so
+/home/jwaad/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app: /usr/lib/x86_64-linux-gnu/liblog4cxx.so
+/home/jwaad/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app: /usr/lib/x86_64-linux-gnu/libboost_regex.so.1.71.0
+/home/jwaad/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app: /opt/ros/noetic/lib/libxmlrpcpp.so
+/home/jwaad/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app: /opt/ros/noetic/lib/libroscpp_serialization.so
+/home/jwaad/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app: /opt/ros/noetic/lib/librostime.so
+/home/jwaad/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app: /usr/lib/x86_64-linux-gnu/libboost_date_time.so.1.71.0
+/home/jwaad/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app: /opt/ros/noetic/lib/libcpp_common.so
+/home/jwaad/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app: /usr/lib/x86_64-linux-gnu/libboost_system.so.1.71.0
+/home/jwaad/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app: /usr/lib/x86_64-linux-gnu/libboost_thread.so.1.71.0
+/home/jwaad/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app: /usr/lib/x86_64-linux-gnu/libconsole_bridge.so.0.4
+/home/jwaad/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app: qt_gesture_recognition/CMakeFiles/qt_gesturegame_app.dir/link.txt
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/jwaad/catkin_ws/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX executable /home/jwaad/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app"
+	cd /home/jwaad/catkin_ws/build/qt_gesture_recognition && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/qt_gesturegame_app.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
-qt_gesture_recognition/CMakeFiles/qt_gesturegame_app.dir/build: /home/qtrobot/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app
+qt_gesture_recognition/CMakeFiles/qt_gesturegame_app.dir/build: /home/jwaad/catkin_ws/devel/lib/qt_gesturegame_app/qt_gesturegame_app
 
 .PHONY : qt_gesture_recognition/CMakeFiles/qt_gesturegame_app.dir/build
 
 qt_gesture_recognition/CMakeFiles/qt_gesturegame_app.dir/clean:
-	cd /home/qtrobot/catkin_ws/build/qt_gesture_recognition && $(CMAKE_COMMAND) -P CMakeFiles/qt_gesturegame_app.dir/cmake_clean.cmake
+	cd /home/jwaad/catkin_ws/build/qt_gesture_recognition && $(CMAKE_COMMAND) -P CMakeFiles/qt_gesturegame_app.dir/cmake_clean.cmake
 .PHONY : qt_gesture_recognition/CMakeFiles/qt_gesturegame_app.dir/clean
 
 qt_gesture_recognition/CMakeFiles/qt_gesturegame_app.dir/depend:
-	cd /home/qtrobot/catkin_ws/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/qtrobot/catkin_ws/src /home/qtrobot/catkin_ws/src/qt_gesture_recognition /home/qtrobot/catkin_ws/build /home/qtrobot/catkin_ws/build/qt_gesture_recognition /home/qtrobot/catkin_ws/build/qt_gesture_recognition/CMakeFiles/qt_gesturegame_app.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/jwaad/catkin_ws/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/jwaad/catkin_ws/src /home/jwaad/catkin_ws/src/qt_gesture_recognition /home/jwaad/catkin_ws/build /home/jwaad/catkin_ws/build/qt_gesture_recognition /home/jwaad/catkin_ws/build/qt_gesture_recognition/CMakeFiles/qt_gesturegame_app.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : qt_gesture_recognition/CMakeFiles/qt_gesturegame_app.dir/depend
 

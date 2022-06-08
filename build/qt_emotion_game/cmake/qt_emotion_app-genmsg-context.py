@@ -1,7 +1,7 @@
 # generated from genmsg/cmake/pkg-genmsg.context.in
 
 messages_str = ""
-services_str = "/home/qtrobot/catkin_ws/src/qt_emotion_game/srv/suspend.srv"
+services_str = "/home/jwaad/catkin_ws/src/qt_emotion_game/srv/suspend.srv"
 pkg_name = "qt_emotion_app"
 dependencies_str = "std_msgs"
 langs = "gencpp;geneus;genlisp;gennodejs;genpy"

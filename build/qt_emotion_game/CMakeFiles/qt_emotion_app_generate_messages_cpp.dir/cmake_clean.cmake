@@ -1,5 +1,5 @@
 file(REMOVE_RECURSE
-  "/home/qtrobot/catkin_ws/devel/include/qt_emotion_app/suspend.h"
+  "/home/jwaad/catkin_ws/devel/include/qt_emotion_app/suspend.h"
   "CMakeFiles/qt_emotion_app_generate_messages_cpp"
 )
 

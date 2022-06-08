@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "/home/qtrobot/catkin_ws/devel/lib/qt_idle_app/qt_idle_app"
-  "/home/qtrobot/catkin_ws/devel/lib/qt_idle_app/qt_idle_app.pdb"
+  "/home/jwaad/catkin_ws/devel/lib/qt_idle_app/qt_idle_app"
+  "/home/jwaad/catkin_ws/devel/lib/qt_idle_app/qt_idle_app.pdb"
   "CMakeFiles/qt_idle_app.dir/src/main.cpp.o"
   "CMakeFiles/qt_idle_app.dir/src/qt_idle_app.cpp.o"
 )

@@ -1,5 +1,5 @@
 file(REMOVE_RECURSE
-  "/home/qtrobot/catkin_ws/devel/share/common-lisp/ros/qt_emotion_app/srv/suspend.lisp"
+  "/home/jwaad/catkin_ws/devel/share/common-lisp/ros/qt_emotion_app/srv/suspend.lisp"
   "CMakeFiles/qt_emotion_app_generate_messages_lisp"
 )
 
