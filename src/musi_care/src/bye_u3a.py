@@ -1,17 +1,4 @@
 #!/usr/bin/env python
-
-##Brief
-#QT will jumble a song then ask you to put it back in order
-#Process: half song is give to you, you need to only choose 2nd half.
-#
-##TODO GENERAL
-#
-#
-#
-#
-##Steps:
-#QT plays explains game 1 time ever on blank screen.
-#QT plays the song 
 #
 
 ##Libraries
@@ -19,7 +6,7 @@ from aubio import source, tempo
 from numpy import median, diff
 from std_msgs.msg import Float64MultiArray
 from std_msgs.msg import String
-from qt_motors_controller.srv import *
+#from qt_motors_controller.srv import *
 import rospy
 import time
 import tty

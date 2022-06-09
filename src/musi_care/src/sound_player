@@ -68,7 +68,9 @@ class PlayAudio():
                 rospy.loginfo("Ending current track to play new track")
                 self.end_audio_steam()
                 self.currently_streaming = False
-            file_path = data.operation_data_1
+            this_path = os.path.dirname(os.path.abspath(__file__)) # path to this file
+            #file_path = data.operation_data_1 # for absolute path
+            file_path = this_path + data.operation_data_1 # relative path
             self.start_time = data.operation_data_2
             #check filepath
             file_path_valid = self.check_valid_filepath(file_path)

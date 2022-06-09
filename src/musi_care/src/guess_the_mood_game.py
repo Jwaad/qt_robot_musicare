@@ -181,19 +181,22 @@ class Guess_The_Mood_Game():
         self.current_level = 1 #Default
         #self.music_data = {"easy":{1:{""}}, "medium":"", "hard":""} # {1:{"song_name":"title", "mood":"happy", "hint":"some text"}, 2:{"song_name":"title", "mood":"happy", "hint":"some text"}}
         self.get_song_database()
+        #print(self.music_data)
         #self.default_volume = 1
         #self.volume_change(self.default_volume) # Set a default volume
         self.pygame.mouse.set_visible(False)
         self.timers = {}
         self.Timer = TimeFunctions()
-        self.music_filepath = "/home/qtrobot/catkin_ws/src/musi_care/src/game_assets/music/"
+        #self.music_filepath = "/home/qtrobot/catkin_ws/src/musi_care/src/game_assets/music/"
+        self.music_filepath = "/game_assets/music/"
     
     def get_song_database(self):
         """read the database file and get the levels data"""
         #There are much better ways of doing this, this was the fastest way i knew how to do this. TODO redo this whole section with better coding perhaps use RegEX / someother database code
 
-        data_filepath = ("/home/qtrobot/catkin_ws/src/musi_care/src/game_assets/music/music_data.txt")
-
+        #data_filepath = ("/home/qtrobot/catkin_ws/src/musi_care/src/game_assets/music/music_data.txt")
+        data_filepath = ("game_assets/music/music_data.txt")
+	
         with open (data_filepath, "r") as database:
             self.music_data = {"easy":{1:{""}}, "medium":{1:{""}}, "hard":{1:{""}}} #Reset data to overwrite it thouroughly
             raw_data = database.read().splitlines()
@@ -255,7 +258,7 @@ class Guess_The_Mood_Game():
         #store default path to music
         
         track_path = os.path.join(self.music_filepath, track_title)
-        
+        print(track_path)
         #Start track
         operation = "start_track"
         song_data = self.call_sound_player(operation, track_path, track_time)
