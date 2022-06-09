@@ -43,10 +43,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/jwaad/catkin_ws/src
+CMAKE_SOURCE_DIR = /home/qtrobot/catkin_ws/src
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/jwaad/catkin_ws/build
+CMAKE_BINARY_DIR = /home/qtrobot/catkin_ws/build
 
 # Utility rule file for rosgraph_msgs_generate_messages_nodejs.
 
@@ -63,10 +63,10 @@ musi_care/CMakeFiles/rosgraph_msgs_generate_messages_nodejs.dir/build: rosgraph_
 .PHONY : musi_care/CMakeFiles/rosgraph_msgs_generate_messages_nodejs.dir/build
 
 musi_care/CMakeFiles/rosgraph_msgs_generate_messages_nodejs.dir/clean:
-	cd /home/jwaad/catkin_ws/build/musi_care && $(CMAKE_COMMAND) -P CMakeFiles/rosgraph_msgs_generate_messages_nodejs.dir/cmake_clean.cmake
+	cd /home/qtrobot/catkin_ws/build/musi_care && $(CMAKE_COMMAND) -P CMakeFiles/rosgraph_msgs_generate_messages_nodejs.dir/cmake_clean.cmake
 .PHONY : musi_care/CMakeFiles/rosgraph_msgs_generate_messages_nodejs.dir/clean
 
 musi_care/CMakeFiles/rosgraph_msgs_generate_messages_nodejs.dir/depend:
-	cd /home/jwaad/catkin_ws/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/jwaad/catkin_ws/src /home/jwaad/catkin_ws/src/musi_care /home/jwaad/catkin_ws/build /home/jwaad/catkin_ws/build/musi_care /home/jwaad/catkin_ws/build/musi_care/CMakeFiles/rosgraph_msgs_generate_messages_nodejs.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/qtrobot/catkin_ws/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/qtrobot/catkin_ws/src /home/qtrobot/catkin_ws/src/musi_care /home/qtrobot/catkin_ws/build /home/qtrobot/catkin_ws/build/musi_care /home/qtrobot/catkin_ws/build/musi_care/CMakeFiles/rosgraph_msgs_generate_messages_nodejs.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : musi_care/CMakeFiles/rosgraph_msgs_generate_messages_nodejs.dir/depend
 

@@ -7,7 +7,7 @@
 # new environment variables
 
 # modified environment variables
-export PATH='/opt/ros/noetic/bin:/home/jwaad/catkin_ws/qt_robot_env/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin'
-export PKG_CONFIG_PATH="/home/jwaad/catkin_ws/devel/lib/pkgconfig:$PKG_CONFIG_PATH"
-export PWD='/home/jwaad/catkin_ws/build'
-export PYTHONPATH="/home/jwaad/catkin_ws/devel/lib/python3/dist-packages:$PYTHONPATH"
+export LD_LIBRARY_PATH="/opt/ros/noetic/lib:/usr/local/lib/nuitrack:/usr/local/lib/"
+export PKG_CONFIG_PATH="/opt/ros/noetic/lib/pkgconfig"
+export PWD="/home/qtrobot/catkin_ws/build"
+export PYTHONPATH="/opt/ros/noetic/lib/python3/dist-packages"

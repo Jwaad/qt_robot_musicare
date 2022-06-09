@@ -43,10 +43,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/jwaad/catkin_ws/src
+CMAKE_SOURCE_DIR = /home/qtrobot/catkin_ws/src
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/jwaad/catkin_ws/build
+CMAKE_BINARY_DIR = /home/qtrobot/catkin_ws/build
 
 # Utility rule file for jwaad_test_gennodejs.
 
@@ -63,10 +63,10 @@ jwaad_test/CMakeFiles/jwaad_test_gennodejs.dir/build: jwaad_test_gennodejs
 .PHONY : jwaad_test/CMakeFiles/jwaad_test_gennodejs.dir/build
 
 jwaad_test/CMakeFiles/jwaad_test_gennodejs.dir/clean:
-	cd /home/jwaad/catkin_ws/build/jwaad_test && $(CMAKE_COMMAND) -P CMakeFiles/jwaad_test_gennodejs.dir/cmake_clean.cmake
+	cd /home/qtrobot/catkin_ws/build/jwaad_test && $(CMAKE_COMMAND) -P CMakeFiles/jwaad_test_gennodejs.dir/cmake_clean.cmake
 .PHONY : jwaad_test/CMakeFiles/jwaad_test_gennodejs.dir/clean
 
 jwaad_test/CMakeFiles/jwaad_test_gennodejs.dir/depend:
-	cd /home/jwaad/catkin_ws/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/jwaad/catkin_ws/src /home/jwaad/catkin_ws/src/jwaad_test /home/jwaad/catkin_ws/build /home/jwaad/catkin_ws/build/jwaad_test /home/jwaad/catkin_ws/build/jwaad_test/CMakeFiles/jwaad_test_gennodejs.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/qtrobot/catkin_ws/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/qtrobot/catkin_ws/src /home/qtrobot/catkin_ws/src/jwaad_test /home/qtrobot/catkin_ws/build /home/qtrobot/catkin_ws/build/jwaad_test /home/qtrobot/catkin_ws/build/jwaad_test/CMakeFiles/jwaad_test_gennodejs.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : jwaad_test/CMakeFiles/jwaad_test_gennodejs.dir/depend
 

@@ -67,14 +67,14 @@ set(musi_care_CONFIG_INCLUDED TRUE)
 
 # set variables for source/devel/install prefixes
 if("FALSE" STREQUAL "TRUE")
-  set(musi_care_SOURCE_PREFIX /home/jwaad/catkin_ws/src/musi_care)
-  set(musi_care_DEVEL_PREFIX /home/jwaad/catkin_ws/devel)
+  set(musi_care_SOURCE_PREFIX /home/qtrobot/catkin_ws/src/musi_care)
+  set(musi_care_DEVEL_PREFIX /home/qtrobot/catkin_ws/devel)
   set(musi_care_INSTALL_PREFIX "")
   set(musi_care_PREFIX ${musi_care_DEVEL_PREFIX})
 else()
   set(musi_care_SOURCE_PREFIX "")
   set(musi_care_DEVEL_PREFIX "")
-  set(musi_care_INSTALL_PREFIX /home/jwaad/catkin_ws/install)
+  set(musi_care_INSTALL_PREFIX /home/qtrobot/catkin_ws/install)
   set(musi_care_PREFIX ${musi_care_INSTALL_PREFIX})
 endif()
 
@@ -154,7 +154,7 @@ foreach(library ${libraries})
     set(lib_path "")
     set(lib "${library}-NOTFOUND")
     # since the path where the library is found is returned we have to iterate over the paths manually
-    foreach(path /home/jwaad/catkin_ws/install/lib;/home/jwaad/catkin_ws/devel/lib;/opt/ros/noetic/lib)
+    foreach(path /home/qtrobot/catkin_ws/install/lib;/home/qtrobot/catkin_ws/devel/lib;/opt/ros/noetic/lib)
       find_library(lib ${library}
         PATHS ${path}
         NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
@@ -211,7 +211,7 @@ foreach(depend ${depends})
   _unpack_libraries_with_build_configuration(musi_care_LIBRARIES ${musi_care_LIBRARIES})
 
   _list_append_unique(musi_care_LIBRARY_DIRS ${${musi_care_dep}_LIBRARY_DIRS})
-  _list_append_deduplicate(musi_care_EXPORTED_TARGETS ${${musi_care_dep}_EXPORTED_TARGETS})
+  list(APPEND musi_care_EXPORTED_TARGETS ${${musi_care_dep}_EXPORTED_TARGETS})
 endforeach()
 
 set(pkg_cfg_extras "musi_care-msg-extras.cmake")

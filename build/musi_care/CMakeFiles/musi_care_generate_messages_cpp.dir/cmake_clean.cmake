@@ -1,7 +1,7 @@
 file(REMOVE_RECURSE
-  "/home/jwaad/catkin_ws/devel/include/musi_care/SongData.h"
-  "/home/jwaad/catkin_ws/devel/include/musi_care/qt_command.h"
-  "/home/jwaad/catkin_ws/devel/include/musi_care/sound_player_srv.h"
+  "/home/qtrobot/catkin_ws/devel/include/musi_care/SongData.h"
+  "/home/qtrobot/catkin_ws/devel/include/musi_care/qt_command.h"
+  "/home/qtrobot/catkin_ws/devel/include/musi_care/sound_player_srv.h"
   "CMakeFiles/musi_care_generate_messages_cpp"
 )
 
