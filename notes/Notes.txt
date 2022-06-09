@@ -1,0 +1,102 @@
+GENERAL NOTES
+
+access key for this robot:
+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
+
+The QTPC is this PC that im using now, which is connected to the screen, the internal computer is called the QTRP
+
+QT does not need to be on while this pc is, it just needs to be powered, who knew...
+To shut down both pc's use this command in the QTRP (Not the QTPC)
+sudo shutdown
+
+QT wifi password: 11111111
+(8 1's)
+
+To shut down:
+ssh into qtrc: ssh 192.168.100.1
+do this command: sudo poweroff
+
+To make QT say my name: Jay-Vard
+QT inner bot (Ros master): 192.168.100.1
+QT This pc (Ros slave): 192.168.100.2
+
+QT DOCS:
+docs.luxai.com/user-manual/
+
+Web control panel:
+Firstly: Ensure you're connected to QTRP wifi
+QTROBOT: http://192.168.100.1:8080 or http://qtrobot into browser
+QTPC: http://192.168.100.2:8080
+Then use username and password qtrobot
+
+You can run code on QT startup.
+This can be done by adding line A (below) in the file "autostart_screens.sh" @~/robot/autostart
+You do this from the web control panel
+A. run_script "name_of_script.sh"
+
+location of some services:
+cd ~/robot/code/software/headers/include/qt_robot_interface
+
+QTRP's host ip
+http://192.168.100.1:11311
+
+
+-----------------------------------------------------------------------------
+ROS / UBUNTU CHEAT SHEET:
+
+Admin Commands:
+    roslaunch package_name launchfile_name.launch
+    roscore_ start roscore
+    cd ~/ then gedit .bashrc    
+Nodes:
+    rosnode list
+    rosrun node_name
+Topics:
+    rostopic list
+    rostopic echo topic_name
+Services:
+    rosservice list
+    rosservice call service_name message_type message_format 
+Workspace:
+Package:
+    To make a package in the already existing catkin workspace:
+        1. go to catkin_ws/src
+        2. catkin_create_pkg package_name dependancy_1 dependancy_2 ... dependancy_n
+        3. go back to work space directory. ("cd ../")
+        4. catkin_make (to initialise and create pathways to relevant files)
+Making a node:
+    if the node is a python node have this line at the top:
+    
+
+Useful commandline commands:
+rosservice call /qt_robot/speech/say "message: 'Hello, eim QT'"
+rosservice call /qt_robot/setting/setVolume "volume: 60"
+    
+-----------------------------------------------------------------------------
+Process to get face tracking on. (launch file and autostart.sh files coming soon)
+rosrun musi-care face_offsets_publisher      #Publishes offsets
+rosrun jwaad_test FaceLockOnActionServer.py  #Launches action server, that corrects for error
+
+
+OPTIONAL:
+rostopic echo /face_track_offsets            #echo offsets to confirm that face_offsets_publisher is working
+
+-----------------------------------------------------------------------------
+For the respeaker app that lets us access the robots mic:
+
+since the app was made for python3, but our qtrp uses python2, we have to use a python3 virtual env. To download and work in that virtual env, we 1st source it in a terminal, using:
+source ~/.venv/bin/activate
+WE also need to do this for the files that need the env.
+
+
+temp
+#!/usr/bin/env python3
+export PYTHONPATH="${PYTHONPATH}:/home/qtrobot/catkin_ws/devel/lib/python3/dist-packages";
+export PYTHONPATH="${PYTHONPATH}:/home/qtrobot/catkin_ws/devel/lib/python2.7/dist-packages";
+
+-----------------------------------------------------------------------------
+
+i installed flask using "python3 -m pip install flask-socketio"
+
+
+

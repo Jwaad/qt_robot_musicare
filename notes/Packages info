@@ -1,0 +1,96 @@
+#Read this file as a yaml for nicer formatting
+
+Launch nuitrack at 2fps
+roslaunch qt_nuitrack_app qt_nuitrack_app.launch 
+
+Launch custom nuitrack at 30fps
+roslaunch qt_nuitrack_app qt_high_frames_nuitrack_app.launch
+
+----------
+
+jwaad_test nodes:
+Test code and nodes go in this package, they are then cleaned up and copied into musi-care to be finalised
+
+#camera_feed:
+Subscribe to camera feed topic and use cv2 to display it. No cv2 annotations.
+
+#control_qt_head:
+Use keyboard inputs to manually move the qt_head
+
+#functionality_test: 
+Tests key functionality to ensure the robot is properly online. UNFINISHED currently only test tts, emotion display and qt_arms
+
+#FaceLockOnActionServer.py:
+Action server. This takes a goal and performs actions until that goal is complete.
+This node specifically tries to lock onto a face when asked by an action client.
+
+#face_lock_on_action_client.py:
+Send a task to the action server to be completed
+
+#publish_nuitrack_data:
+Subscribes to nuitrack face recognition and draws on it, before publishing the new image. Also says "hello" when sees a new person. and "bye" when they are off camera.
+
+#subscribe_to_nuitrack_feed:
+Subscribes to the above node and displays the image
+
+jwaad_test launch files:
+
+#simple_face_track_example.launch
+Launches nodes - publish_nuitrack_data and subscribe_to_nuitrack_feed.
+This launch file displays all the nice nuitrack data in a cv2 display window.
+
+#action_server.launch
+Launches musi-care face_offsets_publisher and then jwaad_test FaceLockOnActionServer.py 
+Additionaly also launches musi-care qt_head_status_pub which tells the program when the movements are done.
+
+jwaad_test msgs and srv:
+
+#srvs
+No srv's exist in this package
+
+#messages
+face_lock_on msgs exist.
+components of msg
+
+----------
+musi_care nodes:
+The real code, this should be neat, but sometimes it's more convinient to have test code in here.
+
+#face_offsets_publisher:
+subscribes to nuitrack and camera feed to calculate the pixel distances from the center of the camera to the center of a person's face and publishes them (the offsets). This program now also checks how far the face is from the center, and acts as an action client to turn on the face tracking.
+
+#qt_head_status_pub:
+Publishes either true of false depending on qt_head activity. 
+
+#qt_control_node:
+Ros service (server) that takes specific string inputs, processes them and does the appropriate action in accordance. ie; "qt_expression_happy" would make qt show a happy expession. handles all the blocking and none blocking methods of performing actions. data type - action_type = 'emote', action_content = 'happy', action_blocking = 'true'.
+
+#guess_tone_game:
+1st QT game, made in pygame. Game where QT will play a snippet of a song, and then will give the user a prompt, to select the correct genre.
+
+#sound_player
+service that takes string input of what file to play, and plays that file, also is able of pausing, stopping, changing linux master volume. Is also a node that publishes the song info.
+
+musi_care launch files:
+
+#guess_tone_game.launch:
+launches qt_control_node, the game and the sound_player.
+
+music_care msgs and srvs:
+
+#srv
+srv for service "qt_control_node" exists.
+used to give commands to QT through this service
+data ( action_type = "", action_content = "", action_blocking = bool)
+rossrv show musi_care/qt_command
+
+#msgs
+msg for node "sound_player exists.
+used to publish information to other nodes in a neater fashion.
+data ( song_title = "", total_track_time = float, track_elapsed_time = float)
+rosmsg show musi_care/SongData
+
+
+
+
+

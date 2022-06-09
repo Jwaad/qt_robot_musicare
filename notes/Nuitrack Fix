@@ -1,0 +1,24 @@
+#This file is best viewed as a YAML (if viewed in gedit)
+Steps to update nuitrack:
+Nuitrack is only on the QTPC.
+
+1. Delete old nuitrack:
+    cd into ~/catkin_ws/devel/lib/qt_nuitrack_app
+    sudo rm *
+
+2. Download new nuitrack:
+    wget https://github.com/3DiVi/nuitrack-sdk/raw/master/Platforms/nuitrack-ubuntu-amd64.deb
+
+3. Install the package:
+    sudo dpkg -i nuitrack-ubuntu-amd64.deb
+
+4. Rebuild workspace:
+    cd into ~/catkin_ws 
+    catkin_make -j4
+    
+5. Check success with:
+    apt list nuitrack -a
+    The result should be something like
+        nuitrack/now 0.35.1 amd64 [installed,local]
+
+

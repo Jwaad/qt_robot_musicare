@@ -1,0 +1,46 @@
+Problems you might encounter:
+
+
+1. Standby mode - QTPC goes on standby
+    the password for QTPC is qtrobot
+    
+    
+2. mdx-1 login not working:
+    The login may be
+        user: qtrobot 
+        pass: qtrobot
+    
+    
+3. Keyboard and mouse not working:
+    A.  Replug the USB hubs's USB-C connection and flip it / rotate it 180degrees
+    B.  IF that doesnt work... It seems to work best with everything disconnected
+        Then power on the QT robot
+        After that plug in the USB hub (Make sure there's nothing connected to it yet)
+        Once that's fully plugged in, then plug in the rest of the peripheral devices starting with the HDMI
+        
+        
+4. Sometimes randomly and other times if you leave it on too long and on it's own, QTPC will freeze:
+    A.  It usually works to just hit the off button on the qtrobot to standby / off the robot. Once the robot turns off, the QTPC will unfreeze. 
+        Turning the QTROBOT back on after that will cause the rosnodes to reinitialise and automatically reconnect.
+    B.  If that didnt work, try holding the power button to turn off the QT robot, once it reboots, it should work, try not to resorting to pulling the plug 
+        (not that you needed me to tell you that).
+    
+
+5.  Head moves right, then down, then right, then down... etc when telling it to only move right
+        I got pitch and yaw backwards..., This meant, i was reading pitch, and changing yaw
+
+
+6. No idea why, but to move the head upwards, a small increment of 1 degree doesn't work, even though it works fine for all other directional movements.
+        move in increments of 5 degrees or more when moving head upwards
+        
+        
+7. Sometimes (Especially when things freeze), the hardware will desync or something similar, and they will still be readable in a rostopic list, but they will not actually output anything.
+        You just have to do full restart in this situation, i dont know how to restart the auto start of QT, this would also fix the problem i believe 
+       
+        
+8. Rerunning autostart.sh - Instead of restarting, we can reinitialise nodes that turn on, on startup by doing the following process:
+        CD into ~/robot/autostart
+        run the command ./autostart_screens.sh
+        
+9. Camera doesnt work while nuitrack is off:
+        qt_nuitrack is actually what publishes the camera feed, so if you dont want that running, youll have to make your own camera publisher node.

@@ -1,0 +1,11 @@
+to change motor freq:
+
+on qtrp (ssh qtrp)
+    cd /opt/ros/kinetic/share/qt_motor/config
+    sudo nano qtrobot-controller.yaml
+            change publish rate from 2 (2x per second) to 30 or 60
+            
+            
+            
+http://192.168.100.1:11311
+

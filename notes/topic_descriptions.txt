@@ -1,0 +1,36 @@
+/client_count:
+    Increases by 1 every time a game is run from the app
+
+/connected_clients:
+    ERROR: Cannot load message class for [rosbridge_msgs/ConnectedClients]. Are your messages built?
+    
+/kid_tablet_images:
+    blank
+
+/kid_tablet_images:
+    blank
+    
+/robAPL_input_events:
+    blank
+
+/robAPL_input_game:
+    ERROR: Cannot load message class for [test_send_blob/GameMessage]. Are your messages built?
+
+/rosout_agg:
+    header: 
+      seq: 129
+      stamp: 
+        secs: 1614539232
+        nsecs: 800652980
+      frame_id: ''
+    level: 2
+    name: "/rosbridge_websocket"
+    msg: "[Client 10] Advertised service /educator_app/request."
+    file: "protocol.py"
+    function: "log"
+    line: 390
+    topics: 
+      - /client_coun
+      - /rosout
+      - /connected_clients
+
