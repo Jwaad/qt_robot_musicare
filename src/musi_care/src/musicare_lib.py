@@ -24,8 +24,7 @@ class AnimationManager():
         self.start_animation_time = rospy.get_time()
         self.animation_location = mouse_pos
         self.play_touch_animation = True
-        
-        
+
     def DrawTouchAnimation(self, window):
         """Handle / play animation """
         if self.play_touch_animation:
@@ -41,7 +40,6 @@ class AnimationManager():
                 self.pygame.draw.circle(window, self.colour, self.animation_location, self.circle_radius, self.border_width) 
             else:
                 self.play_touch_animation = False
-  
    
 
 class TimeFunctions():
@@ -70,7 +68,6 @@ class TimeFunctions():
     def GetTimers(self):
         return self.timers #return the timer list
         
-    
 
 class Button():
     """
@@ -111,4 +108,223 @@ class Button():
                 return False   
         else:
             return False 
+            
+
+class ToggleButton():
+    """Class to load images that serve as buttons """
+
+    def __init__(self, image_path, toggled_image_path, x_y_locations, pygame, scale=1, return_info="", when_toggle_on=object, when_toggle_off=object):
+        self.pygame = pygame
+        raw_image = self.pygame.image.load(image_path).convert_alpha()
+        toggled_raw_image = self.pygame.image.load(toggled_image_path).convert_alpha()
+        img_x = x_y_locations[0]
+        img_y = x_y_locations[1]
+        img_w = int(raw_image.get_width()*scale)
+        img_h = int(raw_image.get_height()*scale)
+        
+        scaled_size = (img_w, img_h)
+        self.image = self.pygame.transform.scale(raw_image, scaled_size)
+        self.toggled_image = self.pygame.transform.scale(toggled_raw_image, scaled_size)
+        self.rect = self.pygame.Rect(img_x,img_y,img_w,img_h) 
+        self.highlighted = False
+        self.block = False 
+        self.return_info = return_info
+        self.toggle = False
+        self.when_toggle_on = when_toggle_on
+        self.when_toggle_off = when_toggle_off
+
+    def render(self, screen):  
+        """Draw image onto screen"""
+        if self.toggle or self.block:   #TODO, change the functionality of self.block to automatically greyscale these images and disable clicks
+            screen.blit(self.toggled_image, self.rect)
+        else:
+            screen.blit(self.image, self.rect)
+        return screen
+
+    def store_info(self, info):
+        """Stores info into correct attribute """
+        self.return_info = info
+    
+    def toggle_toggle(self):
+        """Toggles the function 'self.toggle' """
+        self.toggle = not self.toggle
+        if self.toggle:
+            self.when_toggle_on()
+        else:
+            self.when_toggle_off()
+        
+        return (self.toggle)
+    
+    def get_event(self, event, mouse_pos):
+        """Button event handle, if mouse release, then toggle"""
+        if not self.block:
+            mouse_on_button = self.rect.collidepoint(mouse_pos)
+            if mouse_on_button:
+                if event.type == self.pygame.MOUSEBUTTONUP:
+                    return self.toggle_toggle()
+            return self.toggle
+
+
+class DragableButton():
+    """Class to load images that serve as buttons that can be dragged and dropped """
+    
+    def __init__(self, image_path, toggled_image_path, x_y_locations, pygame, scale=1, return_info="", when_toggle_on=object, when_toggle_off=object):
+        self.pygame = pygame
+        raw_image = self.pygame.image.load(image_path).convert_alpha()
+        toggled_raw_image = self.pygame.image.load(toggled_image_path).convert_alpha()
+        img_x = x_y_locations[0]
+        img_y = x_y_locations[1]
+        self.img_w = int(raw_image.get_width()*scale)
+        self.img_h = int(raw_image.get_height()*scale)
+        
+        scaled_size = (self.img_w*scale, self.img_h*scale)
+        self.image = self.pygame.transform.scale(raw_image, scaled_size)
+        self.toggled_image = self.pygame.transform.scale(toggled_raw_image, scaled_size)
+        self.rect = self.pygame.Rect(img_x,img_y,self.img_w,self.img_h) 
+        self.highlighted = False
+        self.block = False 
+        self.return_info = return_info
+        self.toggle = False
+        self.when_toggle_on = when_toggle_on
+        self.when_toggle_off = when_toggle_off
+        self.mouse_is_held = False
+
+    def render(self, screen):  
+        """Draw image onto screen"""
+        if self.toggle or self.block:   #TODO, change the functionality of self.block to automatically greyscale these images and disable clicks
+            screen.blit(self.toggled_image, self.rect)
+        else:
+            screen.blit(self.image, self.rect)
+        return screen
+
+    def store_info(self, info):
+        """Stores info into correct attribute """
+        self.return_info = info
+    
+    def toggle_toggle(self):
+        """Toggles the function 'self.toggle' """
+        self.toggle = not self.toggle
+        if self.toggle:
+            self.when_toggle_on()
+        else:
+            self.when_toggle_off()
+        
+        return (self.toggle)
+    
+    def get_event(self, event, mouse_pos):
+        """Button event handle, if mouse release, then toggle"""
+        if not self.block:
+            mouse_on_button = self.rect.collidepoint(mouse_pos)
+            if mouse_on_button:
+                if event.type == self.pygame.MOUSEBUTTONDOWN and not self.mouse_is_held:
+                    self.mouse_is_held = True #only triggers the 1st time the mouse is down
+                    self.initial_pos = mouse_pos
+                if self.mouse_is_held:
+                    if event.type == self.pygame.MOUSEBUTTONUP and mouse_pos == self.initial_pos:
+                        self.mouse_is_held = False
+                        return self.toggle_toggle(), self.rect
+                    elif event.type == self.pygame.MOUSEBUTTONUP and mouse_pos != self.initial_pos:
+                        self.mouse_is_held = False #mouse was released somewhere else
+                    else:
+                        self.rect.x = mouse_pos[0] - self.img_w/2
+                        self.rect.y = mouse_pos[1] - self.img_h/2
+            
+            return self.toggle, self.rect
+            
+
+class HorizontalSlider():
+    """Class to handle all functions of the horizontal sliders"""
+    def __init__(self, image_path_slider, image_path_cursor, x_y_locations, slider_scale=1, cursor_scale=1, on_click=object, on_release=object):
+        #init slider
+        raw_slider_image = pygame.image.load(image_path_slider).convert_alpha()
+        img_x = x_y_locations[0]
+        img_y = x_y_locations[1]
+        slider_img_w = int(raw_slider_image.get_width()*slider_scale)
+        slider_img_h = int(raw_slider_image.get_height()*slider_scale)
+        scaled_size = (slider_img_w, slider_img_h)
+        self.slider_image = pygame.transform.scale(raw_slider_image, scaled_size)
+        self.slider_rect = pygame.Rect(img_x,img_y,slider_img_w,slider_img_h)
+        
+        #init cursor
+        raw_cursor_image = pygame.image.load(image_path_cursor).convert_alpha()
+        cursor_img_w = int(raw_cursor_image.get_width()*cursor_scale)
+        cursor_img_h = int(raw_cursor_image.get_height()*cursor_scale)
+        self.half_cursor_height = cursor_img_h/2
+        scaled_size = (cursor_img_w, cursor_img_h)
+        self.cursor_image = pygame.transform.scale(raw_cursor_image, scaled_size)
+        self.cursor_rect = pygame.Rect(img_x,img_y,cursor_img_w,cursor_img_h) 
+        
+        #init variables
+        self.slider_being_held = False
+        self.bar_overwrite = 0.0
+        self.slider_len = 1080 #total pixel length that the bar should extend to at the end of the track
+        slider_min = 161 #starting point of red bar (pixel_x)
+        slider_max = slider_min + self.slider_len #ending point of max red bar pixel X location of slider end point
+        self.slider_range = (slider_min, slider_max) #min and max including space to left of bar
+        self.on_click = on_click
+        self.on_release = on_release
+    
+    
+    def render(self, screen, progress):
+        """Draw slider, cursor and progress bar onto screen """
+        screen.blit(self.slider_image, self.slider_rect)
+        self.draw_progress_bar(screen, progress)
+        self.draw_cursor(screen)
+                
+                
+    def draw_progress_bar(self, screen, progress):
+        """Uses a percentage to colour the completed relevant of the slider in red"""
+        complete_bar_width = self.slider_len
+        bar_height = 57
+        bar_x = 160
+        bar_y = self.slider_range[0]
+        if self.slider_being_held:
+            bar_width = complete_bar_width*self.bar_overwrite #If the user is moving the slider, display their new slider 
+        else:
+            bar_width = complete_bar_width*progress
+        
+        self.cursor_y = bar_width + bar_y
+        self.red_bar = pygame.draw.rect(screen, (255,0,0), pygame.Rect((bar_x,bar_y), (bar_width, bar_height)))
+        
+        
+    def draw_cursor(self, screen):
+        """uses progress to move cursor to where it should be. THIS SHOULD ALWAYS BE AFTER 'draw_progress_bar()' """
+        cursor_x = 160 + int(self.half_cursor_height) - 10
+        self.cursor_rect.center = (self.cursor_y, cursor_x)
+        screen.blit(self.cursor_image, self.cursor_rect) 
+    
+    
+    def get_event(self, event, mouse_pos, track_info=["", 0.0, 999]): #track info = title, elapsed_time, total_time
+        """handle events """
+        mouse_on_cursor = self.cursor_rect.collidepoint(mouse_pos)
+        mouse_x = mouse_pos[0]
+        
+        #Once slider is grabbed
+        if event.type == pygame.MOUSEBUTTONDOWN and mouse_on_cursor:
+            self.on_click()
+            if self.slider_range[0] < mouse_x < self.slider_range[1]:
+                self.slider_being_held = True
+                
+        #Once slider is released
+        if event.type == pygame.MOUSEBUTTONUP and self.slider_being_held:
+            #expand track_info
+            track_title = track_info[0]
+            track_time = track_info[1]
+            track_total_time = track_info[2]
+            
+            time_to_start = track_total_time * self.bar_overwrite # get overwrite in secs
+            
+            self.on_release(track_title, time_to_start)
+            
+            self.slider_being_held = False
+            self.bar_overwrite = 2.0 #  reset slider overwrite. Use a weird number, as this should only occur if i've made a coding error.
+            
+        #While slider is being dragged
+        if self.slider_being_held: #If the user is dragging the cursor
+            if self.slider_range[0] < mouse_x < self.slider_range[1]:                   #If mouse x within slider x range
+                self.bar_overwrite = (mouse_x - self.slider_range[0])/self.slider_len   #Get percentage of where mouse is compared to len of bar
+            elif mouse_x > self.slider_range[1]:
+                self.bar_overwrite = 1.0 #Don't let cursor move past slider bar
+            elif mouse_x < self.slider_range[0]:
+                self.bar_overwrite = 0.0 #Don't let cursor move past slider bar
 

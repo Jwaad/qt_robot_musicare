@@ -18,8 +18,8 @@ class Guess_The_Mood_Game():
 	""" Class to generate and handle guess the mood game """
 	
 	def __init__(self):
-	"""Initialise with no parameters """
-
+	    """Initialise"""
+                   
 
 
 
