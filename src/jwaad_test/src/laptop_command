@@ -1,0 +1,170 @@
+#!/usr/bin/env python
+#File to mimic the interface of command node, so that we dont need robot on to code and test code.
+
+import rospy
+import time
+from musi_care.srv import qt_command
+#from qt_robot_interface.srv import * #so we can use the qt service srvs
+#from qt_gesture_controller.srv import * # #so we can use the service srv "gesture_play" 
+from std_msgs.msg import String #so we can become a publisher and publish a string to the QT node that handles tts.
+
+#NEW COMMANDS NEED ONLY BE ADDED HERE. NO WHERE ELSE: 
+#Emotes
+emote_dict ={   #Format= {"label":"what luxAI called the emotion"}
+"happy":"QT/showing_smile",
+"grin":"QT/happy",
+"angry":"QT/angry",
+"talking": "QT/talking",
+"sad":"QT/sad"
+} 
+
+#Gestures
+gesture_dict = {
+"happy":"QT/emotions/happy",
+"wave": "QT/bye",   #Qt uses right arm to wave
+"angry":"QT/angry", #Qt 
+"placeholder":"QT/placeholder",
+"explain_right":"QT/show_right",
+"shake_head":"musi_care/shake_head",
+"nod":"musi_care/nod",
+"clap":"QT/clapping",
+"arms_up":"QT/hands-up",
+"look_around":"QT/bored"
+}
+
+#Create publishers
+gesture_pub = rospy.Publisher('/qt_robot/gesture/play', String, queue_size=10)
+emote_pub = rospy.Publisher('/qt_robot/emotion/show', String, queue_size=10)
+speechSay_pub = rospy.Publisher('/qt_robot/speech/say', String, queue_size=10)
+
+def execute_command(data):
+    "uses the input to check within a list of things to see which sequence we should perform"
+    #---GENERIC---
+    action_type = data.action_type
+    action_content = data.action_content
+    action_blocking = data.action_blocking
+    #---GESTURE---
+    if action_type == "gesture": #/qt_robot/gesture/play
+        rospy.loginfo("Received a Gesture request.")
+        qt_gesture_id = gesture_dict[action_content] #the emote we want, retrieved from the dict.
+        if action_content in gesture_dict: #Check if the given command is one we have added or not
+            if action_blocking:
+                rospy.wait_for_service('/qt_robot/gesture/play')
+                qt_gesture = rospy.ServiceProxy('/qt_robot/gesture/play', gesture_play)
+                name = qt_gesture_id
+                speed = 1.0 # the default (the speed gesture were recorded at)
+                qt_gesture_play = qt_gesture(name, speed)
+                rospy.loginfo("Finished requested Gesture")
+                pass
+            else: #nonblocking gesture   
+                #gesture_pub.publish(qt_gesture_id)
+                rospy.loginfo("Finished requested Gesture")
+        else:
+            rospy.loginfo("You have entered in an unknown Gesture")
+            #NOTE: Add some error handling here
+    #---EMOTE---
+    elif action_type == "emote":
+        rospy.loginfo("Received an Emote request.")
+        qt_emote_id = emote_dict[action_content] #the emote we want, retrieved from the library.
+        if action_content in emote_dict: #Check if the given command is one we have added or not
+            if action_blocking: #blocking emote
+                rospy.wait_for_service('/qt_robot/emotion/show') #The Service Type / class: emotion_show
+                qt_emote = rospy.ServiceProxy('/qt_robot/emotion/show', emotion_show)
+                qt_emote = qt_emote(qt_emote_id)
+                rospy.loginfo("Finished requested Emote")
+                pass
+            else:               #nonblocking emote    
+                #emote_pub.publish(qt_emote_id)
+                rospy.loginfo("Finished requested Emote")
+        else:
+            rospy.loginfo("You have entered in an unknown Emote")
+            #NOTE: Add some error handling here
+    #---OTHER---
+    elif action_type == "other":
+        #ADD A STOP FUNCTION. ALL THE SERVICES HAVE A "/stop", so we can add in bools which tell us what communication we're in, and stop accordingly.
+        #some unique actions that aren't numerous enough to have their own categories (such as a single clap)
+        pass
+    #---SETTINGS---
+    elif action_type == "settings":
+        #Code that checks what setting they want changed ie: action_content = volume20 (Code could keyword search for "volume", "motorspeed" etc, then the only remaining text should be the numeric goal change ie 20, from "volume20" )
+        pass
+    #---ERROR HANDLING---
+    else:
+        print("WARNING: An unknown action type was entered.") # Make this all fancy and yellow coloured
+        #exit callback but dont close node (Maybe put a try in the "wait_for_command" and then an error handle here)
+   
+
+def perform_command(message):
+    "Callback response, it is really just to help the flow of the code, also handles tts."
+    if message.action_type == "tts":  #If we get a TTS request then handle it upfront, it need not be searched for.
+        if message.action_blocking:
+            rospy.wait_for_service('/qt_robot/speech/say')
+            qt_speech = rospy.ServiceProxy('/qt_robot/speech/say', speech_say) #The Service Type / class: speech_say
+            qt_say = qt_speech(message.action_content)
+            rospy.loginfo("Finished requested TTS message")
+            return True
+        else:
+            #speechSay_pub.publish(message.action_content)
+            rospy.loginfo("Finished requested TTS message")
+            return True
+    else:
+        executed_command = execute_command(message)
+        return True
+
+
+def wait_for_command():
+    """main code that runs and waits for a message """
+    rospy.init_node('qt_command_node')
+    rospy.loginfo("QT Command Node has been launched")
+    s = rospy.Service('qt_command_service', qt_command, perform_command) 
+    rospy.spin() #Keep code running
+    
+    
+if __name__ == "__main__":
+    wait_for_command()
+    
+
+##FULL LIST OF EMOTES(17/06/2021): ~/robot/data/emotions/QT
+#--EMOTES--EMOTES--EMOTES--EMOTES--EMOTES--EMOTES--EMOTES--EMOTES--EMOTES--EMOTES--EMOTES--EMOTES--
+"""
+PUT QT/ INFRONT OF ALL OF THESE
+afraid.avi                     confused.avi         happy_blinking.avi           showing_smile.avi
+angry.avi                      cry.avi              kiss.avi                     shy.avi
+blowing_raspberry.avi          dirty_face.avi       neutral.avi                  surprise.avi
+breathing_exercise.avi         dirty_face_sad.avi   neutral_state_blinking.avi   talking.avi
+brushing_teeth.avi             dirty_face_wash.avi  one_eye_wink.avi             with_a_cold.avi
+brushing_teeth_foam.avi        dirty_teeth.avi      puffing_the_chredo_eeks.avi  with_a_cold_cleaning_nose.avi
+calmig_down_exercise_nose.avi  disgusted.avi        sad.avi                      with_a_cold_sneezing.avi
+calming_down.avi               happy.avi            scream.avi                   yawn.avi
+"""
+
+
+##FULL LIST OF GESTURES (17/06/2021): 17/06/2021
+#--GESTURES--GESTURES--GESTURES--GESTURES--GESTURES--GESTURES--GESTURES--GESTURES--GESTURES--GESTURES--
+"""
+PUT QT/ INFRONT OF ALL OF THESE
+angry.xml               clapping.xml  imitation          peekaboo.xml           Show-face.xml    surprise.xml         up_left.xml
+bored.xml               Dance         kiss.xml           personal-distance.xml  show_left.xml    swipe_left.xml       up_right.xml
+breathing_exercise.xml  drink.xml     monkey.xml         point_front.xml        show_QT.xml      swipe_right.xml      yawn.xml
+bye-bye.xml             emotions      neutral.xml        Pretend-play           show_right.xml   touch-head-back.xml
+bye.xml                 happy.xml     one-arm-up.xml     sad.xml                show_tablet.xml  touch-head.xml
+challenge.xml           hi.xml        peekaboo-back.xml  send_kiss.xml          sneezing.xml     train.xml
+
+PUT QT/emotions INFRONT OF ALL OF THESE
+afraid.xml  angry.xml  calm.xml  disgusted.xml  happy.xml  hoora.xml  sad.xml  shy.xml  surprised.xml
+
+PUT QT/Dance INFRONT OF ALL OF THESE
+Dance-1-1.xml  Dance-1-3.xml  Dance-2-1.xml  Dance-2-3.xml  Dance-3-1.xml  Dance-3-3.xml  Dance-4-2.xml  Dance-4-4.xml  Dance-4-6.xml
+Dance-1-2.xml  Dance-1-4.xml  Dance-2-2.xml  Dance-2-4.xml  Dance-3-2.xml  Dance-4-1.xml  Dance-4-3.xml  Dance-4-5.xml
+
+PUT QT/Pretend-play INFRONT OF ALL OF THESE
+Beeping.xml  Beep.xml  Drive.xml  Driving.xml  Fly.xml  Phone_call.xml
+
+PUT QT/imitation INFRONT OF ALL OF THESE
+hands-on-belly-back.xml  hands-on-head-back.xml  hands-on-hip-back.xml  hands-side-back.xml  hands-up-back.xml  head-right-left.xml
+hands-on-belly.xml       hands-on-head.xml       hands-on-hip.xml       hands-side.xml       hands-up.xml       nodding-yes.xml
+
+PUT musi_care/ INFRONT OF ALL OF THESE
+nod.xml
+"""
+
