@@ -66,9 +66,9 @@ class PlayAudio():
         total_time = song_data_temp.track_total_time
         #---LOAD DATA---
         if  data.operation == "load_track":
-            rospy.loginfo("Recieved request to load track")
+            rospy.loginfo("Sound Player: Recieved request to load track")
             if self.currently_streaming: #end the current playing track
-                rospy.loginfo("Ending current track to load new track")
+                rospy.loginfo("Sound Player: Ending current track to load new track")
                 self.end_audio_steam()
                 self.currently_streaming = False
             this_path = os.path.dirname(os.path.abspath(__file__)) # path to this file
@@ -79,19 +79,19 @@ class PlayAudio():
             file_path_valid = self.check_valid_filepath(file_path)
             if file_path_valid:
                 self.file_path = file_path
-                rospy.loginfo("File path to audio confirmed")
+                rospy.loginfo("Sound Player: File path to audio confirmed")
                 self.track_title = file_path
                 self.paused=True
                 self.call_back_triggered = True
                 return track_title, elapsed_time, total_time, True
             else:
-                rospy.loginfo("\033[1;33;1mCould not find requested file. \033[0m")
+                rospy.loginfo("\033[1;33;1mSound Player: Could not find requested file. \033[0m")
                 return track_title, elapsed_time, total_time, False
         #---START TRACK---
         elif data.operation == "start_track":
-            rospy.loginfo("Recieved request to start track")
+            rospy.loginfo("Sound Player: Recieved request to start track")
             if self.currently_streaming: #end the current playing track
-                rospy.loginfo("Ending current track to play new track")
+                rospy.loginfo("Sound Player: Ending current track to play new track")
                 self.end_audio_steam()
                 self.currently_streaming = False
             this_path = os.path.dirname(os.path.abspath(__file__)) # path to this file
@@ -102,46 +102,46 @@ class PlayAudio():
             file_path_valid = self.check_valid_filepath(file_path)
             if file_path_valid:
                 self.file_path = file_path
-                rospy.loginfo("File path to audio confirmed")
+                rospy.loginfo("Sound Player: File path to audio confirmed")
                 self.track_title = file_path
                 self.paused=False
                 self.call_back_triggered = True
                 return track_title, elapsed_time, total_time, True
             else:
-                rospy.loginfo("\033[1;33;1mCould not find requested file. \033[0m")
+                rospy.loginfo("\033[1;33;1mSound Player: Could not find requested file. \033[0m")
                 return track_title, elapsed_time, total_time, False
         #---PAUSE / RESUME TRACK---
         elif data.operation == "pause_resume":
-            rospy.loginfo("Recieved request to pause / resume track")
+            rospy.loginfo("Sound Player: Recieved request to pause / resume track")
             if self.currently_streaming:
                 self.pause_resume()
             else:
-                rospy.loginfo("\033[1;33;1mInvalid pause request, not currently streaming \033[0m")
+                rospy.loginfo("\033[1;33;1mSound Player: Invalid pause request, not currently streaming \033[0m")
                 return track_title, elapsed_time, total_time, False
         #---PAUSE TRACK---
         elif data.operation == "pause":
-            rospy.loginfo("Recieved request to pause track")
+            rospy.loginfo("Sound Player: Recieved request to pause track")
             if self.currently_streaming and not self.paused: #only attempt to pause if it's not already paused
                 self.pause_resume()
             else:
-                rospy.loginfo("\033[1;33;1mInvalid pause request \033[0m")
+                rospy.loginfo("\033[1;33;1mSound Player: Invalid pause request \033[0m")
                 return track_title, elapsed_time, total_time, False
         #---RESUME TRACK---
         elif data.operation == "resume":
-            rospy.loginfo("Recieved request to resume track")
+            rospy.loginfo("Sound Player: Recieved request to resume track")
             if self.currently_streaming and self.paused: #only attempt to pause if it's not already paused
                 self.pause_resume()
             else:
-                rospy.loginfo("\033[1;33;1mInvalid resume request \033[0m")
+                rospy.loginfo("\033[1;33;1mSound Player: Invalid resume request \033[0m")
                 return track_title, elapsed_time, total_time, False
         #---STOP TRACK---
         elif data.operation == "stop_track":
-            rospy.loginfo("Recieved request to stop track")
+            rospy.loginfo("Sound Player: Recieved request to stop track")
             if self.currently_streaming:
                 self.end_audio_steam()
                 return track_title, elapsed_time, total_time, True
             else:
-                rospy.loginfo("\033[1;33;1mInvalid stop request, not currently streaming \033[0m")
+                rospy.loginfo("\033[1;33;1mSound Player: Invalid stop request, not currently streaming \033[0m")
                 return track_title, elapsed_time, total_time, False
         #---CHANGE MASTER VOLUME---
         elif data.operation == "volume":
@@ -150,14 +150,14 @@ class PlayAudio():
                 call(["amixer", "-D", "pulse", "sset", "Master", str(volume)+"%"])
                 return track_title, elapsed_time, total_time, True
             else:
-                rospy.loginfo("\033[1;33;1mVolume greater than 100 or less than 0 entered \033[0m")
+                rospy.loginfo("\033[1;33;1mSound Player: Volume greater than 100 or less than 0 entered \033[0m")
                 return track_title, elapsed_time, total_time, False
         #---RETURN DATA---
         elif data.operation == "request_data":
             return track_title, elapsed_time, total_time, True
         #---UNRECOGNISED COMMAND---
         else:
-            rospy.loginfo("\033[1;33;1mInvalid operation entered \033[0m")
+            rospy.loginfo("\033[1;33;1mSound Player: Invalid operation entered \033[0m")
             return track_title, elapsed_time, total_time, False
         self.call_back_triggered = True
         return track_title, elapsed_time, total_time, True
@@ -166,14 +166,14 @@ class PlayAudio():
     def start_audio_steam(self, file_path, start_time):
         """Starts sound stream with the path to the file """
         #log info
-        rospy.loginfo("Starting audio stream...")
+        rospy.loginfo("Sound Player: Starting audio stream...")
         start_stream_error = False
 
         #load wav into memory
         try:
             self.wf = wave.open(file_path, 'rb') #audio played must be wav
         except: 
-            rospy.loginfo("\033[1;33;1mSpecified file is the wrong format \033[0m")
+            rospy.loginfo("\033[1;33;1mSound Player: Specified file is the wrong format \033[0m")
             return False
         
         #If above fails, dont do the rest.
@@ -197,7 +197,7 @@ class PlayAudio():
                     start_frame = start_time*self.frame_rate
                     self.wf.setpos(int(start_frame))
             else:
-                rospy.loginfo("\033[1;33;1mThe specified track starting time is longer than the total track time \033[0m")
+                rospy.loginfo("\033[1;33;1mSound Player: The specified track starting time is longer than the total track time \033[0m")
                 start_stream_error = True
                 return False
                 
@@ -238,7 +238,7 @@ class PlayAudio():
             self.player.terminate()
         
             #log info
-            rospy.loginfo("Audio stream ended")
+            rospy.loginfo("Sound Player: Audio stream ended")
             
         self.currently_streaming = False
          
@@ -276,12 +276,12 @@ class PlayAudio():
         #If the stream was paused, resume it
         if self.paused:
             self.stream.start_stream()
-            rospy.loginfo("Track was unpaused")
+            rospy.loginfo("Sound Player: Track was unpaused")
             self.paused = False
         #If the stream is playing, pause it
         else:
             self.stream.stop_stream()
-            rospy.loginfo("Track was paused")
+            rospy.loginfo("Sound Player: Track was paused")
             self.paused = True
            
     
@@ -310,7 +310,7 @@ class PlayAudio():
                 #Play audio file at given time
                 audio_started = self.start_audio_steam(self.file_path, self.start_time)
                 if audio_started:
-                    rospy.loginfo("Audio stream started")
+                    rospy.loginfo("Sound Player: Audio stream started")
                     self.currently_streaming = True
                 else:
                     self.currently_streaming = False
@@ -322,13 +322,13 @@ class PlayAudio():
                     self.stream_rate.sleep()        #Save processing and have this loop sleep  
                     track_ended = (self.elapsed_time >= self.total_track_time) 
                     if track_ended:
-                        rospy.loginfo("Track has ended")
+                        rospy.loginfo("Sound Player: Track has ended")
                     if not self.paused:             #Don't add to the stream time while the stream is paused 
                         self.elapsed_time += 1/self.sound_player_fps    #Is equal to the FPS of sound_player
                 
                 #end stream
                 if self.currently_streaming:
-                    rospy.loginfo("Ending audio stream...")
+                    rospy.loginfo("Sound Player: Ending audio stream...")
                 self.end_audio_steam()
                 
         
@@ -338,4 +338,4 @@ if __name__ == '__main__':
         player.main() #start the process
     except rospy.ROSInterruptException:
         pass
-    rospy.loginfo("Closed successfully")    
+    rospy.loginfo("Sound Player: Closed successfully")    
