@@ -1,6 +1,6 @@
-#Data to save level data as well as user player data
+# Data to save level data as well as user player data
 
-##Structure of save files:
+## Structure of save files:
 Only the information inside the curly brackets are used, so you can write whatever you want else where.
 
 Song data should be seperated with a pound sign followed by a hashtag in between to differentiate them and made the code that reads them easier
