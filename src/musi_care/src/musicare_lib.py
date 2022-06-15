@@ -54,11 +54,12 @@ class SoundManager():
     def load_track(self, track_title, track_time=0.0):
         """gives the sound player the song data, has it load it up to return information about the song, this is essentially "start_track" but betteer """
         track_path = os.path.join(self.music_filepath, track_title)
-        print(track_path)
+        #print(track_path)
         #Start track
         operation = "load_track"
         song_data = self.call_sound_player(operation, track_path, track_time)
-        return song_data.status
+        rospy.sleep(0.1) #requires this to function consistently
+        return song_data
         
 
     def call_sound_player(self, operation, data_1 = "", data_2 = 0.0 ):
@@ -74,34 +75,53 @@ class SoundManager():
         #store default path to music
         
         track_path = os.path.join(self.music_filepath, track_title)
-        print(track_path)
+        #print(track_path)
         #Start track
         operation = "start_track"
         callback_data = self.call_sound_player(operation, track_path, track_time)
+        rospy.sleep(0.1) #requires this to function consistently
         song_data = self.request_song_data() 
-        
         return song_data
 
 
     def stop_track(self):
         """Stop track, dont hold any data in memory"""
         operation = "stop_track"
-        status = self.call_sound_player(operation).status # we only need operation, the other variables can default, theyre ignored anyways
-        return status
+        data = self.call_sound_player(operation) # we only need operation, the other variables can default, theyre ignored anyways
+        rospy.sleep(0.1) #requires this to function consistently
+        return data
         
 
     def pause_unpause(self):
         """Pause track and resume from the same point later"""
         operation = "pause_resume"
-        status = self.call_sound_player(operation).status # we only need operation, the other variables can default, theyre ignored anyways
-        return status
+        data = self.call_sound_player(operation) # we only need operation, the other variables can default, theyre ignored anyways
+        rospy.sleep(0.1) #requires this to function consistently
+        return data
         
+        
+    def pause(self):
+        """Pause track if it's playing"""
+        operation = "pause"
+        data = self.call_sound_player(operation) # we only need operation, the other variables can default, theyre ignored anyways
+        rospy.sleep(0.1) #requires this to function consistently
+        return data
+        
+        
+    def unpause(self):
+        """play track if it's paused"""
+        operation = "resume"
+        data = self.call_sound_player(operation) # we only need operation, the other variables can default, theyre ignored anyways
+        rospy.sleep(0.1) #requires this to function consistently
+        return data                
+
 
     def volume_change(self, volume_percentage):
         """change volume, 1.0 = 100%, 0.5 = 50% etc"""
         operation = "volume"
         volume = volume_percentage * 100 #other methods use decimal percentages, so for consistency this method does too, but then converts it to numerical percentage
         status = self.call_sound_player(operation, data_2 = volume).status # we only need operation and data_2 the other variable can default, it's ignored anyways
+        rospy.sleep(0.1) #requires this to function consistently
         return status
 
 
@@ -109,7 +129,7 @@ class SoundManager():
         """ask the service for data. TODO method needs reworking"""
         operation = "request_data"
         data = self.call_sound_player(operation)
-        return data.status
+        return data
         
         
 #####################################################QTManager/CommandManager##################################################################
@@ -215,6 +235,7 @@ class TimeFunctions():
                 return False #Timer is not done yet
         else: #timer doesnt exist
             print("Timer referenced does not exist, check timer ID given")
+            return None
     
     def GetTimers(self):
         return self.timers #return the timer list
@@ -226,12 +247,13 @@ class Button():
     class used for the generation and management of buttons
     """
     
-    def __init__(self, image_path, image_greyscale_path, x_y_locations, pygame, scale=1, on_click=object, on_release=object):
+    def __init__(self, image_path, image_greyscale_path, x_y_locations, pygame, scale=1, unique_id="", on_click=object, on_release=object):
         
         if not os.path.exists(image_path):
             print("File does not exist path = ", image_path)
         else:
-            print("File located at",image_path)
+            pass
+            #print("File located at",image_path)
         self.pygame = pygame
         raw_image = self.pygame.image.load(image_path).convert_alpha()
         grey_scaled_raw_image = self.pygame.image.load(image_greyscale_path).convert_alpha()
@@ -244,7 +266,10 @@ class Button():
         self.image_greyscale_path = self.pygame.transform.scale(grey_scaled_raw_image, scaled_size)
         self.rect = self.pygame.Rect(img_x, img_y, img_w, img_h) 
         self.pause = False 
-        self.id = rospy.get_time() #unique ID for each button based on time when made
+        if unique_id == "":
+            self.id = rospy.get_time() #unique ID for each button based on time when made
+        else:
+            self.id = unique_id
 
     def render(self, screen):
         if self.pause: #if we get a request to pause show greyscaled version
@@ -390,21 +415,22 @@ class DragableButton():
 
 class HorizontalSlider():
     """Class to handle all functions of the horizontal sliders"""
-    def __init__(self, image_path_slider, image_path_cursor, x_y_locations, slider_scale=1, cursor_scale=1, on_click=object, on_release=object):
+    def __init__(self, image_path_slider, image_path_cursor, x_y_locations, scale=1, on_click=object, on_release=object, music_filepath = "/game_assets/music/"):
         #init slider
         raw_slider_image = pygame.image.load(image_path_slider).convert_alpha()
         img_x = x_y_locations[0]
         img_y = x_y_locations[1]
-        slider_img_w = int(raw_slider_image.get_width()*slider_scale)
-        slider_img_h = int(raw_slider_image.get_height()*slider_scale)
+        self.scale = scale
+        slider_img_w = int(raw_slider_image.get_width()*self.scale)
+        slider_img_h = int(raw_slider_image.get_height()*self.scale)
         scaled_size = (slider_img_w, slider_img_h)
         self.slider_image = pygame.transform.scale(raw_slider_image, scaled_size)
         self.slider_rect = pygame.Rect(img_x,img_y,slider_img_w,slider_img_h)
         
         #init cursor
         raw_cursor_image = pygame.image.load(image_path_cursor).convert_alpha()
-        cursor_img_w = int(raw_cursor_image.get_width()*cursor_scale)
-        cursor_img_h = int(raw_cursor_image.get_height()*cursor_scale)
+        cursor_img_w = int(raw_cursor_image.get_width()*self.scale)
+        cursor_img_h = int(raw_cursor_image.get_height()*self.scale)
         self.half_cursor_height = cursor_img_h/2
         scaled_size = (cursor_img_w, cursor_img_h)
         self.cursor_image = pygame.transform.scale(raw_cursor_image, scaled_size)
@@ -412,9 +438,10 @@ class HorizontalSlider():
         
         #init variables
         self.slider_being_held = False
-        self.bar_overwrite = 0.0
-        self.slider_len = 1080 #total pixel length that the bar should extend to at the end of the track
-        slider_min = 161 #starting point of red bar (pixel_x)
+        self.bar_overwrite = 0.0 #percentage of total len, used to know how far along bar is being held
+        self.slider_len = 1080*self.scale #total pixel length that the bar should extend to at the end of the track
+        self.lower_bound = 160
+        slider_min = self.lower_bound*self.scale #starting point of red bar (pixel_x)
         slider_max = slider_min + self.slider_len #ending point of max red bar pixel X location of slider end point
         self.slider_range = (slider_min, slider_max) #min and max including space to left of bar
         self.on_click = on_click
@@ -426,14 +453,14 @@ class HorizontalSlider():
         screen.blit(self.slider_image, self.slider_rect)
         self.draw_progress_bar(screen, progress)
         self.draw_cursor(screen)
-                
-                
+     
+     
     def draw_progress_bar(self, screen, progress):
         """Uses a percentage to colour the completed relevant of the slider in red"""
         complete_bar_width = self.slider_len
-        bar_height = 57
-        bar_x = 160
-        bar_y = self.slider_range[0]
+        bar_height = 57 * self.scale #thickness of bar
+        bar_x = self.lower_bound  #starting x of bar
+        bar_y = self.slider_range[0] #starting y of bar
         if self.slider_being_held:
             bar_width = complete_bar_width*self.bar_overwrite #If the user is moving the slider, display their new slider 
         else:
@@ -445,7 +472,7 @@ class HorizontalSlider():
         
     def draw_cursor(self, screen):
         """uses progress to move cursor to where it should be. THIS SHOULD ALWAYS BE AFTER 'draw_progress_bar()' """
-        cursor_x = 160 + int(self.half_cursor_height) - 10
+        cursor_x = self.lower_bound + int(self.half_cursor_height) + (43)
         self.cursor_rect.center = (self.cursor_y, cursor_x)
         screen.blit(self.cursor_image, self.cursor_rect) 
     
@@ -471,7 +498,7 @@ class HorizontalSlider():
             time_to_start = track_total_time * self.bar_overwrite # get overwrite in secs
             
             self.on_release(track_title, time_to_start)
-            
+            #self.sound_manager.start_track(track_title, time_to_start)
             self.slider_being_held = False
             self.bar_overwrite = 2.0 #  reset slider overwrite. Use a weird number, as this should only occur if i've made a coding error.
             

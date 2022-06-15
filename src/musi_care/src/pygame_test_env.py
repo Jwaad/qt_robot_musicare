@@ -23,6 +23,7 @@ class test_pygame():
         self.run = True
         self.pygame.mouse.set_visible(False)
         self.sound_manager = SoundManager("/game_assets/music/") #load soundplayer with sound file path
+        print(self.sound_manager.music_filepath)
 
     def DrawBackground(self):
         "Draws the background, and loads it each frame"
