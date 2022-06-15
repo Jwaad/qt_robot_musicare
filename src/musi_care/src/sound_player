@@ -6,6 +6,9 @@
 #You can request a track to be played through a service call. 
 #This node will publish information about the song at 10/s
 #
+##How to load a track:
+#example: operation = "load_track", operation_data_1 = "filename" operation_data_2 = float()
+#
 ##How to play a track:
 #example: operation = "start_track", operation_data_1 = "filename" operation_data_2 = float(track_starting_time_in_secs)
 #
@@ -61,8 +64,31 @@ class PlayAudio():
         track_title= song_data_temp.track_title
         elapsed_time = song_data_temp.track_elapsed_time
         total_time = song_data_temp.track_total_time
+        #---RETURN DATA---
+        if  data.operation == "load_track":
+            rospy.loginfo("Recieved request to load track")
+            if self.currently_streaming: #end the current playing track
+                rospy.loginfo("Ending current track to load new track")
+                self.end_audio_steam()
+                self.currently_streaming = False
+            this_path = os.path.dirname(os.path.abspath(__file__)) # path to this file
+            #file_path = data.operation_data_1 # for absolute path
+            file_path = this_path + data.operation_data_1 # relative path
+            self.start_time = 0
+            #check filepath
+            file_path_valid = self.check_valid_filepath(file_path)
+            if file_path_valid:
+                self.file_path = file_path
+                rospy.loginfo("File path to audio confirmed")
+                self.track_title = file_path
+                self.paused=True
+                self.call_back_triggered = True
+                return track_title, elapsed_time, total_time, True
+            else:
+                rospy.loginfo("\033[1;33;1mCould not find requested file. \033[0m")
+                return track_title, elapsed_time, total_time, False
         #---START TRACK---
-        if data.operation == "start_track":
+        elif data.operation == "start_track":
             rospy.loginfo("Recieved request to start track")
             if self.currently_streaming: #end the current playing track
                 rospy.loginfo("Ending current track to play new track")
@@ -166,9 +192,12 @@ class PlayAudio():
                     output=True,
                     stream_callback=self.audio_callback)   
             
-            #start stream
-            self.stream.start_stream()
-            self.currently_streaming = True
+            #start stream if we should
+            if self.paused:
+                self.stream.stop_stream()
+            else:
+                self.stream.start_stream()
+            self.currently_streaming = True #stream is ready
             return True
                 
                    
@@ -269,7 +298,6 @@ class PlayAudio():
                     self.currently_streaming = True
                 else:
                     self.currently_streaming = False
-                    
                 track_ended = (self.elapsed_time > self.total_track_time)    
                     
                 #Wait for stream to end and listen out for certain messages such as pause, resume etc

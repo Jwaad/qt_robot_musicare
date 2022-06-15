@@ -7,6 +7,78 @@ import rospy
 import pygame
 import pygame.freetype
 import os
+from musi_care.msg import SongData
+from musi_care.srv import sound_player_srv
+from musi_care.srv import qt_command
+
+###
+
+
+class SoundManager():
+
+    def __init__(self, music_filepath):
+        self.music_filepath = music_filepath
+    
+    def load_track(self, track_title, track_time=0.0):
+        """gives the sound player the song data, has it load it up to return information about the song, this is essentially "start_track" but betteer """
+        track_path = os.path.join(self.music_filepath, track_title)
+        print(track_path)
+        #Start track
+        operation = "load_track"
+        song_data = self.call_sound_player(operation, track_path, track_time)
+        return song_data.status
+        
+
+    def call_sound_player(self, operation, data_1 = "", data_2 = 0.0 ):
+        """makes it easier to call sound_player"""
+        rospy.wait_for_service('/sound_player_service')
+        sound_player = rospy.ServiceProxy('/sound_player_service', sound_player_srv)
+        song_data = sound_player(operation, data_1, data_2)
+        return song_data
+            
+
+    def start_track(self, track_title, track_time=0.0):
+        """Starts a track and also saves the information returned as previous song, so we can replay songs without sending a new request"""
+        #store default path to music
+        
+        track_path = os.path.join(self.music_filepath, track_title)
+        print(track_path)
+        #Start track
+        operation = "start_track"
+        callback_data = self.call_sound_player(operation, track_path, track_time)
+        song_data = self.request_song_data() 
+        
+        return song_data
+
+
+    def stop_track(self):
+        """Stop track, dont hold any data in memory"""
+        operation = "stop_track"
+        status = self.call_sound_player(operation).status # we only need operation, the other variables can default, theyre ignored anyways
+        return status
+        
+
+    def pause_unpause(self):
+        """Pause track and resume from the same point later"""
+        operation = "pause_resume"
+        status = self.call_sound_player(operation).status # we only need operation, the other variables can default, theyre ignored anyways
+        return status
+        
+
+    def volume_change(self, volume_percentage):
+        """change volume, 1.0 = 100%, 0.5 = 50% etc"""
+        operation = "volume"
+        volume = volume_percentage * 100 #other methods use decimal percentages, so for consistency this method does too, but then converts it to numerical percentage
+        status = self.call_sound_player(operation, data_2 = volume).status # we only need operation and data_2 the other variable can default, it's ignored anyways
+        return status
+
+
+    def request_song_data(self):
+        """ask the service for data. TODO method needs reworking"""
+        operation = "request_data"
+        data = self.call_sound_player(operation)
+        return data.status
+    
 
 class AnimationManager():
     """Class for misselaneous functions"""
