@@ -38,7 +38,7 @@ class test_pygame():
         
         button = Button(file_path, alt_path, location, self.pygame, scale)
         return(button)
-            
+ 
 
     def Main(self):
         song_name = "dont_fence_me_in_short.wav"
