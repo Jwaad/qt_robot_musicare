@@ -6,6 +6,7 @@ import pygame
 import pygame.freetype
 from musicare_lib import Button
 from musicare_lib import AnimationManager
+from musicare_lib import SoundManager
 
 class test_pygame():
 	
@@ -21,7 +22,7 @@ class test_pygame():
         self.pygame.display.set_caption("Testing Env!") #Label window
         self.run = True
         self.pygame.mouse.set_visible(False)
-        
+        self.sound_manager = SoundManager("/game_assets/music/") #load soundplayer with sound file path
 
     def DrawBackground(self):
         "Draws the background, and loads it each frame"
@@ -40,6 +41,8 @@ class test_pygame():
             
 
     def Main(self):
+        song_name = "dont_fence_me_in_short.wav"
+        
         
         animations = AnimationManager(self.pygame)
         test_button = self.CreateButton("loading_screen_button.png", "loading_screen_button_depressed.png", (300,0)) #create button
@@ -73,9 +76,11 @@ class test_pygame():
 
             #logic based on events
             if pressed_button_id == test_button.id:
-                print("button 1 pressed")
+                print("Button 1 pressed")
+                self.sound_manager.load_track(song_name)
             elif  pressed_button_id == test_button_2.id:
-                print("button 2 pressed")
+                print("Button 2 pressed")
+                self.sound_manager.pause_unpause()
             pressed_button_id = 0 #reset id
                     
                     
