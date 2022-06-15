@@ -80,7 +80,7 @@ class PlayAudio():
             if file_path_valid:
                 self.file_path = file_path
                 rospy.loginfo("Sound Player: File path to audio confirmed")
-                self.track_title = file_path
+                self.track_title = data.operation_data_1
                 self.paused=True
                 self.call_back_triggered = True
                 return track_title, elapsed_time, total_time, True
@@ -103,7 +103,7 @@ class PlayAudio():
             if file_path_valid:
                 self.file_path = file_path
                 rospy.loginfo("Sound Player: File path to audio confirmed")
-                self.track_title = file_path
+                self.track_title = data.operation_data_1
                 self.paused=False
                 self.call_back_triggered = True
                 return track_title, elapsed_time, total_time, True
