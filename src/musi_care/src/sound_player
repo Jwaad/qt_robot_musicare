@@ -36,7 +36,7 @@ from musi_care.msg import SongData
 from musi_care.srv import sound_player_srv
 
 class PlayAudio():
-    """Service that recieves input requests for tracks to be played
+    """Service that receives input requests for tracks to be played
        Node that publishes information of the current sound playing"""
     
     def __init__(self):
@@ -66,7 +66,7 @@ class PlayAudio():
         total_time = song_data_temp.track_total_time
         #---LOAD DATA---
         if  data.operation == "load_track":
-            rospy.loginfo("Sound Player: Recieved request to load track")
+            rospy.loginfo("Sound Player: Received request to load track")
             if self.currently_streaming: #end the current playing track
                 rospy.loginfo("Sound Player: Ending current track to load new track")
                 self.end_audio_steam()
@@ -89,7 +89,7 @@ class PlayAudio():
                 return track_title, elapsed_time, total_time, False
         #---START TRACK---
         elif data.operation == "start_track":
-            rospy.loginfo("Sound Player: Recieved request to start track")
+            rospy.loginfo("Sound Player: Received request to start track")
             if self.currently_streaming: #end the current playing track
                 rospy.loginfo("Sound Player: Ending current track to play new track")
                 self.end_audio_steam()
@@ -112,7 +112,7 @@ class PlayAudio():
                 return track_title, elapsed_time, total_time, False
         #---PAUSE / RESUME TRACK---
         elif data.operation == "pause_resume":
-            rospy.loginfo("Sound Player: Recieved request to pause / resume track")
+            rospy.loginfo("Sound Player: Received request to pause / resume track")
             if self.currently_streaming:
                 self.pause_resume()
             else:
@@ -120,7 +120,7 @@ class PlayAudio():
                 return track_title, elapsed_time, total_time, False
         #---PAUSE TRACK---
         elif data.operation == "pause":
-            rospy.loginfo("Sound Player: Recieved request to pause track")
+            rospy.loginfo("Sound Player: Received request to pause track")
             if self.currently_streaming and not self.paused: #only attempt to pause if it's not already paused
                 self.pause_resume()
             else:
@@ -128,7 +128,7 @@ class PlayAudio():
                 return track_title, elapsed_time, total_time, False
         #---RESUME TRACK---
         elif data.operation == "resume":
-            rospy.loginfo("Sound Player: Recieved request to resume track")
+            rospy.loginfo("Sound Player: Received request to resume track")
             if self.currently_streaming and self.paused: #only attempt to pause if it's not already paused
                 self.pause_resume()
             else:
@@ -136,7 +136,7 @@ class PlayAudio():
                 return track_title, elapsed_time, total_time, False
         #---STOP TRACK---
         elif data.operation == "stop_track":
-            rospy.loginfo("Sound Player: Recieved request to stop track")
+            rospy.loginfo("Sound Player: Received request to stop track")
             if self.currently_streaming:
                 self.end_audio_steam()
                 return track_title, elapsed_time, total_time, True
