@@ -1,0 +1,13 @@
+Musical chairs:
+    As soon as music ends, you have to click the button, speed is accesed
+    
+Copy QT's Rythm:
+    Qt does some simple rythm, clap clap ... clap clap clap User then has to mimic it.
+    
+
+Compare the pitches:
+    QT plays some beep / sound at a certain pitch, the user has to click whether or not the new pitch is the same, or different to the previous
+           Harder levels could add 2 more options "same, higher, lower"
+           
+
+
