@@ -11,10 +11,42 @@ from musi_care.msg import SongData
 from musi_care.srv import sound_player_srv
 from musi_care.srv import qt_command
 
-###
+#####################################################Renderer##################################################################
 
+class Renderer():
+    """Class to render common things, such as background """
+    
+    def __init__(self, window, window_center):
+        self.window = window
+        self.window_center = window_center
+        
+    def DrawBackground(self, colour):
+        """takes window and colour to fill in the background of the window """
+        self.window.fill(colour) #Fill background black
+    
+    
+    def DrawText(self, message, location, font_size = 30, font_colour=(255,255,255) ):
+        """handle drawing text"""
+        font = pygame.font.Font('freesansbold.ttf', font_size)
+        text = font.render(message, False, font_colour)
+        textRect = text.get_rect()
+        textRect.center = location
+        self.window.blit(text, textRect)
+    
+    
+    def DrawTextCentered(self, message, font_size = 30, font_colour=(255,255,255)):
+        """Draws text that's centered in X and Y"""
+        font = pygame.font.Font('freesansbold.ttf', font_size)
+        text = font.render(message, False, font_colour)
+        textRect = text.get_rect()
+        textRect.center = self.window_center
+        self.window.blit(text, textRect)
+
+
+#####################################################SoundManager##################################################################
 
 class SoundManager():
+    """Class to manage communication with sound_player service """
 
     def __init__(self, music_filepath):
         self.music_filepath = music_filepath
@@ -78,7 +110,53 @@ class SoundManager():
         operation = "request_data"
         data = self.call_sound_player(operation)
         return data.status
+        
+        
+#####################################################QTManager/CommandManager##################################################################
+        
+
+class QTManager():
+    """Handles sending communication to robot """
+
+    def __init__(self):
+        self.robo_timer = TimeFunctions()
     
+    def send_qt_command(self, command_type, command_content= "", command_blocking = False):
+        """Neatens and simplifies sending commands to QT """
+        rospy.wait_for_service('/qt_command_service')
+        command_controller = rospy.ServiceProxy('/qt_command_service', qt_command)
+        command_complete = command_controller(command_type, command_content, command_blocking)
+        return command_complete
+    
+    def qt_say_blocking(self, text):
+        """Makes QT say something, then makes you wait until the speaking is done"""
+        timer_len = len(text) * 0.08 #0.2s per letter 4 letter word is given 0.8s to be said
+        timer_id = "QT_SAY_BLOCKING"
+        self.robo_timer.CreateTimer(timer_id, timer_len) #creates timer with ID 1 for 8s   
+        self.send_qt_command("tts", text)
+        talking = True
+        while talking and not rospy.is_shutdown():
+            if self.robo_timer.CheckTimer("QT_SAY_BLOCKING"): #if our timer is done
+                talking = False
+        
+    def qt_say(self, text):
+        """Makes QT say something, then makes starts a timer until the speaking is done"""
+        timer_len = len(text) * 0.08 #0.08s per letter 4 letter word is given 0.32 secs to be said
+        timer_id = "QT_SAY"
+        self.robo_timer.CreateTimer(timer_id, timer_len) #creates timer with ID 1 for 8s   
+        self.send_qt_command("tts", text)
+        return timer_id
+        
+    
+    def qt_gesture(self,gesture):
+        """Make QT do gesture, non blocking """
+        self.send_qt_command("gesture", gesture)
+    
+    def qt_emote(self,emote):
+        """Make QT emote """
+        self.send_qt_command("emote", emote)
+
+#####################################################AnimationManager##################################################################
 
 class AnimationManager():
     """Class for misselaneous functions"""
@@ -113,6 +191,7 @@ class AnimationManager():
             else:
                 self.play_touch_animation = False
    
+#####################################################TimeFunctions##################################################################
 
 class TimeFunctions():
     """Class to handle general functions such as time keeping"""
@@ -140,6 +219,7 @@ class TimeFunctions():
     def GetTimers(self):
         return self.timers #return the timer list
         
+#####################################################Button##################################################################
 
 class Button():
     """
@@ -147,6 +227,7 @@ class Button():
     """
     
     def __init__(self, image_path, image_greyscale_path, x_y_locations, pygame, scale=1, on_click=object, on_release=object):
+        
         if not os.path.exists(image_path):
             print("File does not exist path = ", image_path)
         else:
@@ -181,6 +262,7 @@ class Button():
         else:
             return False 
             
+######################################################ToggleButton#################################################################
 
 class ToggleButton():
     """Class to load images that serve as buttons """
@@ -236,6 +318,7 @@ class ToggleButton():
                     return self.toggle_toggle()
             return self.toggle
 
+######################################################DragableButton#################################################################
 
 class DragableButton():
     """Class to load images that serve as buttons that can be dragged and dropped """
@@ -303,6 +386,7 @@ class DragableButton():
             
             return self.toggle, self.rect
             
+######################################################HorizontalSlider#################################################################
 
 class HorizontalSlider():
     """Class to handle all functions of the horizontal sliders"""
@@ -399,4 +483,6 @@ class HorizontalSlider():
                 self.bar_overwrite = 1.0 #Don't let cursor move past slider bar
             elif mouse_x < self.slider_range[0]:
                 self.bar_overwrite = 0.0 #Don't let cursor move past slider bar
+
+###########################################################END OF LIBRARY############################################################
 
