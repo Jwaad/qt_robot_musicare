@@ -58,7 +58,7 @@ class SoundManager():
         #Start track
         operation = "load_track"
         song_data = self.call_sound_player(operation, track_path, track_time)
-        rospy.sleep(0.1) #requires this to function consistently
+        rospy.sleep(0.15) #requires this to function consistently
         return song_data
         
 
@@ -418,14 +418,14 @@ class HorizontalSlider():
     def __init__(self, image_path_slider, image_path_cursor, x_y_locations, scale=1, on_click=object, on_release=object, music_filepath = "/game_assets/music/"):
         #init slider
         raw_slider_image = pygame.image.load(image_path_slider).convert_alpha()
-        img_x = x_y_locations[0]
-        img_y = x_y_locations[1]
+        self.img_x = x_y_locations[0]
+        self.img_y = x_y_locations[1]
         self.scale = scale
         slider_img_w = int(raw_slider_image.get_width()*self.scale)
-        slider_img_h = int(raw_slider_image.get_height()*self.scale)
+        slider_img_h = int(raw_slider_image.get_height()*self.scale )
         scaled_size = (slider_img_w, slider_img_h)
-        self.slider_image = pygame.transform.scale(raw_slider_image, scaled_size)
-        self.slider_rect = pygame.Rect(img_x,img_y,slider_img_w,slider_img_h)
+        self.slider_image = pygame.transform.scale(raw_slider_image, scaled_size) #scale up the slider
+        self.slider_rect = pygame.Rect(self.img_x,self.img_y,slider_img_w,slider_img_h) #make collision box around it according it it's size
         
         #init cursor
         raw_cursor_image = pygame.image.load(image_path_cursor).convert_alpha()
@@ -434,14 +434,14 @@ class HorizontalSlider():
         self.half_cursor_height = cursor_img_h/2
         scaled_size = (cursor_img_w, cursor_img_h)
         self.cursor_image = pygame.transform.scale(raw_cursor_image, scaled_size)
-        self.cursor_rect = pygame.Rect(img_x,img_y,cursor_img_w,cursor_img_h) 
+        self.cursor_rect = pygame.Rect(self.img_x,self.img_y,cursor_img_w,cursor_img_h)
         
         #init variables
         self.slider_being_held = False
         self.bar_overwrite = 0.0 #percentage of total len, used to know how far along bar is being held
-        self.slider_len = 1080*self.scale #total pixel length that the bar should extend to at the end of the track
-        self.lower_bound = 160
-        slider_min = self.lower_bound*self.scale #starting point of red bar (pixel_x)
+        self.slider_len = 1080 *self.scale  #total pixel length that the bar should extend to at the end of the track
+        self.lower_bound_pix = 37 *self.scale #starting point of red bar (pixel_x)
+        slider_min = self.img_x  + self.lower_bound_pix #starting point of red bar (pixel_x)
         slider_max = slider_min + self.slider_len #ending point of max red bar pixel X location of slider end point
         self.slider_range = (slider_min, slider_max) #min and max including space to left of bar
         self.on_click = on_click
@@ -450,31 +450,32 @@ class HorizontalSlider():
     
     def render(self, screen, progress):
         """Draw slider, cursor and progress bar onto screen """
-        screen.blit(self.slider_image, self.slider_rect)
-        self.draw_progress_bar(screen, progress)
-        self.draw_cursor(screen)
+        screen.blit(self.slider_image, self.slider_rect) #draw bar
+        self.draw_progress_bar(screen, progress) #draw the red progress bar
+        self.draw_cursor(screen) #draw the cursor
      
      
     def draw_progress_bar(self, screen, progress):
         """Uses a percentage to colour the completed relevant of the slider in red"""
         complete_bar_width = self.slider_len
-        bar_height = 57 * self.scale #thickness of bar
-        bar_x = self.lower_bound  #starting x of bar
-        bar_y = self.slider_range[0] #starting y of bar
+        bar_height_pix = 57 *self.scale 
+        bar_y_offset = 11 *self.scale #shifts progress bar to center of main bar
+        bar_x = self.slider_range[0]  #starting x of progress bar
+        bar_y = self.img_y + bar_y_offset  #starting y of bar - thickness of bar + given Y location
         if self.slider_being_held:
             bar_width = complete_bar_width*self.bar_overwrite #If the user is moving the slider, display their new slider 
         else:
-            bar_width = complete_bar_width*progress
+            bar_width = complete_bar_width* progress
         
-        self.cursor_y = bar_width + bar_y
-        self.red_bar = pygame.draw.rect(screen, (255,0,0), pygame.Rect((bar_x,bar_y), (bar_width, bar_height)))
+        self.cursor_x = bar_width + bar_x #starting X of bar + size of progress bar
+        self.red_bar = pygame.draw.rect(screen, (255,0,0), pygame.Rect((bar_x,bar_y), (bar_width, bar_height_pix)))
         
         
     def draw_cursor(self, screen):
         """uses progress to move cursor to where it should be. THIS SHOULD ALWAYS BE AFTER 'draw_progress_bar()' """
-        cursor_x = self.lower_bound + int(self.half_cursor_height) + (43)
-        self.cursor_rect.center = (self.cursor_y, cursor_x)
-        screen.blit(self.cursor_image, self.cursor_rect) 
+        cursor_y = self.img_y + int(self.half_cursor_height) #spawn cursor at half it's length to allign it
+        self.cursor_rect.center = (self.cursor_x, cursor_y)
+        screen.blit(self.cursor_image, self.cursor_rect)
     
     
     def get_event(self, event, mouse_pos, track_info=["", 0.0, 999]): #track info = title, elapsed_time, total_time
