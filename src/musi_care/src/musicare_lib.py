@@ -265,14 +265,13 @@ class Button():
         self.image = self.pygame.transform.scale(raw_image, scaled_size)
         self.image_greyscale_path = self.pygame.transform.scale(grey_scaled_raw_image, scaled_size)
         self.rect = self.pygame.Rect(img_x, img_y, img_w, img_h) 
-        self.pause = False 
         if unique_id == "":
             self.id = rospy.get_time() #unique ID for each button based on time when made
         else:
             self.id = unique_id
 
-    def render(self, screen):
-        if self.pause: #if we get a request to pause show greyscaled version
+    def render(self, screen, grey = False ):
+        if grey: #if we get a request to pause show greyscaled version
             screen.blit(self.image_greyscale_path, self.rect)
         else:
             screen.blit(self.image, self.rect)
@@ -306,18 +305,23 @@ class ToggleButton():
         self.toggled_image = self.pygame.transform.scale(toggled_raw_image, scaled_size)
         self.rect = self.pygame.Rect(img_x,img_y,img_w,img_h) 
         self.highlighted = False
-        self.block = False 
         self.return_info = return_info
         self.toggle = False
         self.when_toggle_on = when_toggle_on
         self.when_toggle_off = when_toggle_off
 
-    def render(self, screen):  
+    def render(self, screen, grey = False):  
         """Draw image onto screen"""
-        if self.toggle or self.block:   #TODO, change the functionality of self.block to automatically greyscale these images and disable clicks
-            screen.blit(self.toggled_image, self.rect)
+        if self.toggle:
+            if grey:
+                screen.blit(self.toggled_image, self.rect) #TODO replace this with the greyscaled version of this image
+            else:
+                screen.blit(self.toggled_image, self.rect)
         else:
-            screen.blit(self.image, self.rect)
+            if grey:
+                screen.blit(self.image, self.rect) #TODO replace this with the greyscaled version of this image
+            else:
+                screen.blit(self.image, self.rect)
         return screen
 
     def store_info(self, info):
@@ -336,12 +340,11 @@ class ToggleButton():
     
     def get_event(self, event, mouse_pos):
         """Button event handle, if mouse release, then toggle"""
-        if not self.block:
-            mouse_on_button = self.rect.collidepoint(mouse_pos)
-            if mouse_on_button:
-                if event.type == self.pygame.MOUSEBUTTONUP:
-                    return self.toggle_toggle()
-            return self.toggle
+        mouse_on_button = self.rect.collidepoint(mouse_pos)
+        if mouse_on_button:
+            if event.type == self.pygame.MOUSEBUTTONUP:
+                return self.toggle_toggle()
+        return self.toggle
 
 ######################################################DragableButton#################################################################
 
@@ -369,12 +372,18 @@ class DragableButton():
         self.when_toggle_off = when_toggle_off
         self.mouse_is_held = False
 
-    def render(self, screen):  
+    def render(self, screen, grey = False):  
         """Draw image onto screen"""
-        if self.toggle or self.block:   #TODO, change the functionality of self.block to automatically greyscale these images and disable clicks
-            screen.blit(self.toggled_image, self.rect)
+        if self.toggle:
+            if grey:
+                screen.blit(self.toggled_image, self.rect) #TODO replace this with the greyscaled version of this image
+            else:
+                screen.blit(self.toggled_image, self.rect)
         else:
-            screen.blit(self.image, self.rect)
+            if grey:
+                screen.blit(self.image, self.rect) #TODO replace this with the greyscaled version of this image
+            else:
+                screen.blit(self.image, self.rect)
         return screen
 
     def store_info(self, info):
@@ -393,23 +402,22 @@ class DragableButton():
     
     def get_event(self, event, mouse_pos):
         """Button event handle, if mouse release, then toggle"""
-        if not self.block:
-            mouse_on_button = self.rect.collidepoint(mouse_pos)
-            if mouse_on_button:
-                if event.type == self.pygame.MOUSEBUTTONDOWN and not self.mouse_is_held:
-                    self.mouse_is_held = True #only triggers the 1st time the mouse is down
-                    self.initial_pos = mouse_pos
-                if self.mouse_is_held:
-                    if event.type == self.pygame.MOUSEBUTTONUP and mouse_pos == self.initial_pos:
-                        self.mouse_is_held = False
-                        return self.toggle_toggle(), self.rect
-                    elif event.type == self.pygame.MOUSEBUTTONUP and mouse_pos != self.initial_pos:
-                        self.mouse_is_held = False #mouse was released somewhere else
-                    else:
-                        self.rect.x = mouse_pos[0] - self.img_w/2
-                        self.rect.y = mouse_pos[1] - self.img_h/2
+        mouse_on_button = self.rect.collidepoint(mouse_pos)
+        if mouse_on_button:
+            if event.type == self.pygame.MOUSEBUTTONDOWN and not self.mouse_is_held:
+                self.mouse_is_held = True #only triggers the 1st time the mouse is down
+                self.initial_pos = mouse_pos
+            if self.mouse_is_held:
+                if event.type == self.pygame.MOUSEBUTTONUP and mouse_pos == self.initial_pos:
+                    self.mouse_is_held = False
+                    return self.toggle_toggle(), self.rect
+                elif event.type == self.pygame.MOUSEBUTTONUP and mouse_pos != self.initial_pos:
+                    self.mouse_is_held = False #mouse was released somewhere else
+                else:
+                    self.rect.x = mouse_pos[0] - self.img_w/2
+                    self.rect.y = mouse_pos[1] - self.img_h/2
             
-            return self.toggle, self.rect
+        return self.toggle, self.rect
             
 ######################################################HorizontalSlider#################################################################
 
@@ -448,12 +456,15 @@ class HorizontalSlider():
         self.on_release = on_release
     
     
-    def render(self, screen, progress):
+    def render(self, screen, progress, grey = False):
         """Draw slider, cursor and progress bar onto screen """
-        screen.blit(self.slider_image, self.slider_rect) #draw bar
-        self.draw_progress_bar(screen, progress) #draw the red progress bar
-        self.draw_cursor(screen) #draw the cursor
-     
+        if grey: #use grey graphic
+            pass
+        else: #render as normal
+            screen.blit(self.slider_image, self.slider_rect) #draw bar
+            self.draw_progress_bar(screen, progress) #draw the red progress bar
+            self.draw_cursor(screen) #draw the cursor
+         
      
     def draw_progress_bar(self, screen, progress):
         """Uses a percentage to colour the completed relevant of the slider in red"""

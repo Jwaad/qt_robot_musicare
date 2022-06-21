@@ -199,6 +199,30 @@ class Guess_The_Mood_Game():
                     qt_speaking = False
 
 
+   def QTSpeakingPopupScreen(self, qt_say, graphics, should_gesture = True, gesture = "explain_right"):
+        """Method displays all our gui with a popup infront with text in centre"""
+        
+        text_display = "Please listen to QT robot"
+        
+        if self.run: #Dont start this screen if the previous screen wanted to close out the game
+            
+            self.command_manager.qt_emote("talking") #show mouth moving
+            speaking_timer_id = self.command_manager.qt_say(qt_say) #says text we give it, and starts an internal timer that we can check on
+            qt_speaking = True # used to tell us when to stop blocking
+            if should_gesture:
+                self.command_manager.qt_gesture(gesture)
+            
+            while qt_speaking and not rospy.is_shutdown() and self.run:
+                #Draw background and objects
+                self.renderer.DrawBackground(self.background_colour)
+                for graphic in graphics:
+                    graphic.render
+                self.renderer.DrawTextCentered("Please listen to QT robot", font_size =70 )
+                self.pygame.display.update() #Update all drawn objects
+                
+                if self.command_manager.robo_timer.CheckTimer(speaking_timer_id): #If our timer is done
+                    qt_speaking = False
+
 
     def play_level(self, difficulty, level_num):
         """Sequence plays the levels"""
