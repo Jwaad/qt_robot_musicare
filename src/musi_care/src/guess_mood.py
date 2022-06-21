@@ -7,6 +7,7 @@ import numpy as np
 import sys
 import rospy
 import os
+import functools
 from random import randint
 from musi_care.msg import SongData
 from musi_care.srv import sound_player_srv
@@ -40,7 +41,7 @@ class Guess_The_Mood_Game():
         self.window_center = (int(self.window_x/2), int(self.window_y/2))
         self.window = pygame.display.set_mode( (self.window_x, self.window_y) ) #Create window and set size
         self.background_colour = (100,100,100) #background black by default
-        self.pygame.display.set_caption("Testing Env!") #Label window
+        self.pygame.display.set_caption("Guess The Mood!") #Label window
         self.run = True
         #self.pygame.mouse.set_visible(False) #set to false when not testing
         self.quit = False #Check to see if the game ended or it was quit
@@ -154,7 +155,7 @@ class Guess_The_Mood_Game():
     def CreateButton(self,file_name, alt_file_name, location,  scale=1, unique_id=""):
         """code creates button using the button_image class."""
         this_file_path = os.path.dirname(__file__)
-        relative_path = 'game_assets/guess_tone_game/graphics'
+        relative_path = 'game_assets/graphics'
         file_path = os.path.join(this_file_path, relative_path, file_name)
         alt_path = os.path.join(this_file_path, relative_path, alt_file_name)
         
@@ -165,7 +166,7 @@ class Guess_The_Mood_Game():
     def CreateHorizontalSlider(self, slider_name, cursor_name, x_y_locations, scale=1, on_click= object, on_release = object):
         """Creates horizontal slider using the horizontal slider class"""
         this_file_path = os.path.dirname(__file__)
-        relative_path = 'game_assets/guess_tone_game/graphics'
+        relative_path = 'game_assets/graphics'
         slider_path = os.path.join(this_file_path, relative_path, slider_name)
         cursor_path = os.path.join(this_file_path, relative_path, cursor_name)
         
@@ -185,11 +186,21 @@ class Guess_The_Mood_Game():
             
             self.command_manager.qt_emote("talking") #show mouth moving
             speaking_timer_id = self.command_manager.qt_say(qt_say) #says text we give it, and starts an internal timer that we can check on
+            
             qt_speaking = True# used to tell us when to stop blocking
             if should_gesture:
                 self.command_manager.qt_gesture(gesture)
             
             while qt_speaking and not rospy.is_shutdown() and self.run:
+                #check for quit
+                for event in self.pygame.event.get():    
+                    #Check if the user clicks the X
+                    if event.type == self.pygame.QUIT:
+                        self.run = False #Stops the program entirely
+                        self.quit = True #Tells us that the game was quit out of, and it didn't end organically
+                        self.level_complete = True # end level
+                        self.sound_manager.stop_track() #Stop the music 
+                        
                 #Draw background and objects
                 self.renderer.DrawBackground(self.background_colour)
                 self.renderer.DrawTextCentered("Please listen to QT robot", font_size =70 )
@@ -197,31 +208,56 @@ class Guess_The_Mood_Game():
                 
                 if self.command_manager.robo_timer.CheckTimer(speaking_timer_id): #If our timer is done
                     qt_speaking = False
+                    return
 
-
-   def QTSpeakingPopupScreen(self, qt_say, graphics, should_gesture = True, gesture = "explain_right"):
-        """Method displays all our gui with a popup infront with text in centre"""
+    def QTSpeakingPopupScreen(self, qt_say, graphics, should_gesture = True, gesture = "explain_right"):
+        """Method displays all our gui with a popup infront with text in centre
+           graphics = a dict of functions that are saved with the parameters needed to render them
+        """
         
         text_display = "Please listen to QT robot"
         
-        if self.run: #Dont start this screen if the previous screen wanted to close out the game
+        if graphics == {}:
+            print("error: no graphics inputted into popup function")
+            return
+        
+        if self.run or rospy.is_shutdown(): #Dont start this screen if the previous screen wanted to close out the game
+                        
+            #create popup button in center
+            popup = self.CreateButton("loading_screen_button.png", "loading_screen_button_depressed.png", (700,550), scale=1.5) 
+            popup.rect.center = self.window_center
             
             self.command_manager.qt_emote("talking") #show mouth moving
             speaking_timer_id = self.command_manager.qt_say(qt_say) #says text we give it, and starts an internal timer that we can check on
-            qt_speaking = True # used to tell us when to stop blocking
+            qt_speaking = True #used to tell us when to stop blocking
             if should_gesture:
                 self.command_manager.qt_gesture(gesture)
             
             while qt_speaking and not rospy.is_shutdown() and self.run:
+                #Track mouse button presses
+                for event in self.pygame.event.get():    
+                    #Check if the user clicks the X
+                    if event.type == self.pygame.QUIT:
+                        self.run = False #Stops the program entirely
+                        self.quit = True #Tells us that the game was quit out of, and it didn't end organically
+                        self.level_complete = True # end level
+                        self.sound_manager.stop_track() #Stop the music 
+                    elif(event.type == self.pygame.MOUSEBUTTONUP):#on mouse release play animation to show where cursor is
+                        mouse_pos = self.pygame.mouse.get_pos() 
+                        self.animation_manager.StartTouchAnimation(mouse_pos) #tell system to play animation when drawing
+                
                 #Draw background and objects
                 self.renderer.DrawBackground(self.background_colour)
-                for graphic in graphics:
-                    graphic.render
+                for key in graphics: # run each partial function
+                    graphics[key]() #run as func             
+                popup.render(self.window)
                 self.renderer.DrawTextCentered("Please listen to QT robot", font_size =70 )
+                self.animation_manager.DrawTouchAnimation(self.window) # also draw touches
                 self.pygame.display.update() #Update all drawn objects
                 
-                if self.command_manager.robo_timer.CheckTimer(speaking_timer_id): #If our timer is done
-                    qt_speaking = False
+                if self.command_manager.robo_timer.CheckTimer(speaking_timer_id): #If our timer's internal timer is done
+                    qt_speaking = False #unessecary but might as well 
+                    return
 
 
     def play_level(self, difficulty, level_num):
@@ -235,9 +271,9 @@ class Guess_The_Mood_Game():
             track_mood = level_data["mood"]
             
             #Create buttons and slider
-            self.sad_button = self.CreateButton("sad_button.png", "sad_button_depressed.png", (650,550), scale=1.3, unique_id="sad") 
-            self.happy_button = self.CreateButton("happy_button.png", "happy_button_depressed.png", (650,950), scale=1.3, unique_id="happy") 
-            self.unsure_button = self.CreateButton("unsure_button.png", "unsure_button_depressed.png", (650,1350), scale=1.3, unique_id = "unsure") 
+            self.sad_button = self.CreateButton("sad_button.png", "sad_button_depressed.png", (675,650), scale=1.3, unique_id="sad") 
+            self.happy_button = self.CreateButton("happy_button.png", "happy_button_depressed.png", (675,1050), scale=1.3, unique_id="happy") 
+            self.unsure_button = self.CreateButton("unsure_button.png", "unsure_button_depressed.png", (675,1450), scale=1.3, unique_id = "unsure") 
             slider_scale = 2 #used for slider and for text adjacent to slider
             slider_x = 275
             slider_y = 200
@@ -245,7 +281,7 @@ class Guess_The_Mood_Game():
             
             #Group elements
             self.buttons = [self.sad_button, self.happy_button, self.unsure_button]
-            self.sliders = {self.song_duration_slider:"track_duration"} #Will be relevant eventually perhaps
+            self.sliders = [self.song_duration_slider] #Will be relevant eventually perhaps
             
             #Define variables & start track
             self.sound_manager.load_track(self.track_name) #load song to sound player and get data back
@@ -256,18 +292,16 @@ class Guess_The_Mood_Game():
             track_stopped = True #this makes it play on start
             wrong_counter = 0
             first_iter = True # used to unpause for the 1st time
+            graphics_list = []
+            qt_message = ""
             
+            self.sound_manager.unpause() #start track
             
             #Main game loop
             while self.level_complete == False and not rospy.is_shutdown() and self.run:
-                    
-                if track_stopped: #if we had paused it, then unpause it here
-                    if self.timer_manager.CheckTimer("delay_unpause") or first_iter: #if our timer finshes or we unpause
-                        self.sound_manager.unpause()
-                        track_stopped = False
-                        first_iter = False
-                        
-                if song_ended: #if the song ended, start player to the beginning and pause it.
+
+                #if the song ended, start player to the beginning and pause it.
+                if song_ended: 
                     self.sound_manager.load_track(self.track_name) 
                     self.sound_manager.pause() #start song paused
                     song_ended = False
@@ -293,6 +327,17 @@ class Guess_The_Mood_Game():
                 self.animation_manager.DrawTouchAnimation(self.window) #last so it shows up on top
                 self.pygame.display.update() #Update all drawn objects
                 
+                #Copy each rendered obj to mem so we can draw them as grey
+                self.rendered_graphics = {}
+                self.rendered_graphics[1] = functools.partial(self.renderer.DrawText, "What mood does this song have?", (1400, 100 ), 70)
+                self.rendered_graphics[2] = functools.partial(self.renderer.DrawText, str(current_track_time), (slider_x - 75, slider_y +75), font_size = 50) #draw current time
+                self.rendered_graphics[3] = functools.partial(self.renderer.DrawText, str(track_total_time), (2650, slider_y +75), font_size = 50)
+                self.rendered_graphics[4] = functools.partial(self.song_duration_slider.render, self.window, progress, grey = True)
+                i = 4
+                for button in self.buttons:
+                    i+=1
+                    self.rendered_graphics[i] = functools.partial(button.render, self.window, grey = True)
+                
                 #Start event handling
                 for event in self.pygame.event.get():    
                     #reset / init variables      
@@ -303,7 +348,7 @@ class Guess_The_Mood_Game():
                         self.animation_manager.StartTouchAnimation(mouse_pos) #tell system to play animation when drawing
                     
                     #handle slider events
-                    for slider in self.sliders.keys():
+                    for slider in self.sliders:
                         slider_held = slider.get_event(event, mouse_pos, self.track_data) #Give the slider track info, so it can pause and play from there.
                         
                     #Check which button is pressed, if any.
@@ -318,33 +363,36 @@ class Guess_The_Mood_Game():
                             if button_pressed_id == track_mood:
                                 print("User has clicked the correct answer")
                                 correct_answer_given= True
-                                self.timer_manager.CreateTimer("delay_unpause", 3)#start a timer to let QT speak
                                 self.command_manager.send_qt_command("emote", "happy")
                                 self.command_manager.send_qt_command("gesture", "nod")
-                                self.command_manager.send_qt_command("tts", "Good job, That is the right answer!") #QT reads out level's hint
+                                qt_message = ("Good job, That is the right answer!") #QT reads out level's hint
+                                self.QTSpeakingPopupScreen(qt_message, self.rendered_graphics) # this is blocking
                             #if clicked button is unsure --> give hint
                             elif button_pressed_id == "unsure":
                                 print("User has clicked unsure")
-                                self.timer_manager.CreateTimer("delay_unpause", 5)#start a timer to let QT speak
                                 self.command_manager.send_qt_command("emote", "talking")
                                 self.command_manager.send_qt_command("gesture", "explain_right")
-                                self.command_manager.send_qt_command("tts", "I will give you a clue... " + track_hint) #QT reads out level's hint
+                                qt_message = ("I will give you a clue... " + track_hint) #QT reads out level's hint
+                                self.QTSpeakingPopupScreen(qt_message, self.rendered_graphics) # this is blocking
+                                self.sound_manager.unpause()
                             #if clicked button is incorrect --> direct to hint if they want one.
                             elif button_pressed_id != track_mood: 
                                 wrong_counter += 1 #how many time they have hit the wrong answer
                                 if wrong_counter < 2:
                                     print("User has clicked the wrong answer")
-                                    self.timer_manager.CreateTimer("delay_unpause", 4)#start a timer to let QT speak
                                     self.command_manager.send_qt_command("emote", "sad")
                                     self.command_manager.send_qt_command("gesture", "shake_head")
-                                    self.command_manager.send_qt_command("tts", "Sorry, that is not the right answer, click, i dont know, for a hint") #QT reads out level's hint
+                                    qt_message = ( "Sorry, that is not the right answer, click, i dont know, for a hint") #QT reads out level's hint
+                                    self.QTSpeakingPopupScreen(qt_message, self.rendered_graphics) # this is blocking
+                                    self.sound_manager.unpause()
                                 else:
                                     print("User has clicked the wrong answer for the 2nd time")
-                                    self.timer_manager.CreateTimer("delay_unpause", 6)#start a timer to let QT speak
                                     self.command_manager.send_qt_command("emote", "sad")
                                     self.command_manager.send_qt_command("gesture", "shake_head")
                                     self.command_manager.send_qt_command("tts", "Sorry, that is not the right answer, here is a hint.") #QT reads out level's hint
-                                    self.command_manager.send_qt_command("tts", track_hint) #QT reads out level's hint
+                                    qt_message = (track_hint) #QT reads out level's hint
+                                    self.QTSpeakingPopupScreen(qt_message, self.rendered_graphics) # this is blocking
+                                    self.sound_manager.unpause()    
                                     
                                     
                     #Check if the user clicks the X

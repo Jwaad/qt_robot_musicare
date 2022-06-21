@@ -455,18 +455,18 @@ class HorizontalSlider():
         self.on_click = on_click
         self.on_release = on_release
     
-    
     def render(self, screen, progress, grey = False):
         """Draw slider, cursor and progress bar onto screen """
-        if grey: #use grey graphic
-            pass
+        if grey: #use grey graphics
+            screen.blit(self.slider_image, self.slider_rect) #draw bar
+            self.draw_progress_bar(screen, progress, grey) #draw the red progress bar
+            self.draw_cursor(screen) #draw the cursor
         else: #render as normal
             screen.blit(self.slider_image, self.slider_rect) #draw bar
             self.draw_progress_bar(screen, progress) #draw the red progress bar
             self.draw_cursor(screen) #draw the cursor
-         
      
-    def draw_progress_bar(self, screen, progress):
+    def draw_progress_bar(self, screen, progress, grey = False):
         """Uses a percentage to colour the completed relevant of the slider in red"""
         complete_bar_width = self.slider_len
         bar_height_pix = 57 *self.scale 
@@ -477,17 +477,19 @@ class HorizontalSlider():
             bar_width = complete_bar_width*self.bar_overwrite #If the user is moving the slider, display their new slider 
         else:
             bar_width = complete_bar_width* progress
-        
+        if grey:
+            bar_colour = (200,200,200)
+        else:
+            bar_colour = (255,0,0)
+            
         self.cursor_x = bar_width + bar_x #starting X of bar + size of progress bar
-        self.red_bar = pygame.draw.rect(screen, (255,0,0), pygame.Rect((bar_x,bar_y), (bar_width, bar_height_pix)))
-        
+        self.red_bar = pygame.draw.rect(screen, bar_colour, pygame.Rect((bar_x,bar_y), (bar_width, bar_height_pix)))
         
     def draw_cursor(self, screen):
         """uses progress to move cursor to where it should be. THIS SHOULD ALWAYS BE AFTER 'draw_progress_bar()' """
         cursor_y = self.img_y + int(self.half_cursor_height) #spawn cursor at half it's length to allign it
         self.cursor_rect.center = (self.cursor_x, cursor_y)
         screen.blit(self.cursor_image, self.cursor_rect)
-    
     
     def get_event(self, event, mouse_pos, track_info=["", 0.0, 999]): #track info = title, elapsed_time, total_time
         """handle events """
