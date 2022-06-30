@@ -34,12 +34,21 @@ class Renderer():
         self.window.blit(text, textRect)
     
     
-    def DrawTextCentered(self, message, font_size = 30, font_colour=(255,255,255)):
+    def DrawTextCentered(self, message, font_size = 30, font_colour=(255,255,255), x = -1, y = -1):
         """Draws text that's centered in X and Y"""
         font = pygame.font.Font('freesansbold.ttf', font_size)
         text = font.render(message, False, font_colour)
         textRect = text.get_rect()
-        textRect.center = self.window_center
+        center = self.window_center
+        if x < 0 and y < 0: #if no X and Y given center both
+            textRect.center = center
+        elif x > -1 and y < 0: #center Y but use the given X
+            textRect.center = [x, center[1]]
+        elif x < 0 and y > -1: #center x and use given Y
+            textRect.center = [center[0], y]
+        else: #if they gave both X and Y instead of using the other draw text func (for some reason?) use both x and y
+            textRect.center = [x,y]
+
         self.window.blit(text, textRect)
 
 
