@@ -19,6 +19,7 @@ from musicare_lib import SoundManager
 from musicare_lib import QTManager
 from musicare_lib import Renderer
 from musicare_lib import HorizontalSlider
+from musicare_lib import StandardLevels
 
 #################################################################Initialise#################################################################
 
@@ -57,6 +58,7 @@ class Guess_The_Mood_Game():
         self.sound_manager = SoundManager(self.music_filepath) #load soundplayer with sound file path
         self.command_manager = QTManager()
         self.renderer = Renderer(self.window,self.window_center)
+        self.level_loader = StandardLevels(self.window, self.window_center, self.pygame)
         #self.music_vol = 1 # change volume of laptop
         #self.qt_voice_vol
         #self.sound_manager.volume_change(self.music_vol) # Set a default volume
@@ -213,42 +215,6 @@ class Guess_The_Mood_Game():
                 if self.command_manager.robo_timer.CheckTimer(speaking_timer_id): #If our timer is done
                     qt_speaking = False
                     return
-
-
-    def yes_or_no_screen(self,text):
-        """Screen for Yes or No questions"""
-        #Create buttons
-        yes = self.CreateButton("Yes_button.png", "Yes_button.png", (225,500), scale= 2.2)
-        no = self.CreateButton("No_button.png", "No_button.png", (1625,500), scale= 2.2)
-        self.command_manager.qt_emote("talking")
-        self.command_manager.qt_say("Should i explain the rules of the game called, 'Guess, the  mood'?")
-        
-        while not rospy.is_shutdown() and self.run:
-            
-            #Event handling
-            for event in self.pygame.event.get():#Check if the user clicks the X
-                if event.type == self.pygame.QUIT:
-                    self.run = False #Stops the program entirely
-                    self.quit = True #Tells us that the game was quit out of, and it didn't end organically
-                    self.level_complete = True # end level
-                elif(event.type == self.pygame.MOUSEBUTTONUP): #on mouse release play animation to show where cursor is
-                    mouse_pos = self.pygame.mouse.get_pos() 
-                    clicked_yes = yes.get_event(event, mouse_pos)
-                    if clicked_yes:
-                        return True
-                    else:
-                        clicked_no = no.get_event(event, mouse_pos)
-                        if clicked_no:
-                            return False
-                    self.animation_manager.StartTouchAnimation(mouse_pos) #tell system to play animation when drawing
-            
-            #Draw graphics
-            self.renderer.DrawBackground(self.background_colour)
-            yes.render(self.window)
-            no.render(self.window)
-            self.renderer.DrawTextCentered(text, font_size = 100, y = 200) #top text
-            self.animation_manager.DrawTouchAnimation(self.window) # also draw touches
-            self.pygame.display.update() #Update all drawn objects
                         
 
     def QTSpeakingPopupScreen(self, qt_say, graphics, should_gesture = True, gesture = "explain_right"):
@@ -470,10 +436,13 @@ class Guess_The_Mood_Game():
 #################################################################Main################################################################   
 
     def Main(self, difficulty = "easy", level =  1): #input what level and difficulty to play, the program will handle the rest
-        self.QTSpeakingScreen("Lets play Guess the mood!")
-        tut = self.yes_or_no_screen('Should i explain how to play "Guess The Mood" ?')
+        #self.QTSpeakingScreen("Lets play Guess the mood!")
+        tut = self.level_loader.yes_or_no_screen('Should I explain how to play "Guess The Mood" ?', self.background_colour)
         if tut:
             print("Playing guided tutorial")
+        elif tut == "QUIT": #if someone clicked quit during this screen then quit instead
+            self.run = False
+            self.quit = True
         self.play_level(difficulty, level)
         
 

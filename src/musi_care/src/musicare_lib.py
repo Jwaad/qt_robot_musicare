@@ -11,6 +11,62 @@ from musi_care.msg import SongData
 from musi_care.srv import sound_player_srv
 from musi_care.srv import qt_command
 
+#####################################################General Levels##################################################################
+
+class StandardLevels():
+    """Class to draw basic screens multiple games use, such as yes or no screen """
+    
+    def __init__(self, window, window_center, pygame):
+        self.window = window
+        self.window_center = window_center
+        self.pygame = pygame
+        self.renderer = Renderer(window, window_center)
+        self.animation_manager = AnimationManager(pygame)
+        self.command_manager = QTManager()
+    
+    def yes_or_no_screen(self, text, background_colour):
+        """Screen for Yes or No questions"""
+        #Variables
+        this_file_path = os.path.dirname(__file__)
+        path_to_imgs = 'game_assets/graphics'
+        yes_img_path = os.path.join(this_file_path, path_to_imgs, "Yes_button.png")
+        no_img_path = os.path.join(this_file_path, path_to_imgs, "No_button.png")
+        
+        #Create buttons
+        yes = Button(yes_img_path, yes_img_path, (225,500), self.pygame, scale= 2.2)
+        no = Button(no_img_path, no_img_path, (1625,500), self.pygame, scale= 2.2)
+        #yes = self.CreateButton("Yes_button.png", "Yes_button.png", (225,500), scale= 2.2)
+        #no = self.CreateButton("No_button.png", "No_button.png", (1625,500), scale= 2.2)
+        
+        #Have QT act
+        self.command_manager.qt_emote("talking")
+        self.command_manager.qt_say("Should i explain the rules of the game called, 'Guess, the  mood'?")
+        
+        while not rospy.is_shutdown():
+            
+            #Event handling
+            for event in self.pygame.event.get():#Check if the user clicks the X
+                if event.type == self.pygame.QUIT:
+                    return "QUIT"
+                elif(event.type == self.pygame.MOUSEBUTTONUP): #on mouse release play animation to show where cursor is
+                    mouse_pos = self.pygame.mouse.get_pos() 
+                    clicked_yes = yes.get_event(event, mouse_pos)
+                    if clicked_yes:
+                        return True
+                    else:
+                        clicked_no = no.get_event(event, mouse_pos)
+                        if clicked_no:
+                            return False
+                    self.animation_manager.StartTouchAnimation(mouse_pos) #tell system to play animation when drawing
+            
+            #Draw graphics
+            self.renderer.DrawBackground(background_colour)
+            yes.render(self.window)
+            no.render(self.window)
+            self.renderer.DrawTextCentered(text, font_size = 100, y = 200) #top text
+            self.animation_manager.DrawTouchAnimation(self.window) # also draw touches
+            self.pygame.display.update() #Update all drawn objects
+
 #####################################################Renderer##################################################################
 
 class Renderer():
