@@ -300,6 +300,10 @@ class Guess_The_Mood_Game():
                     qt_speaking = False #unessecary but might as well 
                     return
 
+    def guided_tut(self):
+        """Code to play tut sequence for Guess the mood"""
+        
+
 
     def play_level(self, difficulty, level_num):
         """Sequence plays the levels"""
@@ -317,7 +321,7 @@ class Guess_The_Mood_Game():
             self.unsure_button = self.CreateButton("unsure_button.png", "unsure_button_depressed.png", (675,1450), scale=1.3, unique_id = "unsure") 
             slider_scale = 2 #used for slider and for text adjacent to slider
             slider_x = 275
-            slider_y = 200
+            slider_y = 300
             self.song_duration_slider = self.CreateHorizontalSlider("track_duration_slider.png", "track_cursor.png", (slider_x,slider_y), on_click = self.sound_manager.stop_track, on_release = self.sound_manager.start_track, scale=slider_scale)
             
             #Group elements
@@ -359,7 +363,7 @@ class Guess_The_Mood_Game():
                 
                 #Draw background and objects
                 self.renderer.DrawBackground(self.background_colour)
-                self.renderer.DrawText("What mood does this song have?", (1400, 100 ), 70)
+                self.renderer.DrawTextCentered("What mood does this song have?", font_size = 100, y = 125)
                 self.renderer.DrawText(str(current_track_time), (slider_x - 75, slider_y +75), font_size = 50) #draw current time
                 self.renderer.DrawText(str(track_total_time), (2650, slider_y +75), font_size = 50) #draw total track time
                 self.song_duration_slider.render(self.window, progress)
@@ -466,7 +470,7 @@ class Guess_The_Mood_Game():
 #################################################################Main################################################################   
 
     def Main(self, difficulty = "easy", level =  1): #input what level and difficulty to play, the program will handle the rest
-        #self.QTSpeakingScreen("hello i am QT")
+        self.QTSpeakingScreen("Lets play Guess the mood!")
         tut = self.yes_or_no_screen('Should i explain how to play "Guess The Mood" ?')
         if tut:
             print("Playing guided tutorial")
