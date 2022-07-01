@@ -8,6 +8,7 @@ import sys
 import rospy
 import os
 import functools
+import math
 from random import randint
 from musi_care.msg import SongData
 from musi_care.srv import sound_player_srv
@@ -198,10 +199,13 @@ class Guess_The_Mood_Game():
     def guided_tut(self):
         """Code to play tut sequence for Guess the mood"""
         #Get the level's data
-        level_data = self.music_data["tutorial"][1] #specific level data for our tutorial {"song_name":"title", "mood":"happy", "hint":"some text"}
+        level_data = self.music_data["tut"][1] #specific level data for our tutorial {"song_name":"title", "mood":"happy", "hint":"some text"}
         self.track_name = level_data["song_name"]
         track_hint = level_data["hint"]
         track_mood = level_data["mood"]
+        #self.HighlightRect()
+        
+        
         
 
     def play_level(self, difficulty, level_num):
@@ -247,7 +251,7 @@ class Guess_The_Mood_Game():
             
             #Main game loop
             while self.level_complete == False and not rospy.is_shutdown() and self.run:
-
+                
                 #if the song ended, start player to the beginning and pause it.
                 if song_ended: 
                     self.sound_manager.load_track(self.track_name) 
@@ -273,6 +277,7 @@ class Guess_The_Mood_Game():
                 self.song_duration_slider.render(self.window, progress)
                 for button in self.buttons: #Draw buttons using button list
                     button.render(self.window)
+                self.renderer.HighlightRect(button.get_rect(), self.pygame) #TODO REMOVE ME
                 self.animation_manager.DrawTouchAnimation(self.window) #last so it shows up on top
                 self.pygame.display.update() #Update all drawn objects
                 

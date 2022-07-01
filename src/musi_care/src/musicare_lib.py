@@ -162,6 +162,7 @@ class Renderer():
         self.window = window
         self.window_center = window_center
         
+        
     def DrawBackground(self, colour):
         """takes window and colour to fill in the background of the window """
         self.window.fill(colour) #Fill background black
@@ -174,6 +175,7 @@ class Renderer():
         textRect = text.get_rect()
         textRect.center = location
         self.window.blit(text, textRect)
+        return text, textRect
     
     
     def DrawTextCentered(self, message, font_size = 30, font_colour=(255,255,255), x = -1, y = -1):
@@ -192,12 +194,47 @@ class Renderer():
             textRect.center = [x,y]
 
         self.window.blit(text, textRect)
+        return text, textRect
 
+
+    def HighlightRect(self, target_rect, pygame):
+        """Using the rect of the obj, draw a box around it and an arrow pointing towards it"""
+        
+        #Variables
+        path_to_arrow = "game_assets/graphics/arrow_pointer.png"
+        arrow_img = pygame.image.load(path_to_arrow).convert_alpha()
+        arrow_size = (arrow_img.get_width(),arrow_img.get_height())
+        bounding_scalar = 50 #how much bigger the bounding should be than the original rect
+        
+        #Create bounding box
+        bound_w = target_rect[2] + bounding_scalar
+        bound_h = target_rect[3] + bounding_scalar
+        bound_x = target_rect[0] + ((target_rect[2]-bound_w)/2)
+        bound_y = target_rect[1] + ((target_rect[3]-bound_h)/2)
+        bounding_rect = (bound_x, bound_y, bound_w, bound_h)
+        
+        #Draw 
+        bounding_rect_center = (bound_x + (bound_w/2), bound_y + (bound_h/2))
+        arrow_x = bound_y + 600 - (arrow_size[0] /2) #use our Y not cen y. 150 is half the width of the arrow
+        print(bounding_rect_center[1])
+        if bounding_rect_center[1] > 600: #if our arrow would hit the top of the screen draw it under the box
+            arrow_y = bound_y - 600 # + our time modifyer #time = rospy.get_time()
+            image = pygame.transform.scale(arrow_img, arrow_size)
+        else:
+            arrow_y = bound_y + bound_h + 600 # - our time modifyer
+            image = pygame.transform.scale(arrow_img, arrow_size)
+        arrow_rect = (arrow_x, arrow_y, arrow_size[0], arrow_size[1])
+        
+        #Draw
+        bound_box = pygame.draw.rect(self.window, (255,0,0), bounding_rect, width=20, border_radius=5) #draw bounding box
+        self.window.blit(image, arrow_rect) #draw arrow
+        
+        
 
 #####################################################SoundManager##################################################################
 
 class SoundManager():
-    """Class to manage communication with sound_player service """
+    """Class to manage communication with sound_player service"""
 
     def __init__(self, music_filepath):
         self.music_filepath = music_filepath
@@ -318,7 +355,6 @@ class QTManager():
         self.send_qt_command("tts", text)
         return timer_id
         
-    
     def qt_gesture(self,gesture):
         """Make QT do gesture, non blocking """
         self.send_qt_command("gesture", gesture)
@@ -437,6 +473,9 @@ class Button():
         else:
             return False 
             
+    def get_rect(self):
+        return self.rect
+            
 ######################################################ToggleButton#################################################################
 
 class ToggleButton():
@@ -514,6 +553,9 @@ class ToggleButton():
             if event.type == self.pygame.MOUSEBUTTONUP:
                 return self.toggle_toggle()
         return self.toggle_state
+        
+    def get_rect(self):
+        return self.rect
 
 ######################################################DragableButton#################################################################
 
@@ -653,6 +695,12 @@ class HorizontalSlider():
             
         self.cursor_x = bar_width + bar_x #starting X of bar + size of progress bar
         self.red_bar = pygame.draw.rect(screen, bar_colour, pygame.Rect((bar_x,bar_y), (bar_width, bar_height_pix)))
+        
+    def get_slider_rect(self):
+        return self.slider_rect   
+    
+    def get_cursor_rect(self):
+        return self.cursor_rect 
         
     def draw_cursor(self, screen):
         """uses progress to move cursor to where it should be. THIS SHOULD ALWAYS BE AFTER 'draw_progress_bar()' """
