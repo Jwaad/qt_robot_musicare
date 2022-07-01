@@ -301,7 +301,7 @@ class Guess_The_Mood_Game():
                 
                 #Copy each rendered obj to mem so we can draw them as grey
                 self.rendered_graphics = {}
-                self.rendered_graphics[1] = functools.partial(self.renderer.DrawText, "What mood does this song have?", (1400, 100 ), 70)
+                self.rendered_graphics[1] = functools.partial(self.renderer.DrawTextCentered, "What mood does this song have?", font_size = 100, y = 125)
                 self.rendered_graphics[2] = functools.partial(self.renderer.DrawText, str(current_track_time), (slider_x - 75, slider_y +75), font_size = 50) #draw current time
                 self.rendered_graphics[3] = functools.partial(self.renderer.DrawText, str(track_total_time), (2650, slider_y +75), font_size = 50)
                 self.rendered_graphics[4] = functools.partial(self.song_duration_slider.render, self.window, progress, grey = True)
@@ -338,14 +338,14 @@ class Guess_The_Mood_Game():
                                 self.command_manager.send_qt_command("emote", "happy")
                                 self.command_manager.send_qt_command("gesture", "nod")
                                 qt_message = ("Good job, That is the right answer!") #QT reads out level's hint
-                                self.QTSpeakingPopupScreen(qt_message, self.rendered_graphics) # this is blocking
+                                self.level_loader.QTSpeakingPopupScreen(qt_message, self.rendered_graphics, self.run, self.background_colour) # this is blocking
                             #if clicked button is unsure --> give hint
                             elif button_pressed_id == "unsure":
                                 print("User has clicked unsure")
                                 self.command_manager.send_qt_command("emote", "talking")
                                 self.command_manager.send_qt_command("gesture", "explain_right")
                                 qt_message = ("I will give you a clue... " + track_hint) #QT reads out level's hint
-                                self.QTSpeakingPopupScreen(qt_message, self.rendered_graphics) # this is blocking
+                                self.level_loader.QTSpeakingPopupScreen(qt_message, self.rendered_graphics, self.run, self.background_colour) # this is blocking
                                 self.sound_manager.unpause()
                             #if clicked button is incorrect --> direct to hint if they want one.
                             elif button_pressed_id != track_mood: 
@@ -355,7 +355,7 @@ class Guess_The_Mood_Game():
                                     self.command_manager.send_qt_command("emote", "sad")
                                     self.command_manager.send_qt_command("gesture", "shake_head")
                                     qt_message = ( "Sorry, that is not the right answer, click, i dont know, for a hint") #QT reads out level's hint
-                                    self.QTSpeakingPopupScreen(qt_message, self.rendered_graphics) # this is blocking
+                                    self.level_loader.QTSpeakingPopupScreen(qt_message, self.rendered_graphics, self.run, self.background_colour) # this is blocking
                                     self.sound_manager.unpause()
                                 else:
                                     print("User has clicked the wrong answer for the 2nd time")
@@ -363,7 +363,7 @@ class Guess_The_Mood_Game():
                                     self.command_manager.send_qt_command("gesture", "shake_head")
                                     self.command_manager.send_qt_command("tts", "Sorry, that is not the right answer, here is a hint.") #QT reads out level's hint
                                     qt_message = (track_hint) #QT reads out level's hint
-                                    self.QTSpeakingPopupScreen(qt_message, self.rendered_graphics) # this is blocking
+                                    self.level_loader.QTSpeakingPopupScreen(qt_message, self.rendered_graphics, self.run, self.background_colour) # this is blocking
                                     self.sound_manager.unpause()    
                                     
                                     

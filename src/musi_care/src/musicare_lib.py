@@ -35,8 +35,6 @@ class StandardLevels():
         #Create buttons
         yes = Button(yes_img_path, yes_img_path, (225,500), self.pygame, scale= 2.2)
         no = Button(no_img_path, no_img_path, (1625,500), self.pygame, scale= 2.2)
-        #yes = self.CreateButton("Yes_button.png", "Yes_button.png", (225,500), scale= 2.2)
-        #no = self.CreateButton("No_button.png", "No_button.png", (1625,500), scale= 2.2)
         
         #Have QT act
         self.command_manager.qt_emote("talking")
@@ -99,6 +97,58 @@ class StandardLevels():
                 
                 if self.command_manager.robo_timer.CheckTimer(speaking_timer_id): #If our timer is done
                     qt_speaking = False
+                    return
+
+
+    def QTSpeakingPopupScreen(self, qt_say, graphics, run, background_colour, should_gesture = True, gesture = "explain_right"):
+        """Method displays all our gui with a popup infront with text in centre
+           graphics = a dict of functions that are saved with the parameters needed to render them
+        """
+        #Variables
+        this_file_path = os.path.dirname(__file__)
+        path_to_imgs = 'game_assets/graphics'
+        popup_path = os.path.join(this_file_path, path_to_imgs, "loading_screen_button.png")
+        popup_path_grey = os.path.join(this_file_path, path_to_imgs, "loading_screen_button_depressed.png")
+
+        text_display = "Please listen to QT robot"
+        
+        if graphics == {}:
+            print("error: no graphics inputted into popup function")
+            return
+        
+        if run or rospy.is_shutdown(): #Dont start this screen if the previous screen wanted to close out the game
+                        
+            #create popup button in center
+            popup = Button(popup_path, popup_path_grey, (700,550), self.pygame, scale=1.5) 
+            popup.rect.center = self.window_center
+            
+            self.command_manager.qt_emote("talking") #show mouth moving
+            speaking_timer_id = self.command_manager.qt_say(qt_say) #says text we give it, and starts an internal timer that we can check on
+            qt_speaking = True #used to tell us when to stop blocking
+            if should_gesture:
+                self.command_manager.qt_gesture(gesture)
+            
+            while qt_speaking and not rospy.is_shutdown() and run:
+                #Track mouse button presses
+                for event in self.pygame.event.get():    
+                    #Check if the user clicks the X
+                    if event.type == self.pygame.QUIT:
+                        return "QUIT"
+                    elif(event.type == self.pygame.MOUSEBUTTONUP):#on mouse release play animation to show where cursor is
+                        mouse_pos = self.pygame.mouse.get_pos() 
+                        self.animation_manager.StartTouchAnimation(mouse_pos) #tell system to play animation when drawing
+                
+                #Draw background and objects
+                self.renderer.DrawBackground(background_colour)
+                for key in graphics: # run each partial function
+                    graphics[key]() #run as func             
+                popup.render(self.window)
+                self.renderer.DrawTextCentered("Please listen to QT robot", font_size =70 )
+                self.animation_manager.DrawTouchAnimation(self.window) # also draw touches
+                self.pygame.display.update() #Update all drawn objects
+                
+                if self.command_manager.robo_timer.CheckTimer(speaking_timer_id): #If our timer's internal timer is done
+                    qt_speaking = False #unessecary but might as well 
                     return
 
 #####################################################Renderer##################################################################
