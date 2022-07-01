@@ -195,7 +195,7 @@ class Guess_The_Mood_Game():
             #Create buttons and slider
             self.sad_button = self.CreateButton("sad_button.png", "sad_button_depressed.png", (675,650), scale=1.3, unique_id="sad") 
             self.happy_button = self.CreateButton("happy_button.png", "happy_button_depressed.png", (675,1050), scale=1.3, unique_id="happy") 
-            self.unsure_button = self.CreateButton("unsure_button.png", "unsure_button_depressed.png", (675,1450), scale=1.3, unique_id = "unsure") 
+            self.unsure_button = self.CreateButton("unsure_button.png", "unsure_button_depressed.png", (850,1450), scale=1, unique_id = "unsure") 
             slider_scale = 2 #used for slider and for text adjacent to slider
             slider_x = 275
             slider_y = 300
@@ -341,7 +341,6 @@ class Guess_The_Mood_Game():
             #close out before end
             self.pygame.quit
             self.sound_manager.stop_track()
-                
 
 
 #################################################################Main################################################################   
@@ -358,6 +357,7 @@ class Guess_The_Mood_Game():
             self.run = False
             self.quit = True
         self.play_level(difficulty, level)
+
 
 #################################################################On execution################################################################      
                    
