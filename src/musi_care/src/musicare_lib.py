@@ -11,6 +11,8 @@ from musi_care.msg import SongData
 from musi_care.srv import sound_player_srv
 from musi_care.srv import qt_command
 
+#TODO REPLACE ALL GREY SCALE VERSIONS TO QUICK SCRIPT OF CV2.convert to greyscale
+
 #####################################################General Levels##################################################################
 
 class StandardLevels():
@@ -440,35 +442,48 @@ class Button():
 class ToggleButton():
     """Class to load images that serve as buttons """
 
-    def __init__(self, image_path, toggled_image_path, x_y_locations, pygame, scale=1, return_info="", when_toggle_on=object, when_toggle_off=object):
+    def __init__(self, default_image_path, toggled_image_path, default_image_grey, toggled_image_grey, x_y_locations, pygame, scale=1, unique_id = "", return_info="", when_toggle_on=object, when_toggle_off=object):
+        #Set vars
         self.pygame = pygame
-        raw_image = self.pygame.image.load(image_path).convert_alpha()
+        self.highlighted = False
+        self.return_info = return_info
+        self.toggle_state = False
+        self.when_toggle_on = when_toggle_on
+        self.when_toggle_off = when_toggle_off
+
+        #load imges
+        raw_image = self.pygame.image.load(default_image_path).convert_alpha()
+        raw_img_grey = self.pygame.image.load(default_image_grey).convert_alpha()
         toggled_raw_image = self.pygame.image.load(toggled_image_path).convert_alpha()
+        toggled_raw_grey = self.pygame.image.load(toggled_image_grey).convert_alpha()
+        
+        #Scale and set pos of imgs
         img_x = x_y_locations[0]
         img_y = x_y_locations[1]
         img_w = int(raw_image.get_width()*scale)
         img_h = int(raw_image.get_height()*scale)
-        
         scaled_size = (img_w, img_h)
         self.image = self.pygame.transform.scale(raw_image, scaled_size)
+        self.image_grey = self.pygame.transform.scale(raw_img_grey, scaled_size)
         self.toggled_image = self.pygame.transform.scale(toggled_raw_image, scaled_size)
+        self.toggled_image_grey = self.pygame.transform.scale(toggled_raw_grey, scaled_size)
+        
         self.rect = self.pygame.Rect(img_x,img_y,img_w,img_h) 
-        self.highlighted = False
-        self.return_info = return_info
-        self.toggle = False
-        self.when_toggle_on = when_toggle_on
-        self.when_toggle_off = when_toggle_off
+        if unique_id == "":
+            self.id = rospy.get_time() #unique ID for each button based on time when made
+        else:
+            self.id = unique_id
 
     def render(self, screen, grey = False):  
         """Draw image onto screen"""
-        if self.toggle:
+        if self.toggle_state:
             if grey:
-                screen.blit(self.toggled_image, self.rect) #TODO replace this with the greyscaled version of this image
+                screen.blit(self.toggled_image_grey, self.rect) #TODO replace this with the greyscaled version of this image
             else:
                 screen.blit(self.toggled_image, self.rect)
         else:
             if grey:
-                screen.blit(self.image, self.rect) #TODO replace this with the greyscaled version of this image
+                screen.blit(self.image_grey, self.rect) #TODO replace this with the greyscaled version of this image
             else:
                 screen.blit(self.image, self.rect)
         return screen
@@ -479,13 +494,18 @@ class ToggleButton():
     
     def toggle_toggle(self):
         """Toggles the function 'self.toggle' """
-        self.toggle = not self.toggle
-        if self.toggle:
+        self.toggle_state = not self.toggle_state
+        if self.toggle_state:
             self.when_toggle_on()
         else:
             self.when_toggle_off()
         
-        return (self.toggle)
+        return (self.toggle_state)
+    
+    def toggle_img(self):
+        """Toggle but only the img to render """
+        self.toggle_state = not self.toggle_state
+        return (self.toggle_state)
     
     def get_event(self, event, mouse_pos):
         """Button event handle, if mouse release, then toggle"""
@@ -493,7 +513,7 @@ class ToggleButton():
         if mouse_on_button:
             if event.type == self.pygame.MOUSEBUTTONUP:
                 return self.toggle_toggle()
-        return self.toggle
+        return self.toggle_state
 
 ######################################################DragableButton#################################################################
 
@@ -673,6 +693,8 @@ class HorizontalSlider():
                 self.bar_overwrite = 1.0 #Don't let cursor move past slider bar
             elif mouse_x < self.slider_range[0]:
                 self.bar_overwrite = 0.0 #Don't let cursor move past slider bar
+                
+        return self.slider_being_held
 
 ###########################################################END OF LIBRARY############################################################
 
