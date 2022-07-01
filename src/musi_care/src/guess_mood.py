@@ -177,46 +177,7 @@ class Guess_The_Mood_Game():
         
         
 #################################################################Level / screen code################################################################
-
-
-    def QTSpeakingScreen(self, qt_say, should_gesture = True, gesture = "explain_right"):
-        """Method displays background and text in centre"""
-        
-        text_display = "Please listen to QT robot"
-        
-        if self.run: #Dont start this screen if the previous screen wanted to close out the game
-            
-            self.command_manager.qt_emote("talking") #show mouth moving
-            speaking_timer_id = self.command_manager.qt_say(qt_say) #says text we give it, and starts an internal timer that we can check on
-            
-            qt_speaking = True# used to tell us when to stop blocking
-            if should_gesture:
-                self.command_manager.qt_gesture(gesture)
-            
-            while qt_speaking and not rospy.is_shutdown() and self.run:
-                #check for quit
-                for event in self.pygame.event.get():
-                    #Check if the user clicks the X
-                    if event.type == self.pygame.QUIT:
-                        self.run = False #Stops the program entirely
-                        self.quit = True #Tells us that the game was quit out of, and it didn't end organically
-                        self.level_complete = True # end level
-                        self.sound_manager.stop_track() #Stop the music 
-                    elif(event.type == self.pygame.MOUSEBUTTONUP):#on mouse release play animation to show where cursor is
-                        mouse_pos = self.pygame.mouse.get_pos() 
-                        self.animation_manager.StartTouchAnimation(mouse_pos) #tell system to play animation when drawing
                         
-                #Draw background and objects
-                self.renderer.DrawBackground(self.background_colour)
-                self.renderer.DrawTextCentered("Please listen to QT robot", font_size =70 )
-                self.animation_manager.DrawTouchAnimation(self.window) # also draw touches
-                self.pygame.display.update() #Update all drawn objects
-                
-                if self.command_manager.robo_timer.CheckTimer(speaking_timer_id): #If our timer is done
-                    qt_speaking = False
-                    return
-                        
-
     def QTSpeakingPopupScreen(self, qt_say, graphics, should_gesture = True, gesture = "explain_right"):
         """Method displays all our gui with a popup infront with text in centre
            graphics = a dict of functions that are saved with the parameters needed to render them
@@ -436,15 +397,18 @@ class Guess_The_Mood_Game():
 #################################################################Main################################################################   
 
     def Main(self, difficulty = "easy", level =  1): #input what level and difficulty to play, the program will handle the rest
-        #self.QTSpeakingScreen("Lets play Guess the mood!")
-        tut = self.level_loader.yes_or_no_screen('Should I explain how to play "Guess The Mood" ?', self.background_colour)
+        status = self.level_loader.QTSpeakingScreen("Lets play Guess the mood!", self.run, self.background_colour)
+        if status == "QUIT": #if someone clicked quit during this screen then quit instead
+            self.run = False
+            self.quit = True
+        tut = self.level_loader.yes_or_no_screen('Should I explain how to play "Guess The Mood" ?', self.run, self.background_colour)
         if tut:
             print("Playing guided tutorial")
         elif tut == "QUIT": #if someone clicked quit during this screen then quit instead
             self.run = False
             self.quit = True
         self.play_level(difficulty, level)
-        
+    
 
 #################################################################On execution################################################################      
                    

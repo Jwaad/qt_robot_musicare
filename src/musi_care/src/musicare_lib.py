@@ -24,7 +24,7 @@ class StandardLevels():
         self.animation_manager = AnimationManager(pygame)
         self.command_manager = QTManager()
     
-    def yes_or_no_screen(self, text, background_colour):
+    def yes_or_no_screen(self, text,run , background_colour):
         """Screen for Yes or No questions"""
         #Variables
         this_file_path = os.path.dirname(__file__)
@@ -42,7 +42,7 @@ class StandardLevels():
         self.command_manager.qt_emote("talking")
         self.command_manager.qt_say("Should i explain the rules of the game called, 'Guess, the  mood'?")
         
-        while not rospy.is_shutdown():
+        while not rospy.is_shutdown() and run:
             
             #Event handling
             for event in self.pygame.event.get():#Check if the user clicks the X
@@ -66,6 +66,40 @@ class StandardLevels():
             self.renderer.DrawTextCentered(text, font_size = 100, y = 200) #top text
             self.animation_manager.DrawTouchAnimation(self.window) # also draw touches
             self.pygame.display.update() #Update all drawn objects
+
+
+    def QTSpeakingScreen(self, qt_say, run, background_colour,  should_gesture = True, gesture = "explain_right", ):
+        """Method displays background and text in centre"""
+        text_display = "Please listen to QT robot"
+        
+        if run: #Dont start this screen if the previous screen wanted to close out the game
+            
+            self.command_manager.qt_emote("talking") #show mouth moving
+            speaking_timer_id = self.command_manager.qt_say(qt_say) #says text we give it, and starts an internal timer that we can check on
+            
+            qt_speaking = True# used to tell us when to stop blocking
+            if should_gesture:
+                self.command_manager.qt_gesture(gesture)
+            
+            while qt_speaking and not rospy.is_shutdown() and run:
+                #check for quit
+                for event in self.pygame.event.get():
+                    #Check if the user clicks the X
+                    if event.type == self.pygame.QUIT:
+                        return "QUIT"
+                    elif(event.type == self.pygame.MOUSEBUTTONUP):#on mouse release play animation to show where cursor is
+                        mouse_pos = self.pygame.mouse.get_pos() 
+                        self.animation_manager.StartTouchAnimation(mouse_pos) #tell system to play animation when drawing
+                        
+                #Draw background and objects
+                self.renderer.DrawBackground(background_colour)
+                self.renderer.DrawTextCentered("Please listen to QT robot", font_size =70 )
+                self.animation_manager.DrawTouchAnimation(self.window) # also draw touches
+                self.pygame.display.update() #Update all drawn objects
+                
+                if self.command_manager.robo_timer.CheckTimer(speaking_timer_id): #If our timer is done
+                    qt_speaking = False
+                    return
 
 #####################################################Renderer##################################################################
 
