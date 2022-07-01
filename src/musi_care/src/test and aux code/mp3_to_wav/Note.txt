@@ -1,7 +1,7 @@
 converts mp3 into wav
 
 steps:
-move files to be converted into input folder (/home/qtrobot/Desktop/mp3_to_wav/input)
+move files to be converted into input folder
 run script from cmd
     cd /home/qtrobot/Desktop/mp3_to_wav
     python3 mp3_wav.py

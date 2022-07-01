@@ -196,6 +196,11 @@ class Guess_The_Mood_Game():
 
     def guided_tut(self):
         """Code to play tut sequence for Guess the mood"""
+        #Get the level's data
+        level_data = self.music_data["tutorial"][1] #specific level data for our tutorial {"song_name":"title", "mood":"happy", "hint":"some text"}
+        self.track_name = level_data["song_name"]
+        track_hint = level_data["hint"]
+        track_mood = level_data["mood"]
         
 
     def play_level(self, difficulty, level_num):
