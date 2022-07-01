@@ -212,7 +212,7 @@ class Guess_The_Mood_Game():
             self.sad_button = self.CreateButton("sad_button.png", "sad_button_depressed.png", (675,750), scale=1.3, unique_id="sad") 
             self.happy_button = self.CreateButton("happy_button.png", "happy_button_depressed.png", (675,1150), scale=1.3, unique_id="happy") 
             self.unsure_button = self.CreateButton("unsure_button.png", "unsure_button_depressed.png", (850,1550), scale=1, unique_id = "unsure") 
-            self.play_button = self.CreateToggleButton("pause_button.png","play_button.png","pause_button_grey.png","play_button_grey.png", (self.cen_x-100, 200), scale = 4, when_toggle_on= self.sound_manager.pause, when_toggle_off = self.sound_manager.unpause) #create pause and play button
+            self.play_button = self.CreateToggleButton("pause_button.png","play_button.png","pause_button_grey.png","play_button_grey.png", (self.cen_x-100, 175), scale = 4, when_toggle_on= self.sound_manager.pause, when_toggle_off = self.sound_manager.unpause) #create pause and play button
             slider_scale = 2 #used for slider and for text adjacent to slider
             slider_x = 275
             slider_y = 450
