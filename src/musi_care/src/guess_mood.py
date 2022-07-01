@@ -77,11 +77,12 @@ class Guess_The_Mood_Game():
         full_path = this_file_path = os.path.dirname(__file__) + data_filepath
 	
         with open (full_path, "r") as database:
-            self.music_data = {"easy":{1:{""}}, "medium":{1:{""}}, "hard":{1:{""}}} #Reset data to overwrite it thouroughly
+            difficulty_labels = ["tut","easy","medium", "hard"]
+            self.music_data = {"tut":{1:{""}},"easy":{1:{""}}, "medium":{1:{""}}, "hard":{1:{""}}} #Reset data to overwrite it thouroughly
             
             #sort data into their difficulty tiers
             data = database.read().splitlines() #read data and load into raw into "data"
-            for difficulty in self.music_data.keys(): #extract for each difficulty seperately
+            for difficulty in difficulty_labels: #extract for each difficulty seperately
                 open_bracket_line_num = 0
                 open_bracket_found= False
                 close_bracket_line_num = 0

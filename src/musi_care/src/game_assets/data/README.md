@@ -8,6 +8,6 @@ The directory that the code defaults in is the folder that contains the "happy" 
 
 Data should have the label of the data followed by an equals sign, and then the data all empty spaces are removed and ignored, so the spaces after the equals are of no consequence
 
-The order of the brackets matters, the top most bracket is easy, then next bracket is medium, then the 3rd will be hard.
-Songs should be put in order of their level numbers
+The order of the brackets matters, the top most bracket is tutorial, then next bracket is easy, then the 3rd will be medium and the 4th is hard.
+Songs should be put in order of their level numbers and seperated with the £#
 

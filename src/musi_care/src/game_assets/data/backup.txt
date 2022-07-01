@@ -1,11 +1,3 @@
-tutorial
-{
-song_name = september.wav
-mood = happy
-hint = This song is very groovy
-£#
-}
-
 EASY MODE
 {
 song_name = follow_the_van.wav
