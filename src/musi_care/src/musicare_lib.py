@@ -7,6 +7,7 @@ import rospy
 import pygame
 import pygame.freetype
 import os
+import math
 from musi_care.msg import SongData
 from musi_care.srv import sound_player_srv
 from musi_care.srv import qt_command
@@ -205,6 +206,8 @@ class Renderer():
         arrow_img = pygame.image.load(path_to_arrow).convert_alpha()
         arrow_size = (arrow_img.get_width(),arrow_img.get_height())
         bounding_scalar = 50 #how much bigger the bounding should be than the original rect
+        time_scalar = 50 # the scaler to move our arrow in a sine wave
+        time = rospy.get_time()
         
         #Create bounding box
         bound_w = target_rect[2] + bounding_scalar
@@ -213,16 +216,16 @@ class Renderer():
         bound_y = target_rect[1] + ((target_rect[3]-bound_h)/2)
         bounding_rect = (bound_x, bound_y, bound_w, bound_h)
         
-        #Draw 
+        #Create Arrow
         bounding_rect_center = (bound_x + (bound_w/2), bound_y + (bound_h/2))
-        arrow_x = bound_y + 600 - (arrow_size[0] /2) #use our Y not cen y. 150 is half the width of the arrow
-        print(bounding_rect_center[1])
+        arrow_x = bound_x + (bound_w/2) - (arrow_size[0] /2) #use our Y not cen y. 150 is half the width of the arrow
         if bounding_rect_center[1] > 600: #if our arrow would hit the top of the screen draw it under the box
-            arrow_y = bound_y - 600 # + our time modifyer #time = rospy.get_time()
+            arrow_y = bound_y - arrow_size[1] - 50 - (math.sin(time) * time_scalar)
             image = pygame.transform.scale(arrow_img, arrow_size)
         else:
-            arrow_y = bound_y + bound_h + 600 # - our time modifyer
+            arrow_y = bound_y + bound_h + 50 + (math.sin(time) * time_scalar)
             image = pygame.transform.scale(arrow_img, arrow_size)
+            image = pygame.transform.rotozoom(image,180,1)
         arrow_rect = (arrow_x, arrow_y, arrow_size[0], arrow_size[1])
         
         #Draw

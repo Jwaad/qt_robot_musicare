@@ -196,6 +196,7 @@ class Guess_The_Mood_Game():
         
 #################################################################Level / screen code################################################################
 
+
     def guided_tut(self):
         """Code to play tut sequence for Guess the mood"""
         #Get the level's data
@@ -203,10 +204,7 @@ class Guess_The_Mood_Game():
         self.track_name = level_data["song_name"]
         track_hint = level_data["hint"]
         track_mood = level_data["mood"]
-        #self.HighlightRect()
-        
-        
-        
+
 
     def play_level(self, difficulty, level_num):
         """Sequence plays the levels"""
@@ -277,7 +275,7 @@ class Guess_The_Mood_Game():
                 self.song_duration_slider.render(self.window, progress)
                 for button in self.buttons: #Draw buttons using button list
                     button.render(self.window)
-                self.renderer.HighlightRect(button.get_rect(), self.pygame) #TODO REMOVE ME
+                    self.renderer.HighlightRect(button.get_rect(), self.pygame) #TODO REMOVE ME
                 self.animation_manager.DrawTouchAnimation(self.window) #last so it shows up on top
                 self.pygame.display.update() #Update all drawn objects
                 
