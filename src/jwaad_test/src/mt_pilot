@@ -9,6 +9,8 @@ import rospy
 
 
 
+"""
+
 #init node
 rospy.init_node('MT_pilot', anonymous=False)
 rospy.loginfo("Node launched successfully")
@@ -98,5 +100,5 @@ if consent:
 
 clap_game.qt_gesture("arms_up") #To reset arms
         
-    
+"""
 
