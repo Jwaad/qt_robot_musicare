@@ -236,7 +236,7 @@ class Guess_The_Mood_Game():
             
         return current_track_time, track_total_time, progress, song_ended
         
-    def highlight_block(self, target_rect = None, msg = "Click anywhere to continue ... "):
+    def highlight_block(self, events, target_rect = None, msg = "Click anywhere to continue ... ", timer_complete = None):
         """
         Highlight a certain object and check for click
         target_graphic = the graphic that's in colour
@@ -246,7 +246,7 @@ class Guess_The_Mood_Game():
         """
 
         #Handle events
-        for event in self.pygame.event.get():
+        for event in events:
             #reset / init variables
             option_chosen = ""
             mouse_pos = self.pygame.mouse.get_pos()
@@ -258,8 +258,12 @@ class Guess_The_Mood_Game():
         if target_rect != None: #so we can have blocking functionality without highlighting
             self.renderer.HighlightRect(target_rect, self.pygame) #draw arrow and box
         if msg != "": #we can send an empty msg to msg instead to have it not display anything
-            self.renderer.DrawTextCentered(msg, font_size = 75, font_colour = (0,0,0))
-            
+            if timer_complete == None: #if user didnt specify a timer, just show text like normal
+                self.renderer.DrawTextCentered(msg, font_size = 75, font_colour = (0,0,0))
+            else:
+                if timer_complete: #only render once timer done
+                    self.renderer.DrawTextCentered(msg, font_size = 75, font_colour = (0,0,0))
+                
         return False
                  
                  
@@ -270,11 +274,9 @@ class Guess_The_Mood_Game():
         """
         for key in graphics.keys(): #Draw each object
             if key in keys: #only draw the graphics we ask for
-                graphic() #run as func
+                graphics[key]() #run as func
     
-    #slider_scale = 2 #used for slider and for text adjacent to slider
-    #slider_x = 275
-    #slider_y = 450
+    
     def create_graphics(self, slider_scale, slider_x, slider_y):
         """Create the pygame objects that we will use """
         self.sad_button = self.CreateButton("sad_button.png", "sad_button_depressed.png", (675,750), scale=1.3, unique_id="sad") 
@@ -284,41 +286,58 @@ class Guess_The_Mood_Game():
         self.song_duration_slider = self.CreateHorizontalSlider("track_duration_slider.png", "track_cursor.png", (slider_x,slider_y), on_click = self.sound_manager.stop_track, on_release = self.sound_manager.start_track, scale=slider_scale)
         
         
+    def get_target_behaviour(self, key):
+        """tells our tut what to draw and what to do with events"""
+        target_graphics = []
+        target_event_handler = None
+        if 0 < key < 8: #if key is bigger than our range
+            if key ==2:
+                print("draw the graphs")
+                target_graphics = [functools.partial(self.sad_button.render, self.window), functools.partial(self.happy_button.render, self.window)]
+        else:
+            print("KEY ERROR: get_target_behaviour")
+            
+        return target_graphics, target_event_handler #if our logic sifts failed
+    
 #################################################################Level / screen code################################################################
 
 
     def guided_tut(self):
         """Code to play tut sequence for Guess the mood"""
-
+            
         #String of our keys so i can remember them
         """
-        1 = 
-        2 =        
-        3 =
-        4 =
-        5 =
-        6 =
+        1 = top text
+        2 = current_track_time 
+        3 = track_total_time
+        4 = song slider
+        5 = sad button
+        6 = happy button
+        7 = unsure button
+        8 = play/pause button
         """
 
         #Create rect to highlight and text for QT to say
         tut_graphics = {
-        1: {"rect":{0, 0, 100, 500},  "speech" : "In this game, you will hear some music and you need to select whether it was happy or sad! When you are ready for the next step, tap the screen."},
-        2: {"rect":{0, 0, 100, 500}, "speech" : "This text at the top will remind you of what you have to do."},
-        3: {"rect":{0, 0, 150, 500}, "speech" : "3."},
-        4: {"rect":{0, 0, 100, 500}, "speech" : "4."},
-        5: {"rect":{0, 0, 150, 500}, "speech" : "5."},
-        6: {"rect":{0, 0, 100, 500}, "speech" : "6."},
-        7: {"rect":{0, 0, 150, 500}, "speech" : "7."},
-        8: {"rect":{0, 0, 100, 500}, "speech" : "8."},
+        1: {"rect":(560, 30, 1790, 135), "keys":[1,2,3,4,5,6,7,8],  "speech" : "In this game, you will hear some music and you need to select whether it was happy or sad! When you are ready for the next step, tap the screen."},
+        2: {"rect":(615, 700, 1675, 800), "keys":[1,2,3,4,5,6,7,8], "speech" : "This text at the top will remind you of what you have to do."},
+        3: {"rect":(0, 0, 150, 550), "keys":[1,2,3,4,5,6,7,8], "speech" : "3."},
+        4: {"rect":(0, 0, 100, 500), "keys":[1,2,3,4,5,6,7,8], "speech" : "4."},
+        5: {"rect": None, "keys":[2,3,4,5,6,7,8], "speech" : "5."},
+        6: {"rect":(0, 0, 150, 550), "keys":[1,2,3,4,5,6,7,8], "speech" : "6."},
+        7: {"rect":(0, 0, 100, 500), "keys":[1,2,3,4,5,6,7,8], "speech" : "7."},
+        8: {"rect":(0, 0, 150, 550), "keys":[1,2,3,4,5,6,7,8], "speech" : "8."},
         }
         
         if self.run:
             
             #Get the level's data
-            level_data = self.music_data[difficulty][level_num] #{"song_name":"title", "mood":"happy", "hint":"some text"}
+            level_data = self.music_data["tut"][1] #load tut song data
             self.track_name = level_data["song_name"]
             track_hint = level_data["hint"]
             track_mood = level_data["mood"]
+            current_track_time = ""
+            track_total_time = ""
             
             #Create buttons and slider
             slider_scale = 2 #used for slider and for text adjacent to slider
@@ -340,14 +359,43 @@ class Guess_The_Mood_Game():
                 #Define some variables for the tut sequence
                 tut_key = tut_graphics[key]["keys"] #draw grey graphics of everything except for our focused graphic
                 tut_speech = tut_graphics[key]["speech"]
-                self.command_manager.qt_say(tut_speech) #QT should say text out loud
+                tut_rect = tut_graphics[key]["rect"]
+                speaking_timer = self.command_manager.qt_say(tut_speech) #QT should say text out loud
                 clicked = False  #Hold execution until user clicks somewhere
                 
-                while not clicked:
+                #set logic based on what graphic we focus on
+                target_graphics, target_event = self.get_target_behaviour(key)
+
+                while not clicked and not rospy.is_shutdown() and self.run:
                 
+                    #Get data
+                    current_track_time, track_total_time, progress, song_ended = self.get_song_info(current_track_time, track_total_time) #get out some data from the current song playing
+                    grey_graphics = self.update_grey_graphics(current_track_time, track_total_time, progress, slider_x, slider_y) #update all grey graphics
+                    
                     #Render graphics
-                    self.update_grey_graphics(current_track_time, track_total_time, progress, slider_x, slider_y) #update all grey graphics
-                    self.load_list_graphics(graphics, key) #load grey objects
+                    self.renderer.DrawBackground(self.background_colour) #draw background
+                    self.load_list_graphics(grey_graphics, tut_key) #load specified grey objects
+                    if target_graphics != []:
+                        for graphic in target_graphics: #Render the target graphic
+                            graphic() #Render graphics each
+                    self.animation_manager.DrawTouchAnimation(self.window) #Draw touch animation
+                    
+                    #Handle events
+                    events = self.pygame.event.get()
+                    for event in events:
+                        print(self.pygame.mouse.get_pos())#TEMP
+                        if event.type == self.pygame.QUIT:
+                            self.run = False #Stops the program entirely
+                            self.quit = True #Tells us that the game was quit out of, and it didn't end organically
+                            self.sound_manager.stop_track() #Stop the music
+                    if target_event != None:
+                        #target_event(events) #render the target graphic
+                        pass
+                        
+                    #Check for click
+                    qt_finished_talking = self.command_manager.robo_timer.CheckTimer(speaking_timer)
+                    clicked = self.highlight_block(events, target_rect = tut_rect, timer_complete = qt_finished_talking)
+                    self.pygame.display.update() #Update all drawn objects
 
 
     def play_level(self, difficulty, level_num):
@@ -378,8 +426,6 @@ class Guess_The_Mood_Game():
             correct_answer_given = False
             track_stopped = True #this makes it play on start
             wrong_counter = 0
-            first_iter = True # used to unpause for the 1st time
-            graphics_list = []
             qt_message = ""
             current_track_time = ""
             track_total_time = ""
@@ -512,8 +558,8 @@ class Guess_The_Mood_Game():
             self.quit = True
         self.play_level(difficulty, level)
         """
-        self.play_level(difficulty, level)
-        #self.guided_tut()
+        #self.play_level(difficulty, level)
+        self.guided_tut()
 
 
 #################################################################On execution################################################################      
