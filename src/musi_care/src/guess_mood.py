@@ -286,16 +286,18 @@ class Guess_The_Mood_Game():
         self.song_duration_slider = self.CreateHorizontalSlider("track_duration_slider.png", "track_cursor.png", (slider_x,slider_y), on_click = self.sound_manager.stop_track, on_release = self.sound_manager.start_track, scale=slider_scale)
         
         
-    def get_target_behaviour(self, key):
+    def get_target_behaviour(self, key, progress):
         """tells our tut what to draw and what to do with events"""
         target_graphics = []
         target_event_handler = None
-        if 0 < key < 8: #if key is bigger than our range
-            if key ==2:
-                print("draw the graphs")
-                target_graphics = [functools.partial(self.sad_button.render, self.window), functools.partial(self.happy_button.render, self.window)]
-        else:
-            print("KEY ERROR: get_target_behaviour")
+        if key ==3:
+            target_graphics = [functools.partial(self.sad_button.render, self.window), functools.partial(self.happy_button.render, self.window)]
+        elif key ==4:
+            target_graphics = [functools.partial(self.unsure_button.render, self.window)]
+        elif key == 5:
+            target_graphics = [functools.partial(self.song_duration_slider.render, self.window, progress), functools.partial(self.play_button.render, self.window)]
+        elif key == 8:
+            target_graphics = [functools.partial(self.play_button.render, self.window)]
             
         return target_graphics, target_event_handler #if our logic sifts failed
     
@@ -318,17 +320,19 @@ class Guess_The_Mood_Game():
         """
 
         #Create rect to highlight and text for QT to say
+        #(250, 400, 2600-250, 650-400) #slider rect
         tut_graphics = {
-        1: {"rect":(560, 30, 1790, 135), "keys":[1,2,3,4,5,6,7,8],  "speech" : "In this game, you will hear some music and you need to select whether it was happy or sad! When you are ready for the next step, tap the screen."},
-        2: {"rect":(615, 700, 1675, 800), "keys":[1,2,3,4,5,6,7,8], "speech" : "This text at the top will remind you of what you have to do."},
-        3: {"rect":(0, 0, 150, 550), "keys":[1,2,3,4,5,6,7,8], "speech" : "3."},
-        4: {"rect":(0, 0, 100, 500), "keys":[1,2,3,4,5,6,7,8], "speech" : "4."},
-        5: {"rect": None, "keys":[2,3,4,5,6,7,8], "speech" : "5."},
-        6: {"rect":(0, 0, 150, 550), "keys":[1,2,3,4,5,6,7,8], "speech" : "6."},
-        7: {"rect":(0, 0, 100, 500), "keys":[1,2,3,4,5,6,7,8], "speech" : "7."},
-        8: {"rect":(0, 0, 150, 550), "keys":[1,2,3,4,5,6,7,8], "speech" : "8."},
+        1: {"rect":None, "keys":[1,2,3,4,5,6,7,8],  "speech" : "In this game, you will hear some music and you need to select whether it was happy or sad! When you are ready for the next step, tap the screen."},
+        2: {"rect":(560, 30, 1790, 135), "keys":[1,2,3,4,5,6,7,8], "speech" : "This text at the top will remind you of what you have to do."},
+        3: {"rect":(615, 700, 1675, 800), "keys":[1,2,3,4,7,8], "speech" : "These are your options. Tap happy if you think the song is happy, or sad if you think the song is sad."},
+        4: {"rect":(800, 1500, 2050-800, 1850-1500), "keys":[1,2,3,4,5,6,8], "speech" : "If you need a hint, click this button. I will help you out!"},
+        5: {"rect": (125, 150, 2750-125, 700-150), "keys":[1, 2,3,5,6,7], "speech" : "This is how you listen to the music."},
+        6: {"rect":(100, 425, 180, 600-425), "keys":[1,2,3,4,5,6,7,8], "speech" : "This number is how long the song has been playing for"},
+        7: {"rect":(2575, 425, 180, 600-425), "keys":[1,2,3,4,5,6,7,8], "speech" : "This number is how long the song is in total."},
+        8: {"rect":(1300, 160, 1600-1300, 450-160), "keys":[1,2,3,4,5,6,7], "speech" : "This is the play and pause button. Use this to stop and start the song as you like."},
+        9: {"rect": None, "keys":[1,2,3,4,5,6,7,8], "speech" : "That is all for Guess the mood."}
         }
-        
+
         if self.run:
             
             #Get the level's data
@@ -352,10 +356,11 @@ class Guess_The_Mood_Game():
             #Define variables & start track
             self.sound_manager.load_track(self.track_name) #load song to sound player and get data back
             self.track_data = self.GetTrackInfo() #Get data from the sound_player node for this track and save it
+            current_track_time, track_total_time, progress, song_ended = self.get_song_info(current_track_time, track_total_time) #get out some data from the current song playing
 
             #loop through each graphic that we care about 
             for key in tut_graphics.keys():
-                
+                print(key)
                 #Define some variables for the tut sequence
                 tut_key = tut_graphics[key]["keys"] #draw grey graphics of everything except for our focused graphic
                 tut_speech = tut_graphics[key]["speech"]
@@ -364,7 +369,7 @@ class Guess_The_Mood_Game():
                 clicked = False  #Hold execution until user clicks somewhere
                 
                 #set logic based on what graphic we focus on
-                target_graphics, target_event = self.get_target_behaviour(key)
+                target_graphics, target_event = self.get_target_behaviour(key, progress)
 
                 while not clicked and not rospy.is_shutdown() and self.run:
                 
@@ -383,7 +388,7 @@ class Guess_The_Mood_Game():
                     #Handle events
                     events = self.pygame.event.get()
                     for event in events:
-                        print(self.pygame.mouse.get_pos())#TEMP
+                        #print(self.pygame.mouse.get_pos())#TEMP
                         if event.type == self.pygame.QUIT:
                             self.run = False #Stops the program entirely
                             self.quit = True #Tells us that the game was quit out of, and it didn't end organically
@@ -393,7 +398,10 @@ class Guess_The_Mood_Game():
                         pass
                         
                     #Check for click
-                    qt_finished_talking = self.command_manager.robo_timer.CheckTimer(speaking_timer)
+                    if len(self.command_manager.robo_timer.get_timers()) > 0: #if there's no timers active dont even check
+                        qt_finished_talking = self.command_manager.robo_timer.CheckTimer(speaking_timer)
+                    else:
+                        qt_finished_talking = True
                     clicked = self.highlight_block(events, target_rect = tut_rect, timer_complete = qt_finished_talking)
                     self.pygame.display.update() #Update all drawn objects
 
@@ -533,19 +541,20 @@ class Guess_The_Mood_Game():
                     
             #Ending sequence after while loop
             if self.quit:
+                self.pygame.quit
                 print("You have quit the game.")
             else:
                 print("You completed the level.")
                 
             #close out before end
-            self.pygame.quit
+            #self.pygame.quit
             self.sound_manager.stop_track()
 
 
 #################################################################Main################################################################   
 
     def Main(self, difficulty = "easy", level =  1): #input what level and difficulty to play, the program will handle the rest
-        """
+    
         status = self.level_loader.QTSpeakingScreen("Lets play Guess the mood!", self.run, self.background_colour)
         if status == "QUIT": #if someone clicked quit during this screen then quit instead
             self.run = False
@@ -556,10 +565,9 @@ class Guess_The_Mood_Game():
         elif tut == "QUIT": #if someone clicked quit during this screen then quit instead
             self.run = False
             self.quit = True
+        self.level_loader.pause_screen(self.run, self.background_colour)
         self.play_level(difficulty, level)
-        """
-        #self.play_level(difficulty, level)
-        self.guided_tut()
+       
 
 
 #################################################################On execution################################################################      

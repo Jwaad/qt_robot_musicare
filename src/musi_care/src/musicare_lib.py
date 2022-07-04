@@ -154,6 +154,38 @@ class StandardLevels():
                     qt_speaking = False #unessecary but might as well 
                     return
 
+    def pause_screen(self, run, background_colour, text_display= "Please tap the screen when you are ready to start the level", qt_say=None, should_gesture = True, gesture = "explain_right"):
+        """Screen that waits until tap, non blocking even if QT speaking"""
+             
+        if run: #Dont start this screen if the previous screen wanted to close out the game
+            
+            #Handle speaking
+            if qt_say != None:
+                self.command_manager.qt_emote("talking") #show mouth moving
+                speaking_timer_id = self.command_manager.qt_say(qt_say) #says text we give it, and starts an internal timer that we can check on          
+                
+            #Handle gesturing
+            if should_gesture:
+                self.command_manager.qt_gesture(gesture)
+            
+            clicked = False
+            while not clicked and not rospy.is_shutdown() and run:
+            
+                #check for quit
+                for event in self.pygame.event.get():
+                    #Check if the user clicks the X
+                    if event.type == self.pygame.QUIT:
+                        return "QUIT"
+                    elif(event.type == self.pygame.MOUSEBUTTONUP):#on mouse release play animation to show where cursor is
+                        clicked = True
+                        self.animation_manager.StartTouchAnimation(self.pygame.mouse.get_pos() ) #tell system to play animation when drawing
+                #Draw background and objects
+                self.renderer.DrawBackground(background_colour)
+                self.renderer.DrawTextCentered(text_display, font_size =70 )
+                self.animation_manager.DrawTouchAnimation(self.window) # also draw touches
+                self.pygame.display.update() #Update all drawn objects
+                
+
 #####################################################Renderer##################################################################
 
 class Renderer():
@@ -444,7 +476,7 @@ class TimeFunctions():
             print("Timer referenced does not exist, check timer ID given")
             return None
     
-    def GetTimers(self):
+    def get_timers(self):
         return self.timers #return the timer list
         
 #####################################################Button##################################################################
