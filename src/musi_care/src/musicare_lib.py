@@ -333,7 +333,9 @@ class QTManager():
         self.robo_timer = TimeFunctions()
         
     def send_qt_command(self, speech = "", gesture = "", emote = "", command_content= "", command_blocking = False):
-        """Neatens and simplifies sending commands to QT """
+        """Neatens and simplifies sending commands to QT 
+        if we want to use multiple functions of QT at once and dont care about tracking time taken, we should use this method instead of the others
+        """
         if command_content == "":
             #rospy.loginfo("QT was sent empty command")
             return False
