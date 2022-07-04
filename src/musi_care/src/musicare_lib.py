@@ -331,20 +331,34 @@ class QTManager():
 
     def __init__(self):
         self.robo_timer = TimeFunctions()
-    
-    def send_qt_command(self, command_type, command_content= "", command_blocking = False):
+        
+    def send_qt_command(self, speech = "", gesture = "", emote = "", command_content= "", command_blocking = False):
         """Neatens and simplifies sending commands to QT """
-        rospy.wait_for_service('/qt_command_service')
-        command_controller = rospy.ServiceProxy('/qt_command_service', qt_command)
-        command_complete = command_controller(command_type, command_content, command_blocking)
-        return command_complete
+        if command_content = "":
+            #rospy.loginfo("QT sent empty command")
+            return False
+        elif speech != "":#do qt_speak
+            rospy.wait_for_service('/qt_command_service')
+            command_controller = rospy.ServiceProxy('/qt_command_service', qt_command)
+            command_complete = command_controller("tts", command_content, command_blocking)
+            return command_complete    
+        elif gesture != "":#do qt_speak
+            rospy.wait_for_service('/qt_command_service')
+            command_controller = rospy.ServiceProxy('/qt_command_service', qt_command)
+            command_complete = command_controller("gesture", command_content, command_blocking)
+            return command_complete    
+        elif emote != "":#do qt_speak
+            rospy.wait_for_service('/qt_command_service')
+            command_controller = rospy.ServiceProxy('/qt_command_service', qt_command)
+            command_complete = command_controller("emote", command_content, command_blocking)
+            return command_complete    
     
     def qt_say_blocking(self, text):
         """Makes QT say something, then makes you wait until the speaking is done"""
         timer_len = len(text) * 0.08 #0.2s per letter 4 letter word is given 0.8s to be said
         timer_id = "QT_SAY_BLOCKING"
         self.robo_timer.CreateTimer(timer_id, timer_len) #creates timer with ID 1 for 8s   
-        self.send_qt_command("tts", text)
+        self.send_qt_command(speech = text)
         talking = True
         while talking and not rospy.is_shutdown():
             if self.robo_timer.CheckTimer("QT_SAY_BLOCKING"): #if our timer is done
@@ -355,16 +369,16 @@ class QTManager():
         timer_len = len(text) * 0.08 #0.08s per letter 4 letter word is given 0.32 secs to be said
         timer_id = "QT_SAY"
         self.robo_timer.CreateTimer(timer_id, timer_len) #creates timer with ID 1 for 8s   
-        self.send_qt_command("tts", text)
+        self.send_qt_command(speech = text)
         return timer_id
         
-    def qt_gesture(self,gesture):
+    def qt_gesture(self, req_gesture):
         """Make QT do gesture, non blocking """
-        self.send_qt_command("gesture", gesture)
+        self.send_qt_command(gesture = req_gesture)
     
-    def qt_emote(self,emote):
-        """Make QT emote """
-        self.send_qt_command("emote", emote)
+    def qt_emote(self,req_emote):
+        """Make QT emote, non blocking"""
+        self.send_qt_command(emote = req_emote)
 
 #####################################################AnimationManager##################################################################
 

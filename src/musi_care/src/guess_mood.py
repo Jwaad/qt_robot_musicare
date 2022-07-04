@@ -192,7 +192,7 @@ class Guess_The_Mood_Game():
         
         slider = HorizontalSlider(slider_path, cursor_path, x_y_locations, scale, on_click, on_release)
         return slider
-        
+    
     
     def update_graphics(self, current_track_time, track_total_time, progress, slider_x, slider_y):
         """Redraw graphics """
@@ -204,7 +204,7 @@ class Guess_The_Mood_Game():
         for button in self.buttons: #Draw buttons using button list
             button.render(self.window)
         self.animation_manager.DrawTouchAnimation(self.window) #last so it shows up on top
-        
+
 
     def update_grey_graphics(self, current_track_time, track_total_time, progress, slider_x, slider_y):
         """reinitialise grey graphics taking with parameters they need """
@@ -219,7 +219,7 @@ class Guess_The_Mood_Game():
             i+=1
             grey_graphics[i] = functools.partial(button.render, self.window, grey = True)
         
-        return grey_graphics
+        return grey_graphics      
         
         
     def highlight_block(self, target_rect = None, msg = "Click anywhere to continue ... "):
@@ -247,9 +247,8 @@ class Guess_The_Mood_Game():
             self.renderer.DrawTextCentered(msg, font_size = 75, font_colour = (0,0,0))
             
         return False
-            
-            
-                            
+                 
+                 
     def load_list_graphics(self, graphics, keys):
         """takes graphics dict and loads them
             Graphics = {1: graphic_func_1, 2: graphic_func_2. etc}
@@ -260,8 +259,6 @@ class Guess_The_Mood_Game():
                 graphic() #run as func
     
 #################################################################Level / screen code################################################################
-
-    
 
 
     def guided_tut(self):
@@ -401,7 +398,7 @@ class Guess_The_Mood_Game():
                     song_ended = True
                 
                 #Draw background and objects
-                self.update_graphics(current_track_time, track_total_time, progress, slider_x, slider_y))
+                self.update_graphics(current_track_time, track_total_time, progress, slider_x, slider_y)
                 self.rendered_graphics = self.update_grey_graphics(current_track_time, track_total_time, progress, slider_x, slider_y) 
                 self.pygame.display.update() #Update all drawn objects
                 
