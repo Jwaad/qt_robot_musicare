@@ -183,7 +183,6 @@ class StandardLevels():
                 self.renderer.DrawBackground(background_colour)
                 speed_coefficient = 1 #half sine freq
                 dot_decider = math.sin(speed_coefficient*rospy.get_time())
-                print(dot_decider)
                 if dot_decider < -1/3:
                     self.renderer.DrawTextCentered(text_display, font_size =70 )
                 elif dot_decider < 1/3:
