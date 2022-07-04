@@ -220,7 +220,18 @@ class Guess_The_Mood_Game():
             grey_graphics[i] = functools.partial(button.render, self.window, grey = True)
         
         return grey_graphics      
-        
+
+    def get_song_info(self):
+    #Get variables that we will draw onto screen
+        formatted_data = self.GetTrackInfo(formatted_output = True)
+        if not self.song_duration_slider.slider_being_held: #If progress slider isn't being held just act as normal
+            current_track_time = formatted_data[0]          #Time gotten from sound_player node
+            track_total_time = formatted_data[1] #Total track time
+        #else pass and dont update current time (ie use old time)
+        progress = self.elapsed_time_secs / self.total_track_secs #elapsed time in percentage completion, so slider can represent that on a bar
+        song_ended = progress >= 0.99 # if progress > 99% = song is finished, otherwise false
+            
+        return current_track_time, track_total_time, progress, song_ended
         
     def highlight_block(self, target_rect = None, msg = "Click anywhere to continue ... "):
         """
@@ -331,8 +342,11 @@ class Guess_The_Mood_Game():
                 clicked = False  #Hold execution until user clicks somewhere
                 
                 while not clicked:
+                
                     #Render graphics
+                    self.update_grey_graphics(current_track_time, track_total_time, progress, slider_x, slider_y) #update all grey graphics
                     self.load_list_graphics(graphics, key) #load grey objects
+                    
                     
 
 
@@ -374,7 +388,7 @@ class Guess_The_Mood_Game():
             
             self.sound_manager.unpause() #start track
             music_playing = True
-            song_interrupt = False # track if we stopped song
+            song_interrupt = False  #track if we stopped song
             slider_was_held = False
             
             #Main game loop
@@ -388,14 +402,7 @@ class Guess_The_Mood_Game():
                     song_ended = False
         
                 #Get variables that we will draw onto screen
-                formatted_data = self.GetTrackInfo(formatted_output = True)
-                if not self.song_duration_slider.slider_being_held: #If progress slider isn't being held just act as normal
-                    current_track_time = formatted_data[0]          #Time gotten from sound_player node
-                    track_total_time = formatted_data[1] #Total track time
-                #else pass and dont update current time (ie use old time)
-                progress = self.elapsed_time_secs / self.total_track_secs #elapsed time in percentage completion, so slider can represent that on a bar
-                if progress >= 0.99: #if longer than 99% of the song has passed
-                    song_ended = True
+                current_track_time, track_total_time, progress, song_ended = self.get_song_info() #get out some data from the current song playing
                 
                 #Draw background and objects
                 self.update_graphics(current_track_time, track_total_time, progress, slider_x, slider_y)
