@@ -154,7 +154,7 @@ class StandardLevels():
                     qt_speaking = False #unessecary but might as well 
                     return
 
-    def pause_screen(self, run, background_colour, text_display= "Please tap the screen when you are ready to start the level", qt_say=None, should_gesture = True, gesture = "explain_right"):
+    def pause_screen(self, run, background_colour, text_display= "Please tap the screen when you are ready to start the level.", qt_say=None, should_gesture = True, gesture = "explain_right"):
         """Screen that waits until tap, non blocking even if QT speaking"""
              
         if run: #Dont start this screen if the previous screen wanted to close out the game
@@ -181,7 +181,15 @@ class StandardLevels():
                         self.animation_manager.StartTouchAnimation(self.pygame.mouse.get_pos() ) #tell system to play animation when drawing
                 #Draw background and objects
                 self.renderer.DrawBackground(background_colour)
-                self.renderer.DrawTextCentered(text_display, font_size =70 )
+                speed_coefficient = 1 #half sine freq
+                dot_decider = math.sin(speed_coefficient*rospy.get_time())
+                print(dot_decider)
+                if dot_decider < -1/3:
+                    self.renderer.DrawTextCentered(text_display, font_size =70 )
+                elif dot_decider < 1/3:
+                    self.renderer.DrawTextCentered(text_display + ".", font_size =70 )
+                else:
+                    self.renderer.DrawTextCentered(text_display + "..", font_size =70 )
                 self.animation_manager.DrawTouchAnimation(self.window) # also draw touches
                 self.pygame.display.update() #Update all drawn objects
                 
