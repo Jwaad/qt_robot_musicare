@@ -221,13 +221,16 @@ class Guess_The_Mood_Game():
         
         return grey_graphics      
 
-    def get_song_info(self):
+    def get_song_info(self, prev_track_time = "", prev_total_time=""):
     #Get variables that we will draw onto screen
         formatted_data = self.GetTrackInfo(formatted_output = True)
         if not self.song_duration_slider.slider_being_held: #If progress slider isn't being held just act as normal
             current_track_time = formatted_data[0]          #Time gotten from sound_player node
             track_total_time = formatted_data[1] #Total track time
-        #else pass and dont update current time (ie use old time)
+        else: #dont update the track time just use the old data
+            current_track_time = prev_track_time
+            track_total_time = prev_total_time
+            
         progress = self.elapsed_time_secs / self.total_track_secs #elapsed time in percentage completion, so slider can represent that on a bar
         song_ended = progress >= 0.99 # if progress > 99% = song is finished, otherwise false
             
@@ -310,45 +313,31 @@ class Guess_The_Mood_Game():
         }
         
         if self.run:
+            
             #Get the level's data
-            level_data = self.music_data["tut"][1] #specific level data for our tutorial {"song_name":"title", "mood":"happy", "hint":"some text"}
-            track_name = level_data["song_name"]
+            level_data = self.music_data[difficulty][level_num] #{"song_name":"title", "mood":"happy", "hint":"some text"}
+            self.track_name = level_data["song_name"]
             track_hint = level_data["hint"]
             track_mood = level_data["mood"]
-            self.sound_manager.load_track(track_name) #load song to sound player and get data back
-            self.track_data = self.GetTrackInfo() #Get data from the sound_player node for this track and save it
             
-            #Create buttons and sliders
-            self.sad_button = self.CreateButton("sad_button.png", "sad_button_depressed.png", (675,750), scale=1.3, unique_id="sad") 
-            self.happy_button = self.CreateButton("happy_button.png", "happy_button_depressed.png", (675,1150), scale=1.3, unique_id="happy") 
-            self.unsure_button = self.CreateButton("unsure_button.png", "unsure_button_depressed.png", (850,1550), scale=1, unique_id = "unsure") 
-            self.play_button = self.CreateToggleButton("pause_button.png","play_button.png","pause_button_grey.png","play_button_grey.png", (self.cen_x-100, 175), scale = 4, when_toggle_on= self.sound_manager.pause, when_toggle_off = self.sound_manager.unpause) #create pause and play button
+            #Create buttons and slider
             slider_scale = 2 #used for slider and for text adjacent to slider
             slider_x = 275
             slider_y = 450
-            self.song_duration_slider = self.CreateHorizontalSlider("track_duration_slider.png", "track_cursor.png", (slider_x,slider_y), on_click = self.sound_manager.stop_track, on_release = self.sound_manager.start_track, scale=slider_scale)
+            self.create_graphics(slider_scale, slider_x, slider_y)
             
             #Group elements
             self.buttons = [self.sad_button, self.happy_button, self.unsure_button, self.play_button]
             self.sliders = [self.song_duration_slider] #Will be relevant eventually perhaps
-            
-            #Get variables that we will draw onto screen
-            formatted_data = self.GetTrackInfo(formatted_output = True)
-            if not self.song_duration_slider.slider_being_held: #If progress slider isn't being held just act as normal
-                current_track_time = formatted_data[0]          #Time gotten from sound_player node
-                track_total_time = formatted_data[1] #Total track time
-            #else pass and dont update current time (ie use old time)
-            progress = self.elapsed_time_secs / self.total_track_secs #elapsed time in percentage completion, so slider can represent that on a bar
-            if progress >= 0.99: #if longer than 99% of the song has passed
-                song_ended = True
-            
-            #create grey graphics
-            #grey_graphics = self.update_grey_graphics(current_track_time, track_total_time, progress, slider_x, slider_y) #update all grey graphics
-            
-            i = 1
+
+            #Define variables & start track
+            self.sound_manager.load_track(self.track_name) #load song to sound player and get data back
+            self.track_data = self.GetTrackInfo() #Get data from the sound_player node for this track and save it
+
+            #loop through each graphic that we care about 
             for key in tut_graphics.keys():
                 
-                #Define some varibles for the tut sequence
+                #Define some variables for the tut sequence
                 tut_key = tut_graphics[key]["keys"] #draw grey graphics of everything except for our focused graphic
                 tut_speech = tut_graphics[key]["speech"]
                 self.command_manager.qt_say(tut_speech) #QT should say text out loud
@@ -359,8 +348,6 @@ class Guess_The_Mood_Game():
                     #Render graphics
                     self.update_grey_graphics(current_track_time, track_total_time, progress, slider_x, slider_y) #update all grey graphics
                     self.load_list_graphics(graphics, key) #load grey objects
-                    
-                    
 
 
     def play_level(self, difficulty, level_num):
@@ -394,6 +381,8 @@ class Guess_The_Mood_Game():
             first_iter = True # used to unpause for the 1st time
             graphics_list = []
             qt_message = ""
+            current_track_time = ""
+            track_total_time = ""
             
             self.sound_manager.unpause() #start track
             music_playing = True
@@ -411,7 +400,7 @@ class Guess_The_Mood_Game():
                     song_ended = False
         
                 #Get variables that we will draw onto screen
-                current_track_time, track_total_time, progress, song_ended = self.get_song_info() #get out some data from the current song playing
+                current_track_time, track_total_time, progress, song_ended = self.get_song_info(current_track_time, track_total_time) #get out some data from the current song playing
                 
                 #Draw background and objects
                 self.update_graphics(current_track_time, track_total_time, progress, slider_x, slider_y)
@@ -473,7 +462,8 @@ class Guess_The_Mood_Game():
                                     print("User has clicked the wrong answer for the 2nd time")
                                     self.command_manager.send_qt_command(emote = "sad")
                                     self.command_manager.send_qt_command(gesture = "shake_head")
-                                    self.command_manager.send_qt_command(tts = "Sorry, that is not the right answer, here is a hint.") #QT reads out level's hint
+                                    qt_message = "Sorry, that is not the right answer, here is a hint." #QT reads out level's hint
+                                    self.level_loader.QTSpeakingPopupScreen(qt_message, self.rendered_graphics, self.run, self.background_colour) # this is blocking  
                                     qt_message = (track_hint) #QT reads out level's hint
                                     self.level_loader.QTSpeakingPopupScreen(qt_message, self.rendered_graphics, self.run, self.background_colour) # this is blocking    
                             if song_interrupt: #if we had paused the music, resume it
