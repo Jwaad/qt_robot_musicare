@@ -679,7 +679,25 @@ class HorizontalSlider():
             screen.blit(self.slider_image, self.slider_rect) #draw bar
             self.draw_progress_bar(screen, progress) #draw the red progress bar
             self.draw_cursor(screen) #draw the cursor
-     
+    
+    def render_bar(self, screen, progress, grey = False):
+        """Draw slider, cursor and progress bar onto screen """
+        if grey: #use grey graphics
+            screen.blit(self.slider_image, self.slider_rect) #draw bar
+            self.draw_progress_bar(screen, progress, grey) #draw the red progress bar
+        else: #render as normal
+            screen.blit(self.slider_image, self.slider_rect) #draw bar
+            self.draw_progress_bar(screen, progress) #draw the red progress bar
+    
+    def render_cursor(self, screen, progress, grey = False):
+        """Draw slider, cursor and progress bar onto screen """
+        if grey: #use grey graphics
+            screen.blit(self.slider_image, self.slider_rect) #draw bar
+            self.draw_cursor(screen) #draw the cursor
+        else: #render as normal
+            screen.blit(self.slider_image, self.slider_rect) #draw bar
+            self.draw_cursor(screen) #draw the cursor
+    
     def draw_progress_bar(self, screen, progress, grey = False):
         """Uses a percentage to colour the completed relevant of the slider in red"""
         complete_bar_width = self.slider_len

@@ -193,17 +193,150 @@ class Guess_The_Mood_Game():
         slider = HorizontalSlider(slider_path, cursor_path, x_y_locations, scale, on_click, on_release)
         return slider
         
+    
+    def update_graphics(self, current_track_time, track_total_time, progress, slider_x, slider_y):
+        """Redraw graphics """
+        self.renderer.DrawBackground(self.background_colour)
+        self.renderer.DrawTextCentered("What mood does this song have?", font_size = 100, y = 100)
+        self.renderer.DrawText(str(current_track_time), (slider_x - 75, slider_y +75), font_size = 50) #draw current time
+        self.renderer.DrawText(str(track_total_time), (2650, slider_y +75), font_size = 50) #draw total track time
+        self.song_duration_slider.render(self.window, progress)
+        for button in self.buttons: #Draw buttons using button list
+            button.render(self.window)
+        self.animation_manager.DrawTouchAnimation(self.window) #last so it shows up on top
         
+
+    def update_grey_graphics(self, current_track_time, track_total_time, progress, slider_x, slider_y):
+        """reinitialise grey graphics taking with parameters they need """
+        #Load graphics into dict # need to be in a specific order for this tut
+        grey_graphics = {}
+        grey_graphics[1] = functools.partial(self.renderer.DrawTextCentered, "What mood does this song have?", font_size = 100, y = 100)
+        grey_graphics[2] = functools.partial(self.renderer.DrawText, str(current_track_time), (slider_x - 75, slider_y +75), font_size = 50) #draw current time
+        grey_graphics[3] = functools.partial(self.renderer.DrawText, str(track_total_time), (2650, slider_y +75), font_size = 50)
+        grey_graphics[4] = functools.partial(self.song_duration_slider.render, self.window, progress, grey = True)
+        i = 4
+        for button in self.buttons:
+            i+=1
+            grey_graphics[i] = functools.partial(button.render, self.window, grey = True)
+        
+        return grey_graphics
+        
+        
+    def highlight_block(self, target_rect = None, msg = "Click anywhere to continue ... "):
+        """
+        Highlight a certain object and check for click
+        target_graphic = the graphic that's in colour
+        Graphics here are a dict of the partial functions for each renderer in grey
+        target_rect the rect that we want to high light around
+        should be used by being kept in a while loop with other graphics to be drawn
+        """
+
+        #Handle events
+        for event in self.pygame.event.get():
+            #reset / init variables
+            option_chosen = ""
+            mouse_pos = self.pygame.mouse.get_pos()
+            if event.type == self.pygame.MOUSEBUTTONUP:  #on mouse release play animation to show where cursor is
+                self.animation_manager.StartTouchAnimation(mouse_pos) #tell system to play animation when drawing
+                return True
+                
+        #Render graphics
+        if target_rect != None: #so we can have blocking functionality without highlighting
+            self.renderer.HighlightRect(target_rect, self.pygame) #draw arrow and box
+        if msg != "": #we can send an empty msg to msg instead to have it not display anything
+            self.renderer.DrawTextCentered(msg, font_size = 75, font_colour = (0,0,0))
+            
+        return False
+            
+            
+                            
+    def load_list_graphics(self, graphics, keys):
+        """takes graphics dict and loads them
+            Graphics = {1: graphic_func_1, 2: graphic_func_2. etc}
+            key = [1,3,4,5]
+        """
+        for key in graphics.keys(): #Draw each object
+            if key in keys: #only draw the graphics we ask for
+                graphic() #run as func
+    
 #################################################################Level / screen code################################################################
+
+    
 
 
     def guided_tut(self):
         """Code to play tut sequence for Guess the mood"""
-        #Get the level's data
-        level_data = self.music_data["tut"][1] #specific level data for our tutorial {"song_name":"title", "mood":"happy", "hint":"some text"}
-        self.track_name = level_data["song_name"]
-        track_hint = level_data["hint"]
-        track_mood = level_data["mood"]
+
+        #String of our keys so i can remember them
+        """
+        1 = 
+        2 =        
+        3 =
+        4 =
+        5 =
+        6 =
+        """
+
+        #Create rect to highlight and text for QT to say
+        tut_graphics = {
+        1: {"rect":{0, 0, 100, 500},  "speech" : "In this game, you will hear some music and you need to select whether it was happy or sad! When you are ready for the next step, tap the screen."},
+        2: {"rect":{0, 0, 100, 500}, "speech" : "This text at the top will remind you of what you have to do."},
+        3: {"rect":{0, 0, 150, 500}, "speech" : "3."},
+        4: {"rect":{0, 0, 100, 500}, "speech" : "4."},
+        5: {"rect":{0, 0, 150, 500}, "speech" : "5."},
+        6: {"rect":{0, 0, 100, 500}, "speech" : "6."},
+        7: {"rect":{0, 0, 150, 500}, "speech" : "7."},
+        8: {"rect":{0, 0, 100, 500}, "speech" : "8."},
+        }
+        
+        if self.run:
+            #Get the level's data
+            level_data = self.music_data["tut"][1] #specific level data for our tutorial {"song_name":"title", "mood":"happy", "hint":"some text"}
+            track_name = level_data["song_name"]
+            track_hint = level_data["hint"]
+            track_mood = level_data["mood"]
+            self.sound_manager.load_track(track_name) #load song to sound player and get data back
+            self.track_data = self.GetTrackInfo() #Get data from the sound_player node for this track and save it
+            
+            #Create buttons and sliders
+            self.sad_button = self.CreateButton("sad_button.png", "sad_button_depressed.png", (675,750), scale=1.3, unique_id="sad") 
+            self.happy_button = self.CreateButton("happy_button.png", "happy_button_depressed.png", (675,1150), scale=1.3, unique_id="happy") 
+            self.unsure_button = self.CreateButton("unsure_button.png", "unsure_button_depressed.png", (850,1550), scale=1, unique_id = "unsure") 
+            self.play_button = self.CreateToggleButton("pause_button.png","play_button.png","pause_button_grey.png","play_button_grey.png", (self.cen_x-100, 175), scale = 4, when_toggle_on= self.sound_manager.pause, when_toggle_off = self.sound_manager.unpause) #create pause and play button
+            slider_scale = 2 #used for slider and for text adjacent to slider
+            slider_x = 275
+            slider_y = 450
+            self.song_duration_slider = self.CreateHorizontalSlider("track_duration_slider.png", "track_cursor.png", (slider_x,slider_y), on_click = self.sound_manager.stop_track, on_release = self.sound_manager.start_track, scale=slider_scale)
+            
+            #Group elements
+            self.buttons = [self.sad_button, self.happy_button, self.unsure_button, self.play_button]
+            self.sliders = [self.song_duration_slider] #Will be relevant eventually perhaps
+            
+            #Get variables that we will draw onto screen
+            formatted_data = self.GetTrackInfo(formatted_output = True)
+            if not self.song_duration_slider.slider_being_held: #If progress slider isn't being held just act as normal
+                current_track_time = formatted_data[0]          #Time gotten from sound_player node
+                track_total_time = formatted_data[1] #Total track time
+            #else pass and dont update current time (ie use old time)
+            progress = self.elapsed_time_secs / self.total_track_secs #elapsed time in percentage completion, so slider can represent that on a bar
+            if progress >= 0.99: #if longer than 99% of the song has passed
+                song_ended = True
+            
+            self.update_grey_graphics(current_track_time, track_total_time, progress, slider_x, slider_y) #update all grey graphics
+            
+            i = 1
+            for key in tut_graphics.keys():
+                
+                #Define some varibles for the tut sequence
+                tut_key = tut_graphics[key]["keys"] #draw grey graphics of everything except for our focused graphic
+                tut_speech = tut_graphics[key]["speech"]
+                self.command_manager.qt_say(tut_speech) #QT should say text out loud
+                clicked = False  #Hold execution until user clicks somewhere
+                
+                while not clicked:
+                    #Render graphics
+                    self.load_list_graphics(graphics, key) #load grey objects
+                    
 
 
     def play_level(self, difficulty, level_num):
@@ -268,27 +401,9 @@ class Guess_The_Mood_Game():
                     song_ended = True
                 
                 #Draw background and objects
-                self.renderer.DrawBackground(self.background_colour)
-                self.renderer.DrawTextCentered("What mood does this song have?", font_size = 100, y = 100)
-                self.renderer.DrawText(str(current_track_time), (slider_x - 75, slider_y +75), font_size = 50) #draw current time
-                self.renderer.DrawText(str(track_total_time), (2650, slider_y +75), font_size = 50) #draw total track time
-                self.song_duration_slider.render(self.window, progress)
-                for button in self.buttons: #Draw buttons using button list
-                    button.render(self.window)
-                    self.renderer.HighlightRect(button.get_rect(), self.pygame) #TODO REMOVE ME
-                self.animation_manager.DrawTouchAnimation(self.window) #last so it shows up on top
+                self.update_graphics(current_track_time, track_total_time, progress, slider_x, slider_y))
+                self.rendered_graphics = self.update_grey_graphics(current_track_time, track_total_time, progress, slider_x, slider_y) 
                 self.pygame.display.update() #Update all drawn objects
-                
-                #Copy each rendered obj to mem so we can draw them as grey
-                self.rendered_graphics = {}
-                self.rendered_graphics[1] = functools.partial(self.renderer.DrawTextCentered, "What mood does this song have?", font_size = 100, y = 100)
-                self.rendered_graphics[2] = functools.partial(self.renderer.DrawText, str(current_track_time), (slider_x - 75, slider_y +75), font_size = 50) #draw current time
-                self.rendered_graphics[3] = functools.partial(self.renderer.DrawText, str(track_total_time), (2650, slider_y +75), font_size = 50)
-                self.rendered_graphics[4] = functools.partial(self.song_duration_slider.render, self.window, progress, grey = True)
-                i = 4
-                for button in self.buttons:
-                    i+=1
-                    self.rendered_graphics[i] = functools.partial(button.render, self.window, grey = True)
                 
                 #Start event handling
                 for event in self.pygame.event.get():    
@@ -391,12 +506,14 @@ class Guess_The_Mood_Game():
             self.quit = True
         tut = self.level_loader.yes_or_no_screen('Should I explain how to play "Guess The Mood" ?', self.run, self.background_colour)
         if tut:
-            print("Playing guided tutorial")
+            self.guided_tut()
         elif tut == "QUIT": #if someone clicked quit during this screen then quit instead
             self.run = False
             self.quit = True
+        self.play_level(difficulty, level)
         """
         self.play_level(difficulty, level)
+        #self.guided_tut()
 
 
 #################################################################On execution################################################################      
