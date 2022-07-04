@@ -436,15 +436,15 @@ class Guess_The_Mood_Game():
                             if button_pressed_id == track_mood:
                                 print("User has clicked the correct answer")
                                 correct_answer_given= True
-                                self.command_manager.send_qt_command("emote", "happy")
-                                self.command_manager.send_qt_command("gesture", "nod")
+                                self.command_manager.send_qt_command(emote = "happy")
+                                self.command_manager.send_qt_command(gesture = "nod")
                                 qt_message = ("Good job, That is the right answer!") #QT reads out level's hint
                                 self.level_loader.QTSpeakingPopupScreen(qt_message, self.rendered_graphics, self.run, self.background_colour) # this is blocking
                             #if clicked button is unsure --> give hint
                             elif button_pressed_id == "unsure":
                                 print("User has clicked unsure")
-                                self.command_manager.send_qt_command("emote", "talking")
-                                self.command_manager.send_qt_command("gesture", "explain_right")
+                                self.command_manager.send_qt_command(emote = "talking")
+                                self.command_manager.send_qt_command(gesture = "explain_right")
                                 qt_message = ("I will give you a clue... " + track_hint) #QT reads out level's hint
                                 self.level_loader.QTSpeakingPopupScreen(qt_message, self.rendered_graphics, self.run, self.background_colour) # this is blocking
                             #if clicked button is incorrect --> direct to hint if they want one.
@@ -452,15 +452,15 @@ class Guess_The_Mood_Game():
                                 wrong_counter += 1 #how many time they have hit the wrong answer
                                 if wrong_counter < 2:
                                     print("User has clicked the wrong answer")
-                                    self.command_manager.send_qt_command("emote", "sad")
-                                    self.command_manager.send_qt_command("gesture", "shake_head")
+                                    self.command_manager.send_qt_command(emote = "sad", gesture = "shake_head")
+                                    #self.command_manager.send_qt_command(gesture = "shake_head")
                                     qt_message = ( "Sorry, that is not the right answer, click, i dont know, for a hint") #QT reads out level's hint
                                     self.level_loader.QTSpeakingPopupScreen(qt_message, self.rendered_graphics, self.run, self.background_colour) # this is blocking
                                 else:
                                     print("User has clicked the wrong answer for the 2nd time")
-                                    self.command_manager.send_qt_command("emote", "sad")
-                                    self.command_manager.send_qt_command("gesture", "shake_head")
-                                    self.command_manager.send_qt_command("tts", "Sorry, that is not the right answer, here is a hint.") #QT reads out level's hint
+                                    self.command_manager.send_qt_command(emote = "sad")
+                                    self.command_manager.send_qt_command(gesture = "shake_head")
+                                    self.command_manager.send_qt_command(tts = "Sorry, that is not the right answer, here is a hint.") #QT reads out level's hint
                                     qt_message = (track_hint) #QT reads out level's hint
                                     self.level_loader.QTSpeakingPopupScreen(qt_message, self.rendered_graphics, self.run, self.background_colour) # this is blocking    
                             if song_interrupt: #if we had paused the music, resume it

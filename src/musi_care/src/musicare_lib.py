@@ -334,24 +334,25 @@ class QTManager():
         
     def send_qt_command(self, speech = "", gesture = "", emote = "", command_content= "", command_blocking = False):
         """Neatens and simplifies sending commands to QT """
-        if command_content = "":
-            #rospy.loginfo("QT sent empty command")
+        if command_content == "":
+            #rospy.loginfo("QT was sent empty command")
             return False
-        elif speech != "":#do qt_speak
-            rospy.wait_for_service('/qt_command_service')
-            command_controller = rospy.ServiceProxy('/qt_command_service', qt_command)
-            command_complete = command_controller("tts", command_content, command_blocking)
-            return command_complete    
-        elif gesture != "":#do qt_speak
-            rospy.wait_for_service('/qt_command_service')
-            command_controller = rospy.ServiceProxy('/qt_command_service', qt_command)
-            command_complete = command_controller("gesture", command_content, command_blocking)
-            return command_complete    
-        elif emote != "":#do qt_speak
-            rospy.wait_for_service('/qt_command_service')
-            command_controller = rospy.ServiceProxy('/qt_command_service', qt_command)
-            command_complete = command_controller("emote", command_content, command_blocking)
-            return command_complete    
+        else:
+            if speech != "":#do qt_speak
+                rospy.wait_for_service('/qt_command_service')
+                command_controller = rospy.ServiceProxy('/qt_command_service', qt_command)
+                command_complete = command_controller("tts", command_content, command_blocking)
+                return command_complete    
+            if gesture != "":#do qt_speak
+                rospy.wait_for_service('/qt_command_service')
+                command_controller = rospy.ServiceProxy('/qt_command_service', qt_command)
+                command_complete = command_controller("gesture", command_content, command_blocking)
+                return command_complete    
+            if emote != "":#do qt_speak
+                rospy.wait_for_service('/qt_command_service')
+                command_controller = rospy.ServiceProxy('/qt_command_service', qt_command)
+                command_complete = command_controller("emote", command_content, command_blocking)
+                return command_complete    
     
     def qt_say_blocking(self, text):
         """Makes QT say something, then makes you wait until the speaking is done"""
