@@ -269,6 +269,18 @@ class Guess_The_Mood_Game():
             if key in keys: #only draw the graphics we ask for
                 graphic() #run as func
     
+    #slider_scale = 2 #used for slider and for text adjacent to slider
+    #slider_x = 275
+    #slider_y = 450
+    def create_graphics(self, slider_scale, slider_x, slider_y):
+        """Create the pygame objects that we will use """
+        self.sad_button = self.CreateButton("sad_button.png", "sad_button_depressed.png", (675,750), scale=1.3, unique_id="sad") 
+        self.happy_button = self.CreateButton("happy_button.png", "happy_button_depressed.png", (675,1150), scale=1.3, unique_id="happy") 
+        self.unsure_button = self.CreateButton("unsure_button.png", "unsure_button_depressed.png", (850,1550), scale=1, unique_id = "unsure") 
+        self.play_button = self.CreateToggleButton("pause_button.png","play_button.png","pause_button_grey.png","play_button_grey.png", (self.cen_x-100, 175), scale = 4, when_toggle_on= self.sound_manager.pause, when_toggle_off = self.sound_manager.unpause) #create pause and play button
+        self.song_duration_slider = self.CreateHorizontalSlider("track_duration_slider.png", "track_cursor.png", (slider_x,slider_y), on_click = self.sound_manager.stop_track, on_release = self.sound_manager.start_track, scale=slider_scale)
+        
+        
 #################################################################Level / screen code################################################################
 
 
@@ -330,7 +342,8 @@ class Guess_The_Mood_Game():
             if progress >= 0.99: #if longer than 99% of the song has passed
                 song_ended = True
             
-            self.update_grey_graphics(current_track_time, track_total_time, progress, slider_x, slider_y) #update all grey graphics
+            #create grey graphics
+            #grey_graphics = self.update_grey_graphics(current_track_time, track_total_time, progress, slider_x, slider_y) #update all grey graphics
             
             i = 1
             for key in tut_graphics.keys():
@@ -361,19 +374,15 @@ class Guess_The_Mood_Game():
             track_mood = level_data["mood"]
             
             #Create buttons and slider
-            self.sad_button = self.CreateButton("sad_button.png", "sad_button_depressed.png", (675,750), scale=1.3, unique_id="sad") 
-            self.happy_button = self.CreateButton("happy_button.png", "happy_button_depressed.png", (675,1150), scale=1.3, unique_id="happy") 
-            self.unsure_button = self.CreateButton("unsure_button.png", "unsure_button_depressed.png", (850,1550), scale=1, unique_id = "unsure") 
-            self.play_button = self.CreateToggleButton("pause_button.png","play_button.png","pause_button_grey.png","play_button_grey.png", (self.cen_x-100, 175), scale = 4, when_toggle_on= self.sound_manager.pause, when_toggle_off = self.sound_manager.unpause) #create pause and play button
             slider_scale = 2 #used for slider and for text adjacent to slider
             slider_x = 275
             slider_y = 450
-            self.song_duration_slider = self.CreateHorizontalSlider("track_duration_slider.png", "track_cursor.png", (slider_x,slider_y), on_click = self.sound_manager.stop_track, on_release = self.sound_manager.start_track, scale=slider_scale)
+            self.create_graphics(slider_scale, slider_x, slider_y)
             
             #Group elements
             self.buttons = [self.sad_button, self.happy_button, self.unsure_button, self.play_button]
             self.sliders = [self.song_duration_slider] #Will be relevant eventually perhaps
-            
+
             #Define variables & start track
             self.sound_manager.load_track(self.track_name) #load song to sound player and get data back
             self.track_data = self.GetTrackInfo() #Get data from the sound_player node for this track and save it
