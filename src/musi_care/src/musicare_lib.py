@@ -27,6 +27,7 @@ class StandardLevels():
         self.animation_manager = AnimationManager(pygame)
         self.command_manager = QTManager()
         self.sound_manager = SoundManager(path_to_music)
+        self.timer = TimeFunctions()
     
     def yes_or_no_screen(self, text,run , background_colour):
         """Screen for Yes or No questions"""
@@ -193,6 +194,40 @@ class StandardLevels():
                     self.renderer.DrawTextCentered(text_display + "..", font_size =70 )
                 self.animation_manager.DrawTouchAnimation(self.window) # also draw touches
                 self.pygame.display.update() #Update all drawn objects
+
+
+    def countdown(self, seconds, run, background_colour):
+        """Code that counts down to start next screen."""
+        #self.command_manager.qt_emote("talking") #show mouth moving
+        if run: #Dont start this screen if the previous screen wanted to close out the game
+            
+            for second in range(seconds, -1, -1): #countdown from seconds to 0
+                if second == 0:
+                    second = "Go!"
+                    timer_id = self.timer.CreateTimer("wait_time", 0.4) #wait for shorter time after go
+                else:
+                    second = str(second) + "!" #convert second to string and add !
+                    timer_id = self.timer.CreateTimer("wait_time", 1) #wait for 1 second and label the timer
+                self.command_manager.send_qt_command(speech= (second) ) #QT should read out the second
+                
+                second_passed = False
+                #For each second passed renderr the screen
+                while not second_passed and not rospy.is_shutdown():
+                    #Check for quit
+                    for event in self.pygame.event.get():
+                        if event.type == self.pygame.QUIT: #Check if the user clicks the X
+                            return "QUIT"
+                        elif(event.type == self.pygame.MOUSEBUTTONUP):#on mouse release play animation to show where cursor is
+                            self.animation_manager.StartTouchAnimation(self.pygame.mouse.get_pos() ) #tell system to play animation when drawing
+                    #Draw background and objects
+                    self.renderer.DrawBackground(background_colour)                  
+                    self.renderer.DrawTextCentered(second, font_size =70 )
+                    self.animation_manager.DrawTouchAnimation(self.window) # also draw touches
+                    self.pygame.display.update() #Update all drawn objects
+                    
+                    second_passed = self.timer.CheckTimer(timer_id)
+                    
+            return True
                 
 
 #####################################################Renderer##################################################################
@@ -555,6 +590,7 @@ class TimeFunctions():
         if timer_id in self.timers.keys():
             print("You have overwritten an older timer, make sure you're not stuck in a loop")
         self.timers[timer_id] = rospy.get_time() + time_to_wait
+        return (timer_id)
 
     def CheckTimer(self, timer_id):
         if timer_id in self.timers.keys():
