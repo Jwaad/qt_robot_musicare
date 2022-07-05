@@ -8,7 +8,7 @@ distract_song = none
 EASY MODE
 {
 song_name = follow_the_van.wav
-distract_song = none
+distract_song = follow_the_van.wav, follow_the_van.wav
 £#
 song_name = sad_1.wav
 distract_song = none

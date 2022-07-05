@@ -55,6 +55,7 @@ class Fix_The_Song_Game():
         self.difficulty = "easy" #Default difficulty to play
         self.current_level = 1 #Default level to play
         self.music_data = self.get_song_database() #From save file load all of the level data 
+        #print(self.music_data)
         self.music_filepath = "/game_assets/music/" #relative path to songs # "/home/qtrobot/catkin_ws/src/musi_care/src/game_assets/music/" 
         self.timer_manager = TimeFunctions()
         self.animation_manager = AnimationManager(self.pygame)
@@ -74,7 +75,7 @@ class Fix_The_Song_Game():
         """Read the database file and get the levels data"""
 
         #data_filepath = ("/home/qtrobot/catkin_ws/src/musi_care/src/game_assets/music/music_data.txt")
-        data_filepath = ("/game_assets/data/gtm_level_data.txt") #gtm = guess the mood
+        data_filepath = ("/game_assets/data/fsg_level_data.txt") #gtm = guess the mood
         this_file_path = os.path.dirname(__file__)
         full_path =  this_file_path + data_filepath
         music_data = []
@@ -122,7 +123,6 @@ class Fix_The_Song_Game():
                                         songs = split_attribute[0].split(",")
                                         attribute_value = []
                                         for song in songs:
-                                            print(song)
                                             distract_song = song.replace(" ", "") #remove spaces
                                             attribute_value.append(distract_song)
                                 else:
