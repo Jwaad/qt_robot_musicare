@@ -1,0 +1,38 @@
+tutorial
+{
+song_name = september.wav
+distract_song = none
+£#
+}
+
+EASY MODE
+{
+song_name = follow_the_van.wav
+distract_song = none
+£#
+song_name = sad_1.wav
+distract_song = none
+£#
+song_name = happy/happy_2.wav
+distract_song = follow_the_van.wav
+£#
+song_name = happy/happy_3.wav
+distract_song = follow_the_van.wav
+£#
+}
+
+MEDIUM MODE
+{
+song_name = happy/happy_1.wav
+mood = happy
+hint = Hint coming soon!
+£#
+}
+
+HARD MODE
+{
+song_name = happy/happy_1.wav
+mood = happy
+hint = Hint coming soon!
+£#
+}

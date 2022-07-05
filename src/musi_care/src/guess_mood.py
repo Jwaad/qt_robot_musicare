@@ -54,8 +54,7 @@ class Guess_The_Mood_Game():
         self.previous_track_data = None
         self.difficulty = "easy" #Default difficulty to play
         self.current_level = 1 #Default level to play
-        self.music_data = {} #our database that we will write into 
-        self.get_song_database() #From save file load all of the level data 
+        self.music_data = self.get_song_database() #From save file load all of the level data 
         self.music_filepath = "/game_assets/music/" #relative path to songs # "/home/qtrobot/catkin_ws/src/musi_care/src/game_assets/music/" 
         self.timer_manager = TimeFunctions()
         self.animation_manager = AnimationManager(self.pygame)
@@ -74,12 +73,13 @@ class Guess_The_Mood_Game():
         """Read the database file and get the levels data"""
 
         #data_filepath = ("/home/qtrobot/catkin_ws/src/musi_care/src/game_assets/music/music_data.txt")
-        data_filepath = ("/game_assets/data/gtm_level_data.txt") #gtm = guess the mood
+        data_filepath = ("/game_assets/data/fsg_level_data.txt") #gtm = guess the mood
         full_path = this_file_path = os.path.dirname(__file__) + data_filepath
-	
+        music_data = []
+	    
         with open (full_path, "r") as database:
             difficulty_labels = ["tut","easy","medium", "hard"]
-            self.music_data = {"tut":{1:{""}},"easy":{1:{""}}, "medium":{1:{""}}, "hard":{1:{""}}} #Reset data to overwrite it thouroughly
+            music_data = {"tut":{1:{""}},"easy":{1:{""}}, "medium":{1:{""}}, "hard":{1:{""}}} #Reset data to overwrite it thouroughly
             
             #sort data into their difficulty tiers
             data = database.read().splitlines() #read data and load into raw into "data"
@@ -104,25 +104,29 @@ class Guess_The_Mood_Game():
                         difficulty_data = data[open_bracket_line_num+1:close_bracket_line_num]
                         new_song = False
                         level = 1
-                        self.music_data[difficulty][level] = dict() #init 1st level
+                        music_data[difficulty][level] = dict() #init 1st level
                         for attribute in difficulty_data:
                             if attribute == "£#":
                                 new_song = True
                             if not new_song: #if all the atrributes describe the same song, add them to the same dict
-                                split_attribute = attribute.split("=")
-                                attribute_label = split_attribute[0].replace(" ", "")
+                                split_attribute = attribute.split("=") #split line by the =
+                                attribute_label = split_attribute[0].replace(" ", "") #get rid of any spaces now
                                 if attribute_label != "hint": #dont get rid of the spaces in hint
                                     attribute_value = split_attribute[1].replace(" ", "")
                                 else:
                                     attribute_value = split_attribute[1][1:] # Get rid of the space at the start
-                                self.music_data[difficulty][level][attribute_label] = attribute_value
+                                music_data[difficulty][level][attribute_label] = attribute_value
                             else:
                                 new_song = False
                                 level += 1
-                                self.music_data[difficulty][level] = dict() # Create new song entry labeled as the correct level
+                                music_data[difficulty][level] = dict() # Create new song entry labeled as the correct level
                         data = data[close_bracket_line_num+1:]
                         break
-                    line_num += 1         
+                    line_num += 1 
+            return music_data
+            
+        rospy.log_info("Catastrophic error, data read failed.")
+        return music_data        
 
 
     def GetTrackInfo(self, formatted_output = False): 
