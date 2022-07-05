@@ -8,6 +8,7 @@ import pygame
 import pygame.freetype
 import os
 import math
+import random
 from musi_care.msg import SongData
 from musi_care.srv import sound_player_srv
 from musi_care.srv import qt_command
@@ -196,19 +197,29 @@ class StandardLevels():
                 self.pygame.display.update() #Update all drawn objects
 
 
-    def countdown(self, seconds, run, background_colour):
-        """Code that counts down to start next screen."""
-        #self.command_manager.qt_emote("talking") #show mouth moving
+    def countdown(self, seconds, run, background_colour, prelim_msg = None):
+        """Code that counts down to start next screen.
+        Use prelim msg to have a msg readout before the count down"""
+        
         if run: #Dont start this screen if the previous screen wanted to close out the game
             
+            if prelim_msg != None:
+                seconds += 1 #add another screen
+            
             for second in range(seconds, -1, -1): #countdown from seconds to 0
-                if second == 0:
-                    second = "Go!"
-                    timer_id = self.timer.CreateTimer("wait_time", 0.4) #wait for shorter time after go
+                if prelim_msg != None and second == seconds: #if this is the 1st loop
+                    qt_speech = prelim_msg
+                    self.command_manager.qt_say(qt_speech)
+                    timer_id = "QT_SAY"
                 else:
-                    second = str(second) + "!" #convert second to string and add !
-                    timer_id = self.timer.CreateTimer("wait_time", 1) #wait for 1 second and label the timer
-                self.command_manager.send_qt_command(speech= (second) ) #QT should read out the second
+                    if second == 0: #if last countdown
+                        qt_speech = "Go!"
+                        timer_id = self.timer.CreateTimer("wait_time", 0.6) #wait for shorter time after go
+                    else:
+                        qt_speech = str(second) + "!" #convert second to string and add !
+                        timer_id = self.timer.CreateTimer("wait_time", 1) #wait for 1 second and label the timer
+                    
+                    self.command_manager.send_qt_command(speech= (qt_speech) ) #QT should read out the second
                 
                 second_passed = False
                 #For each second passed renderr the screen
@@ -216,16 +227,19 @@ class StandardLevels():
                     #Check for quit
                     for event in self.pygame.event.get():
                         if event.type == self.pygame.QUIT: #Check if the user clicks the X
-                            return "QUIT"
+                            return False
                         elif(event.type == self.pygame.MOUSEBUTTONUP):#on mouse release play animation to show where cursor is
                             self.animation_manager.StartTouchAnimation(self.pygame.mouse.get_pos() ) #tell system to play animation when drawing
                     #Draw background and objects
-                    self.renderer.DrawBackground(background_colour)                  
-                    self.renderer.DrawTextCentered(second, font_size =70 )
-                    self.animation_manager.DrawTouchAnimation(self.window) # also draw touches
-                    self.pygame.display.update() #Update all drawn objects
+                    self.renderer.DrawBackground(background_colour) 
+                    self.renderer.DrawTextCentered(qt_speech, font_size =70 ) 
+                    self.animation_manager.DrawTouchAnimation(self.window) # also draw touches 
+                    self.pygame.display.update() #Update all drawn objects 
                     
-                    second_passed = self.timer.CheckTimer(timer_id)
+                    if prelim_msg != None and second == seconds: #if 1st loop, check a different timer 
+                        second_passed = self.command_manager.robo_timer.CheckTimer(timer_id) 
+                    else: 
+                        second_passed = self.timer.CheckTimer(timer_id) 
                     
             return True
                 
