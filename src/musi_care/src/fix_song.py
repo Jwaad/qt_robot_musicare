@@ -329,10 +329,10 @@ class Fix_The_Song_Game():
             self.track_name = level_data["song_name"]
             
             #Create slider
-            slider_y = 125
-            slider_x = 450
-            song_duration_slider = self.CreateHorizontalSlider("track_duration_slider.png", "track_cursor.png", (slider_y,slider_x))
-            
+            slider_x = 275
+            slider_y = 800
+            song_duration_slider = self.CreateHorizontalSlider("track_duration_slider.png", "track_cursor.png", (slider_x,slider_y), scale=2)
+
             #Load track
             self.sound_manager.load_track(self.track_name)
             
@@ -343,17 +343,18 @@ class Fix_The_Song_Game():
             track_total_time = 100
             
             self.sound_manager.unpause()
+            time = rospy.get_time()
             while not song_ended and not rospy.is_shutdown() and self.run:
                 
                 #Format song time elapsed to display on screen
                 formatted_data = self.GetTrackInfo(formatted_output = True)
                 current_track_time, track_total_time, progress, song_ended = self.get_song_info(current_track_time, track_total_time)
-                
+
                 #Draw background and objects
                 self.renderer.DrawBackground(self.background_colour)
-                self.renderer.DrawText(str(current_track_time), (165, slider_x +100)) #draw current time
-                self.renderer.DrawText(str(track_total_time), (1240, slider_x+100)) #draw total track time
-                self.renderer.DrawText("Please listen to the song", (700, 100 ), 50)
+                self.renderer.DrawText(str(current_track_time), (slider_x - 75, slider_y +75), font_size = 50) #draw current time
+                self.renderer.DrawText(str(track_total_time), (2650, slider_y +75), font_size = 50) #draw total track time
+                self.renderer.DrawTextCentered("Please listen to the song.", font_size = 100, y = 600)
                 song_duration_slider.render(self.window, progress)
                 self.animation_manager.DrawTouchAnimation(self.window) # also draw touches
                 self.pygame.display.update() #Update all drawn objects
@@ -366,7 +367,7 @@ class Fix_The_Song_Game():
                     mouse_pos = self.pygame.mouse.get_pos()
                     if event.type == self.pygame.MOUSEBUTTONUP:
                         self.animation_manager.StartTouchAnimation(mouse_pos) #draw mouse click animation
-
+                #print(mouse_pos) #TODO del me
 
     def play_level(self, difficulty, level_num):
         """Sequence plays the levels"""
