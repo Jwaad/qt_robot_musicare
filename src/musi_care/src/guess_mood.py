@@ -312,13 +312,13 @@ class Guess_The_Mood_Game():
             
         return target_graphics, target_event_handler #if our logic sifts failed
 
-#Example on how to define target_event_handler
-"""
-#define what to do with events
-def event_handler(events):
-    pass
-target_event_handler = event_handler #copy to this var
-"""
+        #Example on how to define target_event_handler
+        """
+        #define what to do with events
+        def event_handler(events):
+            pass
+        target_event_handler = event_handler #copy to this var
+        """
          
 #####################################################Level / screen code#################################################################
 
