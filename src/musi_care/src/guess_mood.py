@@ -15,7 +15,7 @@ from musi_care.srv import sound_player_srv
 from musi_care.srv import qt_command
 from musicare_lib import TimeFunctions 
 from musicare_lib import Button
-from musicare_lib import ToggleButton
+from musicare_lib import PausePlayButton
 from musicare_lib import AnimationManager
 from musicare_lib import SoundManager
 from musicare_lib import QTManager
@@ -175,7 +175,7 @@ class Guess_The_Mood_Game():
         return(button)         
 
 
-    def CreateToggleButton(self, file_name, alt_file_name, file_grey, alt_file_grey, location,  scale=1, unique_id = "", return_info="", when_toggle_on=object, when_toggle_off=object):
+    def CreatePlayButton(self, file_name, alt_file_name, file_grey, alt_file_grey, rewind_name, rewind_name_grey, location,  scale=1, unique_id = "", on_pause=object, on_play=object):
         """code creates toggle button using the toggle button class."""
         this_file_path = os.path.dirname(__file__)
         relative_path = 'game_assets/graphics'
@@ -183,8 +183,12 @@ class Guess_The_Mood_Game():
         alt_path = os.path.join(this_file_path, relative_path, alt_file_name)
         file_path_grey = os.path.join(this_file_path, relative_path, file_grey)
         alt_path_grey = os.path.join(this_file_path, relative_path, alt_file_grey)
+        file_path = os.path.join(this_file_path, relative_path, file_name)
+        alt_path = os.path.join(this_file_path, relative_path, alt_file_name)
+        rewind_path = os.path.join(this_file_path, relative_path, rewind_name)
+        rewind_path_grey = os.path.join(this_file_path, relative_path, rewind_name_grey)
         
-        button = ToggleButton(file_path, alt_path, file_path_grey, alt_path_grey, location, self.pygame, scale, unique_id, return_info, when_toggle_on, when_toggle_off)
+        button = PausePlayButton(file_path, alt_path, file_path_grey, alt_path_grey, rewind_path, rewind_path_grey, location, self.pygame, scale, unique_id, on_pause, on_play)
         return(button)  
         
         
@@ -289,7 +293,7 @@ class Guess_The_Mood_Game():
         self.sad_button = self.CreateButton("sad_button.png", "sad_button_depressed.png", (675,750), scale=1.3, unique_id="sad") 
         self.happy_button = self.CreateButton("happy_button.png", "happy_button_depressed.png", (675,1150), scale=1.3, unique_id="happy") 
         self.unsure_button = self.CreateButton("unsure_button.png", "unsure_button_depressed.png", (850,1550), scale=1, unique_id = "unsure") 
-        self.play_button = self.CreateToggleButton("pause_button.png","play_button.png","pause_button_grey.png","play_button_grey.png", (self.cen_x-100, 175), scale = 4, when_toggle_on= self.sound_manager.pause, when_toggle_off = self.sound_manager.unpause) #create pause and play button
+        self.play_button = self.CreatePlayButton("pause_button.png", "pause_button_grey.png", "play_button.png",  "play_button_grey.png", "rewind_button.png", "rewind_button_grey.png", (self.cen_x-100, 175), scale = 1, on_play= self.sound_manager.unpause , on_pause = self.sound_manager.pause) #create pause and play button
         self.song_duration_slider = self.CreateHorizontalSlider("track_duration_slider.png", "track_cursor.png", (slider_x,slider_y), on_click = self.sound_manager.stop_track, on_release = self.sound_manager.start_track, scale=slider_scale)
         
         
@@ -455,8 +459,8 @@ class Guess_The_Mood_Game():
                 
                 #if the song ended, start player to the beginning and pause it.
                 if song_ended: 
+                    self.play_button.its_rewind_time() #draw rewind symbol
                     self.sound_manager.load_track(self.track_name) 
-                    self.sound_manager.pause() #start song paused
                     music_playing = False
                     song_ended = False
         
@@ -482,15 +486,15 @@ class Guess_The_Mood_Game():
                         slider_held = slider.get_event(event, mouse_pos, self.track_data) #Give the slider track info, so it can pause and play from there.
                         
                     #Events for pause button:
-                    if slider_held: #since this will automatically resume the song, change our play button  & logic to match
-                        self.play_button.toggle_state = False
+                    if slider_held:  #slider will resume song, so swap the playbutton's logic to match
+                        self.play_button.rewind_off() #turn rewind icon off too
                         music_playing = True
                         slider_was_held = False
-                    else:                 
-                        music_playing = not (self.play_button.get_event(event, mouse_pos))
+                    else: #if slider not held, handle events from pause button. this will return if we're paused or not
+                        music_playing = not(self.play_button.get_event(event, mouse_pos))
                     
                     #Check which button is pressed, if any.
-                    for button in self.buttons[:-1]: #for all buttons except the toggle button
+                    for button in self.buttons[:-1]: #for all buttons except the play_button
                         button_pressed = button.get_event(event, mouse_pos)
                         if button_pressed:
                             button_pressed_id = button.id

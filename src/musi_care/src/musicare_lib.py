@@ -700,6 +700,110 @@ class ToggleButton():
     def get_rect(self):
         return self.rect
 
+
+######################################################ToggleButton#################################################################
+
+class PausePlayButton():
+    """All functionality of toggle button, but with an option to replace with a 3rd image"""
+
+    def __init__(self, pause_path, pause_path_grey, play_path, play_path_grey, rewind_path, rewind_path_grey,  x_y_locations, pygame, scale=1, unique_id = "", on_pause=object, on_play=object):
+    
+        #Set vars
+        self.pygame = pygame
+        self.highlighted = False
+        self.playing = True #starts paused
+        self.on_pause = on_pause
+        self.on_play = on_play
+        self.rewind_toggle = False #show rewind or not
+
+        #load imges
+        raw_play = self.pygame.image.load(play_path).convert_alpha()
+        raw_play_grey = self.pygame.image.load(play_path_grey).convert_alpha()
+        raw_pause = self.pygame.image.load(pause_path).convert_alpha()
+        raw_pause_grey = self.pygame.image.load(pause_path_grey).convert_alpha()
+        raw_rewind = self.pygame.image.load(rewind_path).convert_alpha()
+        raw_rewind_grey = self.pygame.image.load(rewind_path_grey).convert_alpha()
+        
+        #Scale and set pos of imgs
+        img_x = x_y_locations[0]
+        img_y = x_y_locations[1]
+        img_w = int(raw_play.get_width()*scale)
+        img_h = int(raw_play.get_height()*scale)
+        scaled_size = (img_w, img_h) #scale all 3 images by same scalars
+        self.play = self.pygame.transform.scale(raw_play, scaled_size)
+        self.play_grey = self.pygame.transform.scale(raw_play_grey, scaled_size)
+        self.pause = self.pygame.transform.scale(raw_pause, scaled_size)
+        self.pause_grey = self.pygame.transform.scale(raw_pause_grey, scaled_size)
+        self.rewind = self.pygame.transform.scale(raw_rewind, scaled_size)
+        self.rewind_grey = self.pygame.transform.scale(raw_rewind_grey, scaled_size)
+        
+        self.rect = self.pygame.Rect(img_x,img_y,img_w,img_h) 
+        if unique_id == "":
+            self.id = rospy.get_time() #unique ID for each button based on time when made
+        else:
+            self.id = unique_id
+
+    def render(self, screen, grey = False):  
+        """Draw image onto screen"""
+        if self.rewind_toggle:
+            if grey:
+                    screen.blit(self.rewind_grey, self.rect) #TODO replace this with the greyscaled version of this image
+            else:
+                    screen.blit(self.rewind, self.rect)
+        else:
+            if self.playing:
+                if grey:
+                    screen.blit(self.pause_grey, self.rect) #TODO replace this with the greyscaled version of this image
+                else:
+                    screen.blit(self.pause, self.rect)
+            else:
+                if grey:
+                    screen.blit(self.play_grey, self.rect) #TODO replace this with the greyscaled version of this image
+                else:
+                    screen.blit(self.play, self.rect)
+        return screen #redundant
+    
+    def its_rewind_time(self): #an easter egg
+        """toggles rewind to true  ONLY TO BE USED EXTERNALLY"""
+        self.rewind_toggle = True
+        self.playing = False #
+        return self.rewind_toggle
+
+    def rewind_off(self):
+        """toggles rewind to false  ONLY TO BE USED EXTERNALLY"""
+        self.rewind_toggle = False
+        self.playing = True
+        return self.rewind_toggle
+    
+    def toggle_pause(self):
+        """Toggles the function 'self.toggle' """
+        #act acording to the state
+        if self.playing: #if we're playing and we click the icon = Pause
+            self.on_pause() #pause
+        else:
+            self.on_play() #unpause
+            self.rewind_toggle = False #if this was true, set it to false now
+        #flip the state
+        self.playing = not self.playing
+        return (self.playing)
+    
+    def toggle_img(self):
+        """Toggle but only the img to render """
+        self.playing = not self.playing
+        return (self.playing)
+    
+    def get_event(self, event, mouse_pos):
+        """Button event handle, if mouse release, then toggle"""
+        mouse_on_button = self.rect.collidepoint(mouse_pos)
+        if mouse_on_button:
+            if event.type == self.pygame.MOUSEBUTTONUP:
+                return self.toggle_pause() #flip paused and play
+        return self.playing #return the state we were in
+        
+    def get_rect(self):
+        return self.rect
+        
+        
 ######################################################DragableButton#################################################################
 
 class DragableButton():
