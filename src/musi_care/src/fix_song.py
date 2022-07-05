@@ -55,7 +55,6 @@ class Fix_The_Song_Game():
         self.difficulty = "easy" #Default difficulty to play
         self.current_level = 1 #Default level to play
         self.music_data = self.get_song_database() #From save file load all of the level data 
-        print(self.music_data)
         self.music_filepath = "/game_assets/music/" #relative path to songs # "/home/qtrobot/catkin_ws/src/musi_care/src/game_assets/music/" 
         self.timer_manager = TimeFunctions()
         self.animation_manager = AnimationManager(self.pygame)
@@ -75,8 +74,9 @@ class Fix_The_Song_Game():
         """Read the database file and get the levels data"""
 
         #data_filepath = ("/home/qtrobot/catkin_ws/src/musi_care/src/game_assets/music/music_data.txt")
-        data_filepath = ("/game_assets/data/fsg_level_data.txt") #gtm = guess the mood
-        full_path = this_file_path = os.path.dirname(__file__) + data_filepath
+        data_filepath = ("/game_assets/data/gtm_level_data.txt") #gtm = guess the mood
+        this_file_path = os.path.dirname(__file__)
+        full_path =  this_file_path + data_filepath
         music_data = []
 	    
         with open (full_path, "r") as database:
@@ -113,10 +113,20 @@ class Fix_The_Song_Game():
                             if not new_song: #if all the atrributes describe the same song, add them to the same dict
                                 split_attribute = attribute.split("=") #split line by the =
                                 attribute_label = split_attribute[0].replace(" ", "") #get rid of any spaces now
-                                if attribute_label != "hint": #dont get rid of the spaces in hint
-                                    attribute_value = split_attribute[1].replace(" ", "")
+                                if attribute_label == "distract_song": #parse differently
+                                    if split_attribute[1].replace(" ", "") == "none": #if there's no distract songs, just return none
+                                        attribute_value = None
+                                    else:
+                                        split_attribute.pop(0)
+                                        split_attribute #get rid of the label, the rest are songs
+                                        songs = split_attribute[0].split(",")
+                                        attribute_value = []
+                                        for song in songs:
+                                            print(song)
+                                            distract_song = song.replace(" ", "") #remove spaces
+                                            attribute_value.append(distract_song)
                                 else:
-                                    attribute_value = split_attribute[1][1:] # Get rid of the space at the start
+                                    attribute_value = split_attribute[1].replace(" ", "") # Get rid of the space at the start
                                 music_data[difficulty][level][attribute_label] = attribute_value
                             else:
                                 new_song = False
@@ -178,22 +188,20 @@ class Fix_The_Song_Game():
                     self.run = False #Stops the program entirely
 
 
-    def play_level(self, difficulty, level_num)
-         """Sequence plays the levels"""
+    def play_level(self, difficulty, level_num):
+        """Sequence plays the levels"""
         if self.run: #Dont start this screen if the previous screen wanted to close out the game
             
             #Get the level's data
             level_data = self.music_data[difficulty][level_num] #{"song_name":"title", "mood":"happy", "hint":"some text"}
             self.track_name = level_data["song_name"]
-            if level_data["distract_song"] == "none"
-                self.distract_song = None
-            else:
-                self.distract_song = level_data["distract_song"]
-            
+            self.distract_song = level_data["distract_song"] #will be None or a list of songs
+            print(level_data)
             
             
         
 #################################################################Main####################################################################   
+
 
     def Main(self, difficulty = "easy", level =  1): #input what level and difficulty to play, the program will handle the rest
         """Main Func"""

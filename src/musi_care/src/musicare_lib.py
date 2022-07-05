@@ -243,7 +243,9 @@ class Renderer():
         """Using the rect of the obj, draw a box around it and an arrow pointing towards it"""
         
         #Variables
-        path_to_arrow = "game_assets/graphics/arrow_pointer.png"
+        this_path = os.path.dirname(__file__)
+        relative_arrow = "/game_assets/graphics/arrow_pointer.png"
+        path_to_arrow = this_path + relative_arrow
         arrow_img = pygame.image.load(path_to_arrow).convert_alpha()
         arrow_size = (arrow_img.get_width(),arrow_img.get_height())
         bounding_scalar = 50 #how much bigger the bounding should be than the original rect
