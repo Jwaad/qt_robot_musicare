@@ -177,7 +177,21 @@ class Fix_The_Song_Game():
                 if event.type == self.pygame.QUIT:
                     self.run = False #Stops the program entirely
 
-        
+
+    def play_level(self, difficulty, level_num)
+         """Sequence plays the levels"""
+        if self.run: #Dont start this screen if the previous screen wanted to close out the game
+            
+            #Get the level's data
+            level_data = self.music_data[difficulty][level_num] #{"song_name":"title", "mood":"happy", "hint":"some text"}
+            self.track_name = level_data["song_name"]
+            if level_data["distract_song"] == "none"
+                self.distract_song = None
+            else:
+                self.distract_song = level_data["distract_song"]
+            
+            
+            
         
 #################################################################Main####################################################################   
 

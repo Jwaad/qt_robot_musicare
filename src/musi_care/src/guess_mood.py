@@ -561,24 +561,27 @@ class Guess_The_Mood_Game():
 
     def Main(self, difficulty = "easy", level =  1): #input what level and difficulty to play, the program will handle the rest
     
+        #Show starting screen
         error = self.level_loader.QTSpeakingScreen("Lets play Guess the mood!", self.run, self.background_colour)
-        
         if error == "QUIT": #if someone clicked quit during this screen then quit instead
             self.run = False
             self.quit = True
-            
+
+        #Ask if they want tutorial
         tut = self.level_loader.yes_or_no_screen('Should I explain how to play "Guess The Mood" ?', self.run, self.background_colour)
-        if tut:
-            self.guided_tut()
-        elif tut == "QUIT": #if someone clicked quit during this screen then quit instead
+        if tut == "QUIT": #if someone clicked quit during this screen then quit instead
             self.run = False
             self.quit = True
+        elif tut == True:
+            self.guided_tut()
         
+        #Tap to continue screen to slow pacing
         error = self.level_loader.tap_to_continue(self.run, self.background_colour)
         if error == "QUIT":
             self.run = False
             self.quit = True
-            
+        
+        #Run game code
         self.play_level(difficulty, level)
        
 
