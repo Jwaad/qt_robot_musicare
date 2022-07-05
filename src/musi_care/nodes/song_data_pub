@@ -1,0 +1,73 @@
+#! /usr/bin/env python
+
+import rospy
+from musi_care.msg import SongData
+from musi_care.srv import sound_player_srv
+
+
+class SongDataPub:
+
+    def __init__(self):
+        rospy.init_node('song_data_publisher', anonymous=False)
+        self.song_data_pub = rospy.Publisher("song_data_publisher", SongData, queue_size=10)
+        self.pub_rate = rospy.Rate(60) # 60fps publish rate
+        self.get_data_rate = 1/1 #get song data only 3x every 2s (slightly faster than every s)
+        self.timers = {}
+    
+    def CreateTimer(self, timer_id, time_to_wait):
+        """Add's time goal to timers list or replaces old timer """
+        #Let it happen, but if a timer overwrites an old one, print warning
+        if timer_id in self.timers.keys():
+            print("You have overwritten an older timer, make sure you're not stuck in a loop")
+        self.timers[timer_id] = rospy.get_time() + time_to_wait
+        return (timer_id)
+
+    def CheckTimer(self, timer_id):
+        if timer_id in self.timers.keys():
+            if self.timers[timer_id] <= rospy.get_time():
+                self.timers.pop(timer_id)
+                return True #timer is done
+            else:
+                return False #Timer is not done yet
+        else: #timer doesnt exist
+            print("Timer referenced does not exist, check timer ID given")
+            return None
+            
+    def call_sound_player(self, operation, data_1 = "", data_2 = 0.0 ):
+        """Handle service call to sound player"""
+        rospy.wait_for_service('/sound_player_service')
+        sound_player = rospy.ServiceProxy('/sound_player_service', sound_player_srv)
+        song_data = sound_player(operation, data_1, data_2)
+        return song_data    
+    
+    def convert_to_SongData(self, msg):
+        song_data = SongData
+        song_data.track_title = msg.track_title #track title
+        song_data.track_total_time = msg.track_total_time  #track time in seconds
+        song_data.track_elapsed_time = msg.track_elapsed_time  #current time in seconds
+        return song_data
+        
+    def Main(self):
+        """Get song data and publish"""
+        #pub once at start
+        srv_msg = self.call_sound_player("request_data")
+        song_data = self.convert_to_SongData(srv_msg)
+        timer_id = self.CreateTimer("timer", self.get_data_rate) #check everyonce in a while, but publish much faster
+        time_to_check = self.CheckTimer(timer_id)
+        while not rospy.is_shutdown(): #rospy.spin() should prob use this instead
+            if time_to_check == True:
+                print("checked data")
+                srv_msg = self.call_sound_player("request_data")
+                song_data = self.convert_to_SongData(srv_msg)
+                timer_id = self.CreateTimer("timer", self.get_data_rate)# start timer again
+            self.song_data_pub.publish(song_data)
+            self.pub_rate.sleep()
+            time_to_check = self.CheckTimer(timer_id)
+            
+        rospy.log_info("Closed successfully")
+
+if __name__ == '__main__':
+    
+    song_data_publisher = SongDataPub()
+    song_data_publisher.Main()
+    #rospy.spin()
