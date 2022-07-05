@@ -74,7 +74,8 @@ class Guess_The_Mood_Game():
 
         #data_filepath = ("/home/qtrobot/catkin_ws/src/musi_care/src/game_assets/music/music_data.txt")
         data_filepath = ("/game_assets/data/gtm_level_data.txt") #gtm = guess the mood
-        full_path = this_file_path = os.path.dirname(__file__) + data_filepath
+        this_file_path = os.path.dirname(__file__)
+        full_path =  this_file_path + data_filepath
         music_data = []
 	    
         with open (full_path, "r") as database:
@@ -366,7 +367,7 @@ class Guess_The_Mood_Game():
 
             #loop through each graphic that we care about 
             for key in tut_graphics.keys():
-                print(key)
+                #print(key)
                 #Define some variables for the tut sequence
                 tut_key = tut_graphics[key]["keys"] #draw grey graphics of everything except for our focused graphic
                 tut_speech = tut_graphics[key]["speech"]
