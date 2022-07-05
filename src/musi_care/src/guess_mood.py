@@ -62,7 +62,7 @@ class Guess_The_Mood_Game():
         self.sound_manager = SoundManager(self.music_filepath) #load soundplayer with sound file path
         self.command_manager = QTManager()
         self.renderer = Renderer(self.window,self.window_center)
-        self.level_loader = StandardLevels(self.window, self.window_center, self.pygame)
+        self.level_loader = StandardLevels(self.window, self.window_center, self.pygame, self.music_filepath)
         #self.music_vol = 1 # change volume of laptop
         #self.qt_voice_vol
         #self.sound_manager.volume_change(self.music_vol) # Set a default volume
