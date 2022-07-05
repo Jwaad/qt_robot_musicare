@@ -56,11 +56,11 @@ class StandardLevels():
                     mouse_pos = self.pygame.mouse.get_pos() 
                     clicked_yes = yes.get_event(event, mouse_pos)
                     if clicked_yes:
-                        return True
+                        return True, True #returns error and button pressed
                     else:
                         clicked_no = no.get_event(event, mouse_pos)
                         if clicked_no:
-                            return False
+                            return True, False
                     self.animation_manager.StartTouchAnimation(mouse_pos) #tell system to play animation when drawing
             
             #Draw graphics
@@ -90,7 +90,7 @@ class StandardLevels():
                 for event in self.pygame.event.get():
                     #Check if the user clicks the X
                     if event.type == self.pygame.QUIT:
-                        return "QUIT"
+                        return False
                     elif(event.type == self.pygame.MOUSEBUTTONUP):#on mouse release play animation to show where cursor is
                         mouse_pos = self.pygame.mouse.get_pos() 
                         self.animation_manager.StartTouchAnimation(mouse_pos) #tell system to play animation when drawing
@@ -103,7 +103,7 @@ class StandardLevels():
                 
                 if self.command_manager.robo_timer.CheckTimer(speaking_timer_id): #If our timer is done
                     qt_speaking = False
-                    return
+                    return True
 
 
     def QTSpeakingPopupScreen(self, qt_say, graphics, run, background_colour, should_gesture = True, gesture = "explain_right"):
@@ -122,7 +122,7 @@ class StandardLevels():
             print("error: no graphics inputted into popup function")
             return
         
-        if run or rospy.is_shutdown(): #Dont start this screen if the previous screen wanted to close out the game
+        if run and not rospy.is_shutdown(): #Dont start this screen if the previous screen wanted to close out the game
                         
             #create popup button in center
             popup = Button(popup_path, popup_path_grey, (700,550), self.pygame, scale=1.5) 
@@ -139,7 +139,7 @@ class StandardLevels():
                 for event in self.pygame.event.get():    
                     #Check if the user clicks the X
                     if event.type == self.pygame.QUIT:
-                        return "QUIT"
+                        return False
                     elif(event.type == self.pygame.MOUSEBUTTONUP):#on mouse release play animation to show where cursor is
                         mouse_pos = self.pygame.mouse.get_pos() 
                         self.animation_manager.StartTouchAnimation(mouse_pos) #tell system to play animation when drawing
@@ -155,7 +155,7 @@ class StandardLevels():
                 
                 if self.command_manager.robo_timer.CheckTimer(speaking_timer_id): #If our timer's internal timer is done
                     qt_speaking = False #unessecary but might as well 
-                    return
+                    return True
 
 
     def tap_to_continue(self, run, background_colour, text_display= "Please tap the screen when you are ready to start the level.", qt_say=None, should_gesture = True, gesture = "explain_right"):
@@ -179,7 +179,7 @@ class StandardLevels():
                 for event in self.pygame.event.get():
                     #Check if the user clicks the X
                     if event.type == self.pygame.QUIT:
-                        return "QUIT"
+                        return False
                     elif(event.type == self.pygame.MOUSEBUTTONUP):#on mouse release play animation to show where cursor is
                         clicked = True
                         self.animation_manager.StartTouchAnimation(self.pygame.mouse.get_pos() ) #tell system to play animation when drawing
@@ -195,6 +195,8 @@ class StandardLevels():
                     self.renderer.DrawTextCentered(text_display + "..", font_size =70 )
                 self.animation_manager.DrawTouchAnimation(self.window) # also draw touches
                 self.pygame.display.update() #Update all drawn objects
+                
+            return True
 
 
     def countdown(self, seconds, run, background_colour, prelim_msg = None):

@@ -311,7 +311,15 @@ class Guess_The_Mood_Game():
             target_graphics = [functools.partial(self.play_button.render, self.window)]
             
         return target_graphics, target_event_handler #if our logic sifts failed
-    
+
+#Example on how to define target_event_handler
+"""
+#define what to do with events
+def event_handler(events):
+    pass
+target_event_handler = event_handler #copy to this var
+"""
+         
 #####################################################Level / screen code#################################################################
 
 
@@ -332,6 +340,8 @@ class Guess_The_Mood_Game():
 
         #Create rect to highlight and text for QT to say
         #(250, 400, 2600-250, 650-400) #slider rect
+        #TODO ADD MORE TO THIS --> 
+        #Lets try it now: listen to song --> this sounds happy to me. --> lets click "happy" --> highlight happy --> wait for press
         tut_graphics = {
         1: {"rect":None, "keys":[1,2,3,4,5,6,7,8],  "speech" : "In this game, you will hear some music and you need to select whether it was happy or sad! When you are ready for the next step, tap the screen."},
         2: {"rect":(560, 30, 1790, 135), "keys":[1,2,3,4,5,6,7,8], "speech" : "This text at the top will remind you of what you have to do."},
@@ -371,7 +381,6 @@ class Guess_The_Mood_Game():
 
             #loop through each graphic that we care about 
             for key in tut_graphics.keys():
-                #print(key)
                 #Define some variables for the tut sequence
                 tut_key = tut_graphics[key]["keys"] #draw grey graphics of everything except for our focused graphic
                 tut_speech = tut_graphics[key]["speech"]
@@ -403,9 +412,9 @@ class Guess_The_Mood_Game():
                         if event.type == self.pygame.QUIT:
                             self.run = False #Stops the program entirely
                             self.quit = True #Tells us that the game was quit out of, and it didn't end organically
-                            self.sound_manager.stop_track() #Stop the music
+                            #self.sound_manager.stop_track() #Stop the music
                     if target_event != None:
-                        #target_event(events) #render the target graphic
+                        target_event(events) #render the target graphic
                         pass
                         
                     #Check for click
@@ -567,24 +576,15 @@ class Guess_The_Mood_Game():
     def Main(self, difficulty = "easy", level =  1): #input what level and difficulty to play, the program will handle the rest
     
         #Show starting screen
-        error = self.level_loader.QTSpeakingScreen("Lets play Guess the mood!", self.run, self.background_colour)
-        if error == "QUIT": #if someone clicked quit during this screen then quit instead
-            self.run = False
-            self.quit = True
+        self.run = self.level_loader.QTSpeakingScreen("Lets play Guess the mood!", self.run, self.background_colour)
 
         #Ask if they want tutorial
-        tut = self.level_loader.yes_or_no_screen('Should I explain how to play "Guess The Mood" ?', self.run, self.background_colour)
-        if tut == "QUIT": #if someone clicked quit during this screen then quit instead
-            self.run = False
-            self.quit = True
-        elif tut == True:
+        self.run, tut = self.level_loader.yes_or_no_screen('Should I explain how to play "Guess The Mood" ?', self.run, self.background_colour)
+        if tut:
             self.guided_tut()
         
         #Tap to continue screen to slow pacing
-        error = self.level_loader.tap_to_continue(self.run, self.background_colour)
-        if error == "QUIT":
-            self.run = False
-            self.quit = True
+        self.run = self.level_loader.tap_to_continue(self.run, self.background_colour)
         
         #Run game code
         self.play_level(difficulty, level)

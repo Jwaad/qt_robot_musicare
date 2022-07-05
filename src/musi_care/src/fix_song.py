@@ -140,12 +140,189 @@ class Fix_The_Song_Game():
         rospy.log_info("Catastrophic error, data read failed.")
         return music_data
         
+
+    def GetTrackInfo(self, formatted_output = False): 
+        """Subscribe to sound_player publisher and get elapsed track time"""
+        song_data = self.sound_manager.request_song_data()
+        
+        self.track_title = song_data.track_title #track title
+        self.total_track_secs = song_data.track_total_time #track time in seconds
+        self.elapsed_time_secs = song_data.track_elapsed_time #current time in seconds
+    
+        #Either return the above, or format the secs to be displayed
+        if formatted_output:
+            total_mins, total_secs = self.format_elapsed_display(self.total_track_secs) 
+            elapsed_mins, elapsed_secs = self.format_elapsed_display(self.elapsed_time_secs)
+            
+            elapsed_time = elapsed_mins+ ":" + elapsed_secs
+            total_time = total_mins + ":" + total_secs
+        
+            return elapsed_time, total_time
+        else:
+            return self.track_title , self.elapsed_time_secs, self.total_track_secs      
+
+
+    def get_song_info(self, prev_track_time = "", prev_total_time=""):
+    #Get variables that we will draw onto screen
+        formatted_data = self.GetTrackInfo(formatted_output = True)
+        current_track_time = formatted_data[0]          #Time gotten from sound_player node
+        track_total_time = formatted_data[1] #Total track time          
+        progress = self.elapsed_time_secs / self.total_track_secs #elapsed time in percentage completion, so slider can represent that on a bar
+        song_ended = progress >= 0.99 # if progress > 99% = song is finished, otherwise false
+        return current_track_time, track_total_time, progress, song_ended
+        
+        
+    def format_elapsed_display(self, time):
+        "bit of code that converts secs to mins and secs"
+        if time < 60:
+            secs = int(time)
+            mins = str(0 )
+        else:
+            secs = int(time%60)
+            mins = str(int((time - secs) / 60))
+        if secs < 10:
+            secs = "0" + str(secs)
+        return str(mins), str(secs)
+
+
+    def CreateButton(self,file_name, alt_file_name, location,  scale=1, unique_id=""):
+        """code creates button using the button_image class."""
+        this_file_path = os.path.dirname(__file__)
+        relative_path = 'game_assets/graphics'
+        file_path = os.path.join(this_file_path, relative_path, file_name)
+        alt_path = os.path.join(this_file_path, relative_path, alt_file_name)
+        
+        button = Button(file_path, alt_path, location, self.pygame, scale, unique_id)
+        return(button)         
+
+
+    def CreatePlayButton(self, file_name, alt_file_name, file_grey, alt_file_grey, rewind_name, rewind_name_grey, location,  scale=1, unique_id = "", on_pause=object, on_play=object):
+        """code creates toggle button using the toggle button class."""
+        this_file_path = os.path.dirname(__file__)
+        relative_path = 'game_assets/graphics'
+        file_path = os.path.join(this_file_path, relative_path, file_name)
+        alt_path = os.path.join(this_file_path, relative_path, alt_file_name)
+        file_path_grey = os.path.join(this_file_path, relative_path, file_grey)
+        alt_path_grey = os.path.join(this_file_path, relative_path, alt_file_grey)
+        file_path = os.path.join(this_file_path, relative_path, file_name)
+        alt_path = os.path.join(this_file_path, relative_path, alt_file_name)
+        rewind_path = os.path.join(this_file_path, relative_path, rewind_name)
+        rewind_path_grey = os.path.join(this_file_path, relative_path, rewind_name_grey)
+        
+        button = PausePlayButton(file_path, alt_path, file_path_grey, alt_path_grey, rewind_path, rewind_path_grey, location, self.pygame, scale, unique_id, on_pause, on_play)
+        return(button)  
+        
+        
+    def CreateHorizontalSlider(self, slider_name, cursor_name, x_y_locations, scale=1, on_click= object, on_release = object):
+        """Creates horizontal slider using the horizontal slider class"""
+        this_file_path = os.path.dirname(__file__)
+        relative_path = 'game_assets/graphics'
+        slider_path = os.path.join(this_file_path, relative_path, slider_name)
+        cursor_path = os.path.join(this_file_path, relative_path, cursor_name)
+        
+        slider = HorizontalSlider(slider_path, cursor_path, x_y_locations, scale, on_click, on_release)
+        return slider
+    
+    
+    def update_graphics(self, current_track_time, track_total_time, progress, slider_x, slider_y):
+        """Redraw graphics """
+        self.renderer.DrawBackground(self.background_colour)
+        self.renderer.DrawTextCentered("What mood does this song have?", font_size = 100, y = 100)
+        self.renderer.DrawText(str(current_track_time), (slider_x - 75, slider_y +75), font_size = 50) #draw current time
+        self.renderer.DrawText(str(track_total_time), (2650, slider_y +75), font_size = 50) #draw total track time
+        self.song_duration_slider.render(self.window, progress)
+        for button in self.buttons: #Draw buttons using button list
+            button.render(self.window)
+        self.animation_manager.DrawTouchAnimation(self.window) #last so it shows up on top
+
+
+    def update_grey_graphics(self, current_track_time, track_total_time, progress, slider_x, slider_y):
+        """reinitialise grey graphics taking with parameters they need """
+        #Load graphics into dict # need to be in a specific order for this tut
+        grey_graphics = {}
+        grey_graphics[1] = functools.partial(self.renderer.DrawTextCentered, "What mood does this song have?", font_size = 100, y = 100)
+        grey_graphics[2] = functools.partial(self.renderer.DrawText, str(current_track_time), (slider_x - 75, slider_y +75), font_size = 50) #draw current time
+        grey_graphics[3] = functools.partial(self.renderer.DrawText, str(track_total_time), (2650, slider_y +75), font_size = 50)
+        grey_graphics[4] = functools.partial(self.song_duration_slider.render, self.window, progress, grey = True)
+        i = 4
+        for button in self.buttons:
+            i+=1
+            grey_graphics[i] = functools.partial(button.render, self.window, grey = True)
+        
+        return grey_graphics      
+        
+        
+    def highlight_block(self, events, target_rect = None, msg = "Click anywhere to continue ... ", timer_complete = None):
+        """
+        Highlight a certain object and check for click
+        target_graphic = the graphic that's in colour
+        Graphics here are a dict of the partial functions for each renderer in grey
+        target_rect the rect that we want to high light around
+        should be used by being kept in a while loop with other graphics to be drawn
+        """
+
+        #Handle events
+        for event in events:
+            #reset / init variables
+            option_chosen = ""
+            mouse_pos = self.pygame.mouse.get_pos()
+            if event.type == self.pygame.MOUSEBUTTONUP:  #on mouse release play animation to show where cursor is
+                self.animation_manager.StartTouchAnimation(mouse_pos) #tell system to play animation when drawing
+                return True
+                
+        #Render graphics
+        if target_rect != None: #so we can have blocking functionality without highlighting
+            self.renderer.HighlightRect(target_rect, self.pygame) #draw arrow and box
+        if msg != "": #we can send an empty msg to msg instead to have it not display anything
+            if timer_complete == None: #if user didnt specify a timer, just show text like normal
+                self.renderer.DrawTextCentered(msg, font_size = 75, font_colour = (0,0,0))
+            else:
+                if timer_complete: #only render once timer done
+                    self.renderer.DrawTextCentered(msg, font_size = 75, font_colour = (0,0,0))
+                
+        return False
+                 
+                 
+    def load_list_graphics(self, graphics, keys):
+        """takes graphics dict and loads them
+            Graphics = {1: graphic_func_1, 2: graphic_func_2. etc}
+            key = [1,3,4,5]
+        """
+        for key in graphics.keys(): #Draw each object
+            if key in keys: #only draw the graphics we ask for
+                graphics[key]() #run as func
+    
+    
+    def create_graphics(self, slider_scale, slider_x, slider_y):
+        """Create the pygame objects that we will use """
+        self.sad_button = self.CreateButton("sad_button.png", "sad_button_depressed.png", (675,750), scale=1.3, unique_id="sad") 
+        self.happy_button = self.CreateButton("happy_button.png", "happy_button_depressed.png", (675,1150), scale=1.3, unique_id="happy") 
+        self.unsure_button = self.CreateButton("unsure_button.png", "unsure_button_depressed.png", (850,1550), scale=1, unique_id = "unsure") 
+        self.play_button = self.CreatePlayButton("pause_button.png", "pause_button_grey.png", "play_button.png",  "play_button_grey.png", "rewind_button.png", "rewind_button_grey.png", (self.cen_x-100, 175), scale = 1, on_play= self.sound_manager.unpause , on_pause = self.sound_manager.pause) #create pause and play button
+        self.song_duration_slider = self.CreateHorizontalSlider("track_duration_slider.png", "track_cursor.png", (slider_x,slider_y), on_click = self.sound_manager.stop_track, on_release = self.sound_manager.start_track, scale=slider_scale)
+        
+        
+    def get_target_behaviour(self, key, progress):
+        """tells our tut what to draw and what to do with events"""
+        target_graphics = []
+        target_event_handler = None
+        if key ==3:
+            target_graphics = [functools.partial(self.sad_button.render, self.window), functools.partial(self.happy_button.render, self.window)]
+        elif key ==4:
+            target_graphics = [functools.partial(self.unsure_button.render, self.window)]
+        elif key == 5:
+            target_graphics = [functools.partial(self.song_duration_slider.render, self.window, progress), functools.partial(self.play_button.render, self.window)]
+        elif key == 8:
+            target_graphics = [functools.partial(self.play_button.render, self.window)]
+            
+        return target_graphics, target_event_handler #if our logic sifts failed
+
         
 #######################################################Level / screen code###############################################################
         
     def play_music_blocking(self, difficulty, level): 
         """Level with just music player"""
-        if self.run():
+        if self.run:
         
             #Get the level's data
             level_data = self.music_data[difficulty][level] #{"song_name":"title", "mood":"happy", "hint":"some text"}
@@ -157,40 +334,38 @@ class Fix_The_Song_Game():
             song_duration_slider = self.CreateHorizontalSlider("track_duration_slider.png", "track_cursor.png", (slider_y,slider_x))
             
             #Load track
-            self.sound_manager.load_track(song_path)
+            self.sound_manager.load_track(self.track_name)
             
+            #Variables
             music_playing = True
-            qt_spoken = False
-            while music_playing and not rospy.is_shutdown() and self.run:
+            song_ended = False
+            current_track_time = 0
+            track_total_time = 100
+            
+            self.sound_manager.unpause()
+            while not song_ended and not rospy.is_shutdown() and self.run:
                 
                 #Format song time elapsed to display on screen
                 formatted_data = self.GetTrackInfo(formatted_output = True)
-                current_track_time = formatted_data[0]
-                track_total_time = formatted_data[1] #Total track time
-                progress = self.elapsed_time_secs / self.total_track_secs #elapsed time in percentage completion, so slider can represent that on a bar
+                current_track_time, track_total_time, progress, song_ended = self.get_song_info(current_track_time, track_total_time)
                 
                 #Draw background and objects
-                self.DrawBackground(background_colour)
-                self.DrawText(str(current_track_time), (165, slider_x +100)) #draw current time
-                self.DrawText(str(track_total_time), (1240, slider_x+100)) #draw total track time
-                self.DrawText("Please listen to the song", (700, 100 ), 50)
+                self.renderer.DrawBackground(self.background_colour)
+                self.renderer.DrawText(str(current_track_time), (165, slider_x +100)) #draw current time
+                self.renderer.DrawText(str(track_total_time), (1240, slider_x+100)) #draw total track time
+                self.renderer.DrawText("Please listen to the song", (700, 100 ), 50)
                 song_duration_slider.render(self.window, progress)
+                self.animation_manager.DrawTouchAnimation(self.window) # also draw touches
                 self.pygame.display.update() #Update all drawn objects
-                
-                if qt_spoken == False:
-                    self.qt_emote("talking")
-                    self.qt_say_blocking("I am going to play the full song, listen carefully!")
-                    qt_spoken = True
-                    self.pause_unpause() #play the song
-                    
-                #Check for end
-                if self.check_track_ended(): #must come after draw_text
-                    music_playing = False
                 
                 #Check if the X was clicked
                 for event in self.pygame.event.get():
                     if event.type == self.pygame.QUIT:
                         self.run = False #Stops the program entirely
+                        self.sound_manager.stop_track()
+                    mouse_pos = self.pygame.mouse.get_pos()
+                    if event.type == self.pygame.MOUSEBUTTONUP:
+                        self.animation_manager.StartTouchAnimation(mouse_pos) #draw mouse click animation
 
 
     def play_level(self, difficulty, level_num):
@@ -201,40 +376,38 @@ class Fix_The_Song_Game():
             level_data = self.music_data[difficulty][level_num] #{"song_name":"title", "mood":"happy", "hint":"some text"}
             self.track_name = level_data["song_name"]
             self.distract_song = level_data["distract_song"] #will be None or a list of songs
-            print(level_data)
             
             
-        
 #################################################################Main####################################################################   
 
 
     def Main(self, difficulty = "easy", level =  1): #input what level and difficulty to play, the program will handle the rest
         """Main Func"""
         
-        error = self.level_loader.QTSpeakingScreen("Lets play Fix The Song!", self.run, self.background_colour)
-        
-        if error == "QUIT": #if someone clicked quit during this screen then quit instead
-            self.run = False
-            self.quit = True
-        
         """
-        tut = self.level_loader.yes_or_no_screen('Should I explain how to play "Fix The Song" ?', self.run, self.background_colour)
+        #Introduce game
+        self.run = self.level_loader.QTSpeakingScreen("Lets play Fix The Song!", self.run, self.background_colour)
+
+        #Ask if they want to play tutorial
+        self.run, tut = self.level_loader.yes_or_no_screen('Should I explain how to play "Fix The Song" ?', self.run, self.background_colour)
         if tut:
-            self.guided_tut()
-        elif tut == "QUIT": #if someone clicked quit during this screen then quit instead
-            self.run = False
-            self.quit = True
+            print("tut chosed")
+            #self.guided_tut()
+        
+        #Count in to the start of the game
+        self.run = self.level_loader.tap_to_continue(self.run, self.background_colour)
+
+        #Count into level to slow pacing
+        self.run = self.level_loader.countdown(3, self.run, self.background_colour, prelim_msg = "Get ready to hear the song!")
+
         """
         
-        error = self.level_loader.tap_to_continue(self.run, self.background_colour)
-        if error == "QUIT":
-            self.run = False
-            self.quit = True
-            
+        #Play the track and block
         self.play_music_blocking(difficulty, level)
+       
         
+        #Play main level
         self.play_level(difficulty, level)
-        
         
         
 ######################################################On execution#######################################################################
