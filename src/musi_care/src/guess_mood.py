@@ -73,7 +73,7 @@ class Guess_The_Mood_Game():
         """Read the database file and get the levels data"""
 
         #data_filepath = ("/home/qtrobot/catkin_ws/src/musi_care/src/game_assets/music/music_data.txt")
-        data_filepath = ("/game_assets/data/fsg_level_data.txt") #gtm = guess the mood
+        data_filepath = ("/game_assets/data/gtm_level_data.txt") #gtm = guess the mood
         full_path = this_file_path = os.path.dirname(__file__) + data_filepath
         music_data = []
 	    
