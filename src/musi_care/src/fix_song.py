@@ -180,7 +180,31 @@ class Fix_The_Song_Game():
         
         
 #################################################################Main####################################################################   
+
+    def Main(self, difficulty = "easy", level =  1): #input what level and difficulty to play, the program will handle the rest
+        """Main Func"""
         
+        error = self.level_loader.QTSpeakingScreen("Lets play Fix The Song!", self.run, self.background_colour)
+        
+        if error == "QUIT": #if someone clicked quit during this screen then quit instead
+            self.run = False
+            self.quit = True
+        
+        """
+        tut = self.level_loader.yes_or_no_screen('Should I explain how to play "Fix The Song" ?', self.run, self.background_colour)
+        if tut:
+            self.guided_tut()
+        elif tut == "QUIT": #if someone clicked quit during this screen then quit instead
+            self.run = False
+            self.quit = True
+        """
+        
+        error = self.level_loader.tap_to_continue(self.run, self.background_colour)
+        if error == "QUIT":
+            self.run = False
+            self.quit = True
+            
+        self.play_level(difficulty, level)
         
         
         

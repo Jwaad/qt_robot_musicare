@@ -156,7 +156,7 @@ class StandardLevels():
                     return
 
 
-    def pause_screen(self, run, background_colour, text_display= "Please tap the screen when you are ready to start the level.", qt_say=None, should_gesture = True, gesture = "explain_right"):
+    def tap_to_continue(self, run, background_colour, text_display= "Please tap the screen when you are ready to start the level.", qt_say=None, should_gesture = True, gesture = "explain_right"):
         """Screen that waits until tap, non blocking even if QT speaking"""
              
         if run: #Dont start this screen if the previous screen wanted to close out the game

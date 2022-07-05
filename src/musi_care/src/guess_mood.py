@@ -574,7 +574,7 @@ class Guess_The_Mood_Game():
             self.run = False
             self.quit = True
         
-        error = self.level_loader.pause_screen(self.run, self.background_colour)
+        error = self.level_loader.tap_to_continue(self.run, self.background_colour)
         if error == "QUIT":
             self.run = False
             self.quit = True
