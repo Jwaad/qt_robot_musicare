@@ -67,3 +67,145 @@ class Guess_The_Mood_Game():
         #self.qt_voice_vol
         #self.sound_manager.volume_change(self.music_vol) # Set a default volume
         #self.set_robot_volume(qt_voice_vol) #TODO add this functionality  
+        
+        
+        
+        
+        
+        
+        
+        
+########################################################Low level methods################################################################
+        
+        
+    def get_song_database(self):
+        """Read the database file and get the levels data"""
+
+        #data_filepath = ("/home/qtrobot/catkin_ws/src/musi_care/src/game_assets/music/music_data.txt")
+        data_filepath = ("/game_assets/data/fsg_level_data.txt") #gtm = guess the mood
+        full_path = this_file_path = os.path.dirname(__file__) + data_filepath
+	
+        with open (full_path, "r") as database:
+            difficulty_labels = ["tut","easy","medium", "hard"]
+            self.music_data = {"tut":{1:{""}},"easy":{1:{""}}, "medium":{1:{""}}, "hard":{1:{""}}} #Reset data to overwrite it thouroughly
+            
+            #sort data into their difficulty tiers
+            data = database.read().splitlines() #read data and load into raw into "data"
+            for difficulty in difficulty_labels: #extract for each difficulty seperately
+                open_bracket_line_num = 0
+                open_bracket_found= False
+                close_bracket_line_num = 0
+                close_bracket_found = False
+                line_num = 0
+
+                #Look for brackets and get the data between them
+                for line in data:
+                    if line == "{":
+                        open_bracket_line_num = line_num
+                        open_bracket_found = True
+                    elif line == "}":
+                        close_bracket_line_num = line_num
+                        close_bracket_found = True
+                    #We have found the brackets, save the information and delete it from data
+                    if open_bracket_found and close_bracket_found:
+                        #Organise data and put it into a new dict   
+                        difficulty_data = data[open_bracket_line_num+1:close_bracket_line_num]
+                        new_song = False
+                        level = 1
+                        self.music_data[difficulty][level] = dict() #init 1st level
+                        for attribute in difficulty_data:
+                            if attribute == "£#":
+                                new_song = True
+                            if not new_song: #if all the atrributes describe the same song, add them to the same dict
+                                split_attribute = attribute.split("=")
+                                attribute_label = split_attribute[0].replace(" ", "")
+                                if attribute_label != "hint": #dont get rid of the spaces in hint
+                                    attribute_value = split_attribute[1].replace(" ", "")
+                                else:
+                                    attribute_value = split_attribute[1][1:] # Get rid of the space at the start
+                                self.music_data[difficulty][level][attribute_label] = attribute_value
+                            else:
+                                new_song = False
+                                level += 1
+                                self.music_data[difficulty][level] = dict() # Create new song entry labeled as the correct level
+                        data = data[close_bracket_line_num+1:]
+                        break
+                    line_num += 1 
+        
+        
+#######################################################Level / screen code###############################################################
+        
+    def play_music_blocking(self, song_path, run, background_colour): 
+        """Level with just music player"""
+        
+        #Create slider
+        slider_y = 125
+        slider_x = 450
+        song_duration_slider = self.CreateHorizontalSlider("track_duration_slider.png", "track_cursor.png", (slider_y,slider_x))
+        
+        #Load track
+        self.sound_manager.load_track(song_path)
+        
+        music_playing = True
+        qt_spoken = False
+        while music_playing and not rospy.is_shutdown() and self.run:
+            
+            #Format song time elapsed to display on screen
+            formatted_data = self.GetTrackInfo(formatted_output = True)
+            current_track_time = formatted_data[0]
+            track_total_time = formatted_data[1] #Total track time
+            progress = self.elapsed_time_secs / self.total_track_secs #elapsed time in percentage completion, so slider can represent that on a bar
+            
+            #Draw background and objects
+            self.DrawBackground(background_colour)
+            self.DrawText(str(current_track_time), (165, slider_x +100)) #draw current time
+            self.DrawText(str(track_total_time), (1240, slider_x+100)) #draw total track time
+            self.DrawText("Please listen to the song", (700, 100 ), 50)
+            song_duration_slider.render(self.window, progress)
+            self.pygame.display.update() #Update all drawn objects
+            
+            if qt_spoken == False:
+                self.qt_emote("talking")
+                self.qt_say_blocking("I am going to play the full song, listen carefully!")
+                qt_spoken = True
+                self.pause_unpause() #play the song
+                
+            #Check for end
+            if self.check_track_ended(): #must come after draw_text
+                music_playing = False
+            
+            #Check if the X was clicked
+            for event in self.pygame.event.get():
+                if event.type == self.pygame.QUIT:
+                    self.run = False #Stops the program entirely
+
+        
+        
+#################################################################Main####################################################################   
+        
+        
+        
+        
+######################################################On execution#######################################################################
+
+#If we run this node, run the game on it's own
+if __name__ == '__main__':
+    #Initialise game
+    rospy.init_node('fix_song_game', anonymous=False)
+    rospy.loginfo("Node launched successfully")
+    game_object = Fix_The_Song_Game()
+
+    #Run the game
+    try:
+        game_object.Main()
+    except(KeyboardInterrupt or rospy.exceptions.ROSInterruptException):
+        game_object.pygame.quit
+        SoundManager().stop_track()
+        print("Audio may not be stopped due to interrupt")
+        
+        
+        
+        
+        
+        
+        

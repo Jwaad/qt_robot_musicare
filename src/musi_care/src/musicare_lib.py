@@ -26,7 +26,7 @@ class StandardLevels():
         self.renderer = Renderer(window, window_center)
         self.animation_manager = AnimationManager(pygame)
         self.command_manager = QTManager()
-        self.sound_manager = SoundManager()
+        self.sound_manager = SoundManager(path_to_music)
     
     def yes_or_no_screen(self, text,run , background_colour):
         """Screen for Yes or No questions"""
@@ -154,50 +154,6 @@ class StandardLevels():
                 if self.command_manager.robo_timer.CheckTimer(speaking_timer_id): #If our timer's internal timer is done
                     qt_speaking = False #unessecary but might as well 
                     return
-
-
-    def play_music_blocking(self, song_path): 
-        
-        #Create slider
-        slider_y = 125
-        slider_x = 450
-        song_duration_slider = self.CreateHorizontalSlider("track_duration_slider.png", "track_cursor.png", (slider_y,slider_x))
-        
-        #Load track
-        self.sound_manager.load_track(song_path)
-        
-        music_playing = True
-        qt_spoken = False
-        while music_playing and not rospy.is_shutdown() and self.run:
-            #Format song time elapsed to display on screen
-            formatted_data = self.GetTrackInfo(formatted_output = True)
-            current_track_time = formatted_data[0]
-            track_total_time = formatted_data[1] #Total track time
-            progress = self.elapsed_time_secs / self.total_track_secs #elapsed time in percentage completion, so slider can represent that on a bar
-            
-            #Draw background and objects
-            self.DrawBackground()
-            self.DrawText(str(current_track_time), (165, slider_x +100)) #draw current time
-            self.DrawText(str(track_total_time), (1240, slider_x+100)) #draw total track time
-            self.DrawText("Please listen to the song", (700, 100 ), 50)
-            song_duration_slider.render(self.window, progress)
-            self.DrawMouseCursor(self.window)
-            self.pygame.display.update() #Update all drawn objects
-            
-            if qt_spoken == False:
-                self.qt_emote("talking")
-                self.qt_say_blocking("I am going to play the full song, listen carefully!")
-                qt_spoken = True
-                self.pause_unpause() #play the song
-                
-            #Check for end
-            if self.check_track_ended(): #must come after draw_text
-                music_playing = False
-            
-            #Check if the X was clicked
-            for event in self.pygame.event.get():
-                if event.type == self.pygame.QUIT:
-                    self.run = False #Stops the program entirely
 
 
     def pause_screen(self, run, background_colour, text_display= "Please tap the screen when you are ready to start the level.", qt_say=None, should_gesture = True, gesture = "explain_right"):

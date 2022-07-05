@@ -68,7 +68,7 @@ class Guess_The_Mood_Game():
         #self.sound_manager.volume_change(self.music_vol) # Set a default volume
         #self.set_robot_volume(qt_voice_vol) #TODO add this functionality  
                    
-#################################################################Low level methods################################################################
+#############################################################Low level methods###########################################################
                 
     def get_song_database(self):
         """Read the database file and get the levels data"""
@@ -221,6 +221,7 @@ class Guess_The_Mood_Game():
         
         return grey_graphics      
 
+
     def get_song_info(self, prev_track_time = "", prev_total_time=""):
     #Get variables that we will draw onto screen
         formatted_data = self.GetTrackInfo(formatted_output = True)
@@ -235,6 +236,7 @@ class Guess_The_Mood_Game():
         song_ended = progress >= 0.99 # if progress > 99% = song is finished, otherwise false
             
         return current_track_time, track_total_time, progress, song_ended
+        
         
     def highlight_block(self, events, target_rect = None, msg = "Click anywhere to continue ... ", timer_complete = None):
         """
@@ -301,7 +303,7 @@ class Guess_The_Mood_Game():
             
         return target_graphics, target_event_handler #if our logic sifts failed
     
-#################################################################Level / screen code################################################################
+#####################################################Level / screen code#################################################################
 
 
     def guided_tut(self):
@@ -551,7 +553,7 @@ class Guess_The_Mood_Game():
             self.sound_manager.stop_track()
 
 
-#################################################################Main################################################################   
+#################################################################Main####################################################################   
 
     def Main(self, difficulty = "easy", level =  1): #input what level and difficulty to play, the program will handle the rest
     
@@ -577,8 +579,8 @@ class Guess_The_Mood_Game():
        
 
 
-#################################################################On execution################################################################      
-                   
+######################################################On execution#######################################################################
+
 #If we run this node, run the game on it's own
 if __name__ == '__main__':
     #Initialise game
