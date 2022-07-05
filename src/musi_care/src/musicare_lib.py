@@ -370,7 +370,29 @@ class QTManager():
 
     def __init__(self):
         self.robo_timer = TimeFunctions()
+    
+    def init_robot(self, arm_vel):
+        """Method to init robot parameters"""
+        #Set control mode, incase they were changed before hand
+        rospy.wait_for_service('/qt_robot/motors/setControlMode')
+        self.set_mode = rospy.ServiceProxy('/qt_robot/motors/setControlMode', set_control_mode)
+        mode_changed = self.set_mode(["right_arm", "left_arm"], 1)
+        if mode_changed:
+            rospy.loginfo("Motors successfully set control mode 1")
+        else:
+            rospy.loginfo("Motor control mode could not be changed")
+            self.run = False
         
+        #Set velocity of arms incase they were set differently
+        rospy.wait_for_service('/qt_robot/motors/setVelocity')
+        set_vel = rospy.ServiceProxy('/qt_robot/motors/setVelocity', set_velocity)
+        speed_changed = set_vel(["right_arm", "left_arm"], arm_vel)
+        if speed_changed:
+            rospy.loginfo("Motors successfully set to default speed ({})".format(arm_vel))
+        else:
+            rospy.loginfo("Motor speed could not be changed")
+            self.run = False
+    
     def send_qt_command(self, speech = "", gesture = "", emote = "", command_content= "", command_blocking = False):
         """Neatens and simplifies sending commands to QT 
         if we want to use multiple functions of QT at once and dont care about tracking time taken, we should use this method instead of the others
