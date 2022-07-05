@@ -143,12 +143,13 @@ class Fix_The_Song_Game():
 
     def GetTrackInfo(self, formatted_output = False): 
         """Subscribe to sound_player publisher and get elapsed track time"""
+
         song_data = self.sound_manager.request_song_data()
         
         self.track_title = song_data.track_title #track title
         self.total_track_secs = song_data.track_total_time #track time in seconds
         self.elapsed_time_secs = song_data.track_elapsed_time #current time in seconds
-    
+
         #Either return the above, or format the secs to be displayed
         if formatted_output:
             total_mins, total_secs = self.format_elapsed_display(self.total_track_secs) 
@@ -335,6 +336,7 @@ class Fix_The_Song_Game():
 
             #Load track
             self.sound_manager.load_track(self.track_name)
+            current_track_time, track_total_time, progress, song_ended = self.get_song_info(current_track_time, track_total_time)
             
             #Variables
             music_playing = True
@@ -343,12 +345,14 @@ class Fix_The_Song_Game():
             track_total_time = 100
             
             self.sound_manager.unpause()
-            time = rospy.get_time()
+            
+            
             while not song_ended and not rospy.is_shutdown() and self.run:
-                
+
                 #Format song time elapsed to display on screen
                 formatted_data = self.GetTrackInfo(formatted_output = True)
-                current_track_time, track_total_time, progress, song_ended = self.get_song_info(current_track_time, track_total_time)
+                if track_check: #this is slow so lets save some computation
+                    current_track_time, track_total_time, progress, song_ended = self.get_song_info(current_track_time, track_total_time)
 
                 #Draw background and objects
                 self.renderer.DrawBackground(self.background_colour)
