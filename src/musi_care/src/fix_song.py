@@ -143,49 +143,54 @@ class Fix_The_Song_Game():
         
 #######################################################Level / screen code###############################################################
         
-    def play_music_blocking(self, song_path, run, background_colour): 
+    def play_music_blocking(self, difficulty, level): 
         """Level with just music player"""
+        if self.run():
         
-        #Create slider
-        slider_y = 125
-        slider_x = 450
-        song_duration_slider = self.CreateHorizontalSlider("track_duration_slider.png", "track_cursor.png", (slider_y,slider_x))
-        
-        #Load track
-        self.sound_manager.load_track(song_path)
-        
-        music_playing = True
-        qt_spoken = False
-        while music_playing and not rospy.is_shutdown() and self.run:
+            #Get the level's data
+            level_data = self.music_data[difficulty][level] #{"song_name":"title", "mood":"happy", "hint":"some text"}
+            self.track_name = level_data["song_name"]
             
-            #Format song time elapsed to display on screen
-            formatted_data = self.GetTrackInfo(formatted_output = True)
-            current_track_time = formatted_data[0]
-            track_total_time = formatted_data[1] #Total track time
-            progress = self.elapsed_time_secs / self.total_track_secs #elapsed time in percentage completion, so slider can represent that on a bar
+            #Create slider
+            slider_y = 125
+            slider_x = 450
+            song_duration_slider = self.CreateHorizontalSlider("track_duration_slider.png", "track_cursor.png", (slider_y,slider_x))
             
-            #Draw background and objects
-            self.DrawBackground(background_colour)
-            self.DrawText(str(current_track_time), (165, slider_x +100)) #draw current time
-            self.DrawText(str(track_total_time), (1240, slider_x+100)) #draw total track time
-            self.DrawText("Please listen to the song", (700, 100 ), 50)
-            song_duration_slider.render(self.window, progress)
-            self.pygame.display.update() #Update all drawn objects
+            #Load track
+            self.sound_manager.load_track(song_path)
             
-            if qt_spoken == False:
-                self.qt_emote("talking")
-                self.qt_say_blocking("I am going to play the full song, listen carefully!")
-                qt_spoken = True
-                self.pause_unpause() #play the song
+            music_playing = True
+            qt_spoken = False
+            while music_playing and not rospy.is_shutdown() and self.run:
                 
-            #Check for end
-            if self.check_track_ended(): #must come after draw_text
-                music_playing = False
-            
-            #Check if the X was clicked
-            for event in self.pygame.event.get():
-                if event.type == self.pygame.QUIT:
-                    self.run = False #Stops the program entirely
+                #Format song time elapsed to display on screen
+                formatted_data = self.GetTrackInfo(formatted_output = True)
+                current_track_time = formatted_data[0]
+                track_total_time = formatted_data[1] #Total track time
+                progress = self.elapsed_time_secs / self.total_track_secs #elapsed time in percentage completion, so slider can represent that on a bar
+                
+                #Draw background and objects
+                self.DrawBackground(background_colour)
+                self.DrawText(str(current_track_time), (165, slider_x +100)) #draw current time
+                self.DrawText(str(track_total_time), (1240, slider_x+100)) #draw total track time
+                self.DrawText("Please listen to the song", (700, 100 ), 50)
+                song_duration_slider.render(self.window, progress)
+                self.pygame.display.update() #Update all drawn objects
+                
+                if qt_spoken == False:
+                    self.qt_emote("talking")
+                    self.qt_say_blocking("I am going to play the full song, listen carefully!")
+                    qt_spoken = True
+                    self.pause_unpause() #play the song
+                    
+                #Check for end
+                if self.check_track_ended(): #must come after draw_text
+                    music_playing = False
+                
+                #Check if the X was clicked
+                for event in self.pygame.event.get():
+                    if event.type == self.pygame.QUIT:
+                        self.run = False #Stops the program entirely
 
 
     def play_level(self, difficulty, level_num):
@@ -226,6 +231,8 @@ class Fix_The_Song_Game():
             self.run = False
             self.quit = True
             
+        self.play_music_blocking(difficulty, level)
+        
         self.play_level(difficulty, level)
         
         
