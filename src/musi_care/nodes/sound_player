@@ -52,7 +52,14 @@ class PlayAudio():
         self.track_title = ""
         self.elapsed_time = 0.0
         self.total_track_time = 999
-        
+    
+    def get_path(self, data):
+        """Get path to music """
+        this_path = os.path.dirname(os.path.abspath(__file__)) # path to this file
+        file_path = this_path[:-5] + "src" + data.operation_data_1 # relative path #manually altered abs path as script moved
+        print(file_path)
+        return file_path
+    
     def service_callback(self, data):
         """Code to handle what to do when service is called"""
         #Set variables
@@ -68,12 +75,7 @@ class PlayAudio():
                 rospy.loginfo("Sound Player: Ending current track to load new track")
                 self.end_audio_steam()
                 self.currently_streaming = False
-            this_path = os.path.dirname(os.path.abspath(__file__)) # path to this file
-            #file_path = data.operation_data_1 # for absolute path
-            relative_path_joiner = "src"
-            #NOTE we -5 here, cuz this script is in the folder "/node"
-            file_path = this_path[:-5] + relative_path_joiner + data.operation_data_1 # relative path
-            print(file_path)
+            file_path = self.get_path(data)
             self.start_time = 0
             #check filepath
             file_path_valid = self.check_valid_filepath(file_path)
@@ -94,9 +96,7 @@ class PlayAudio():
                 rospy.loginfo("Sound Player: Ending current track to play new track")
                 self.end_audio_steam()
                 self.currently_streaming = False
-            this_path = os.path.dirname(os.path.abspath(__file__)) # path to this file
-            #file_path = data.operation_data_1 # for absolute path
-            file_path = this_path + data.operation_data_1 # relative path
+            file_path = self.get_path(data)
             self.start_time = data.operation_data_2
             #check filepath
             file_path_valid = self.check_valid_filepath(file_path)
