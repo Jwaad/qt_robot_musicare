@@ -411,9 +411,8 @@ class SoundManager():
 
 
     def request_song_data(self):
-        """ask the service for data. TODO method needs reworking"""
-        operation = "request_data"
-        data = self.call_sound_player(operation)
+        """ask ros topic for data TODO method needs reworking"""
+        data = rospy.wait_for_message("/song_data_publisher", SongData)
         return data
     
     
