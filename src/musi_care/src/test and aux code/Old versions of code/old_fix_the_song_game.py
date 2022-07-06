@@ -19,7 +19,7 @@ from aubio import source, tempo
 from numpy import median, diff
 from std_msgs.msg import Float64MultiArray
 from std_msgs.msg import String
-from qt_motors_controller.srv import *
+#from qt_motors_controller.srv import *
 import rospy
 import time
 import tty
@@ -35,10 +35,10 @@ from musi_care.srv import sound_player_srv
 from musi_care.srv import qt_command
 import pygame
 import pygame.freetype
-from musi_care_lib import ImageButton as IB
-from musi_care_lib import ToggleImageButton as TIB
-from musi_care_lib import DragablePlayableImageButton as IDB #image dragable button
-from musi_care_lib import TimeFunctions           
+from musicare_lib import ImageButton as IB
+from musicare_lib import ToggleImageButton as TIB
+from musicare_lib import DragablePlayableImageButton as IDB #image dragable button
+from musicare_lib import TimeFunctions           
 import wave
 import contextlib
 from pydub import AudioSegment
@@ -443,8 +443,6 @@ class Fix_Song_Game():
         self.send_qt_command("emote", emote)
     
 ###HIGHER LEVEL METHODS###
-
-
 
     def transition_screen(self, text):
         """Method displays screen with only a single large button in the centre """

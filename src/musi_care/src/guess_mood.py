@@ -315,7 +315,7 @@ class Guess_The_Mood_Game():
         #Example on how to define target_event_handler
         """
         #define what to do with events
-        def event_handler(events):
+        def event_handler(events):send_qt_command
             pass
         target_event_handler = event_handler #copy to this var
         """

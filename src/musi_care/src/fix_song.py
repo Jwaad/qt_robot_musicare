@@ -9,6 +9,7 @@ import rospy
 import os
 import functools
 import math
+import threading
 from random import randint
 from musi_care.msg import SongData
 from musi_care.srv import sound_player_srv
@@ -22,6 +23,7 @@ from musicare_lib import QTManager
 from musicare_lib import Renderer
 from musicare_lib import HorizontalSlider
 from musicare_lib import StandardLevels
+
 
 #################################################################Initialise#################################################################
 
@@ -164,13 +166,13 @@ class Fix_The_Song_Game():
 
 
     def get_song_info(self, prev_track_time = "", prev_total_time=""):
-    #Get variables that we will draw onto screen
+        """Get variables that we will draw onto screen"""
         formatted_data = self.GetTrackInfo(formatted_output = True)
-        current_track_time = formatted_data[0]          #Time gotten from sound_player node
-        track_total_time = formatted_data[1] #Total track time          
-        progress = self.elapsed_time_secs / self.total_track_secs #elapsed time in percentage completion, so slider can represent that on a bar
-        song_ended = progress >= 0.99 # if progress > 99% = song is finished, otherwise false
-        return current_track_time, track_total_time, progress, song_ended
+        self.current_track_time = formatted_data[0]          #Time gotten from sound_player node
+        self.track_total_time = formatted_data[1] #Total track time          
+        self.progress = self.elapsed_time_secs / self.total_track_secs #elapsed time in percentage completion, so slider can represent that on a bar
+        self.song_ended = self.progress >= 0.99 # if self.progress > 99% = song is finished, otherwise false
+        return self.current_track_time, self.track_total_time, self.progress, self.song_ended
         
         
     def format_elapsed_display(self, time):
@@ -323,11 +325,8 @@ class Fix_The_Song_Game():
         
     def play_music_blocking(self, difficulty, level): 
         """Level with just music player"""
-        time = rospy.get_time()
         if self.run:
             
-            print(rospy.get_time() - time)
-            time = rospy.get_time()
             
             #Get the level's data
             level_data = self.music_data[difficulty][level] #{"song_name":"title", "mood":"happy", "hint":"some text"}
@@ -343,29 +342,30 @@ class Fix_The_Song_Game():
 
             #Variables
             music_playing = True
-            song_ended = False
-            current_track_time = 0
-            track_total_time = 100
+            self.song_ended = False
+            self.current_track_time = 0
+            self.track_total_time = 100
+            self.progress = 0
+            self.current_track_time, self.track_total_time, self.progress, self.song_ended = self.get_song_info(self.current_track_time, self.track_total_time)
             
-            current_track_time, track_total_time, progress, song_ended = self.get_song_info(current_track_time, track_total_time)
             self.sound_manager.unpause()
             
-            
-            while not song_ended and not rospy.is_shutdown() and self.run:
-
+            while not self.song_ended and not rospy.is_shutdown() and self.run:
+                time = rospy.get_time()
+                
                 #Format song time elapsed to display on screen
                 formatted_data = self.GetTrackInfo(formatted_output = True)
-                current_track_time, track_total_time, progress, song_ended = self.get_song_info(current_track_time, track_total_time)
+                self.current_track_time, self.track_total_time, self.progress, self.song_ended = self.get_song_info(self.current_track_time, self.track_total_time)
 
                 #Draw background and objects
                 self.renderer.DrawBackground(self.background_colour)
-                self.renderer.DrawText(str(current_track_time), (slider_x - 75, slider_y +75), font_size = 50) #draw current time
-                self.renderer.DrawText(str(track_total_time), (2650, slider_y +75), font_size = 50) #draw total track time
+                self.renderer.DrawText(str(self.current_track_time), (slider_x - 75, slider_y +75), font_size = 50) #draw current time
+                self.renderer.DrawText(str(self.track_total_time), (2650, slider_y +75), font_size = 50) #draw total track time
                 self.renderer.DrawTextCentered("Please listen to the song.", font_size = 100, y = 600)
-                song_duration_slider.render(self.window, progress)
+                song_duration_slider.render(self.window, self.progress)
                 self.animation_manager.DrawTouchAnimation(self.window) # also draw touches
                 self.pygame.display.update() #Update all drawn objects
-                
+
                 #Check if the X was clicked
                 for event in self.pygame.event.get():
                     if event.type == self.pygame.QUIT:
@@ -373,8 +373,11 @@ class Fix_The_Song_Game():
                         self.sound_manager.stop_track()
                     mouse_pos = self.pygame.mouse.get_pos()
                     if event.type == self.pygame.MOUSEBUTTONUP:
-                        self.animation_manager.StartTouchAnimation(mouse_pos) #draw mouse click animation
+                        #self.animation_manager.StartTouchAnimation(mouse_pos) #draw mouse click animation
+                        pass
                 #print(mouse_pos) #TODO del me
+                
+                #print(rospy.get_time() - time)
 
     def play_level(self, difficulty, level_num):
         """Sequence plays the levels"""

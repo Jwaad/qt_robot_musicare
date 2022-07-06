@@ -8,30 +8,24 @@ import pygame
 import pygame.freetype
 import os
 import math
-import random
 from musi_care.msg import SongData
 from musi_care.srv import sound_player_srv
 from musi_care.srv import qt_command
 
 #TODO REPLACE ALL GREY SCALE VERSIONS TO QUICK SCRIPT OF CV2.convert to greyscale
 
-#rospy.init_node('musicare_lib', anonymous=False)
-#rospy.loginfo("musicare_lib launched successfully")
-    
 #####################################################General Levels##################################################################
 
 class StandardLevels():
     """Class to draw basic screens multiple games use, such as yes or no screen """
     
-    def __init__(self, window, window_center, pygame, path_to_music):
+    def __init__(self, window, window_center, pygame):
         self.window = window
         self.window_center = window_center
         self.pygame = pygame
         self.renderer = Renderer(window, window_center)
         self.animation_manager = AnimationManager(pygame)
         self.command_manager = QTManager()
-        self.sound_manager = SoundManager(path_to_music)
-        self.timer = TimeFunctions()
     
     def yes_or_no_screen(self, text,run , background_colour):
         """Screen for Yes or No questions"""
@@ -59,11 +53,11 @@ class StandardLevels():
                     mouse_pos = self.pygame.mouse.get_pos() 
                     clicked_yes = yes.get_event(event, mouse_pos)
                     if clicked_yes:
-                        return True, True #returns error and button pressed
+                        return True
                     else:
                         clicked_no = no.get_event(event, mouse_pos)
                         if clicked_no:
-                            return True, False
+                            return False
                     self.animation_manager.StartTouchAnimation(mouse_pos) #tell system to play animation when drawing
             
             #Draw graphics
@@ -93,7 +87,7 @@ class StandardLevels():
                 for event in self.pygame.event.get():
                     #Check if the user clicks the X
                     if event.type == self.pygame.QUIT:
-                        return False
+                        return "QUIT"
                     elif(event.type == self.pygame.MOUSEBUTTONUP):#on mouse release play animation to show where cursor is
                         mouse_pos = self.pygame.mouse.get_pos() 
                         self.animation_manager.StartTouchAnimation(mouse_pos) #tell system to play animation when drawing
@@ -106,7 +100,7 @@ class StandardLevels():
                 
                 if self.command_manager.robo_timer.CheckTimer(speaking_timer_id): #If our timer is done
                     qt_speaking = False
-                    return True
+                    return
 
 
     def QTSpeakingPopupScreen(self, qt_say, graphics, run, background_colour, should_gesture = True, gesture = "explain_right"):
@@ -125,7 +119,7 @@ class StandardLevels():
             print("error: no graphics inputted into popup function")
             return
         
-        if run and not rospy.is_shutdown(): #Dont start this screen if the previous screen wanted to close out the game
+        if run or rospy.is_shutdown(): #Dont start this screen if the previous screen wanted to close out the game
                         
             #create popup button in center
             popup = Button(popup_path, popup_path_grey, (700,550), self.pygame, scale=1.5) 
@@ -142,7 +136,7 @@ class StandardLevels():
                 for event in self.pygame.event.get():    
                     #Check if the user clicks the X
                     if event.type == self.pygame.QUIT:
-                        return False
+                        return "QUIT"
                     elif(event.type == self.pygame.MOUSEBUTTONUP):#on mouse release play animation to show where cursor is
                         mouse_pos = self.pygame.mouse.get_pos() 
                         self.animation_manager.StartTouchAnimation(mouse_pos) #tell system to play animation when drawing
@@ -158,96 +152,7 @@ class StandardLevels():
                 
                 if self.command_manager.robo_timer.CheckTimer(speaking_timer_id): #If our timer's internal timer is done
                     qt_speaking = False #unessecary but might as well 
-                    return True
-
-
-    def tap_to_continue(self, run, background_colour, text_display= "Please tap the screen when you are ready to start the level.", qt_say=None, should_gesture = True, gesture = "explain_right"):
-        """Screen that waits until tap, non blocking even if QT speaking"""
-             
-        if run: #Dont start this screen if the previous screen wanted to close out the game
-            
-            #Handle speaking
-            if qt_say != None:
-                self.command_manager.qt_emote("talking") #show mouth moving
-                speaking_timer_id = self.command_manager.qt_say(qt_say) #says text we give it, and starts an internal timer that we can check on          
-                
-            #Handle gesturing
-            if should_gesture:
-                self.command_manager.qt_gesture(gesture)
-            
-            clicked = False
-            while not clicked and not rospy.is_shutdown() and run:
-            
-                #check for quit
-                for event in self.pygame.event.get():
-                    #Check if the user clicks the X
-                    if event.type == self.pygame.QUIT:
-                        return False
-                    elif(event.type == self.pygame.MOUSEBUTTONUP):#on mouse release play animation to show where cursor is
-                        clicked = True
-                        self.animation_manager.StartTouchAnimation(self.pygame.mouse.get_pos() ) #tell system to play animation when drawing
-                #Draw background and objects
-                self.renderer.DrawBackground(background_colour)
-                speed_coefficient = 1 #half sine freq
-                dot_decider = math.sin(speed_coefficient*rospy.get_time())
-                if dot_decider < -1/3:
-                    self.renderer.DrawTextCentered(text_display, font_size =70 )
-                elif dot_decider < 1/3:
-                    self.renderer.DrawTextCentered(text_display + ".", font_size =70 )
-                else:
-                    self.renderer.DrawTextCentered(text_display + "..", font_size =70 )
-                self.animation_manager.DrawTouchAnimation(self.window) # also draw touches
-                self.pygame.display.update() #Update all drawn objects
-                
-            return True
-
-
-    def countdown(self, seconds, run, background_colour, prelim_msg = None):
-        """Code that counts down to start next screen.
-        Use prelim msg to have a msg readout before the count down"""
-        
-        if run: #Dont start this screen if the previous screen wanted to close out the game
-            
-            if prelim_msg != None:
-                seconds += 1 #add another screen
-            
-            for second in range(seconds, -1, -1): #countdown from seconds to 0
-                if prelim_msg != None and second == seconds: #if this is the 1st loop
-                    qt_speech = prelim_msg
-                    self.command_manager.qt_say(qt_speech)
-                    timer_id = "QT_SAY"
-                else:
-                    if second == 0: #if last countdown
-                        qt_speech = "Go!"
-                        timer_id = self.timer.CreateTimer("wait_time", 0.6) #wait for shorter time after go
-                    else:
-                        qt_speech = str(second) + "!" #convert second to string and add !
-                        timer_id = self.timer.CreateTimer("wait_time", 1) #wait for 1 second and label the timer
-                    
-                    self.command_manager.send_qt_command(speech= (qt_speech) ) #QT should read out the second
-                
-                second_passed = False
-                #For each second passed renderr the screen
-                while not second_passed and not rospy.is_shutdown():
-                    #Check for quit
-                    for event in self.pygame.event.get():
-                        if event.type == self.pygame.QUIT: #Check if the user clicks the X
-                            return False
-                        elif(event.type == self.pygame.MOUSEBUTTONUP):#on mouse release play animation to show where cursor is
-                            self.animation_manager.StartTouchAnimation(self.pygame.mouse.get_pos() ) #tell system to play animation when drawing
-                    #Draw background and objects
-                    self.renderer.DrawBackground(background_colour) 
-                    self.renderer.DrawTextCentered(qt_speech, font_size =70 ) 
-                    self.animation_manager.DrawTouchAnimation(self.window) # also draw touches 
-                    self.pygame.display.update() #Update all drawn objects 
-                    
-                    if prelim_msg != None and second == seconds: #if 1st loop, check a different timer 
-                        second_passed = self.command_manager.robo_timer.CheckTimer(timer_id) 
-                    else: 
-                        second_passed = self.timer.CheckTimer(timer_id) 
-                    
-            return True
-                
+                    return
 
 #####################################################Renderer##################################################################
 
@@ -297,9 +202,7 @@ class Renderer():
         """Using the rect of the obj, draw a box around it and an arrow pointing towards it"""
         
         #Variables
-        this_path = os.path.dirname(__file__)
-        relative_arrow = "/game_assets/graphics/arrow_pointer.png"
-        path_to_arrow = this_path + relative_arrow
+        path_to_arrow = "game_assets/graphics/arrow_pointer.png"
         arrow_img = pygame.image.load(path_to_arrow).convert_alpha()
         arrow_size = (arrow_img.get_width(),arrow_img.get_height())
         bounding_scalar = 50 #how much bigger the bounding should be than the original rect
@@ -414,72 +317,11 @@ class SoundManager():
 
 
     def request_song_data(self):
-        """ask ros topic for data TODO method needs reworking"""
-        #time = rospy.get_time()
-        data = self.call_sound_player("request_data")
-        #data = rospy.wait_for_message("/song_data_publisher", SongData) #through the node
-        #print("time taken waiting for node ", rospy.get_time() - time)
-        
+        """ask the service for data. TODO method needs reworking"""
+        operation = "request_data"
+        data = self.call_sound_player(operation)
         return data
-    
-    
-    def return_wav_lenth(self, song_path):
-        with contextlib.closing(wave.open(song_path,'r')) as f:
-            frames = f.getnframes()
-            rate = f.getframerate()
-            duration = frames / float(rate)
-            return(duration)    
-    
-    
-    def slice_song(self, num_segments, target_song_to_split, distracting_songs = None):
-        """Method that chops up a song and creates segments from it, this uses the file name, so you can use 2 differenty files and append the returned variabels together to jumble multiple songs
-        target_song should be the path to a single song
-        distracting songs should be a list of paths to songs, even if only 1 song is used
-        """
         
-        #Define variables
-        self.path_to_save = r"/home/qtrobot/catkin_ws/src/musi_care/src/game_assets/music/temp/"
-        segments = []
-        song_path = os.path.join(self.music_filepath, target_song_to_split)
-        total_wav_len = (self.return_wav_lenth(song_path))*1000 #convert to millisecond
-        slice_size = total_wav_len / num_segments
-        prev_slice = 0 
-        
-        #Slice and save songs
-        for i in range(0,num_segments):
-            audio_segment = AudioSegment.from_wav(song_path)
-            audio_segment = audio_segment[prev_slice : prev_slice+slice_size]
-            prev_slice += slice_size
-            song_name = target_song_to_split.split("/")[-1]
-            print(song_name) #TODO REMOVE ME
-            song_path_save = self.path_to_save + str(i) + song_name #cut off the problematic parts TODO change this to look for the "/" and cut after the "/"
-            audio_segment.export(song_path_save, format="wav") #Exports to a wav file in the current path.       
-            segments.append(song_path_save) #list of all songs made
-            rospy.loginfo("temp file saved")
-        
-        #handle distracting song
-        if distracting_songs != None:
-            for song in distracting_songs: #so we can use multiple distracting songs
-                song_path = os.path.join(self.music_filepath, song)
-                total_wav_len = (self.return_wav_lenth(song_path))*1000 #convert to millisecond
-                slice_size = total_wav_len / num_segments
-                prev_slice = 0 
-                
-                #Slice distracting songs and add to same list
-                for i in range(0,num_segments):
-                    audio_segment = AudioSegment.from_wav(song_path)
-                    audio_segment = audio_segment[prev_slice : prev_slice+slice_size]
-                    prev_slice += slice_size
-                    song_name = song.split("/")[-1]
-                    song_path_save = self.path_to_save + str(i) + song_name #cut off the problematic parts TODO change this to look for the "/" and cut after the "/"
-                    audio_segment.export(song_path_save, format="wav") #Exports to a wav file in the current path.       
-                    segments.append(song_path_save) #list of all songs made
-                    rospy.loginfo("temp file saved")
-        
-        print(segments)
-        segments = random.shuffle(segments)
-        print(segments)
-        return segments       
         
 #####################################################QTManager/CommandManager##################################################################
         
@@ -489,50 +331,31 @@ class QTManager():
 
     def __init__(self):
         self.robo_timer = TimeFunctions()
-    
-    def init_robot(self, arm_vel):
-        """Method to init robot parameters"""
-        #Set control mode, incase they were changed before hand
-        rospy.wait_for_service('/qt_robot/motors/setControlMode')
-        self.set_mode = rospy.ServiceProxy('/qt_robot/motors/setControlMode', set_control_mode)
-        mode_changed = self.set_mode(["right_arm", "left_arm"], 1)
-        if mode_changed:
-            rospy.loginfo("Motors successfully set control mode 1")
-        else:
-            rospy.loginfo("Motor control mode could not be changed")
-            self.run = False
         
-        #Set velocity of arms incase they were set differently
-        rospy.wait_for_service('/qt_robot/motors/setVelocity')
-        set_vel = rospy.ServiceProxy('/qt_robot/motors/setVelocity', set_velocity)
-        speed_changed = set_vel(["right_arm", "left_arm"], arm_vel)
-        if speed_changed:
-            rospy.loginfo("Motors successfully set to default speed ({})".format(arm_vel))
-        else:
-            rospy.loginfo("Motor speed could not be changed")
-            self.run = False
-    
-    def send_qt_command(self, speech = None, gesture = None, emote = None, command_blocking = False):
+    def send_qt_command(self, speech = "", gesture = "", emote = "", command_content= "", command_blocking = False):
         """Neatens and simplifies sending commands to QT 
         if we want to use multiple functions of QT at once and dont care about tracking time taken, we should use this method instead of the others
         """
-        if speech != None:#do qt_speak
-            print("sending speech req")
-            rospy.wait_for_service('/qt_command_service')
-            command_controller = rospy.ServiceProxy('/qt_command_service', qt_command)
-            command_complete = command_controller("tts", speech, command_blocking)
-            return command_complete    
-        if gesture != None:#do qt_speak
-            rospy.wait_for_service('/qt_command_service')
-            command_controller = rospy.ServiceProxy('/qt_command_service', qt_command)
-            command_complete = command_controller("gesture", gesture, command_blocking)
-            return command_complete    
-        if emote != None:#do qt_speak
-            rospy.wait_for_service('/qt_command_service')
-            command_controller = rospy.ServiceProxy('/qt_command_service', qt_command)
-            command_complete = command_controller("emote", emote, command_blocking)
-            return command_complete    
-
+        if command_content == "":
+            #rospy.loginfo("QT was sent empty command")
+            return False
+        else:
+            if speech != "":#do qt_speak
+                rospy.wait_for_service('/qt_command_service')
+                command_controller = rospy.ServiceProxy('/qt_command_service', qt_command)
+                command_complete = command_controller("tts", command_content, command_blocking)
+                return command_complete    
+            if gesture != "":#do qt_speak
+                rospy.wait_for_service('/qt_command_service')
+                command_controller = rospy.ServiceProxy('/qt_command_service', qt_command)
+                command_complete = command_controller("gesture", command_content, command_blocking)
+                return command_complete    
+            if emote != "":#do qt_speak
+                rospy.wait_for_service('/qt_command_service')
+                command_controller = rospy.ServiceProxy('/qt_command_service', qt_command)
+                command_complete = command_controller("emote", command_content, command_blocking)
+                return command_complete    
+    
     def qt_say_blocking(self, text):
         """Makes QT say something, then makes you wait until the speaking is done"""
         timer_len = len(text) * 0.08 #0.2s per letter 4 letter word is given 0.8s to be said
@@ -546,12 +369,10 @@ class QTManager():
         
     def qt_say(self, text):
         """Makes QT say something, then makes starts a timer until the speaking is done"""
-        print("waiting for serv")
         timer_len = len(text) * 0.08 #0.08s per letter 4 letter word is given 0.32 secs to be said
         timer_id = "QT_SAY"
         self.robo_timer.CreateTimer(timer_id, timer_len) #creates timer with ID 1 for 8s   
-        status = self.send_qt_command(speech = text)
-        print(status)
+        self.send_qt_command(speech = text)
         return timer_id
         
     def qt_gesture(self, req_gesture):
@@ -611,7 +432,6 @@ class TimeFunctions():
         if timer_id in self.timers.keys():
             print("You have overwritten an older timer, make sure you're not stuck in a loop")
         self.timers[timer_id] = rospy.get_time() + time_to_wait
-        return (timer_id)
 
     def CheckTimer(self, timer_id):
         if timer_id in self.timers.keys():
@@ -624,7 +444,7 @@ class TimeFunctions():
             print("Timer referenced does not exist, check timer ID given")
             return None
     
-    def get_timers(self):
+    def GetTimers(self):
         return self.timers #return the timer list
         
 #####################################################Button##################################################################
@@ -757,110 +577,6 @@ class ToggleButton():
     def get_rect(self):
         return self.rect
 
-
-######################################################ToggleButton#################################################################
-
-class PausePlayButton():
-    """All functionality of toggle button, but with an option to replace with a 3rd image"""
-
-    def __init__(self, pause_path, pause_path_grey, play_path, play_path_grey, rewind_path, rewind_path_grey,  x_y_locations, pygame, scale=1, unique_id = "", on_pause=object, on_play=object):
-    
-        #Set vars
-        self.pygame = pygame
-        self.highlighted = False
-        self.playing = True #starts paused
-        self.on_pause = on_pause
-        self.on_play = on_play
-        self.rewind_toggle = False #show rewind or not
-
-        #load imges
-        raw_play = self.pygame.image.load(play_path).convert_alpha()
-        raw_play_grey = self.pygame.image.load(play_path_grey).convert_alpha()
-        raw_pause = self.pygame.image.load(pause_path).convert_alpha()
-        raw_pause_grey = self.pygame.image.load(pause_path_grey).convert_alpha()
-        raw_rewind = self.pygame.image.load(rewind_path).convert_alpha()
-        raw_rewind_grey = self.pygame.image.load(rewind_path_grey).convert_alpha()
-        
-        #Scale and set pos of imgs
-        img_x = x_y_locations[0]
-        img_y = x_y_locations[1]
-        img_w = int(raw_play.get_width()*scale)
-        img_h = int(raw_play.get_height()*scale)
-        scaled_size = (img_w, img_h) #scale all 3 images by same scalars
-        self.play = self.pygame.transform.scale(raw_play, scaled_size)
-        self.play_grey = self.pygame.transform.scale(raw_play_grey, scaled_size)
-        self.pause = self.pygame.transform.scale(raw_pause, scaled_size)
-        self.pause_grey = self.pygame.transform.scale(raw_pause_grey, scaled_size)
-        self.rewind = self.pygame.transform.scale(raw_rewind, scaled_size)
-        self.rewind_grey = self.pygame.transform.scale(raw_rewind_grey, scaled_size)
-        
-        self.rect = self.pygame.Rect(img_x,img_y,img_w,img_h) 
-        if unique_id == "":
-            self.id = rospy.get_time() #unique ID for each button based on time when made
-        else:
-            self.id = unique_id
-
-    def render(self, screen, grey = False):  
-        """Draw image onto screen"""
-        if self.rewind_toggle:
-            if grey:
-                    screen.blit(self.rewind_grey, self.rect) #TODO replace this with the greyscaled version of this image
-            else:
-                    screen.blit(self.rewind, self.rect)
-        else:
-            if self.playing:
-                if grey:
-                    screen.blit(self.pause_grey, self.rect) #TODO replace this with the greyscaled version of this image
-                else:
-                    screen.blit(self.pause, self.rect)
-            else:
-                if grey:
-                    screen.blit(self.play_grey, self.rect) #TODO replace this with the greyscaled version of this image
-                else:
-                    screen.blit(self.play, self.rect)
-        return screen #redundant
-    
-    def its_rewind_time(self): #an easter egg
-        """toggles rewind to true  ONLY TO BE USED EXTERNALLY"""
-        self.rewind_toggle = True
-        self.playing = False #
-        return self.rewind_toggle
-
-    def rewind_off(self):
-        """toggles rewind to false  ONLY TO BE USED EXTERNALLY"""
-        self.rewind_toggle = False
-        self.playing = True
-        return self.rewind_toggle
-    
-    def toggle_pause(self):
-        """Toggles the function 'self.toggle' """
-        #act acording to the state
-        if self.playing: #if we're playing and we click the icon = Pause
-            self.on_pause() #pause
-        else:
-            self.on_play() #unpause
-            self.rewind_toggle = False #if this was true, set it to false now
-        #flip the state
-        self.playing = not self.playing
-        return (self.playing)
-    
-    def toggle_img(self):
-        """Toggle but only the img to render """
-        self.playing = not self.playing
-        return (self.playing)
-    
-    def get_event(self, event, mouse_pos):
-        """Button event handle, if mouse release, then toggle"""
-        mouse_on_button = self.rect.collidepoint(mouse_pos)
-        if mouse_on_button:
-            if event.type == self.pygame.MOUSEBUTTONUP:
-                return self.toggle_pause() #flip paused and play
-        return self.playing #return the state we were in
-        
-    def get_rect(self):
-        return self.rect
-        
-        
 ######################################################DragableButton#################################################################
 
 class DragableButton():
@@ -1051,6 +767,7 @@ class HorizontalSlider():
             time_to_start = track_total_time * self.bar_overwrite # get overwrite in secs
             
             self.on_release(track_title, time_to_start)
+            #self.sound_manager.start_track(track_title, time_to_start)
             self.slider_being_held = False
             self.bar_overwrite = 2.0 #  reset slider overwrite. Use a weird number, as this should only occur if i've made a coding error.
             

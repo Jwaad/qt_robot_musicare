@@ -13,7 +13,7 @@ class SongDataPub:
         rospy.loginfo("Song Data: Node Initialised")
         self.song_data_pub = rospy.Publisher("song_data_publisher", SongData, queue_size=10)
         self.pub_rate = rospy.Rate(60) # 60fps publish rate
-        self.get_data_rate = 1/20 #get song data only 3x every 2s (slightly faster than every s)
+        self.get_data_rate = 1/2 #get song data only 3x every 2s (slightly faster than every s)
         self.timers = {}
     
     def CreateTimer(self, timer_id, time_to_wait):
