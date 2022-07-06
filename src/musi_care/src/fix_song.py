@@ -323,8 +323,12 @@ class Fix_The_Song_Game():
         
     def play_music_blocking(self, difficulty, level): 
         """Level with just music player"""
+        time = rospy.get_time()
         if self.run:
-        
+            
+            print(rospy.get_time() - time)
+            time = rospy.get_time()
+            
             #Get the level's data
             level_data = self.music_data[difficulty][level] #{"song_name":"title", "mood":"happy", "hint":"some text"}
             self.track_name = level_data["song_name"]
@@ -336,14 +340,14 @@ class Fix_The_Song_Game():
 
             #Load track
             self.sound_manager.load_track(self.track_name)
-            current_track_time, track_total_time, progress, song_ended = self.get_song_info(current_track_time, track_total_time)
-            
+
             #Variables
             music_playing = True
             song_ended = False
             current_track_time = 0
             track_total_time = 100
             
+            current_track_time, track_total_time, progress, song_ended = self.get_song_info(current_track_time, track_total_time)
             self.sound_manager.unpause()
             
             
@@ -351,8 +355,7 @@ class Fix_The_Song_Game():
 
                 #Format song time elapsed to display on screen
                 formatted_data = self.GetTrackInfo(formatted_output = True)
-                if track_check: #this is slow so lets save some computation
-                    current_track_time, track_total_time, progress, song_ended = self.get_song_info(current_track_time, track_total_time)
+                current_track_time, track_total_time, progress, song_ended = self.get_song_info(current_track_time, track_total_time)
 
                 #Draw background and objects
                 self.renderer.DrawBackground(self.background_colour)
