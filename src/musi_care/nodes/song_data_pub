@@ -11,7 +11,7 @@ class SongDataPub:
         rospy.init_node('song_data_publisher', anonymous=False)
         self.song_data_pub = rospy.Publisher("song_data_publisher", SongData, queue_size=10)
         self.pub_rate = rospy.Rate(60) # 60fps publish rate
-        self.get_data_rate = 1/1 #get song data only 3x every 2s (slightly faster than every s)
+        self.get_data_rate = 1/20 #get song data only 3x every 2s (slightly faster than every s)
         self.timers = {}
     
     def CreateTimer(self, timer_id, time_to_wait):
@@ -41,7 +41,7 @@ class SongDataPub:
         return song_data    
     
     def convert_to_SongData(self, msg):
-        song_data = SongData
+        song_data = SongData()
         song_data.track_title = msg.track_title #track title
         song_data.track_total_time = msg.track_total_time  #track time in seconds
         song_data.track_elapsed_time = msg.track_elapsed_time  #current time in seconds
@@ -56,10 +56,11 @@ class SongDataPub:
         time_to_check = self.CheckTimer(timer_id)
         while not rospy.is_shutdown(): #rospy.spin() should prob use this instead
             if time_to_check == True:
-                print("checked data")
+                #print("checked data")
                 srv_msg = self.call_sound_player("request_data")
                 song_data = self.convert_to_SongData(srv_msg)
                 timer_id = self.CreateTimer("timer", self.get_data_rate)# start timer again
+            #print("pub data")                
             self.song_data_pub.publish(song_data)
             self.pub_rate.sleep()
             time_to_check = self.CheckTimer(timer_id)
