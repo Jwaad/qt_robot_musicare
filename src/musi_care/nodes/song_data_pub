@@ -9,6 +9,7 @@ class SongDataPub:
 
     def __init__(self):
         rospy.init_node('song_data_publisher', anonymous=False)
+        rospy.log_info("Song Data: Node Initialised")
         self.song_data_pub = rospy.Publisher("song_data_publisher", SongData, queue_size=10)
         self.pub_rate = rospy.Rate(60) # 60fps publish rate
         self.get_data_rate = 1/20 #get song data only 3x every 2s (slightly faster than every s)
@@ -65,7 +66,7 @@ class SongDataPub:
             self.pub_rate.sleep()
             time_to_check = self.CheckTimer(timer_id)
             
-        rospy.log_info("Closed successfully")
+        rospy.log_info("Song Data: Closed successfully")
 
 if __name__ == '__main__':
     
