@@ -1,6 +1,5 @@
 <launch>
     <node pkg="musi_care" type="sound_player" name="sound_player" output="screen"/>
     <node pkg="jwaad_test" type="laptop_command" name="laptop_command_node" output="screen"/>
-    <node pkg="musi_care" type="song_data_pub" name="song_data_pub" output="screen"/>
 </launch>
 
