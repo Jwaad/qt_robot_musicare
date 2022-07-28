@@ -662,6 +662,19 @@ musi_care_genpy/fast:
 .PHONY : musi_care_genpy/fast
 
 #=============================================================================
+# Target rules for targets named _catkin_empty_exported_target
+
+# Build rule for target.
+_catkin_empty_exported_target: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 _catkin_empty_exported_target
+.PHONY : _catkin_empty_exported_target
+
+# fast build rule for target.
+_catkin_empty_exported_target/fast:
+	$(MAKE) -f test/CMakeFiles/_catkin_empty_exported_target.dir/build.make test/CMakeFiles/_catkin_empty_exported_target.dir/build
+.PHONY : _catkin_empty_exported_target/fast
+
+#=============================================================================
 # Target rules for targets named _jwaad_test_generate_messages_check_deps_FaceLockOnFeedback
 
 # Build rule for target.
@@ -1011,6 +1024,7 @@ help:
 	@echo "... musi_care_generate_messages_nodejs"
 	@echo "... musi_care_gennodejs"
 	@echo "... musi_care_genpy"
+	@echo "... _catkin_empty_exported_target"
 	@echo "... _jwaad_test_generate_messages_check_deps_FaceLockOnFeedback"
 	@echo "... _jwaad_test_generate_messages_check_deps_FaceLockOnAction"
 	@echo "... _jwaad_test_generate_messages_check_deps_FaceLockOnResult"

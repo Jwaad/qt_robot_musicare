@@ -1,8 +1,0 @@
-prefix=/home/jwaad/catkin_ws/install
-
-Name: qt_memgame_app
-Description: Description of qt_memgame_app
-Version: 1.0.1
-Cflags: -I${prefix}/include
-Libs: -L${prefix}/lib -lqt_memgame_app -lstd_msgs -lmessage_runtime
-Requires: qt_gesture_controller qt_motors_controller

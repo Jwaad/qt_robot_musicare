@@ -1,8 +1,0 @@
-prefix=/home/jwaad/catkin_ws/install
-
-Name: qt_gesturegame_app
-Description: Description of qt_gesturegame_app
-Version: 1.0.1
-Cflags: -I${prefix}/include
-Libs: -L${prefix}/lib -lqt_gesturegame_app -lstd_msgs -lmessage_runtime
-Requires: qt_gesture_controller qt_motors_controller qt_nuitrack_app

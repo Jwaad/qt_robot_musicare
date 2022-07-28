@@ -586,6 +586,9 @@ class Guess_The_Mood_Game():
         #Tap to continue screen to slow pacing
         self.run = self.level_loader.tap_to_continue(self.run, self.background_colour)
         
+        #Countdown #TODO REMOVE ME
+        self.run = self.level_loader.countdown(3, self.run, self.background_colour, prelim_msg = "Get ready to play!")
+        
         #Run game code
         self.play_level(difficulty, level)
        

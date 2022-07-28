@@ -55,6 +55,7 @@ CMAKE_BINARY_DIR = /home/jwaad/catkin_ws/build
 # The main recursive "all" target.
 all: gtest/all
 all: musi_care/all
+all: test/all
 all: jwaad_test/all
 
 .PHONY : all
@@ -62,6 +63,7 @@ all: jwaad_test/all
 # The main recursive "preinstall" target.
 preinstall: gtest/preinstall
 preinstall: musi_care/preinstall
+preinstall: test/preinstall
 preinstall: jwaad_test/preinstall
 
 .PHONY : preinstall
@@ -74,6 +76,7 @@ clean: CMakeFiles/tests.dir/clean
 clean: CMakeFiles/download_extra_data.dir/clean
 clean: gtest/clean
 clean: musi_care/clean
+clean: test/clean
 clean: jwaad_test/clean
 
 .PHONY : clean
@@ -220,6 +223,24 @@ musi_care/clean: musi_care/CMakeFiles/musi_care_gennodejs.dir/clean
 musi_care/clean: musi_care/CMakeFiles/musi_care_genpy.dir/clean
 
 .PHONY : musi_care/clean
+
+#=============================================================================
+# Directory level rules for directory test
+
+# Recursive "all" directory target.
+test/all:
+
+.PHONY : test/all
+
+# Recursive "preinstall" directory target.
+test/preinstall:
+
+.PHONY : test/preinstall
+
+# Recursive "clean" directory target.
+test/clean: test/CMakeFiles/_catkin_empty_exported_target.dir/clean
+
+.PHONY : test/clean
 
 #=============================================================================
 # Target rules for target CMakeFiles/doxygen.dir
@@ -1266,6 +1287,33 @@ musi_care_genpy: musi_care/CMakeFiles/musi_care_genpy.dir/rule
 musi_care/CMakeFiles/musi_care_genpy.dir/clean:
 	$(MAKE) -f musi_care/CMakeFiles/musi_care_genpy.dir/build.make musi_care/CMakeFiles/musi_care_genpy.dir/clean
 .PHONY : musi_care/CMakeFiles/musi_care_genpy.dir/clean
+
+#=============================================================================
+# Target rules for target test/CMakeFiles/_catkin_empty_exported_target.dir
+
+# All Build rule for target.
+test/CMakeFiles/_catkin_empty_exported_target.dir/all:
+	$(MAKE) -f test/CMakeFiles/_catkin_empty_exported_target.dir/build.make test/CMakeFiles/_catkin_empty_exported_target.dir/depend
+	$(MAKE) -f test/CMakeFiles/_catkin_empty_exported_target.dir/build.make test/CMakeFiles/_catkin_empty_exported_target.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/jwaad/catkin_ws/build/CMakeFiles --progress-num= "Built target _catkin_empty_exported_target"
+.PHONY : test/CMakeFiles/_catkin_empty_exported_target.dir/all
+
+# Build rule for subdir invocation for target.
+test/CMakeFiles/_catkin_empty_exported_target.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/jwaad/catkin_ws/build/CMakeFiles 0
+	$(MAKE) -f CMakeFiles/Makefile2 test/CMakeFiles/_catkin_empty_exported_target.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/jwaad/catkin_ws/build/CMakeFiles 0
+.PHONY : test/CMakeFiles/_catkin_empty_exported_target.dir/rule
+
+# Convenience name for target.
+_catkin_empty_exported_target: test/CMakeFiles/_catkin_empty_exported_target.dir/rule
+
+.PHONY : _catkin_empty_exported_target
+
+# clean rule for target.
+test/CMakeFiles/_catkin_empty_exported_target.dir/clean:
+	$(MAKE) -f test/CMakeFiles/_catkin_empty_exported_target.dir/build.make test/CMakeFiles/_catkin_empty_exported_target.dir/clean
+.PHONY : test/CMakeFiles/_catkin_empty_exported_target.dir/clean
 
 #=============================================================================
 # Target rules for target jwaad_test/CMakeFiles/_jwaad_test_generate_messages_check_deps_FaceLockOnFeedback.dir

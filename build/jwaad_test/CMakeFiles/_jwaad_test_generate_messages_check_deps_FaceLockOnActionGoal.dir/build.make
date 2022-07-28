@@ -54,7 +54,7 @@ CMAKE_BINARY_DIR = /home/jwaad/catkin_ws/build
 include jwaad_test/CMakeFiles/_jwaad_test_generate_messages_check_deps_FaceLockOnActionGoal.dir/progress.make
 
 jwaad_test/CMakeFiles/_jwaad_test_generate_messages_check_deps_FaceLockOnActionGoal:
-	cd /home/jwaad/catkin_ws/build/jwaad_test && ../catkin_generated/env_cached.sh /usr/bin/python3 /opt/ros/noetic/share/genmsg/cmake/../../../lib/genmsg/genmsg_check_deps.py jwaad_test /home/jwaad/catkin_ws/devel/share/jwaad_test/msg/FaceLockOnActionGoal.msg jwaad_test/FaceLockOnGoal:actionlib_msgs/GoalID:std_msgs/Header
+	cd /home/jwaad/catkin_ws/build/jwaad_test && ../catkin_generated/env_cached.sh /usr/bin/python3 /opt/ros/noetic/share/genmsg/cmake/../../../lib/genmsg/genmsg_check_deps.py jwaad_test /home/jwaad/catkin_ws/devel/share/jwaad_test/msg/FaceLockOnActionGoal.msg std_msgs/Header:jwaad_test/FaceLockOnGoal:actionlib_msgs/GoalID
 
 _jwaad_test_generate_messages_check_deps_FaceLockOnActionGoal: jwaad_test/CMakeFiles/_jwaad_test_generate_messages_check_deps_FaceLockOnActionGoal
 _jwaad_test_generate_messages_check_deps_FaceLockOnActionGoal: jwaad_test/CMakeFiles/_jwaad_test_generate_messages_check_deps_FaceLockOnActionGoal.dir/build.make

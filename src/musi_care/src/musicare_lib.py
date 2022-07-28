@@ -9,6 +9,9 @@ import pygame.freetype
 import os
 import math
 import random
+import wave
+import contextlib
+from pydub import AudioSegment
 from musi_care.msg import SongData
 from musi_care.srv import sound_player_srv
 from musi_care.srv import qt_command
@@ -438,9 +441,11 @@ class SoundManager():
         """
         
         #Define variables
-        self.path_to_save = r"/home/qtrobot/catkin_ws/src/musi_care/src/game_assets/music/temp/"
+        this_path = os.path.dirname(__file__)
+        music_filepath = r"/game_assets/music/"
         segments = []
-        song_path = os.path.join(self.music_filepath, target_song_to_split)
+        song_path = this_path + music_filepath + target_song_to_split
+        self.path_to_save =  this_path + music_filepath + "temp/"
         total_wav_len = (self.return_wav_lenth(song_path))*1000 #convert to millisecond
         slice_size = total_wav_len / num_segments
         prev_slice = 0 
@@ -456,11 +461,12 @@ class SoundManager():
             audio_segment.export(song_path_save, format="wav") #Exports to a wav file in the current path.       
             segments.append(song_path_save) #list of all songs made
             rospy.loginfo("temp file saved")
+        correct_segs = segments #always give 1st seg is series of segs
         
         #handle distracting song
         if distracting_songs != None:
             for song in distracting_songs: #so we can use multiple distracting songs
-                song_path = os.path.join(self.music_filepath, song)
+                song_path = this_path + music_filepath + song
                 total_wav_len = (self.return_wav_lenth(song_path))*1000 #convert to millisecond
                 slice_size = total_wav_len / num_segments
                 prev_slice = 0 
@@ -476,10 +482,8 @@ class SoundManager():
                     segments.append(song_path_save) #list of all songs made
                     rospy.loginfo("temp file saved")
         
-        print(segments)
-        segments = random.shuffle(segments)
-        print(segments)
-        return segments       
+        random.shuffle(segments)
+        return segments, correct_segs 
         
 #####################################################QTManager/CommandManager##################################################################
         

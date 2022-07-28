@@ -1,8 +1,0 @@
-prefix=/home/jwaad/catkin_ws/install
-
-Name: tutorial_qt_respeaker
-Description: Description of tutorial_qt_respeaker
-Version: 0.0.0
-Cflags: 
-Libs: -L${prefix}/lib 
-Requires: 

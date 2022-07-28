@@ -71,6 +71,14 @@
 /home/jwaad/catkin_ws/build/musi_care/CMakeFiles/musi_care_generate_messages_nodejs.dir
 /home/jwaad/catkin_ws/build/musi_care/CMakeFiles/musi_care_gennodejs.dir
 /home/jwaad/catkin_ws/build/musi_care/CMakeFiles/musi_care_genpy.dir
+/home/jwaad/catkin_ws/build/test/CMakeFiles/install/strip.dir
+/home/jwaad/catkin_ws/build/test/CMakeFiles/install/local.dir
+/home/jwaad/catkin_ws/build/test/CMakeFiles/install.dir
+/home/jwaad/catkin_ws/build/test/CMakeFiles/list_install_components.dir
+/home/jwaad/catkin_ws/build/test/CMakeFiles/rebuild_cache.dir
+/home/jwaad/catkin_ws/build/test/CMakeFiles/edit_cache.dir
+/home/jwaad/catkin_ws/build/test/CMakeFiles/test.dir
+/home/jwaad/catkin_ws/build/test/CMakeFiles/_catkin_empty_exported_target.dir
 /home/jwaad/catkin_ws/build/jwaad_test/CMakeFiles/install/strip.dir
 /home/jwaad/catkin_ws/build/jwaad_test/CMakeFiles/_jwaad_test_generate_messages_check_deps_FaceLockOnFeedback.dir
 /home/jwaad/catkin_ws/build/jwaad_test/CMakeFiles/install/local.dir
