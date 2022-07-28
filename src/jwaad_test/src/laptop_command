@@ -32,10 +32,6 @@ gesture_dict = {
 "look_around":"QT/bored"
 }
 
-#Create publishers
-gesture_pub = rospy.Publisher('/qt_robot/gesture/play', String, queue_size=10)
-emote_pub = rospy.Publisher('/qt_robot/emotion/show', String, queue_size=10)
-speechSay_pub = rospy.Publisher('/qt_robot/speech/say', String, queue_size=10)
 
 def execute_command(data):
     "uses the input to check within a list of things to see which sequence we should perform"
@@ -49,15 +45,9 @@ def execute_command(data):
         qt_gesture_id = gesture_dict[action_content] #the emote we want, retrieved from the dict.
         if action_content in gesture_dict: #Check if the given command is one we have added or not
             if action_blocking:
-                rospy.wait_for_service('/qt_robot/gesture/play')
-                qt_gesture = rospy.ServiceProxy('/qt_robot/gesture/play', gesture_play)
-                name = qt_gesture_id
-                speed = 1.0 # the default (the speed gesture were recorded at)
-                qt_gesture_play = qt_gesture(name, speed)
                 rospy.loginfo("Finished requested Gesture")
                 pass
-            else: #nonblocking gesture   
-                #gesture_pub.publish(qt_gesture_id)
+            else:
                 rospy.loginfo("Finished requested Gesture")
         else:
             rospy.loginfo("You have entered in an unknown Gesture")
@@ -68,13 +58,9 @@ def execute_command(data):
         qt_emote_id = emote_dict[action_content] #the emote we want, retrieved from the library.
         if action_content in emote_dict: #Check if the given command is one we have added or not
             if action_blocking: #blocking emote
-                rospy.wait_for_service('/qt_robot/emotion/show') #The Service Type / class: emotion_show
-                qt_emote = rospy.ServiceProxy('/qt_robot/emotion/show', emotion_show)
-                qt_emote = qt_emote(qt_emote_id)
                 rospy.loginfo("Finished requested Emote")
                 pass
-            else:               #nonblocking emote    
-                #emote_pub.publish(qt_emote_id)
+            else:
                 rospy.loginfo("Finished requested Emote")
         else:
             rospy.loginfo("You have entered in an unknown Emote")
@@ -98,13 +84,9 @@ def perform_command(message):
     "Callback response, it is really just to help the flow of the code, also handles tts."
     if message.action_type == "tts":  #If we get a TTS request then handle it upfront, it need not be searched for.
         if message.action_blocking:
-            rospy.wait_for_service('/qt_robot/speech/say')
-            qt_speech = rospy.ServiceProxy('/qt_robot/speech/say', speech_say) #The Service Type / class: speech_say
-            qt_say = qt_speech(message.action_content)
             rospy.loginfo("Finished requested TTS message")
             return True
         else:
-            #speechSay_pub.publish(message.action_content)
             rospy.loginfo("Finished requested TTS message")
             return True
     else:
