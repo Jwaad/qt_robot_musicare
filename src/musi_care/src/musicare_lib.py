@@ -390,7 +390,7 @@ class SoundManager():
 
     def call_sound_player(self, operation, data_1 = "", data_2 = 0.0 ):
         """makes it easier to call sound_player"""
-        rospy.wait_for_service('/sound_player_service')
+        #rospy.wait_for_service('/sound_player_service') #dont wait since our connection is persistent.
         song_data = self.sound_player(operation, data_1, data_2)
         return song_data
             
