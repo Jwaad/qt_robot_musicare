@@ -61,11 +61,13 @@ class Guess_The_Mood_Game():
         self.sound_manager = SoundManager(self.music_filepath) #load soundplayer with sound file path
         self.command_manager = QTManager()
         self.renderer = Renderer(self.window,self.window_center)
-        self.level_loader = StandardLevels(self.window, self.window_center, self.pygame, self.music_filepath)
+        self.level_loader = StandardLevels(self.window, self.window_center, self.pygame, self.music_filepath)        
         #self.music_vol = 1 # change volume of laptop
         #self.qt_voice_vol
         #self.sound_manager.volume_change(self.music_vol) # Set a default volume
         #self.set_robot_volume(qt_voice_vol) #TODO add this functionality  
+        self.t1 = 0 #t1 for FPS tracking
+        self.debug = True
                    
 #############################################################Low level methods###########################################################
                 
@@ -132,8 +134,9 @@ class Guess_The_Mood_Game():
 
     def GetTrackInfo(self, formatted_output = False): 
         """Subscribe to sound_player publisher and get elapsed track time"""
-        song_data = self.sound_manager.request_song_data()
         
+        song_data = self.sound_manager.request_song_data()
+
         self.track_title = song_data.track_title #track title
         self.total_track_secs = song_data.track_total_time #track time in seconds
         self.elapsed_time_secs = song_data.track_elapsed_time #current time in seconds
@@ -319,7 +322,20 @@ class Guess_The_Mood_Game():
             pass
         target_event_handler = event_handler #copy to this var
         """
-         
+    
+    def get_fps(self):
+        """get time between the last execution of this function and the current """
+        t2 = rospy.get_time()
+        fps = "FPS: " + str(int(1/(t2 - self.t1))) #calculate fps  1 / (timenow - prevtime)
+        self.t1 = t2 #store prev time
+        return fps
+    
+    def draw_debug_info(self, fps):
+        """Draw any debug features we want to see """
+        if self.debug:
+            self.renderer.DrawText(fps, (70,50), font_size = 30) #draw fps
+        
+        
 #####################################################Level / screen code#################################################################
 
 
@@ -457,6 +473,7 @@ class Guess_The_Mood_Game():
             qt_message = ""
             current_track_time = ""
             track_total_time = ""
+            fps = "0"
             
             self.sound_manager.unpause() #start track
             music_playing = True
@@ -477,8 +494,9 @@ class Guess_The_Mood_Game():
                 current_track_time, track_total_time, progress, song_ended = self.get_song_info(current_track_time, track_total_time) #get out some data from the current song playing
                 
                 #Draw background and objects
-                self.update_graphics(current_track_time, track_total_time, progress, slider_x, slider_y)
-                self.rendered_graphics = self.update_grey_graphics(current_track_time, track_total_time, progress, slider_x, slider_y) 
+                self.update_graphics(current_track_time, track_total_time, progress, slider_x, slider_y) #draw coloured graphics
+                self.rendered_graphics = self.update_grey_graphics(current_track_time, track_total_time, progress, slider_x, slider_y)  #save updated grey graphics into attribute
+                if self.debug: self.draw_debug_info(fps) #draw fps onto screen
                 self.pygame.display.update() #Update all drawn objects
                 
                 #Start event handling
@@ -550,14 +568,14 @@ class Guess_The_Mood_Game():
                         self.quit = True #Tells us that the game was quit out of, and it didn't end organically
                         self.level_complete = True # end level
                         self.sound_manager.stop_track() #Stop the music 
-                            
+                    
+                if self.debug:
+                    fps = self.get_fps() #calculate FPS of this loop and show it next loop
+                        
                 #check if level won
                 if correct_answer_given:
                     self.level_complete = True
                     print("Ending level")
-          
-                # Cap fps to 30
-                #self.clock.tick(self.fps)
                     
             #Ending sequence after while loop
             if self.quit:
@@ -574,7 +592,8 @@ class Guess_The_Mood_Game():
 #################################################################Main####################################################################   
 
     def Main(self, difficulty = "easy", level =  1): #input what level and difficulty to play, the program will handle the rest
-    
+        
+        """
         #Show starting screen
         self.run = self.level_loader.QTSpeakingScreen("Lets play Guess the mood!", self.run, self.background_colour)
 
@@ -588,7 +607,7 @@ class Guess_The_Mood_Game():
         
         #Countdown #TODO REMOVE ME
         self.run = self.level_loader.countdown(3, self.run, self.background_colour, prelim_msg = "Get ready to play!")
-        
+        """
         #Run game code
         self.play_level(difficulty, level)
        

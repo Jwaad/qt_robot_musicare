@@ -20,7 +20,40 @@ from musi_care.srv import qt_command
 
 #rospy.init_node('musicare_lib', anonymous=False)
 #rospy.loginfo("musicare_lib launched successfully")
+
+
+######################################################DragableButton#################################################################
+
+class Behaviours():
+    """Class to store and return saved / repeatable behaviours other than builtin with QT"""
     
+    def __init__(self):
+        pass
+    
+    def get_agreements(self):  #List of all sayings when QT agrees EG yes, correct
+        sayings = ["Yes!", "Correct!", "That's right!", "That's correct!", "Great, that's right!"]
+        ind = random.randint(0, len(sayings))
+        saying = sayings[ind]
+        return saying
+        
+    def get_disagreements(self): #List of all sayings when QT disagree EG no, sorry.
+        agreements = ["No...","Sorry, no...", "No that's not correct...", ]
+        ind = random.randint(0, len(sayings))
+        saying = sayings[ind]
+        return saying
+        
+    def get_praise(self):
+        sayings = ["Amazing, that's the right answer!", "Great job!", "Alright, that's correct!", "Wow, well done!", "Nice! Well done!"]
+        ind = random.randint(0, len(sayings))
+        saying = sayings[ind]
+        return saying  
+
+    def get_incorrect(self):
+        sayings = ["Okay, next question", "On to the next question", ]
+        ind = random.randint(0, len(sayings))
+        saying = sayings[ind]
+        return saying  
+
 #####################################################General Levels##################################################################
 
 class StandardLevels():
@@ -460,7 +493,7 @@ class SoundManager():
             song_path_save = self.path_to_save + str(i) + song_name #cut off the problematic parts TODO change this to look for the "/" and cut after the "/"
             audio_segment.export(song_path_save, format="wav") #Exports to a wav file in the current path.       
             segments.append(song_path_save) #list of all songs made
-            rospy.loginfo("temp file saved")
+            rospy.loginfo("Temp file saved")
         correct_segs = segments #always give 1st seg is series of segs
         
         #handle distracting song
@@ -480,7 +513,7 @@ class SoundManager():
                     song_path_save = self.path_to_save + str(i) + song_name #cut off the problematic parts TODO change this to look for the "/" and cut after the "/"
                     audio_segment.export(song_path_save, format="wav") #Exports to a wav file in the current path.       
                     segments.append(song_path_save) #list of all songs made
-                    rospy.loginfo("temp file saved")
+                    rospy.loginfo("Temp file saved")
         
         random.shuffle(segments)
         return segments, correct_segs 
@@ -521,7 +554,7 @@ class QTManager():
         if we want to use multiple functions of QT at once and dont care about tracking time taken, we should use this method instead of the others
         """
         if speech != None:#do qt_speak
-            print("sending speech req")
+            #print("sending speech req")
             rospy.wait_for_service('/qt_command_service')
             command_controller = rospy.ServiceProxy('/qt_command_service', qt_command)
             command_complete = command_controller("tts", speech, command_blocking)
@@ -550,12 +583,12 @@ class QTManager():
         
     def qt_say(self, text):
         """Makes QT say something, then makes starts a timer until the speaking is done"""
-        print("waiting for serv")
+        #print("waiting for serv")
         timer_len = len(text) * 0.08 #0.08s per letter 4 letter word is given 0.32 secs to be said
         timer_id = "QT_SAY"
         self.robo_timer.CreateTimer(timer_id, timer_len) #creates timer with ID 1 for 8s   
         status = self.send_qt_command(speech = text)
-        print(status)
+        #print(status)
         return timer_id
         
     def qt_gesture(self, req_gesture):
