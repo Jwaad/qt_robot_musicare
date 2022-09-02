@@ -374,7 +374,9 @@ class SoundManager():
 
     def __init__(self, music_filepath):
         self.music_filepath = music_filepath
-    
+        rospy.wait_for_service('/sound_player_service')
+        self.sound_player = rospy.ServiceProxy('/sound_player_service', sound_player_srv, persistent=True)
+        
     def load_track(self, track_title, track_time=0.0):
         """gives the sound player the song data, has it load it up to return information about the song, this is essentially "start_track" but betteer """
         track_path = os.path.join(self.music_filepath, track_title)
@@ -389,8 +391,7 @@ class SoundManager():
     def call_sound_player(self, operation, data_1 = "", data_2 = 0.0 ):
         """makes it easier to call sound_player"""
         rospy.wait_for_service('/sound_player_service')
-        sound_player = rospy.ServiceProxy('/sound_player_service', sound_player_srv)
-        song_data = sound_player(operation, data_1, data_2)
+        song_data = self.sound_player(operation, data_1, data_2)
         return song_data
             
 
