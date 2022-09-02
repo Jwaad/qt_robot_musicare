@@ -493,7 +493,7 @@ class SoundManager():
             print(song_name) #TODO REMOVE ME
             song_path_save = self.path_to_save + str(i) + song_name #cut off the problematic parts TODO change this to look for the "/" and cut after the "/"
             audio_segment.export(song_path_save, format="wav") #Exports to a wav file in the current path.       
-            segments.append(song_path_save) #list of all songs made
+            segments.append(song_name) #list of all songs made
             rospy.loginfo("Temp file saved")
         correct_segs = segments #always give 1st seg is series of segs
         
@@ -513,7 +513,7 @@ class SoundManager():
                     song_name = song.split("/")[-1]
                     song_path_save = self.path_to_save + str(i) + song_name #cut off the problematic parts TODO change this to look for the "/" and cut after the "/"
                     audio_segment.export(song_path_save, format="wav") #Exports to a wav file in the current path.       
-                    segments.append(song_path_save) #list of all songs made
+                    segments.append(song_name) #list of all songs made
                     rospy.loginfo("Temp file saved")
         
         random.shuffle(segments)

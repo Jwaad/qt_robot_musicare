@@ -9,12 +9,15 @@ import rospy
 import os
 import functools
 import math
+import random
 from random import randint
 from musi_care.msg import SongData
 from musi_care.srv import sound_player_srv
 from musi_care.srv import qt_command
 from musicare_lib import TimeFunctions 
 from musicare_lib import Button
+from musicare_lib import DragableButton
+from musicare_lib import ToggleButton
 from musicare_lib import PausePlayButton
 from musicare_lib import AnimationManager
 from musicare_lib import SoundManager
@@ -23,9 +26,10 @@ from musicare_lib import Renderer
 from musicare_lib import HorizontalSlider
 from musicare_lib import StandardLevels
 
+
 #################################################################Initialise#################################################################
 
-class Guess_The_Mood_Game():
+class Fix_The_Song_Game():
     """ Class to generate and handle guess the mood game """
 	
     def __init__(self):
@@ -46,7 +50,7 @@ class Guess_The_Mood_Game():
         self.cen_y = self.window_center[1]
         self.window = pygame.display.set_mode( (self.window_x, self.window_y) ) #Create window and set size
         self.background_colour = (100,100,100) #background black by default
-        self.pygame.display.set_caption("Guess The Mood!") #Label window
+        self.pygame.display.set_caption("Fix The Song!") #Label window
         self.run = True
         #self.pygame.mouse.set_visible(False) #set to false when not testing
         self.quit = False #Check to see if the game ended or it was quit
@@ -55,27 +59,27 @@ class Guess_The_Mood_Game():
         self.difficulty = "easy" #Default difficulty to play
         self.current_level = 1 #Default level to play
         self.music_data = self.get_song_database() #From save file load all of the level data 
+        #print(self.music_data)
         self.music_filepath = "/game_assets/music/" #relative path to songs # "/home/qtrobot/catkin_ws/src/musi_care/src/game_assets/music/" 
         self.timer_manager = TimeFunctions()
         self.animation_manager = AnimationManager(self.pygame)
         self.sound_manager = SoundManager(self.music_filepath) #load soundplayer with sound file path
         self.command_manager = QTManager()
         self.renderer = Renderer(self.window,self.window_center)
-        self.level_loader = StandardLevels(self.window, self.window_center, self.pygame, self.music_filepath)        
+        self.level_loader = StandardLevels(self.window, self.window_center, self.pygame, self.music_filepath)
         #self.music_vol = 1 # change volume of laptop
         #self.qt_voice_vol
         #self.sound_manager.volume_change(self.music_vol) # Set a default volume
         #self.set_robot_volume(qt_voice_vol) #TODO add this functionality  
-        self.t1 = 0 #t1 for FPS tracking
-        self.debug = True
-                   
-#############################################################Low level methods###########################################################
-                
+        
+  
+########################################################Low level methods################################################################
+        
     def get_song_database(self):
         """Read the database file and get the levels data"""
 
         #data_filepath = ("/home/qtrobot/catkin_ws/src/musi_care/src/game_assets/music/music_data.txt")
-        data_filepath = ("/game_assets/data/gtm_level_data.txt") #gtm = guess the mood
+        data_filepath = ("/game_assets/data/fsg_level_data.txt") #gtm = guess the mood
         this_file_path = os.path.dirname(__file__)
         full_path =  this_file_path + data_filepath
         music_data = []
@@ -114,10 +118,19 @@ class Guess_The_Mood_Game():
                             if not new_song: #if all the atrributes describe the same song, add them to the same dict
                                 split_attribute = attribute.split("=") #split line by the =
                                 attribute_label = split_attribute[0].replace(" ", "") #get rid of any spaces now
-                                if attribute_label != "hint": #dont get rid of the spaces in hint
-                                    attribute_value = split_attribute[1].replace(" ", "")
+                                if attribute_label == "distract_song": #parse differently
+                                    if split_attribute[1].replace(" ", "") == "none": #if there's no distract songs, just return none
+                                        attribute_value = None
+                                    else:
+                                        split_attribute.pop(0)
+                                        split_attribute #get rid of the label, the rest are songs
+                                        songs = split_attribute[0].split(",")
+                                        attribute_value = []
+                                        for song in songs:
+                                            distract_song = song.replace(" ", "") #remove spaces
+                                            attribute_value.append(distract_song)
                                 else:
-                                    attribute_value = split_attribute[1][1:] # Get rid of the space at the start
+                                    attribute_value = split_attribute[1].replace(" ", "") # Get rid of the space at the start
                                 music_data[difficulty][level][attribute_label] = attribute_value
                             else:
                                 new_song = False
@@ -129,18 +142,18 @@ class Guess_The_Mood_Game():
             return music_data
             
         rospy.log_info("Catastrophic error, data read failed.")
-        return music_data        
-
+        return music_data
+        
 
     def GetTrackInfo(self, formatted_output = False): 
         """Subscribe to sound_player publisher and get elapsed track time"""
-        
-        song_data = self.sound_manager.request_song_data()
 
+        song_data = self.sound_manager.request_song_data()
+        
         self.track_title = song_data.track_title #track title
         self.total_track_secs = song_data.track_total_time #track time in seconds
         self.elapsed_time_secs = song_data.track_elapsed_time #current time in seconds
-    
+
         #Either return the above, or format the secs to be displayed
         if formatted_output:
             total_mins, total_secs = self.format_elapsed_display(self.total_track_secs) 
@@ -154,6 +167,16 @@ class Guess_The_Mood_Game():
             return self.track_title , self.elapsed_time_secs, self.total_track_secs      
 
 
+    def get_song_info(self, prev_track_time = "", prev_total_time=""):
+        """Get variables that we will draw onto screen"""
+        formatted_data = self.GetTrackInfo(formatted_output = True)
+        self.current_track_time = formatted_data[0]          #Time gotten from sound_player node
+        self.track_total_time = formatted_data[1] #Total track time          
+        self.progress = self.elapsed_time_secs / self.total_track_secs #elapsed time in percentage completion, so slider can represent that on a bar
+        self.song_ended = self.progress >= 0.99 # if self.progress > 99% = song is finished, otherwise false
+        return self.current_track_time, self.track_total_time, self.progress, self.song_ended
+        
+        
     def format_elapsed_display(self, time):
         "bit of code that converts secs to mins and secs"
         if time < 60:
@@ -167,7 +190,7 @@ class Guess_The_Mood_Game():
         return str(mins), str(secs)
 
 
-    def CreateButton(self,file_name, alt_file_name, location,  scale=1, unique_id=""):
+    def CreateButton(self, file_name, alt_file_name, location, scale=1, unique_id=""):
         """code creates button using the button_image class."""
         this_file_path = os.path.dirname(__file__)
         relative_path = 'game_assets/graphics'
@@ -175,7 +198,33 @@ class Guess_The_Mood_Game():
         alt_path = os.path.join(this_file_path, relative_path, alt_file_name)
         
         button = Button(file_path, alt_path, location, self.pygame, scale, unique_id)
-        return(button)         
+        return(button)
+
+
+    def CreateToggleButton(self, file_name, alt_file_name, default_image_grey, toggled_image_grey, location, scale=1, unique_id="", return_info="", when_toggle_on=object, when_toggle_off=object):
+        """code creates button using the button_image class."""
+        this_file_path = os.path.dirname(__file__)
+        relative_path = '/game_assets/graphics/'
+        file_path = this_file_path + relative_path + file_name
+        alt_path = this_file_path + relative_path + alt_file_name
+        file_path_grey = this_file_path + relative_path + default_image_grey
+        alt_path_grey = this_file_path + relative_path + toggled_image_grey
+        
+        button = ToggleButton(file_path, alt_path, file_path_grey, alt_path_grey, location, self.pygame, scale, unique_id, return_info, when_toggle_on, when_toggle_off)
+        return(button)
+        
+        #default_image_path, toggled_image_path, default_image_grey, toggled_image_grey, x_y_locations, pygame, scale=1, unique_id = "", return_info="", when_toggle_on=object, when_toggle_off=object
+        
+
+    def CreateDragButton(self,file_name, alt_file_name, location,  scale=1, return_info="", when_toggle_on=object, when_toggle_off=object):
+        """code creates button using the button_image class."""
+        this_file_path = os.path.dirname(__file__)
+        relative_path = 'game_assets/graphics'
+        file_path = os.path.join(this_file_path, relative_path, file_name)
+        alt_path = os.path.join(this_file_path, relative_path, alt_file_name)
+        
+        button = DragableButton(file_path, alt_path, location, self.pygame, scale, return_info = return_info, when_toggle_on=when_toggle_on, when_toggle_off=when_toggle_off)
+        return(button)
 
 
     def CreatePlayButton(self, file_name, alt_file_name, file_grey, alt_file_grey, rewind_name, rewind_name_grey, location,  scale=1, unique_id = "", on_pause=object, on_play=object):
@@ -232,22 +281,6 @@ class Guess_The_Mood_Game():
             grey_graphics[i] = functools.partial(button.render, self.window, grey = True)
         
         return grey_graphics      
-
-
-    def get_song_info(self, prev_track_time = "", prev_total_time=""):
-    #Get variables that we will draw onto screen
-        formatted_data = self.GetTrackInfo(formatted_output = True)
-        if not self.song_duration_slider.slider_being_held: #If progress slider isn't being held just act as normal
-            current_track_time = formatted_data[0]          #Time gotten from sound_player node
-            track_total_time = formatted_data[1] #Total track time
-        else: #dont update the track time just use the old data
-            current_track_time = prev_track_time
-            track_total_time = prev_total_time
-            
-        progress = self.elapsed_time_secs / self.total_track_secs #elapsed time in percentage completion, so slider can represent that on a bar
-        song_ended = progress >= 0.99 # if progress > 99% = song is finished, otherwise false
-            
-        return current_track_time, track_total_time, progress, song_ended
         
         
     def highlight_block(self, events, target_rect = None, msg = "Click anywhere to continue ... ", timer_complete = None):
@@ -255,7 +288,7 @@ class Guess_The_Mood_Game():
         Highlight a certain object and check for click
         target_graphic = the graphic that's in colour
         Graphics here are a dict of the partial functions for each renderer in grey
-        target_rect the rect that we want to high light around
+        target_rect the rect that we want to highlight around
         should be used by being kept in a while loop with other graphics to be drawn
         """
 
@@ -315,131 +348,100 @@ class Guess_The_Mood_Game():
             
         return target_graphics, target_event_handler #if our logic sifts failed
 
-        #Example on how to define target_event_handler
-        """
-        #define what to do with events
-        def event_handler(events):send_qt_command
-            pass
-        target_event_handler = event_handler #copy to this var
-        """
-    
-    def get_fps(self):
-        """get time between the last execution of this function and the current """
-        t2 = rospy.get_time()
-        fps = "FPS: " + str(int(1/(t2 - self.t1))) #calculate fps  1 / (timenow - prevtime)
-        self.t1 = t2 #store prev time
-        return fps
-    
-    def draw_debug_info(self, fps):
-        """Draw any debug features we want to see """
-        if self.debug:
-            self.renderer.DrawText(fps, (70,50), font_size = 30) #draw fps
+
+    def play_seg_track(self,song_path):
+        """Uses the stored info attribute to play music on button press """
         
+        def play_track():
+            self.sound_manager.start_track(song_path)
         
-#####################################################Level / screen code#################################################################
-
-
-    def guided_tut(self):
-        """Code to play tut sequence for Guess the mood"""
-            
-        #String of our keys so i can remember them
-        """
-        1 = top text
-        2 = current_track_time 
-        3 = track_total_time
-        4 = song slider
-        5 = sad button
-        6 = happy button
-        7 = unsure button
-        8 = play/pause button
-        """
-
-        #Create rect to highlight and text for QT to say
-        #(250, 400, 2600-250, 650-400) #slider rect
-        #TODO ADD MORE TO THIS --> 
-        #Lets try it now: listen to song --> this sounds happy to me. --> lets click "happy" --> highlight happy --> wait for press
-        tut_graphics = {
-        1: {"rect":None, "keys":[1,2,3,4,5,6,7,8],  "speech" : "In this game, you will hear some music and you need to select whether it was happy or sad! When you are ready for the next step, tap the screen."},
-        2: {"rect":(560, 30, 1790, 135), "keys":[1,2,3,4,5,6,7,8], "speech" : "This text at the top will remind you of what you have to do."},
-        3: {"rect":(615, 700, 1675, 800), "keys":[1,2,3,4,7,8], "speech" : "These are your options. Tap happy if you think the song is happy, or sad if you think the song is sad."},
-        4: {"rect":(800, 1500, 2050-800, 1850-1500), "keys":[1,2,3,4,5,6,8], "speech" : "If you need a hint, click this button. I will help you out!"},
-        5: {"rect": (125, 150, 2750-125, 700-150), "keys":[1, 2,3,5,6,7], "speech" : "This is how you listen to the music."},
-        6: {"rect":(100, 425, 180, 600-425), "keys":[1,2,3,4,5,6,7,8], "speech" : "This number is how long the song has been playing for"},
-        7: {"rect":(2575, 425, 180, 600-425), "keys":[1,2,3,4,5,6,7,8], "speech" : "This number is how long the song is in total."},
-        8: {"rect":(1300, 160, 1600-1300, 450-160), "keys":[1,2,3,4,5,6,7], "speech" : "This is the play and pause button. Use this to stop and start the song as you like."},
-        9: {"rect": None, "keys":[1,2,3,4,5,6,7,8], "speech" : "That is all for Guess the mood."}
-        }
-
+        return play_track
+     
+     
+    def stop_seg_track(self,song_path):
+        """Uses the stored info attribute to play music on button press """
+        
+        def stop_track():
+            self.sound_manager.stop_track()
+        
+        return stop_track
+                
+#######################################################Level / screen code###############################################################
+        
+    def play_music_blocking(self, difficulty, level): 
+        """Level with just music player"""
         if self.run:
             
+            
             #Get the level's data
-            level_data = self.music_data["tut"][1] #load tut song data
+            level_data = self.music_data[difficulty][level] #{"song_name":"title", "mood":"happy", "hint":"some text"}
             self.track_name = level_data["song_name"]
-            track_hint = level_data["hint"]
-            track_mood = level_data["mood"]
-            current_track_time = ""
-            track_total_time = ""
             
-            #Create buttons and slider
-            slider_scale = 2 #used for slider and for text adjacent to slider
+            #Create slider and buttons
             slider_x = 275
-            slider_y = 450
-            self.create_graphics(slider_scale, slider_x, slider_y)
+            slider_y = 800
+            song_duration_slider = self.CreateHorizontalSlider("track_duration_slider.png", "track_cursor.png", (slider_x,slider_y), scale=2)
+            self.next_button = self.CreateButton("next_button.png", "next_button_grey.png", (self.cen_x - 300,1200), self.pygame, scale=1)
+            self.play_button = self.CreatePlayButton("pause_button.png", "pause_button_grey.png", "play_button.png",  "play_button_grey.png", "rewind_button.png", "rewind_button_grey.png", (self.cen_x-100, 450), scale = 1, on_play= self.sound_manager.unpause , on_pause = self.sound_manager.pause) #create pause and play button
             
-            #Group elements
-            self.buttons = [self.sad_button, self.happy_button, self.unsure_button, self.play_button]
-            self.sliders = [self.song_duration_slider] #Will be relevant eventually perhaps
+            #Load track
+            self.sound_manager.load_track(self.track_name)
 
-            #Define variables & start track
-            self.sound_manager.load_track(self.track_name) #load song to sound player and get data back
-            self.track_data = self.GetTrackInfo() #Get data from the sound_player node for this track and save it
-            current_track_time, track_total_time, progress, song_ended = self.get_song_info(current_track_time, track_total_time) #get out some data from the current song playing
-
-            #loop through each graphic that we care about 
-            for key in tut_graphics.keys():
-                #Define some variables for the tut sequence
-                tut_key = tut_graphics[key]["keys"] #draw grey graphics of everything except for our focused graphic
-                tut_speech = tut_graphics[key]["speech"]
-                tut_rect = tut_graphics[key]["rect"]
-                speaking_timer = self.command_manager.qt_say(tut_speech) #QT should say text out loud
-                clicked = False  #Hold execution until user clicks somewhere
+            #Variables
+            music_playing = True
+            self.song_ended = False
+            self.current_track_time = 0
+            self.track_total_time = 100
+            self.progress = 0
+            self.current_track_time, self.track_total_time, self.progress, self.song_ended = self.get_song_info(self.current_track_time, self.track_total_time)
+            
+            self.sound_manager.unpause()
+            music_ended = False
+            next_pressed = False
+            while not next_pressed and not rospy.is_shutdown() and self.run:
+                time = rospy.get_time()
                 
-                #set logic based on what graphic we focus on
-                target_graphics, target_event = self.get_target_behaviour(key, progress)
-
-                while not clicked and not rospy.is_shutdown() and self.run:
+                #Format song time elapsed to display on screen
+                formatted_data = self.GetTrackInfo(formatted_output = True)
+                self.current_track_time, self.track_total_time, self.progress, self.song_ended = self.get_song_info(self.current_track_time, self.track_total_time)
                 
-                    #Get data
-                    current_track_time, track_total_time, progress, song_ended = self.get_song_info(current_track_time, track_total_time) #get out some data from the current song playing
-                    grey_graphics = self.update_grey_graphics(current_track_time, track_total_time, progress, slider_x, slider_y) #update all grey graphics
-                    
-                    #Render graphics
-                    self.renderer.DrawBackground(self.background_colour) #draw background
-                    self.load_list_graphics(grey_graphics, tut_key) #load specified grey objects
-                    if target_graphics != []:
-                        for graphic in target_graphics: #Render the target graphic
-                            graphic() #Render graphics each
-                    self.animation_manager.DrawTouchAnimation(self.window) #Draw touch animation
-                    
-                    #Handle events
-                    events = self.pygame.event.get()
-                    for event in events:
-                        #print(self.pygame.mouse.get_pos())#TEMP
-                        if event.type == self.pygame.QUIT:
-                            self.run = False #Stops the program entirely
-                            self.quit = True #Tells us that the game was quit out of, and it didn't end organically
-                            #self.sound_manager.stop_track() #Stop the music
-                    if target_event != None:
-                        target_event(events) #render the target graphic
+                if self.song_ended:
+                    self.play_button.its_rewind_time() #draw rewind symbol
+                    self.sound_manager.load_track(self.track_name) #reload the track at the start
+                    music_ended = True #use this var, so we have one that stays true for the rest of the loop
+
+                #Draw background and objects
+                self.renderer.DrawBackground(self.background_colour)
+                self.renderer.DrawText(str(self.current_track_time), (slider_x - 75, slider_y +75), font_size = 50) #draw current time
+                self.renderer.DrawText(str(self.track_total_time), (2650, slider_y +75), font_size = 50) #draw total track time
+                self.renderer.DrawTextCentered("Please listen to the song.", font_size = 100, y = 300)
+                song_duration_slider.render(self.window, self.progress)
+                if music_ended: #render next button grey until music ended
+                    self.next_button.render(self.window, grey= False)
+                else:
+                    self.next_button.render(self.window, grey = True)
+                self.play_button.render(self.window)
+                self.animation_manager.DrawTouchAnimation(self.window) # also draw touches
+                self.pygame.display.update() #Update all drawn objects
+
+                #Check if the X was clicked
+                for event in self.pygame.event.get():
+                    if event.type == self.pygame.QUIT:
+                        self.run = False #Stops the program entirely
+                        self.sound_manager.stop_track()
+                    mouse_pos = self.pygame.mouse.get_pos()
+                    if event.type == self.pygame.MOUSEBUTTONUP:
+                        self.animation_manager.StartTouchAnimation(mouse_pos) #draw mouse click animation
                         pass
-                        
-                    #Check for click
-                    if len(self.command_manager.robo_timer.get_timers()) > 0: #if there's no timers active dont even check
-                        qt_finished_talking = self.command_manager.robo_timer.CheckTimer(speaking_timer)
-                    else:
-                        qt_finished_talking = True
-                    clicked = self.highlight_block(events, target_rect = tut_rect, timer_complete = qt_finished_talking)
-                    self.pygame.display.update() #Update all drawn objects
+                    #Check for button press
+                    if music_ended: #if music ended start checking for next press, otherwise ignore it
+                        next_button_clicked = self.next_button.get_event(event, mouse_pos)
+                        if next_button_clicked:
+                            next_pressed = True
+                            self.sound_manager.stop_track()
+                    self.play_button.get_event(event, mouse_pos)
+                    
+                 #print(rospy.get_time() - time)
 
 
     def play_level(self, difficulty, level_num):
@@ -449,178 +451,178 @@ class Guess_The_Mood_Game():
             #Get the level's data
             level_data = self.music_data[difficulty][level_num] #{"song_name":"title", "mood":"happy", "hint":"some text"}
             self.track_name = level_data["song_name"]
-            track_hint = level_data["hint"]
-            track_mood = level_data["mood"]
+            self.distract_song = level_data["distract_song"] #will be None or a list of songs
             
-            #Create buttons and slider
-            slider_scale = 2 #used for slider and for text adjacent to slider
-            slider_x = 275
-            slider_y = 450
-            self.create_graphics(slider_scale, slider_x, slider_y)
+            #store colours in here so we can get their names
+            self.segment_graphics = {
+            1:("music_segment_play_blue.png","music_segment_pause_blue.png"), 
+            2:("music_segment_play_orange.png","music_segment_pause_orange.png"), 
+            3:("music_segment_play_purple.png","music_segment_pause_purple.png"),
+            4:("music_segment_play_grey.png","music_segment_pause_grey.png")
+            #blue = 1 orange = 2 purple = 3 grey = 4.  #4 is reserved for the ones at the top and when grey screen
+            }
             
-            #Group elements
-            self.buttons = [self.sad_button, self.happy_button, self.unsure_button, self.play_button]
-            self.sliders = [self.song_duration_slider] #Will be relevant eventually perhaps
-
-            #Define variables & start track
-            self.sound_manager.load_track(self.track_name) #load song to sound player and get data back
-            self.track_data = self.GetTrackInfo() #Get data from the sound_player node for this track and save it
-            self.level_complete = False #Check when level has been finished
-            song_ended = False
-            correct_answer_given = False
-            track_stopped = True #this makes it play on start
-            wrong_counter = 0
-            qt_message = ""
-            current_track_time = ""
-            track_total_time = ""
-            fps = "0"
+            #create buttons for each segments
+            segment_num = 2 #split song into this many segs
+            all_seg_paths, correct_segments = self.sound_manager.slice_song(segment_num, self.track_name, self.distract_song)
+            segment_x_y = { 0: (450,450), 1:(750,450), 2:(450,750), 3:(750,750), 4: (100,100), 5: (100,200)} #temp hard coded num TODO: change these to calculated pos for each
             
-            self.sound_manager.unpause() #start track
-            music_playing = True
-            song_interrupt = False  #track if we stopped song
-            slider_was_held = False
-            
-            #Main game loop
-            while self.level_complete == False and not rospy.is_shutdown() and self.run:
-                
-                #if the song ended, start player to the beginning and pause it.
-                if song_ended: 
-                    self.play_button.its_rewind_time() #draw rewind symbol
-                    self.sound_manager.load_track(self.track_name) 
-                    music_playing = False
-                    song_ended = False
+            seg_pos_list = []
         
-                #Get variables that we will draw onto screen
-                current_track_time, track_total_time, progress, song_ended = self.get_song_info(current_track_time, track_total_time) #get out some data from the current song playing
+            for i in range(len(correct_segments)): #TODO find better way to do this
+                seg_pos_list.append(i) #were going to use this list to randomise the pos of the answer segments
                 
-                #Draw background and objects
-                self.update_graphics(current_track_time, track_total_time, progress, slider_x, slider_y) #draw coloured graphics
-                self.rendered_graphics = self.update_grey_graphics(current_track_time, track_total_time, progress, slider_x, slider_y)  #save updated grey graphics into attribute
-                if self.debug: self.draw_debug_info(fps) #draw fps onto screen
+            #create and order dragable buttons this is scalable
+            dragable_buttons = {}
+            i = 0
+            correct_seg_order = []
+            dragable_pos = {} 
+            
+            for song_path in correct_segments:
+                #create a moving button for each and also setup correct_seg
+                correct_seg_order.append(song_path)
+                seg_pos = segment_x_y[seg_pos_list.pop(random.randint(0,len(seg_pos_list)-1))]
+                #seg_colour = self.segment_graphics[random.randint(2,3)] #ignore blue
+                seg_colour = self.segment_graphics[1] #segments should be blue
+                dragable_pos[i] = seg_pos
+                dragable_buttons[i] = self.CreateDragButton(seg_colour[0], seg_colour[1], seg_pos, return_info =song_path, when_toggle_on = self.play_seg_track(song_path), when_toggle_off = self.stop_seg_track(song_path))
+                i+=1
+            
+            #Create main buttons
+            loading_button = self.CreateButton("loading_screen_button_depressed.png", "loading_screen_button_depressed.png", (200,225))
+            song_segment_y = 550
+            song_half = self.CreateToggleButton(self.segment_graphics[2][0], self.segment_graphics[2][1],self.segment_graphics[4][1],self.segment_graphics[4][1],(song_segment_y, 90),return_info =correct_segments[0],  when_toggle_on = self.play_seg_track(correct_segments[0]), when_toggle_off = self.stop_seg_track(song_path))
+            song_unknown = self.CreateButton( "music_segment_greyed_out.png", "music_segment_greyed_out.png",(song_segment_y+150,90)) #TODO make this auto scale and spawn according to difficulty
+            #play_button = self.CreateToggleButton("play_button.png","pause_button.png",(song_segment_y+250,130))
+            #check_button = self.CreateButton("check_button.png", "check_button.png", (song_segment_y+350,130))
+            main_buttons = [loading_button, song_unknown] #list of buttons so we can easier render them
+            
+            #TODO shuffle in some fake segments
+
+            qt_has_spoken = False
+            song_restored = False
+            current_seg_order = [song_half.return_info]
+            slot_free = True #there's no segment in the slot
+            
+            #Copy format of our previous data
+            is_in_slot = dragable_pos.copy() #the inital pos of each dragable
+            for key in is_in_slot.keys():
+                is_in_slot[key] = False
+                
+            while not song_restored and not rospy.is_shutdown() and self.run:
+                self.renderer.DrawBackground(self.background_colour)
+                song_half.render(self.window)
+                for button in main_buttons:
+                    button.render(self.window)
+                #if not slot_free: #only render this once a song is in the slot
+                #    check_button.render(self.window)
+                self.renderer.DrawText("Put the song back together", (700, 40), 50)
+                self.renderer.DrawText("Drag the segment into the slot", (700, 300), 50)
+                for key in dragable_buttons: #render dragable buttons
+                    dragable_buttons[key].render(self.window) #draw the segments
                 self.pygame.display.update() #Update all drawn objects
+
+                if not qt_has_spoken: #in here so he speaks while yes and no are drawn
+                    #self.qt_gesture("explain_right")
+                    #self.qt_emote("sad")
+                    #self.qt_say_blocking("The song is all jumbled up! Help me put it back together!")
+                    qt_has_spoken = True #QT has spoken now, so dont let him talk again
                 
-                #Start event handling
-                for event in self.pygame.event.get():    
-                    #reset / init variables      
-                    option_chosen = ""
-                    mouse_pos = self.pygame.mouse.get_pos()
-                    
-                    if event.type == self.pygame.MOUSEBUTTONUP:  #on mouse release play animation to show where cursor is
-                        self.animation_manager.StartTouchAnimation(mouse_pos) #tell system to play animation when drawing
-                    
-                    #handle slider events
-                    for slider in self.sliders:
-                        slider_held = slider.get_event(event, mouse_pos, self.track_data) #Give the slider track info, so it can pause and play from there.
-                        
-                    #Events for pause button:
-                    if slider_held:  #slider will resume song, so swap the playbutton's logic to match
-                        self.play_button.rewind_off() #turn rewind icon off too
-                        music_playing = True
-                        slider_was_held = False
-                    else: #if slider not held, handle events from pause button. this will return if we're paused or not
-                        music_playing = not(self.play_button.get_event(event, mouse_pos))
-                    
-                    #Check which button is pressed, if any.
-                    for button in self.buttons[:-1]: #for all buttons except the play_button
-                        button_pressed = button.get_event(event, mouse_pos)
-                        if button_pressed:
-                            button_pressed_id = button.id
-                            self.sound_manager.pause() #pause if something is playing
-                            if music_playing:
-                                song_interrupt = True
-                            track_stopped = True
-                            #if clicked button is correct
-                            if button_pressed_id == track_mood:
-                                print("User has clicked the correct answer")
-                                correct_answer_given= True
-                                self.command_manager.send_qt_command(emote = "happy", gesture = "nod")
-                                qt_message = ("Good job, That is the right answer!") #QT reads out level's hint
-                                self.level_loader.QTSpeakingPopupScreen(qt_message, self.rendered_graphics, self.run, self.background_colour) # this is blocking
-                            #if clicked button is unsure --> give hint
-                            elif button_pressed_id == "unsure":
-                                print("User has clicked unsure")
-                                self.command_manager.send_qt_command(emote = "talking", gesture = "explain_right")
-                                qt_message = ("I will give you a clue... " + track_hint) #QT reads out level's hint
-                                self.level_loader.QTSpeakingPopupScreen(qt_message, self.rendered_graphics, self.run, self.background_colour) # this is blocking
-                            #if clicked button is incorrect --> direct to hint if they want one.
-                            elif button_pressed_id != track_mood: 
-                                wrong_counter += 1 #how many time they have hit the wrong answer
-                                if wrong_counter < 2:
-                                    print("User has clicked the wrong answer")
-                                    self.command_manager.send_qt_command(emote = "sad", gesture = "shake_head")
-                                    qt_message = ( "Sorry, that is not the right answer, click, i dont know, for a hint") #QT reads out level's hint
-                                    self.level_loader.QTSpeakingPopupScreen(qt_message, self.rendered_graphics, self.run, self.background_colour) # this is blocking
-                                else:
-                                    print("User has clicked the wrong answer for the 2nd time")
-                                    self.command_manager.send_qt_command(emote = "sad")
-                                    self.command_manager.send_qt_command(gesture = "shake_head")
-                                    qt_message = "Sorry, that is not the right answer, here is a hint." #QT reads out level's hint
-                                    self.level_loader.QTSpeakingPopupScreen(qt_message, self.rendered_graphics, self.run, self.background_colour) # this is blocking  
-                                    qt_message = (track_hint) #QT reads out level's hint
-                                    self.level_loader.QTSpeakingPopupScreen(qt_message, self.rendered_graphics, self.run, self.background_colour) # this is blocking    
-                            if song_interrupt: #if we had paused the music, resume it
-                                self.sound_manager.unpause()
-                                song_interrupt = False
-                                    
-                    #Check if the user clicks the X
+                for event in self.pygame.event.get():
                     if event.type == self.pygame.QUIT:
                         self.run = False #Stops the program entirely
-                        self.quit = True #Tells us that the game was quit out of, and it didn't end organically
-                        self.level_complete = True # end level
-                        self.sound_manager.stop_track() #Stop the music 
-                    
-                if self.debug:
-                    fps = self.get_fps() #calculate FPS of this loop and show it next loop
                         
-                #check if level won
-                if correct_answer_given:
-                    self.level_complete = True
-                    print("Ending level")
-                    
-            #Ending sequence after while loop
-            if self.quit:
-                self.pygame.quit
-                print("You have quit the game.")
-            else:
-                print("You completed the level.")
+                    #Check for button press
+                    mouse_pos = self.pygame.mouse.get_pos()
+                    for button in main_buttons:
+                        button_press = button.get_event(event, mouse_pos)
                 
-            #close out before end
-            #self.pygame.quit
-            self.sound_manager.stop_track()
-
-
+                    press = song_half.get_event(event, mouse_pos)
+                    if press: #if the track was stopped, or stopped, set them all to false
+                            for key in dragable_buttons: #if pressed, set all others to false
+                                dragable_buttons[key].toggle = False
+                            song_half.toggle = True
+                            
+                    for key in dragable_buttons:
+                        press, button_pos = dragable_buttons[key].get_event(event, mouse_pos)
+                        #Check if toggle is pressed
+                        if press:
+                            for inner_key in dragable_buttons: #if pressed, set all others to false
+                                dragable_buttons[inner_key].toggle = False
+                            song_half.toggle = False
+                            dragable_buttons[key].toggle = True # set our pressed one back to true
+                            
+                        #Check if seg is placed in the slot and allow only if the slot is free
+                        if song_unknown.rect.collidepoint(button_pos.center) and not dragable_buttons[key].mouse_is_held and slot_free: #if our dragged part is released on top of the song slot
+                            dragable_buttons[key].rect.x = song_unknown.rect.x
+                            dragable_buttons[key].rect.y = song_unknown.rect.y
+                            current_seg_order = current_seg_order + [dragable_buttons[key].return_info]#TODO change this so it's scaleable
+                            is_in_slot[key] = True #this is currently in the slot
+                            slot_free = False
+                        #If it wasn't placed in the slot, placed it back in it's original location, and track which seg has left the slot
+                        elif not song_unknown.rect.collidepoint(button_pos.center) and not dragable_buttons[key].mouse_is_held: #move the button back to where it was if it was released somewhere random
+                            if is_in_slot[key]: #if we moved out from the slot, reset some variables
+                                slot_free = True
+                                current_seg_order.pop(1) #TODO change this to be scalable
+                                print("song popped")
+                                is_in_slot[key] = False
+                            else:
+                                dragable_buttons[key].rect.x = dragable_pos[key][0]
+                                dragable_buttons[key].rect.y = dragable_pos[key][1]
+                    
+                    #check if answers are corect once a loop, change this to check instead when the box is dragged in.          
+                    if current_seg_order == correct_seg_order:
+                        #self.qt_gesture("happy")
+                        #self.qt_emote("talking")
+                        #self.qt_say_blocking("Great job, that is correct!")
+                        #self.qt_emote("grin")
+                        song_restored = True
+                    else:
+                        #self.qt_gesture("shake_head")
+                        #self.qt_emote("talking")
+                        #self.qt_say("Sorry, that is not correct, please try again!")
+                        pass
+                
+            
+        
+        
+            
 #################################################################Main####################################################################   
 
-    def Main(self, difficulty = "easy", level =  1): #input what level and difficulty to play, the program will handle the rest
-        
-        """
-        #Show starting screen
-        self.run = self.level_loader.QTSpeakingScreen("Lets play Guess the mood!", self.run, self.background_colour)
 
-        #Ask if they want tutorial
-        self.run, tut = self.level_loader.yes_or_no_screen('Should I explain how to play "Guess The Mood" ?', self.run, self.background_colour)
+    def Main(self, difficulty = "easy", level =  3): #input what level and difficulty to play, the program will handle the rest
+        """Main Func"""
+        """
+        #Introduce game
+        self.run = self.level_loader.QTSpeakingScreen("Lets play Fix The Song!", self.run, self.background_colour)
+
+        #Ask if they want to play tutorial
+        self.run, tut = self.level_loader.yes_or_no_screen('Should I explain how to play "Fix The Song" ?', self.run, self.background_colour)
         if tut:
-            self.guided_tut()
+            print("tut chosed")
+            #self.guided_tut()
         
-        #Tap to continue screen to slow pacing
+        #Count in to the start of the game
         self.run = self.level_loader.tap_to_continue(self.run, self.background_colour)
+
+        #Count into level to slow pacing
+        self.run = self.level_loader.countdown(3, self.run, self.background_colour, prelim_msg = "Get ready to hear the song!")
         
-        #Countdown #TODO REMOVE ME
-        self.run = self.level_loader.countdown(3, self.run, self.background_colour, prelim_msg = "Get ready to play!")
+        #Play the track and block
+        self.play_music_blocking(difficulty, level)
         """
-        #Run game code
+        #Play main level
         self.play_level(difficulty, level)
-       
-
-
+        
+        
 ######################################################On execution#######################################################################
 
 #If we run this node, run the game on it's own
 if __name__ == '__main__':
     #Initialise game
-    rospy.init_node('guess_the_mood_game', anonymous=False)
+    rospy.init_node('fix_song_game', anonymous=False)
     rospy.loginfo("Node launched successfully")
-    game_object = Guess_The_Mood_Game()
+    game_object = Fix_The_Song_Game()
 
     #Run the game
     try:
@@ -629,3 +631,10 @@ if __name__ == '__main__':
         game_object.pygame.quit
         SoundManager().stop_track()
         print("Audio may not be stopped due to interrupt")
+        
+        
+        
+        
+        
+        
+        

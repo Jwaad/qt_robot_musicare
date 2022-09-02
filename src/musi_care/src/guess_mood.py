@@ -45,7 +45,7 @@ class Guess_The_Mood_Game():
         self.cen_x = self.window_center[0]
         self.cen_y = self.window_center[1]
         self.window = pygame.display.set_mode( (self.window_x, self.window_y) ) #Create window and set size
-        self.background_colour = (100,100,100) #background black by default
+        self.background_colour = (100,100,100) #background grey by default
         self.pygame.display.set_caption("Guess The Mood!") #Label window
         self.run = True
         #self.pygame.mouse.set_visible(False) #set to false when not testing
@@ -180,14 +180,19 @@ class Guess_The_Mood_Game():
 
     def CreatePlayButton(self, file_name, alt_file_name, file_grey, alt_file_grey, rewind_name, rewind_name_grey, location,  scale=1, unique_id = "", on_pause=object, on_play=object):
         """code creates toggle button using the toggle button class."""
+        #get path to imgs
         this_file_path = os.path.dirname(__file__)
         relative_path = 'game_assets/graphics'
+        
+        #paths for play img
         file_path = os.path.join(this_file_path, relative_path, file_name)
         alt_path = os.path.join(this_file_path, relative_path, alt_file_name)
+        
+        #paths for pause img
         file_path_grey = os.path.join(this_file_path, relative_path, file_grey)
         alt_path_grey = os.path.join(this_file_path, relative_path, alt_file_grey)
-        file_path = os.path.join(this_file_path, relative_path, file_name)
-        alt_path = os.path.join(this_file_path, relative_path, alt_file_name)
+        
+        #Path for replay img  
         rewind_path = os.path.join(this_file_path, relative_path, rewind_name)
         rewind_path_grey = os.path.join(this_file_path, relative_path, rewind_name_grey)
         
