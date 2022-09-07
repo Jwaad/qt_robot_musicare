@@ -701,15 +701,16 @@ class Fix_The_Song_Game():
 
     def Main(self, difficulty = "easy", level =  1): #input what level and difficulty to play, the program will handle the rest
         """Main Func"""
-        """
+
         #Introduce game
         self.run = self.level_loader.QTSpeakingScreen("Lets play Fix The Song!", self.run, self.background_colour)
 
         #Ask if they want to play tutorial
         self.run, tut = self.level_loader.yes_or_no_screen('Should I explain how to play "Fix The Song" ?', self.run, self.background_colour)
         if tut:
-            print("tut chosed")
-            self.guided_tut()
+            while confused:
+                self.guided_tut()
+                self.run, confused = self.level_loader.yes_or_no_screen('Should I explain again?', self.run, self.background_colour)
         
         #Count in to the start of the game
         self.run = self.level_loader.tap_to_continue(self.run, self.background_colour)
@@ -721,9 +722,8 @@ class Fix_The_Song_Game():
         self.play_music_blocking(difficulty, level)
         
         #Play main level
-        self.play_level(difficulty, 4)
-        """
-        self.guided_tut()
+        self.play_level(difficulty, level)
+
         
 ######################################################On execution#######################################################################
 
