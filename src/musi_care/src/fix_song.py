@@ -485,7 +485,7 @@ class Fix_The_Song_Game():
                 #seg_colour = self.segment_graphics[random.randint(2,3)] #ignore blue
                 seg_colour = self.segment_graphics[1] #segments should be blue
                 dragable_pos[i] = seg_pos
-                dragable_buttons[i] = self.CreateDragButton(seg_colour[0], seg_colour[1], seg_pos, return_info =song_path, when_toggle_on = self.play_seg_track(song_path), when_toggle_off = self.stop_seg_track(song_path))
+                dragable_buttons[i] = self.CreateDragButton(seg_colour[0], seg_colour[1], seg_pos, return_info = song_path, when_toggle_on = self.play_seg_track(song_path), when_toggle_off = self.stop_seg_track(song_path))
                 i+=1
             
             #Create main buttons

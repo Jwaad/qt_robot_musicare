@@ -598,7 +598,6 @@ class Guess_The_Mood_Game():
 
     def Main(self, difficulty = "easy", level =  1): #input what level and difficulty to play, the program will handle the rest
         
-        """
         #Show starting screen
         self.run = self.level_loader.QTSpeakingScreen("Lets play Guess the mood!", self.run, self.background_colour)
 
@@ -612,7 +611,7 @@ class Guess_The_Mood_Game():
         
         #Countdown #TODO REMOVE ME
         self.run = self.level_loader.countdown(3, self.run, self.background_colour, prelim_msg = "Get ready to play!")
-        """
+        
         #Run game code
         self.play_level(difficulty, level)
        
