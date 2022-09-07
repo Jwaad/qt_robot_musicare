@@ -2,6 +2,7 @@ tutorial
 {
 song_name = september.wav
 distract_song = none
+seg_num = 2
 £#
 }
 
@@ -9,23 +10,27 @@ EASY MODE
 {
 song_name = follow_the_van.wav
 distract_song = none
+seg_num = 2
 £#
 song_name = sad_1.wav
 distract_song = none
+seg_num = 2
 £#
 song_name = happy_2.wav
 distract_song = follow_the_van.wav
+seg_num = 2
 £#
 song_name = happy_3.wav
 distract_song = follow_the_van.wav
+seg_num = 2
 £#
 }
 
 MEDIUM MODE
 {
-song_name = happy/happy_1.wav
-mood = happy
-hint = Hint coming soon!
+song_name = follow_the_van.wav
+distract_song = happy_2.wav
+seg_num = 3
 £#
 }
 
