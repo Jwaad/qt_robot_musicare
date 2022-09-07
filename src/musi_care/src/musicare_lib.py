@@ -477,7 +477,8 @@ class SoundManager():
         #Define variables
         this_path = os.path.dirname(__file__)
         music_filepath = r"/game_assets/music/"
-        segments = []
+        correct_segs = []
+        distract_segments = []
         song_path = this_path + music_filepath + target_song_to_split
         self.path_to_save =  this_path + music_filepath + "temp/"
         total_wav_len = (self.return_wav_lenth(song_path))*1000 #convert to millisecond
@@ -489,13 +490,12 @@ class SoundManager():
             audio_segment = AudioSegment.from_wav(song_path)
             audio_segment = audio_segment[prev_slice : prev_slice+slice_size]
             prev_slice += slice_size
-            song_name = target_song_to_split.split("/")[-1]
-            print(song_name) #TODO REMOVE ME
-            song_path_save = self.path_to_save + str(i) + song_name #cut off the problematic parts TODO change this to look for the "/" and cut after the "/"
+            song_name =  "c" + str(i) + target_song_to_split.split("/")[-1]
+            #print(song_name) #TODO REMOVE ME
+            song_path_save = self.path_to_save + song_name # save song with new name, add C to show it's the correct song
             audio_segment.export(song_path_save, format="wav") #Exports to a wav file in the current path.       
-            segments.append(song_name) #list of all songs made
+            correct_segs.append("temp/"+song_name) #list of all songs made
             rospy.loginfo("Temp file saved")
-        correct_segs = segments #always give 1st seg is series of segs
         
         #handle distracting song
         if distracting_songs != None:
@@ -503,21 +503,20 @@ class SoundManager():
                 song_path = this_path + music_filepath + song
                 total_wav_len = (self.return_wav_lenth(song_path))*1000 #convert to millisecond
                 slice_size = total_wav_len / num_segments
-                prev_slice = 0 
+                prev_slice = 0
                 
                 #Slice distracting songs and add to same list
                 for i in range(0,num_segments):
                     audio_segment = AudioSegment.from_wav(song_path)
                     audio_segment = audio_segment[prev_slice : prev_slice+slice_size]
                     prev_slice += slice_size
-                    song_name = song.split("/")[-1]
-                    song_path_save = self.path_to_save + str(i) + song_name #cut off the problematic parts TODO change this to look for the "/" and cut after the "/"
+                    song_name =  "d" + str(i) + song.split("/")[-1]
+                    song_path_save = self.path_to_save + song_name #cut off the problematic parts TODO change this to look for the "/" and cut after the "/"
                     audio_segment.export(song_path_save, format="wav") #Exports to a wav file in the current path.       
-                    segments.append(song_name) #list of all songs made
+                    distract_segments.append("temp/"+song_name) #list of all songs made
                     rospy.loginfo("Temp file saved")
         
-        random.shuffle(segments)
-        return segments, correct_segs 
+        return correct_segs, distract_segments
         
 #####################################################QTManager/CommandManager##################################################################
         
