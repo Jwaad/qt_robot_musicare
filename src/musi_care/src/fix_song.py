@@ -67,6 +67,7 @@ class Fix_The_Song_Game():
         self.command_manager = QTManager()
         self.renderer = Renderer(self.window,self.window_center)
         self.level_loader = StandardLevels(self.window, self.window_center, self.pygame, self.music_filepath)
+        self.segment_x_y = { 0: (450,450), 1:(750,450), 2:(450,750), 3:(750,750), 4: (100,100), 5: (100,200)} #hard coded num locations of each segment
         #self.music_vol = 1 # change volume of laptop
         #self.qt_voice_vol
         #self.sound_manager.volume_change(self.music_vol) # Set a default volume
@@ -143,6 +144,12 @@ class Fix_The_Song_Game():
             
         rospy.log_info("Catastrophic error, data read failed.")
         return music_data
+        
+    def EmptyTempDir(self):
+        """empties temp folder after use"""
+        path = self.music_filepath + "temp"
+        files = os.listdir('.')
+        print(files)
         
 
     def GetTrackInfo(self, formatted_output = False): 
@@ -452,7 +459,8 @@ class Fix_The_Song_Game():
             level_data = self.music_data[difficulty][level_num] #{"song_name":"title", "mood":"happy", "hint":"some text"}
             self.track_name = level_data["song_name"]
             self.distract_song = level_data["distract_song"] #will be None or a list of songs
-            
+            self.segment_num = int(level_data["seg_num"]) #split song into this many segs
+                        
             #store colours in here so we can get their names
             self.segment_graphics = {
             1:("music_segment_play_blue.png","music_segment_pause_blue.png"), 
@@ -463,35 +471,38 @@ class Fix_The_Song_Game():
             }
             
             #create buttons for each segments
-            segment_num = 2 #split song into this many segs
-            all_seg_paths, correct_segments = self.sound_manager.slice_song(segment_num, self.track_name, self.distract_song)
-            segment_x_y = { 0: (450,450), 1:(750,450), 2:(450,750), 3:(750,750), 4: (100,100), 5: (100,200)} #temp hard coded num TODO: change these to calculated pos for each
+            correct_segments, distract_segments = self.sound_manager.slice_song(self.segment_num, self.track_name, self.distract_song)
+            all_segments = correct_segments + distract_segments
+            given_seg = correct_segments[0]
+            seg_pos_list = [] 
             
-            seg_pos_list = []
-        
-            for i in range(len(correct_segments)): #TODO find better way to do this
+            for i in range(len(all_segments)):
                 seg_pos_list.append(i) #were going to use this list to randomise the pos of the answer segments
                 
             #create and order dragable buttons this is scalable
             dragable_buttons = {}
             i = 0
-            correct_seg_order = []
-            dragable_pos = {} 
+            dragable_pos = {}
             
-            for song_path in correct_segments:
-                #create a moving button for each and also setup correct_seg
-                correct_seg_order.append(song_path)
-                seg_pos = segment_x_y[seg_pos_list.pop(random.randint(0,len(seg_pos_list)-1))]
-                #seg_colour = self.segment_graphics[random.randint(2,3)] #ignore blue
-                seg_colour = self.segment_graphics[1] #segments should be blue
+            for song_path in correct_segments: #create a seg for each correct seg
+                seg_pos = self.segment_x_y[seg_pos_list.pop(random.randint(0,len(seg_pos_list)-1))] #assigns each a number 0 - num_segs, these are popped so they cant be chosed twice
+                seg_colour = self.segment_graphics[random.randint(1,3)] #ignore grey
                 dragable_pos[i] = seg_pos
                 dragable_buttons[i] = self.CreateDragButton(seg_colour[0], seg_colour[1], seg_pos, return_info = song_path, when_toggle_on = self.play_seg_track(song_path), when_toggle_off = self.stop_seg_track(song_path))
                 i+=1
+                
+            if len(distract_segments) > 0:            
+                for song_path in distract_segments:
+                    seg_pos = self.segment_x_y[seg_pos_list.pop(random.randint(0,len(seg_pos_list)-1))] #assigns each a number 0 - num_segs, these are popped so they cant be chosed twice
+                    seg_colour = self.segment_graphics[random.randint(1,3)] #ignore grey
+                    dragable_pos[i] = seg_pos
+                    dragable_buttons[i] = self.CreateDragButton(seg_colour[0], seg_colour[1], seg_pos, return_info = song_path, when_toggle_on = self.play_seg_track(song_path), when_toggle_off = self.stop_seg_track(song_path))
+                    i+=1
             
             #Create main buttons
             loading_button = self.CreateButton("loading_screen_button_depressed.png", "loading_screen_button_depressed.png", (200,225))
             song_segment_y = 550
-            song_half = self.CreateToggleButton(self.segment_graphics[2][0], self.segment_graphics[2][1],self.segment_graphics[4][1],self.segment_graphics[4][1],(song_segment_y, 90),return_info =correct_segments[0],  when_toggle_on = self.play_seg_track(correct_segments[0]), when_toggle_off = self.stop_seg_track(song_path))
+            given_half = self.CreateToggleButton(self.segment_graphics[4][0], self.segment_graphics[4][1],self.segment_graphics[4][1],self.segment_graphics[4][1],(song_segment_y, 90),return_info =correct_segments[0],  when_toggle_on = self.play_seg_track(correct_segments[0]), when_toggle_off = self.stop_seg_track(song_path))
             song_unknown = self.CreateButton( "music_segment_greyed_out.png", "music_segment_greyed_out.png",(song_segment_y+150,90)) #TODO make this auto scale and spawn according to difficulty
             #play_button = self.CreateToggleButton("play_button.png","pause_button.png",(song_segment_y+250,130))
             #check_button = self.CreateButton("check_button.png", "check_button.png", (song_segment_y+350,130))
@@ -501,7 +512,7 @@ class Fix_The_Song_Game():
 
             qt_has_spoken = False
             song_restored = False
-            current_seg_order = [song_half.return_info]
+            current_seg_order = [given_half.return_info]
             slot_free = True #there's no segment in the slot
             
             #Copy format of our previous data
@@ -511,7 +522,7 @@ class Fix_The_Song_Game():
                 
             while not song_restored and not rospy.is_shutdown() and self.run:
                 self.renderer.DrawBackground(self.background_colour)
-                song_half.render(self.window)
+                given_half.render(self.window)
                 for button in main_buttons:
                     button.render(self.window)
                 #if not slot_free: #only render this once a song is in the slot
@@ -537,11 +548,11 @@ class Fix_The_Song_Game():
                     for button in main_buttons:
                         button_press = button.get_event(event, mouse_pos)
                 
-                    press = song_half.get_event(event, mouse_pos)
+                    press = given_half.get_event(event, mouse_pos)
                     if press: #if the track was stopped, or stopped, set them all to false
                             for key in dragable_buttons: #if pressed, set all others to false
                                 dragable_buttons[key].toggle = False
-                            song_half.toggle = True
+                            given_half.toggle = True
                             
                     for key in dragable_buttons:
                         press, button_pos = dragable_buttons[key].get_event(event, mouse_pos)
@@ -549,7 +560,7 @@ class Fix_The_Song_Game():
                         if press:
                             for inner_key in dragable_buttons: #if pressed, set all others to false
                                 dragable_buttons[inner_key].toggle = False
-                            song_half.toggle = False
+                            given_half.toggle = False
                             dragable_buttons[key].toggle = True # set our pressed one back to true
                             
                         #Check if seg is placed in the slot and allow only if the slot is free
@@ -571,7 +582,7 @@ class Fix_The_Song_Game():
                                 dragable_buttons[key].rect.y = dragable_pos[key][1]
                     
                     #check if answers are corect once a loop, change this to check instead when the box is dragged in.          
-                    if current_seg_order == correct_seg_order:
+                    if current_seg_order == correct_segments:
                         #self.qt_gesture("happy")
                         #self.qt_emote("talking")
                         #self.qt_say_blocking("Great job, that is correct!")
@@ -590,7 +601,7 @@ class Fix_The_Song_Game():
 #################################################################Main####################################################################   
 
 
-    def Main(self, difficulty = "easy", level =  3): #input what level and difficulty to play, the program will handle the rest
+    def Main(self, difficulty = "easy", level =  1): #input what level and difficulty to play, the program will handle the rest
         """Main Func"""
         """
         #Introduce game
@@ -631,6 +642,9 @@ if __name__ == '__main__':
         game_object.pygame.quit
         SoundManager().stop_track()
         print("Audio may not be stopped due to interrupt")
+    
+    #on exit delete music files
+    game_object.EmptyTempDir()
         
         
         
