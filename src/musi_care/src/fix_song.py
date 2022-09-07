@@ -25,7 +25,7 @@ from musicare_lib import QTManager
 from musicare_lib import Renderer
 from musicare_lib import HorizontalSlider
 from musicare_lib import StandardLevels
-
+from musicare_lib import Behaviours
 
 #################################################################Initialise#################################################################
 
@@ -68,6 +68,7 @@ class Fix_The_Song_Game():
         self.renderer = Renderer(self.window,self.window_center)
         self.level_loader = StandardLevels(self.window, self.window_center, self.pygame, self.music_filepath)
         self.segment_x_y = { 0: (450,450), 1:(750,450), 2:(450,750), 3:(750,750), 4: (100,100), 5: (100,200)} #hard coded num locations of each segment
+        self.sayings = Behaviours()
         #self.music_vol = 1 # change volume of laptop
         #self.qt_voice_vol
         #self.sound_manager.volume_change(self.music_vol) # Set a default volume
@@ -389,7 +390,7 @@ class Fix_The_Song_Game():
             slider_x = 275
             slider_y = 800
             song_duration_slider = self.CreateHorizontalSlider("track_duration_slider.png", "track_cursor.png", (slider_x,slider_y), scale=2)
-            self.next_button = self.CreateButton("next_button.png", "next_button_grey.png", (self.cen_x - 300,1200), self.pygame, scale=1)
+            self.next_button = self.CreateButton("next_button.png", "next_button_grey.png", (self.cen_x - 300,1200), scale=1)
             self.play_button = self.CreatePlayButton("pause_button.png", "pause_button_grey.png", "play_button.png",  "play_button_grey.png", "rewind_button.png", "rewind_button_grey.png", (self.cen_x-100, 450), scale = 1, on_play= self.sound_manager.unpause , on_pause = self.sound_manager.pause) #create pause and play button
             
             #Load track
@@ -507,7 +508,6 @@ class Fix_The_Song_Game():
             song_unknown = self.CreateButton( "music_segment_greyed_out.png", "music_segment_greyed_out.png",(song_segment_y+150,90)) #TODO make this auto scale and spawn according to difficulty
             main_buttons = [loading_button, song_unknown] #list of buttons so we can easier render them
 
-            qt_has_spoken = False
             song_restored = False
             current_seg_order = [given_half.return_info]
             slot_free = True #there's no segment in the slot
@@ -522,19 +522,11 @@ class Fix_The_Song_Game():
                 given_half.render(self.window)
                 for button in main_buttons:
                     button.render(self.window)
-                #if not slot_free: #only render this once a song is in the slot
-                #    check_button.render(self.window)
                 self.renderer.DrawText("Put the song back together", (700, 40), 50)
                 self.renderer.DrawText("Drag the segment into the slot", (700, 300), 50)
                 for key in dragable_buttons: #render dragable buttons
                     dragable_buttons[key].render(self.window) #draw the segments
                 self.pygame.display.update() #Update all drawn objects
-
-                if not qt_has_spoken: #in here so he speaks while yes and no are drawn
-                    #self.qt_gesture("explain_right")
-                    #self.qt_emote("sad")
-                    #self.qt_say_blocking("The song is all jumbled up! Help me put it back together!")
-                    qt_has_spoken = True #QT has spoken now, so dont let him talk again
                 
                 for event in self.pygame.event.get():
                     if event.type == self.pygame.QUIT:
@@ -566,7 +558,24 @@ class Fix_The_Song_Game():
                             current_seg_order = current_seg_order + [dragable_buttons[key].return_info]#TODO change this so it's scaleable
                             is_in_slot[key] = True #this is currently in the slot
                             slot_free = False
-                        #If it wasn't placed in the slot, placed it back in it's original location, and track which seg has left the slot
+                            
+                            #check if answers are corect once one is dragged in     
+                            if current_seg_order == correct_segments:
+                                self.command_manager.send_qt_command(emote = "happy", gesture = "nod")
+                                qt_message = (self.sayings.get_agreements()) #QT reads out a randomised "good job"
+                                print(qt_message)
+                                #self.level_loader.QTSpeakingPopupScreen(qt_message, self.rendered_graphics, self.run, self.background_colour)
+                                song_restored = True
+                            else:
+                                self.command_manager.send_qt_command(emote = "sad", gesture = "shake_head")
+                                qt_message = (self.sayings.get_disagreements()) #QT reads out level's hint
+                                print(qt_message)
+                                #self.level_loader.QTSpeakingPopupScreen(qt_message, self.rendered_graphics, self.run, self.background_colour)
+                        #if it was placed into the slot when something else is in the slot
+                        elif song_unknown.rect.collidepoint(button_pos.center) and not dragable_buttons[key].mouse_is_held and not slot_free:
+                            dragable_buttons[key].rect.x = dragable_pos[key][0]
+                            dragable_buttons[key].rect.y = dragable_pos[key][1]
+                        #If it wasn't placed in the slot, place it back in it's original location, and track which seg has left the slot
                         elif not song_unknown.rect.collidepoint(button_pos.center) and not dragable_buttons[key].mouse_is_held: #move the button back to where it was if it was released somewhere random
                             if is_in_slot[key]: #if we moved out from the slot, reset some variables
                                 slot_free = True
@@ -575,20 +584,7 @@ class Fix_The_Song_Game():
                             else:
                                 dragable_buttons[key].rect.x = dragable_pos[key][0]
                                 dragable_buttons[key].rect.y = dragable_pos[key][1]
-                    
-                    #check if answers are corect once a loop, change this to check instead when the box is dragged in.          
-                    if current_seg_order == correct_segments:
-                        #self.qt_gesture("happy")
-                        #self.qt_emote("talking")
-                        #self.qt_say_blocking("Great job, that is correct!")
-                        #self.qt_emote("grin")
-                        song_restored = True
-                    else:
-                        #self.qt_gesture("shake_head")
-                        #self.qt_emote("talking")
-                        #self.qt_say("Sorry, that is not correct, please try again!")
-                        pass
-                
+                        
             
         
         

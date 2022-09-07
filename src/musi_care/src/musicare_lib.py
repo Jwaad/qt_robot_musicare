@@ -31,13 +31,13 @@ class Behaviours():
         pass
     
     def get_agreements(self):  #List of all sayings when QT agrees EG yes, correct
-        sayings = ["Yes!", "Correct!", "That's right!", "That's correct!", "Great, that's right!"]
-        ind = random.randint(0, len(sayings))
+        sayings = ["Yes!", "Correct!", "That's right!", "That's correct!", "Great, that's right!","Good job, That is the right answer!"]
+        ind = random.randint(0, len(sayings) )
         saying = sayings[ind]
         return saying
         
     def get_disagreements(self): #List of all sayings when QT disagree EG no, sorry.
-        agreements = ["No...","Sorry, no...", "No that's not correct...", ]
+        sayings = ["No, Please try again...","Sorry, no, please try again", "No, that's not correct...", "I'm sorry that is not right, Please try again..."]
         ind = random.randint(0, len(sayings))
         saying = sayings[ind]
         return saying
@@ -52,7 +52,13 @@ class Behaviours():
         sayings = ["Okay, next question", "On to the next question", ]
         ind = random.randint(0, len(sayings))
         saying = sayings[ind]
-        return saying  
+        return saying
+        
+    def get_next_level(self):
+        sayings = ["Okay, next level", "On to the next level", "Lets play the next level!", "Now onto the next one!", "Lets play another one!" ]
+        ind = random.randint(0, len(sayings))
+        saying = sayings[ind]
+        return saying
 
 #####################################################General Levels##################################################################
 
