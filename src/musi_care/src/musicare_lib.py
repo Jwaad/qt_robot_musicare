@@ -32,31 +32,31 @@ class Behaviours():
     
     def get_agreements(self):  #List of all sayings when QT agrees EG yes, correct
         sayings = ["Yes!", "Correct!", "That's right!", "That's correct!", "Great, that's right!","Good job, That is the right answer!"]
-        ind = random.randint(0, len(sayings) )
+        ind = random.randint(0, len(sayings)-1 )
         saying = sayings[ind]
         return saying
         
     def get_disagreements(self): #List of all sayings when QT disagree EG no, sorry.
         sayings = ["No, Please try again...","Sorry, no, please try again", "No, that's not correct...", "I'm sorry that is not right, Please try again..."]
-        ind = random.randint(0, len(sayings))
+        ind = random.randint(0, len(sayings)-1)
         saying = sayings[ind]
         return saying
         
     def get_praise(self):
         sayings = ["Amazing, that's the right answer!", "Great job!", "Alright, that's correct!", "Wow, well done!", "Nice! Well done!"]
-        ind = random.randint(0, len(sayings))
+        ind = random.randint(0, len(sayings)-1)
         saying = sayings[ind]
         return saying  
 
     def get_incorrect(self):
         sayings = ["Okay, next question", "On to the next question", ]
-        ind = random.randint(0, len(sayings))
+        ind = random.randint(0, len(sayings)-1)
         saying = sayings[ind]
         return saying
         
     def get_next_level(self):
         sayings = ["Okay, next level", "On to the next level", "Lets play the next level!", "Now onto the next one!", "Lets play another one!" ]
-        ind = random.randint(0, len(sayings))
+        ind = random.randint(0, len(sayings)-1)
         saying = sayings[ind]
         return saying
 
@@ -520,7 +520,7 @@ class SoundManager():
                     song_path_save = self.path_to_save + song_name #cut off the problematic parts TODO change this to look for the "/" and cut after the "/"
                     audio_segment.export(song_path_save, format="wav") #Exports to a wav file in the current path.       
                     distract_segments.append("temp/"+song_name) #list of all songs made
-                    rospy.loginfo("Temp file saved")
+                    #rospy.loginfo("Temp file saved")
         
         return correct_segs, distract_segments
         
@@ -909,18 +909,27 @@ class PausePlayButton():
 class DragableButton():
     """Class to load images that serve as buttons that can be dragged and dropped """
     
-    def __init__(self, image_path, toggled_image_path, x_y_locations, pygame, scale=1, return_info="", when_toggle_on=object, when_toggle_off=object):
+    def __init__(self, image_path, toggled_image_path, default_image_grey, toggled_image_grey, x_y_locations, pygame, scale=1, return_info="", when_toggle_on=object, when_toggle_off=object):
         self.pygame = pygame
+        
+        #load images
         raw_image = self.pygame.image.load(image_path).convert_alpha()
         toggled_raw_image = self.pygame.image.load(toggled_image_path).convert_alpha()
+        raw_image_grey = self.pygame.image.load(default_image_grey).convert_alpha()
+        toggled_raw_image_grey = self.pygame.image.load(toggled_image_grey).convert_alpha()
+        
+        #Set pos
         img_x = x_y_locations[0]
         img_y = x_y_locations[1]
         self.img_w = int(raw_image.get_width()*scale)
         self.img_h = int(raw_image.get_height()*scale)
         
-        scaled_size = (self.img_w*scale, self.img_h*scale)
+        #Scale
+        scaled_size = (self.img_w, self.img_h)
         self.image = self.pygame.transform.scale(raw_image, scaled_size)
         self.toggled_image = self.pygame.transform.scale(toggled_raw_image, scaled_size)
+        self.image_grey = self.pygame.transform.scale(raw_image_grey, scaled_size)
+        self.toggled_image_grey = self.pygame.transform.scale(toggled_raw_image_grey, scaled_size)
         self.rect = self.pygame.Rect(img_x,img_y,self.img_w,self.img_h) 
         self.highlighted = False
         self.block = False 
@@ -934,12 +943,12 @@ class DragableButton():
         """Draw image onto screen"""
         if self.toggle:
             if grey:
-                screen.blit(self.toggled_image, self.rect) #TODO replace this with the greyscaled version of this image
+                screen.blit(self.toggled_image_grey, self.rect) #TODO replace this with the greyscaled version of this image
             else:
                 screen.blit(self.toggled_image, self.rect)
         else:
             if grey:
-                screen.blit(self.image, self.rect) #TODO replace this with the greyscaled version of this image
+                screen.blit(self.image_grey, self.rect) #TODO replace this with the greyscaled version of this image
             else:
                 screen.blit(self.image, self.rect)
         return screen

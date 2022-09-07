@@ -67,8 +67,10 @@ class Fix_The_Song_Game():
         self.command_manager = QTManager()
         self.renderer = Renderer(self.window,self.window_center)
         self.level_loader = StandardLevels(self.window, self.window_center, self.pygame, self.music_filepath)
-        self.segment_x_y = { 0: (450,450), 1:(750,450), 2:(450,750), 3:(750,750), 4: (100,100), 5: (100,200)} #hard coded num locations of each segment
+        self.segment_x_y = { 0: (600,800), 1:(1250,800), 2:(1900,800), 3:(600,1500), 4: (1250,1500), 5: (1900,1500)} #hard coded num locations of each segment
         self.sayings = Behaviours()
+        self.t1 = 0 #t1 for FPS tracking
+        self.debug = True
         #self.music_vol = 1 # change volume of laptop
         #self.qt_voice_vol
         #self.sound_manager.volume_change(self.music_vol) # Set a default volume
@@ -199,7 +201,7 @@ class Fix_The_Song_Game():
         return str(mins), str(secs)
 
 
-    def CreateButton(self, file_name, alt_file_name, location, scale=1, unique_id=""):
+    def CreateButton(self, file_name, alt_file_name, location, scale=2, unique_id=""):
         """code creates button using the button_image class."""
         this_file_path = os.path.dirname(__file__)
         relative_path = 'game_assets/graphics'
@@ -210,7 +212,7 @@ class Fix_The_Song_Game():
         return(button)
 
 
-    def CreateToggleButton(self, file_name, alt_file_name, default_image_grey, toggled_image_grey, location, scale=1, unique_id="", return_info="", when_toggle_on=object, when_toggle_off=object):
+    def CreateToggleButton(self, file_name, alt_file_name, default_image_grey, toggled_image_grey, location, scale=2, unique_id="", return_info="", when_toggle_on=object, when_toggle_off=object):
         """code creates button using the button_image class."""
         this_file_path = os.path.dirname(__file__)
         relative_path = '/game_assets/graphics/'
@@ -225,14 +227,17 @@ class Fix_The_Song_Game():
         #default_image_path, toggled_image_path, default_image_grey, toggled_image_grey, x_y_locations, pygame, scale=1, unique_id = "", return_info="", when_toggle_on=object, when_toggle_off=object
         
 
-    def CreateDragButton(self,file_name, alt_file_name, location,  scale=1, return_info="", when_toggle_on=object, when_toggle_off=object):
+    def CreateDragButton(self,file_name, alt_file_name, file_grey, alt_file_grey, location,  scale=2, return_info="", when_toggle_on=object, when_toggle_off=object):
         """code creates button using the button_image class."""
         this_file_path = os.path.dirname(__file__)
         relative_path = 'game_assets/graphics'
         file_path = os.path.join(this_file_path, relative_path, file_name)
         alt_path = os.path.join(this_file_path, relative_path, alt_file_name)
+        file_path_grey = os.path.join(this_file_path, relative_path, file_grey)
+        alt_path_grey = os.path.join(this_file_path, relative_path, alt_file_grey)
         
-        button = DragableButton(file_path, alt_path, location, self.pygame, scale, return_info = return_info, when_toggle_on=when_toggle_on, when_toggle_off=when_toggle_off)
+        
+        button = DragableButton(file_path, alt_path, file_path_grey, alt_path_grey,  location, self.pygame, scale, return_info = return_info, when_toggle_on=when_toggle_on, when_toggle_off=when_toggle_off)
         return(button)
 
 
@@ -264,37 +269,40 @@ class Fix_The_Song_Game():
         return slider
     
     
-    def update_graphics(self, current_track_time, track_total_time, progress, slider_x, slider_y):
+    def update_graphics(self, given_half, dragable_buttons, main_buttons):
         """Redraw graphics """
         self.renderer.DrawBackground(self.background_colour)
-        self.renderer.DrawTextCentered("What mood does this song have?", font_size = 100, y = 100)
-        self.renderer.DrawText(str(current_track_time), (slider_x - 75, slider_y +75), font_size = 50) #draw current time
-        self.renderer.DrawText(str(track_total_time), (2650, slider_y +75), font_size = 50) #draw total track time
-        self.song_duration_slider.render(self.window, progress)
-        for button in self.buttons: #Draw buttons using button list
+        given_half.render(self.window)
+        for button in main_buttons:
             button.render(self.window)
+        self.renderer.DrawTextCentered("Put the song back together", font_size = 100, y = 50)
+        self.renderer.DrawTextCentered("Drag the segments below into the empty slot above", font_size = 100, y= 550,)
+        for key in dragable_buttons: #render dragable buttons
+            dragable_buttons[key].render(self.window) #draw the segments
         self.animation_manager.DrawTouchAnimation(self.window) #last so it shows up on top
+   
 
-
-    def update_grey_graphics(self, current_track_time, track_total_time, progress, slider_x, slider_y):
+    def update_grey_graphics(self, given_half, dragable_buttons, main_buttons):
         """reinitialise grey graphics taking with parameters they need """
         #Load graphics into dict # need to be in a specific order for this tut
         grey_graphics = {}
-        grey_graphics[1] = functools.partial(self.renderer.DrawTextCentered, "What mood does this song have?", font_size = 100, y = 100)
-        grey_graphics[2] = functools.partial(self.renderer.DrawText, str(current_track_time), (slider_x - 75, slider_y +75), font_size = 50) #draw current time
-        grey_graphics[3] = functools.partial(self.renderer.DrawText, str(track_total_time), (2650, slider_y +75), font_size = 50)
-        grey_graphics[4] = functools.partial(self.song_duration_slider.render, self.window, progress, grey = True)
-        i = 4
-        for button in self.buttons:
+        grey_graphics[1] = functools.partial(self.renderer.DrawTextCentered, "Put the song back together", font_size = 100, y= 50)
+        grey_graphics[2] = functools.partial(given_half.render, self.window, grey = True)
+        grey_graphics[3] = functools.partial(self.renderer.DrawTextCentered, "Drag the segments below into the empty slot above", font_size = 100, y= 550)
+        i=4
+        for button in main_buttons:
+            grey_graphics[i] =  functools.partial(button.render, self.window, grey = True)
             i+=1
-            grey_graphics[i] = functools.partial(button.render, self.window, grey = True)
-        
-        return grey_graphics      
+        for key in dragable_buttons: #render dragable buttons
+            grey_graphics[i] = functools.partial(dragable_buttons[key].render,self.window, grey = True) #draw the segments
+            i+=1
+        return grey_graphics 
+        #self.animation_manager.DrawTouchAnimation(self.window) #last so it shows up on top     
         
         
     def highlight_block(self, events, target_rect = None, msg = "Click anywhere to continue ... ", timer_complete = None):
         """
-        Highlight a certain object and check for click
+        Highlight a certain object and let QT explain it, it will then move on on it's own
         target_graphic = the graphic that's in colour
         Graphics here are a dict of the partial functions for each renderer in grey
         target_rect the rect that we want to highlight around
@@ -308,7 +316,7 @@ class Fix_The_Song_Game():
             mouse_pos = self.pygame.mouse.get_pos()
             if event.type == self.pygame.MOUSEBUTTONUP:  #on mouse release play animation to show where cursor is
                 self.animation_manager.StartTouchAnimation(mouse_pos) #tell system to play animation when drawing
-                return True
+                #return True
                 
         #Render graphics
         if target_rect != None: #so we can have blocking functionality without highlighting
@@ -317,10 +325,10 @@ class Fix_The_Song_Game():
             if timer_complete == None: #if user didnt specify a timer, just show text like normal
                 self.renderer.DrawTextCentered(msg, font_size = 75, font_colour = (0,0,0))
             else:
-                if timer_complete: #only render once timer done
+                if timer_complete: #only render text once timer done
                     self.renderer.DrawTextCentered(msg, font_size = 75, font_colour = (0,0,0))
                 
-        return False
+        #return False
                  
                  
     def load_list_graphics(self, graphics, keys):
@@ -333,30 +341,55 @@ class Fix_The_Song_Game():
                 graphics[key]() #run as func
     
     
-    def create_graphics(self, slider_scale, slider_x, slider_y):
+    def create_graphics(self):
         """Create the pygame objects that we will use """
-        self.sad_button = self.CreateButton("sad_button.png", "sad_button_depressed.png", (675,750), scale=1.3, unique_id="sad") 
-        self.happy_button = self.CreateButton("happy_button.png", "happy_button_depressed.png", (675,1150), scale=1.3, unique_id="happy") 
-        self.unsure_button = self.CreateButton("unsure_button.png", "unsure_button_depressed.png", (850,1550), scale=1, unique_id = "unsure") 
-        self.play_button = self.CreatePlayButton("pause_button.png", "pause_button_grey.png", "play_button.png",  "play_button_grey.png", "rewind_button.png", "rewind_button_grey.png", (self.cen_x-100, 175), scale = 1, on_play= self.sound_manager.unpause , on_pause = self.sound_manager.pause) #create pause and play button
-        self.song_duration_slider = self.CreateHorizontalSlider("track_duration_slider.png", "track_cursor.png", (slider_x,slider_y), on_click = self.sound_manager.stop_track, on_release = self.sound_manager.start_track, scale=slider_scale)
+        #store colours in here so we can get their names
+        self.segment_graphics = {
+        1:("music_segment_play_blue.png","music_segment_pause_blue.png"), 
+        2:("music_segment_play_orange.png","music_segment_pause_orange.png"), 
+        3:("music_segment_play_purple.png","music_segment_pause_purple.png"),
+        4:("music_segment_play_grey.png","music_segment_pause_grey.png")
+        #blue = 1 orange = 2 purple = 3 grey = 4.  #4 is reserved for the ones at the top and when grey screen
+        }
+           
+        #Get each segment position
+        correct_segments, distract_segments = self.sound_manager.slice_song(self.segment_num, self.track_name, self.distract_song)
+        all_segments = correct_segments + distract_segments
+        given_seg = correct_segments[0]
+        seg_pos_list = [] 
         
+        for i in range(len(all_segments)):
+            seg_pos_list.append(i) #were going to use this list to randomise the pos of the answer segments
+             
+        #create and order dragable buttons this is scalable
+        dragable_buttons = {}
+        i = 0
+        dragable_pos = {}
         
-    def get_target_behaviour(self, key, progress):
-        """tells our tut what to draw and what to do with events"""
-        target_graphics = []
-        target_event_handler = None
-        if key ==3:
-            target_graphics = [functools.partial(self.sad_button.render, self.window), functools.partial(self.happy_button.render, self.window)]
-        elif key ==4:
-            target_graphics = [functools.partial(self.unsure_button.render, self.window)]
-        elif key == 5:
-            target_graphics = [functools.partial(self.song_duration_slider.render, self.window, progress), functools.partial(self.play_button.render, self.window)]
-        elif key == 8:
-            target_graphics = [functools.partial(self.play_button.render, self.window)]
+        for song_path in correct_segments: #create a seg for each correct seg
+            seg_pos = self.segment_x_y[seg_pos_list.pop(random.randint(0,len(seg_pos_list)-1))] #assigns each a number 0 - num_segs, these are popped so they cant be chosed twice
+            seg_colour = self.segment_graphics[random.randint(1,3)] #ignore grey
+            dragable_pos[i] = seg_pos
+            dragable_buttons[i] = self.CreateDragButton(seg_colour[0], seg_colour[1], self.segment_graphics[4][0], self.segment_graphics[4][0],  seg_pos, return_info = song_path, when_toggle_on = self.play_seg_track(song_path), when_toggle_off = self.stop_seg_track(song_path))
+            i+=1
             
-        return target_graphics, target_event_handler #if our logic sifts failed
-
+        if len(distract_segments) > 0:            
+            for song_path in distract_segments:
+                seg_pos = self.segment_x_y[seg_pos_list.pop(random.randint(0,len(seg_pos_list)-1))] #assigns each a number 0 - num_segs, these are popped so they cant be chosed twice
+                seg_colour = self.segment_graphics[random.randint(1,3)] #ignore grey
+                dragable_pos[i] = seg_pos
+                dragable_buttons[i] = self.CreateDragButton(seg_colour[0], seg_colour[1], self.segment_graphics[4][0], self.segment_graphics[4][0],  seg_pos, return_info = song_path, when_toggle_on = self.play_seg_track(song_path), when_toggle_off = self.stop_seg_track(song_path))
+                i+=1
+        
+        #Create main buttons
+        loading_button = self.CreateButton("loading_screen_button_depressed.png", "loading_screen_button_depressed.png", (270,550), scale = 2.3)
+        song_segment_y = 1100
+        given_half = self.CreateToggleButton(self.segment_graphics[4][0], self.segment_graphics[4][1],self.segment_graphics[4][0],self.segment_graphics[4][0],(song_segment_y, 120),return_info =correct_segments[0],  when_toggle_on = self.play_seg_track(correct_segments[0]), when_toggle_off = self.stop_seg_track(song_path))
+        song_unknown = self.CreateButton( "music_segment_greyed_out.png", "music_segment_greyed_out.png",(song_segment_y+300,120)) #TODO make this auto scale and spawn according to difficulty
+        main_buttons = [loading_button, song_unknown] #list of buttons so we can easier render them
+        
+        return given_half, song_unknown, dragable_buttons, dragable_pos, main_buttons, correct_segments
+        
 
     def play_seg_track(self,song_path):
         """Uses the stored info attribute to play music on button press """
@@ -374,9 +407,124 @@ class Fix_The_Song_Game():
             self.sound_manager.stop_track()
         
         return stop_track
-                
+
+
+    def get_fps(self):
+        """get time between the last execution of this function and the current """
+        t2 = rospy.get_time()
+        fps = "FPS: " + str(int(1/(t2 - self.t1))) #calculate fps  1 / (timenow - prevtime)
+        self.t1 = t2 #store prev time
+        return fps
+    
+    
+    def draw_debug_info(self, fps):
+        """Draw any debug features we want to see """
+        if self.debug:
+            self.renderer.DrawText(fps, (70,50), font_size = 30) #draw fps
+            
+
+    def get_target_behaviour(self, key, given_half, dragable_buttons, main_buttons ):
+        """tells our tut what to draw and what to do with events"""
+        target_graphics = []
+        target_event_handler = None
+        if key ==2: #given seg
+            target_graphics = [functools.partial(given_half.render, self.window)] #given_half.render(self.window)
+        elif key ==3: #segs
+            target_graphics = []
+            for key in dragable_buttons:
+                graphic = functools.partial(dragable_buttons[key].render,self.window,)
+                target_graphics.append(graphic)
+        elif key == 4: #song slot
+            target_graphics = [functools.partial(main_buttons[1].render, self.window)]
+            
+        return target_graphics, target_event_handler #if our logic sifts failed
+                    
 #######################################################Level / screen code###############################################################
-        
+
+
+    def guided_tut(self):
+        """Code to play tut sequence for Guess the mood"""
+            
+        #String of our keys so i can remember them
+        """
+        1 = top text 
+        2 = given seg
+        3 = instructions
+        4 = the box behind segs
+        5 = Slot for segs to go in
+        6 & 7 = segs
+        """
+
+        #Create rect to highlight and text for QT to say
+        #(250, 400, 2600-250, 650-400) #slider rect
+        #TODO ADD MORE TO THIS --> 
+        #Lets try it now: listen to song --> this sounds happy to me. --> lets click "happy" --> highlight happy --> wait for press
+        tut_graphics = {
+        1: {"rect":None, "keys":[1,2,3,4,5,6,7],  "speech" : "To play this game, first you will hear music... I will let you listen to it in full... After that I will split the song into 2 parts... Then you will need to find the correct pieces and put them back together..."},
+        # given rect
+        2: {"rect":(1100, 100, 300, 350), "keys":[1,3,4,5,6,7], "speech" : "I have already given you the first half of the song... Click on it to play it and remind yourself of what the song sounds like."},
+        #segs
+        3: {"rect":(550, 750, 1050, 450), "keys":[1,2,3,4,5], "speech" : "These are the segments... Click on them once to listen to them. Only 1 of these is the correct answer, so listen to them all to figure out which is correct!"},
+        #Song slot
+        4: {"rect":(1350, 100, 400, 350), "keys":[1,2,3,4,5,6,7], "speech" : "This box is called the song slot... Once you have found the correct segment, drag it into this box to complete the level..."},
+        5: {"rect": None, "keys":[1,2,3,4,5,6,7], "speech" : "That is everything for Fix the song! Have fun!"}
+        }
+
+        if self.run:
+            
+            #Get the level's data
+            level_data = self.music_data["tut"][1] #load tut song data
+            self.track_name = level_data["song_name"]
+            self.distract_song = level_data["distract_song"] #will be None or a list of songs
+            self.segment_num = int(level_data["seg_num"]) #split song into this many segs
+            
+            given_half, song_unknown, dragable_buttons, dragable_pos, main_buttons, correct_segments = self.create_graphics()
+
+            #loop through each graphic that we care about 
+            for key in tut_graphics.keys():
+                #Define some variables for the tut sequence
+                tut_key = tut_graphics[key]["keys"] #draw grey graphics of everything except for our focused graphic
+                tut_speech = tut_graphics[key]["speech"]
+                tut_rect = tut_graphics[key]["rect"]
+                speaking_timer = self.command_manager.qt_say(tut_speech) #QT should say text out loud
+                qt_done_talking = False  #Hold execution until user clicks somewhere
+                
+                #set logic based on what graphic we focus on
+                target_graphics, target_event = self.get_target_behaviour(key, given_half, dragable_buttons, main_buttons)
+
+                while not qt_done_talking and not rospy.is_shutdown() and self.run:
+                
+                    grey_graphics = self.update_grey_graphics(given_half, dragable_buttons, main_buttons)#update all grey graphics
+                    
+                    #Render graphics
+                    self.renderer.DrawBackground(self.background_colour) #draw background
+                    self.load_list_graphics(grey_graphics, tut_key) #load specified grey objects
+                    if target_graphics != []:
+                        for graphic in target_graphics: #Render the target graphic
+                            graphic() #Render graphics each
+                    self.animation_manager.DrawTouchAnimation(self.window) #Draw touch animation
+                    
+                    #Handle events
+                    events = self.pygame.event.get()
+                    for event in events:
+                        #print(self.pygame.mouse.get_pos())#TEMP
+                        if event.type == self.pygame.QUIT:
+                            self.run = False #Stops the program entirely
+                            self.quit = True #Tells us that the game was quit out of, and it didn't end organically
+                    if target_event != None:
+                        target_event(events) #render the target graphic
+                        pass
+                        
+                    #Check for when QT is done speaking_continue
+                    if len(self.command_manager.robo_timer.get_timers()) > 0: #if there's no timers active dont even check
+                        qt_done_talking = self.command_manager.robo_timer.CheckTimer(speaking_timer)
+                    
+                    #highlight the box we want and draw it    
+                    self.highlight_block(events, target_rect = tut_rect, msg="", timer_complete = qt_done_talking)
+                    
+                    self.pygame.display.update() #Update all drawn objects
+    
+    
     def play_music_blocking(self, difficulty, level): 
         """Level with just music player"""
         if self.run:
@@ -462,51 +610,9 @@ class Fix_The_Song_Game():
             self.track_name = level_data["song_name"]
             self.distract_song = level_data["distract_song"] #will be None or a list of songs
             self.segment_num = int(level_data["seg_num"]) #split song into this many segs
-                        
-            #store colours in here so we can get their names
-            self.segment_graphics = {
-            1:("music_segment_play_blue.png","music_segment_pause_blue.png"), 
-            2:("music_segment_play_orange.png","music_segment_pause_orange.png"), 
-            3:("music_segment_play_purple.png","music_segment_pause_purple.png"),
-            4:("music_segment_play_grey.png","music_segment_pause_grey.png")
-            #blue = 1 orange = 2 purple = 3 grey = 4.  #4 is reserved for the ones at the top and when grey screen
-            }
+            fps = "0" #for debug info
             
-            #create buttons for each segments
-            correct_segments, distract_segments = self.sound_manager.slice_song(self.segment_num, self.track_name, self.distract_song)
-            all_segments = correct_segments + distract_segments
-            given_seg = correct_segments[0]
-            seg_pos_list = [] 
-            
-            for i in range(len(all_segments)):
-                seg_pos_list.append(i) #were going to use this list to randomise the pos of the answer segments
-                
-            #create and order dragable buttons this is scalable
-            dragable_buttons = {}
-            i = 0
-            dragable_pos = {}
-            
-            for song_path in correct_segments: #create a seg for each correct seg
-                seg_pos = self.segment_x_y[seg_pos_list.pop(random.randint(0,len(seg_pos_list)-1))] #assigns each a number 0 - num_segs, these are popped so they cant be chosed twice
-                seg_colour = self.segment_graphics[random.randint(1,3)] #ignore grey
-                dragable_pos[i] = seg_pos
-                dragable_buttons[i] = self.CreateDragButton(seg_colour[0], seg_colour[1], seg_pos, return_info = song_path, when_toggle_on = self.play_seg_track(song_path), when_toggle_off = self.stop_seg_track(song_path))
-                i+=1
-                
-            if len(distract_segments) > 0:            
-                for song_path in distract_segments:
-                    seg_pos = self.segment_x_y[seg_pos_list.pop(random.randint(0,len(seg_pos_list)-1))] #assigns each a number 0 - num_segs, these are popped so they cant be chosed twice
-                    seg_colour = self.segment_graphics[random.randint(1,3)] #ignore grey
-                    dragable_pos[i] = seg_pos
-                    dragable_buttons[i] = self.CreateDragButton(seg_colour[0], seg_colour[1], seg_pos, return_info = song_path, when_toggle_on = self.play_seg_track(song_path), when_toggle_off = self.stop_seg_track(song_path))
-                    i+=1
-            
-            #Create main buttons
-            loading_button = self.CreateButton("loading_screen_button_depressed.png", "loading_screen_button_depressed.png", (200,225))
-            song_segment_y = 550
-            given_half = self.CreateToggleButton(self.segment_graphics[4][0], self.segment_graphics[4][1],self.segment_graphics[4][1],self.segment_graphics[4][1],(song_segment_y, 90),return_info =correct_segments[0],  when_toggle_on = self.play_seg_track(correct_segments[0]), when_toggle_off = self.stop_seg_track(song_path))
-            song_unknown = self.CreateButton( "music_segment_greyed_out.png", "music_segment_greyed_out.png",(song_segment_y+150,90)) #TODO make this auto scale and spawn according to difficulty
-            main_buttons = [loading_button, song_unknown] #list of buttons so we can easier render them
+            given_half, song_unknown, dragable_buttons, dragable_pos, main_buttons, correct_segments = self.create_graphics()
 
             song_restored = False
             current_seg_order = [given_half.return_info]
@@ -518,19 +624,23 @@ class Fix_The_Song_Game():
                 is_in_slot[key] = False
                 
             while not song_restored and not rospy.is_shutdown() and self.run:
-                self.renderer.DrawBackground(self.background_colour)
-                given_half.render(self.window)
-                for button in main_buttons:
-                    button.render(self.window)
-                self.renderer.DrawText("Put the song back together", (700, 40), 50)
-                self.renderer.DrawText("Drag the segment into the slot", (700, 300), 50)
-                for key in dragable_buttons: #render dragable buttons
-                    dragable_buttons[key].render(self.window) #draw the segments
-                self.pygame.display.update() #Update all drawn objects
+            
+                #Draw background and objects
+                self.update_graphics(given_half, dragable_buttons, main_buttons)#draw coloured graphics
+                self.rendered_graphics = self.update_grey_graphics(given_half, dragable_buttons, main_buttons)
                 
+                #self.rendered_graphics = self.update_grey_graphics(current_track_time, track_total_time, progress, slider_x, slider_y)  #save updated grey graphics into attribute
+                if self.debug:
+                    self.draw_debug_info(fps) #draw fps onto screen
+                
+                self.pygame.display.update() #Update all drawn objects
+
                 for event in self.pygame.event.get():
                     if event.type == self.pygame.QUIT:
                         self.run = False #Stops the program entirely
+                        
+                    if event.type == self.pygame.MOUSEBUTTONUP:  #on mouse release play animation to show where cursor is
+                        self.animation_manager.StartTouchAnimation(mouse_pos) #tell system to play animation when drawing
                         
                     #Check for button press
                     mouse_pos = self.pygame.mouse.get_pos()
@@ -563,14 +673,12 @@ class Fix_The_Song_Game():
                             if current_seg_order == correct_segments:
                                 self.command_manager.send_qt_command(emote = "happy", gesture = "nod")
                                 qt_message = (self.sayings.get_agreements()) #QT reads out a randomised "good job"
-                                print(qt_message)
-                                #self.level_loader.QTSpeakingPopupScreen(qt_message, self.rendered_graphics, self.run, self.background_colour)
+                                self.level_loader.QTSpeakingPopupScreen(qt_message, self.rendered_graphics, self.run, self.background_colour)
                                 song_restored = True
                             else:
                                 self.command_manager.send_qt_command(emote = "sad", gesture = "shake_head")
                                 qt_message = (self.sayings.get_disagreements()) #QT reads out level's hint
-                                print(qt_message)
-                                #self.level_loader.QTSpeakingPopupScreen(qt_message, self.rendered_graphics, self.run, self.background_colour)
+                                self.level_loader.QTSpeakingPopupScreen(qt_message, self.rendered_graphics, self.run, self.background_colour)
                         #if it was placed into the slot when something else is in the slot
                         elif song_unknown.rect.collidepoint(button_pos.center) and not dragable_buttons[key].mouse_is_held and not slot_free:
                             dragable_buttons[key].rect.x = dragable_pos[key][0]
@@ -584,10 +692,9 @@ class Fix_The_Song_Game():
                             else:
                                 dragable_buttons[key].rect.x = dragable_pos[key][0]
                                 dragable_buttons[key].rect.y = dragable_pos[key][1]
-                        
-            
-        
-        
+                                
+                if self.debug:
+                    fps = self.get_fps() #calculate FPS of this loop and show it next loop                
             
 #################################################################Main####################################################################   
 
@@ -602,7 +709,7 @@ class Fix_The_Song_Game():
         self.run, tut = self.level_loader.yes_or_no_screen('Should I explain how to play "Fix The Song" ?', self.run, self.background_colour)
         if tut:
             print("tut chosed")
-            #self.guided_tut()
+            self.guided_tut()
         
         #Count in to the start of the game
         self.run = self.level_loader.tap_to_continue(self.run, self.background_colour)
@@ -612,10 +719,11 @@ class Fix_The_Song_Game():
         
         #Play the track and block
         self.play_music_blocking(difficulty, level)
-        """
-        #Play main level
-        self.play_level(difficulty, level)
         
+        #Play main level
+        self.play_level(difficulty, 4)
+        """
+        self.guided_tut()
         
 ######################################################On execution#######################################################################
 
