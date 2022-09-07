@@ -145,12 +145,13 @@ class Fix_The_Song_Game():
         rospy.log_info("Catastrophic error, data read failed.")
         return music_data
         
-    def EmptyTempDir(self):
-        """empties temp folder after use"""
-        path = self.music_filepath + "temp"
-        files = os.listdir('.')
-        print(files)
         
+    def EmptyTempDir(self):
+        """empties temp folder after use, NOT IN USE BECAUSE IM SCARED OF DELETING THE WRONG FILES"""
+        path = os.path.dirname(__file__) + self.music_filepath + "temp"
+        song_names = os.listdir(path)
+        #add part that deletes files here
+
 
     def GetTrackInfo(self, formatted_output = False): 
         """Subscribe to sound_player publisher and get elapsed track time"""
@@ -504,11 +505,7 @@ class Fix_The_Song_Game():
             song_segment_y = 550
             given_half = self.CreateToggleButton(self.segment_graphics[4][0], self.segment_graphics[4][1],self.segment_graphics[4][1],self.segment_graphics[4][1],(song_segment_y, 90),return_info =correct_segments[0],  when_toggle_on = self.play_seg_track(correct_segments[0]), when_toggle_off = self.stop_seg_track(song_path))
             song_unknown = self.CreateButton( "music_segment_greyed_out.png", "music_segment_greyed_out.png",(song_segment_y+150,90)) #TODO make this auto scale and spawn according to difficulty
-            #play_button = self.CreateToggleButton("play_button.png","pause_button.png",(song_segment_y+250,130))
-            #check_button = self.CreateButton("check_button.png", "check_button.png", (song_segment_y+350,130))
             main_buttons = [loading_button, song_unknown] #list of buttons so we can easier render them
-            
-            #TODO shuffle in some fake segments
 
             qt_has_spoken = False
             song_restored = False
@@ -548,20 +545,19 @@ class Fix_The_Song_Game():
                     for button in main_buttons:
                         button_press = button.get_event(event, mouse_pos)
                 
-                    press = given_half.get_event(event, mouse_pos)
-                    if press: #if the track was stopped, or stopped, set them all to false
-                            for key in dragable_buttons: #if pressed, set all others to false
-                                dragable_buttons[key].toggle = False
-                            given_half.toggle = True
+                    given_press = given_half.get_event(event, mouse_pos)
+                    if given_press: #if the track was started, or stopped, set them all to false
+                        for key in dragable_buttons:
+                            dragable_buttons[key].toggle = False
                             
-                    for key in dragable_buttons:
+                    for key in dragable_buttons: #loop through dict of buttons and handle events on press
                         press, button_pos = dragable_buttons[key].get_event(event, mouse_pos)
                         #Check if toggle is pressed
                         if press:
+                            given_half.toggle_state = False
                             for inner_key in dragable_buttons: #if pressed, set all others to false
-                                dragable_buttons[inner_key].toggle = False
-                            given_half.toggle = False
-                            dragable_buttons[key].toggle = True # set our pressed one back to true
+                                if inner_key != key: #skip our pressed one
+                                    dragable_buttons[inner_key].toggle = False 
                             
                         #Check if seg is placed in the slot and allow only if the slot is free
                         if song_unknown.rect.collidepoint(button_pos.center) and not dragable_buttons[key].mouse_is_held and slot_free: #if our dragged part is released on top of the song slot
@@ -575,7 +571,6 @@ class Fix_The_Song_Game():
                             if is_in_slot[key]: #if we moved out from the slot, reset some variables
                                 slot_free = True
                                 current_seg_order.pop(1) #TODO change this to be scalable
-                                print("song popped")
                                 is_in_slot[key] = False
                             else:
                                 dragable_buttons[key].rect.x = dragable_pos[key][0]
@@ -640,11 +635,12 @@ if __name__ == '__main__':
         game_object.Main()
     except(KeyboardInterrupt or rospy.exceptions.ROSInterruptException):
         game_object.pygame.quit
-        SoundManager().stop_track()
+        SoundManager("").stop_track()
         print("Audio may not be stopped due to interrupt")
     
-    #on exit delete music files
+    #on exit delete music files and stop music
     game_object.EmptyTempDir()
+    SoundManager("").stop_track()
         
         
         

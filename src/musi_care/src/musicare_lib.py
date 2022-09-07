@@ -957,7 +957,7 @@ class DragableButton():
         mouse_on_button = self.rect.collidepoint(mouse_pos)
         if mouse_on_button:
             if event.type == self.pygame.MOUSEBUTTONDOWN and not self.mouse_is_held:
-                self.mouse_is_held = True #only triggers the 1st time the mouse is down
+                self.mouse_is_held = True #Tells us that the mouse was clicked during this event handling
                 self.initial_pos = mouse_pos
             if self.mouse_is_held:
                 if event.type == self.pygame.MOUSEBUTTONUP and mouse_pos == self.initial_pos:
