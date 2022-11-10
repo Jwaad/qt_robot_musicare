@@ -13,7 +13,7 @@ from random import randint
 from musi_care.msg import SongData
 from musi_care.srv import sound_player_srv
 from musi_care.srv import qt_command
-from musicare_lib import TimeFunctions 
+from musicare_lib import TimeFunctions
 from musicare_lib import Button
 from musicare_lib import PausePlayButton
 from musicare_lib import AnimationManager
@@ -22,6 +22,7 @@ from musicare_lib import QTManager
 from musicare_lib import Renderer
 from musicare_lib import HorizontalSlider
 from musicare_lib import StandardLevels
+from musicare_lib import Behaviours
 
 #################################################################Initialise#################################################################
 
@@ -61,6 +62,7 @@ class Guess_The_Mood_Game():
         self.sound_manager = SoundManager(self.music_filepath) #load soundplayer with sound file path
         self.command_manager = QTManager()
         self.renderer = Renderer(self.window,self.window_center)
+        self.behaviours_manager = Behaviours(self.pygame, self.music_filepath)
         self.level_loader = StandardLevels(self.window, self.window_center, self.pygame, self.music_filepath)        
         #self.music_vol = 1 # change volume of laptop
         #self.qt_voice_vol
@@ -505,11 +507,14 @@ class Guess_The_Mood_Game():
                 self.pygame.display.update() #Update all drawn objects
                 
                 #Start event handling
-                for event in self.pygame.event.get():    
+                
+                events = self.pygame.event.get()
+                self.behaviours_manager.qt_reminder(events)
+                for event in events:    
                     #reset / init variables      
                     option_chosen = ""
                     mouse_pos = self.pygame.mouse.get_pos()
-                    
+
                     if event.type == self.pygame.MOUSEBUTTONUP:  #on mouse release play animation to show where cursor is
                         self.animation_manager.StartTouchAnimation(mouse_pos) #tell system to play animation when drawing
                     
@@ -560,7 +565,7 @@ class Guess_The_Mood_Game():
                                     self.command_manager.send_qt_command(emote = "sad")
                                     self.command_manager.send_qt_command(gesture = "shake_head")
                                     qt_message = "Sorry, that is not the right answer, here is a hint." #QT reads out level's hint
-                                    self.level_loader.QTSpeakingPopupScreen(qt_message, self.rendered_graphics, self.run, self.background_colour) # this is blocking  
+                                    self.level_loader.QTSpeakingPopupScreen(qt_message, self.rendered_graphics, self.run, self.background_colour) # this is blocking
                                     qt_message = (track_hint) #QT reads out level's hint
                                     self.level_loader.QTSpeakingPopupScreen(qt_message, self.rendered_graphics, self.run, self.background_colour) # this is blocking    
                             if song_interrupt: #if we had paused the music, resume it
@@ -615,9 +620,8 @@ class Guess_The_Mood_Game():
         #Run game code
         self.play_level(difficulty, level)
         """
-        #Countdown
-        self.run = self.level_loader.countdown(3, self.run, self.background_colour, prelim_msg = "Get ready to play!")
-
+        #Run game code
+        self.play_level(difficulty, level)
 
 ######################################################On execution#######################################################################
 

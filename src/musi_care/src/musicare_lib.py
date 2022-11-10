@@ -27,9 +27,45 @@ from musi_care.srv import qt_command
 class Behaviours():
     """Class to store and return saved / repeatable behaviours other than builtin with QT"""
     
-    def __init__(self):
-        pass
+    def __init__(self, pygame, path_to_music):
+        self.timeout_started = False
+        self.timer = TimeFunctions()
+        self.sound_manager = SoundManager(path_to_music)
+        self.command_manager =  QTManager()
+        self.pygame = pygame
+        self.paused = False
+        self.speaking_timer_id = ""
     
+    def qt_reminder(self, events, pause = True, timeout_message = "If you are stuck. please click the clue button"):
+        """If x seconds of no inputs pass, qt should pause music and say something"""
+        timer_id = "timeout"
+        timeout_time = 7 #give some seconds until timeout
+        #If first run of this method, start timer
+        if not self.timeout_started:
+            self.timer.CreateTimer(timer_id, timeout_time, verbose = False)
+            self.paused = False
+            self.timeout_started = True
+        if self.timer.CheckTimer(timer_id):
+            if pause and not self.paused:
+               self.sound_manager.pause()
+               self.speaking_timer_id = self.command_manager.qt_say(timeout_message)
+               self.paused = True
+        else:
+            for event in events:
+                if event.type == self.pygame.MOUSEBUTTONDOWN:
+                    print("starting timer")
+                    self.timer.CreateTimer(timer_id, timeout_time, verbose = False) #restart timer
+                    self.paused = False
+            
+        #check if we're still paused and if QT is still speaking
+        if self.paused:
+            if self.command_manager.robo_timer.CheckTimer(self.speaking_timer_id): 
+                self.paused = False
+                self.sound_manager.unpause()
+                self.timeout_started = False # so that we start a new timer
+                
+            
+        
     def get_agreements(self):  #List of all sayings when QT agrees EG yes, correct
         sayings = ["Yes!", "Correct!", "That's right!", "That's correct!", "Great, that's right!","Good job, That is the right answer!"]
         ind = random.randint(0, len(sayings)-1 )
@@ -305,11 +341,9 @@ class Renderer():
         self.window = window
         self.window_center = window_center
         
-        
     def DrawBackground(self, colour):
         """takes window and colour to fill in the background of the window """
         self.window.fill(colour) #Fill background black
-    
     
     def DrawText(self, message, location, font_size = 30, font_colour=(255,255,255) ):
         """handle drawing text"""
@@ -594,12 +628,10 @@ class QTManager():
         
     def qt_say(self, text):
         """Makes QT say something, then makes starts a timer until the speaking is done"""
-        #print("waiting for serv")
-        timer_len = len(text) * 0.08 #0.08s per letter 4 letter word is given 0.32 secs to be said
+        timer_len = len(text) * 0.09 #0.09s per letter. A 4 letter word is given 0.36 secs to be said
         timer_id = "QT_SAY"
-        self.robo_timer.CreateTimer(timer_id, timer_len) #creates timer with ID 1 for 8s   
-        status = self.send_qt_command(speech = text)
-        #print(status)
+        self.robo_timer.CreateTimer(timer_id, timer_len) #Creates timer with ID 1 for 8s   
+        self.send_qt_command(speech = text) #Have qt say the text
         return timer_id
         
     def qt_gesture(self, req_gesture):
@@ -653,10 +685,10 @@ class TimeFunctions():
     def __init__(self):
         self.timers = {}
     
-    def CreateTimer(self, timer_id, time_to_wait):
+    def CreateTimer(self, timer_id, time_to_wait, verbose = True):
         """Add's time goal to timers list or replaces old timer """
         #Let it happen, but if a timer overwrites an old one, print warning
-        if timer_id in self.timers.keys():
+        if timer_id in self.timers.keys() and verbose:
             print("You have overwritten an older timer, make sure you're not stuck in a loop")
         self.timers[timer_id] = rospy.get_time() + time_to_wait
         return (timer_id)
