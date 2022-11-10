@@ -37,13 +37,13 @@ class Behaviours():
         return saying
         
     def get_disagreements(self): #List of all sayings when QT disagree EG no, sorry.
-        sayings = ["No, Please try again...","Sorry, no, please try again", "No, that's not correct...", "I'm sorry that is not right, Please try again..."]
+        sayings = ["No, Please try again...", "Sorry, no, please try again", "No, that's not correct...", "I'm sorry that is not right, Please try again..."]
         ind = random.randint(0, len(sayings)-1)
         saying = sayings[ind]
         return saying
         
     def get_praise(self):
-        sayings = ["Amazing, that's the right answer!", "Great job!", "Alright, that's correct!", "Wow, well done!", "Nice! Well done!"]
+        sayings = ["Amazing, that is the right answer!", "Great job!", "Alright, that's correct!", "Wow, well done!", "Nice! Well done!", "You did really well on that one!", "You are a natural", "You made that one look easy!"]
         ind = random.randint(0, len(sayings)-1)
         saying = sayings[ind]
         return saying  
@@ -263,23 +263,28 @@ class StandardLevels():
                         qt_speech = "Go!"
                         timer_id = self.timer.CreateTimer("wait_time", 0.6) #wait for shorter time after go
                     else:
-                        qt_speech = str(second) + "!" #convert second to string and add !
-                        timer_id = self.timer.CreateTimer("wait_time", 1) #wait for 1 second and label the timer
+                        qt_speech = str(second) #convert second to string and add !
+                        timer_id = self.timer.CreateTimer("wait_time", 1.3) #wait for 1.3 seconds to let qt catch up and label the timer
                     
                     self.command_manager.send_qt_command(speech= (qt_speech) ) #QT should read out the second
                 
                 second_passed = False
-                #For each second passed renderr the screen
+                
+                #For each second passed render the screen
                 while not second_passed and not rospy.is_shutdown():
                     #Check for quit
                     for event in self.pygame.event.get():
                         if event.type == self.pygame.QUIT: #Check if the user clicks the X
                             return False
                         elif(event.type == self.pygame.MOUSEBUTTONUP):#on mouse release play animation to show where cursor is
-                            self.animation_manager.StartTouchAnimation(self.pygame.mouse.get_pos() ) #tell system to play animation when drawing
+                            self.animation_manager.StartTouchAnimation(self.pygame.mouse.get_pos()) #tell system to play animation when drawing
                     #Draw background and objects
-                    self.renderer.DrawBackground(background_colour) 
-                    self.renderer.DrawTextCentered(qt_speech, font_size =70 ) 
+                    self.renderer.DrawBackground(background_colour)
+                    if prelim_msg != None and second == seconds:
+                        self.renderer.DrawTextCentered(qt_speech, font_size =100) 
+                    else:
+                        self.renderer.DrawTextCentered(qt_speech, font_size =500,font_colour=(150,250,150))
+                        
                     self.animation_manager.DrawTouchAnimation(self.window) # also draw touches 
                     self.pygame.display.update() #Update all drawn objects 
                     
