@@ -452,10 +452,7 @@ class Guess_The_Mood_Game():
     def play_level(self, difficulty, level_num):
         """Sequence plays the levels"""
         if self.run: #Dont start this screen if the previous screen wanted to close out the game
-            
-            #Start recording time
-            start_time = rospy.get_time()
-            
+
             #Get the level's data
             level_data = self.music_data[difficulty][level_num] #{"song_name":"title", "mood":"happy", "hint":"some text"}
             self.track_name = level_data["song_name"]
@@ -490,9 +487,15 @@ class Guess_The_Mood_Game():
             song_interrupt = False  #track if we stopped song
             slider_was_held = False
             
+            #Start recording time
+            start_time = rospy.get_time()
+            
             #Main game loop
             while self.level_complete == False and not rospy.is_shutdown() and self.run:
                 
+                #update play time
+                play_time = rospy.get_time() - start_time
+            
                 #if the song ended, start player to the beginning and pause it.
                 if song_ended: 
                     self.play_button.its_rewind_time() #draw rewind symbol
@@ -601,9 +604,11 @@ class Guess_The_Mood_Game():
             #self.pygame.quit
             self.sound_manager.stop_track()
             
-            return time_taken
+            return play_time
 
-
+    def save_data(self):
+        """Save the user's level data to file"""
+        
 #################################################################Main####################################################################   
 
     def Main(self, difficulty = "easy", level =  1): #input what level and difficulty to play, the program will handle the rest
@@ -635,7 +640,7 @@ if __name__ == '__main__':
     #Initialise game
     rospy.init_node('guess_the_mood_game', anonymous=False)
     rospy.loginfo("Node launched successfully")
-    game_object = Guess_The_Mood_Game()
+    game_object = Guess_The_Mood_Game("Jwaad")
 
     #Run the game
     try:
