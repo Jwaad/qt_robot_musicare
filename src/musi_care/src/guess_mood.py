@@ -29,10 +29,10 @@ from musicare_lib import Behaviours
 class Guess_The_Mood_Game():
     """ Class to generate and handle guess the mood game """
 	
-    def __init__(self):
-        """Initialise"""
-        x=145#x pos of screen
-        y=0  # y pos of screen
+    def __init__(self, user_id):
+        """Initialise and take user_id, user_id helps us save the data to the specific profiles"""
+        x=145 # x pos of screen
+        y=0   # y pos of screen
         os.environ['SDL_VIDEO_WINDOW_POS'] = '%d,%d' % (x,y) #move screen to x and y pos
         self.previous_screen = "" # used so we can go backwards a screen
         self.next_screen = "" #used to skip screen, low priority feature
@@ -40,8 +40,8 @@ class Guess_The_Mood_Game():
         self.pygame.init() #start py engine
         self.pygame.freetype.init() 
         res = pygame.display.Info() #get our screen resolution
-        self.window_x = res.current_w -150#Width of window -150 to account for the linux toolbar
-        self.window_y = res.current_h  #Height of window
+        self.window_x = res.current_w -150 # Width of window -150 to account for the linux toolbar
+        self.window_y = res.current_h      # Height of window
         self.window_center = (int(self.window_x/2), int(self.window_y/2))
         self.cen_x = self.window_center[0]
         self.cen_y = self.window_center[1]
@@ -453,6 +453,9 @@ class Guess_The_Mood_Game():
         """Sequence plays the levels"""
         if self.run: #Dont start this screen if the previous screen wanted to close out the game
             
+            #Start recording time
+            start_time = rospy.get_time()
+            
             #Get the level's data
             level_data = self.music_data[difficulty][level_num] #{"song_name":"title", "mood":"happy", "hint":"some text"}
             self.track_name = level_data["song_name"]
@@ -597,6 +600,8 @@ class Guess_The_Mood_Game():
             #close out before end
             #self.pygame.quit
             self.sound_manager.stop_track()
+            
+            return time_taken
 
 
 #################################################################Main####################################################################   

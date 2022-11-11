@@ -5,7 +5,7 @@
 #
 import rospy
 import pygame
-import pygame.freetype
+import pygame.freetype #some reason fixed events repeating themselves
 import os
 import math
 import random
@@ -48,8 +48,8 @@ class Behaviours():
         if self.timer.CheckTimer(timer_id):
             if pause and not self.paused:
                self.sound_manager.pause()
-               self.speaking_timer_id = self.command_manager.qt_say(timeout_message)
                self.paused = True
+            self.speaking_timer_id = self.command_manager.qt_say(timeout_message)
         else:
             for event in events:
                 if event.type == self.pygame.MOUSEBUTTONDOWN:
@@ -58,14 +58,13 @@ class Behaviours():
                     self.paused = False
             
         #check if we're still paused and if QT is still speaking
-        if self.paused:
+        if self.paused and pause:
             if self.command_manager.robo_timer.CheckTimer(self.speaking_timer_id): 
                 self.paused = False
                 self.sound_manager.unpause()
                 self.timeout_started = False # so that we start a new timer
                 
-            
-        
+
     def get_agreements(self):  #List of all sayings when QT agrees EG yes, correct
         sayings = ["Yes!", "Correct!", "That's right!", "That's correct!", "Great, that's right!","Good job, That is the right answer!"]
         ind = random.randint(0, len(sayings)-1 )
