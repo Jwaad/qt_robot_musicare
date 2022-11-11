@@ -21,6 +21,50 @@ from musi_care.srv import qt_command
 #rospy.init_node('musicare_lib', anonymous=False)
 #rospy.loginfo("musicare_lib launched successfully")
 
+######################################################Uncategorised#################################################################
+class General():
+    
+    def __init__(self):
+        pass
+        
+
+    def save_data(self, user_id, game_name, level):
+        """Save the user's level data to file
+        How save system works:
+        Data is all in a dictionary of dictionaires,        
+        Example data:
+        {
+            {"guess_the_mood":
+                {1:
+                    {"time_taken":123
+                    "accuracy":100
+                    "hints_given":2
+                    },
+                2:
+                    {"time_taken":123
+                    "accuracy":100
+                    "hints_given":2
+                    }
+                }
+            },
+            
+            {"fix_the_song":
+                {1:
+                    {"time_taken":123
+                    "accuracy":100
+                    "hints_given":2
+                    }
+                }
+            },
+        }
+        
+        
+        """
+        save_location = r"./user_saves/"
+        save_name = save_location # + user_id
+        print(os.path.exists(save_location))
+        #/user_saves
+
 
 ######################################################DragableButton#################################################################
 
