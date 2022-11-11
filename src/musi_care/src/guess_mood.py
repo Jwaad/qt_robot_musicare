@@ -216,27 +216,21 @@ class Guess_The_Mood_Game():
         return slider
     
     
-    def update_graphics(self, current_track_time, track_total_time, progress, slider_x, slider_y):
+    def update_graphics(self):
         """Redraw graphics """
         self.renderer.DrawBackground(self.background_colour)
         self.renderer.DrawTextCentered("What mood does this song have?", font_size = 100, y = 100)
-        self.renderer.DrawText(str(current_track_time), (slider_x - 75, slider_y +75), font_size = 50) #draw current time
-        self.renderer.DrawText(str(track_total_time), (2650, slider_y +75), font_size = 50) #draw total track time
-        self.song_duration_slider.render(self.window, progress)
         for button in self.buttons: #Draw buttons using button list
             button.render(self.window)
         self.animation_manager.DrawTouchAnimation(self.window) #last so it shows up on top
 
 
-    def update_grey_graphics(self, current_track_time, track_total_time, progress, slider_x, slider_y):
+    def update_grey_graphics(self):
         """reinitialise grey graphics taking with parameters they need """
         #Load graphics into dict # need to be in a specific order for this tut
         grey_graphics = {}
         grey_graphics[1] = functools.partial(self.renderer.DrawTextCentered, "What mood does this song have?", font_size = 100, y = 100)
-        grey_graphics[2] = functools.partial(self.renderer.DrawText, str(current_track_time), (slider_x - 75, slider_y +75), font_size = 50) #draw current time
-        grey_graphics[3] = functools.partial(self.renderer.DrawText, str(track_total_time), (2650, slider_y +75), font_size = 50)
-        grey_graphics[4] = functools.partial(self.song_duration_slider.render, self.window, progress, grey = True)
-        i = 4
+        i = 1
         for button in self.buttons:
             i+=1
             grey_graphics[i] = functools.partial(button.render, self.window, grey = True)
@@ -247,13 +241,8 @@ class Guess_The_Mood_Game():
     def get_song_info(self, prev_track_time = "", prev_total_time=""):
     #Get variables that we will draw onto screen
         formatted_data = self.GetTrackInfo(formatted_output = True)
-        if not self.song_duration_slider.slider_being_held: #If progress slider isn't being held just act as normal
-            current_track_time = formatted_data[0]          #Time gotten from sound_player node
-            track_total_time = formatted_data[1] #Total track time
-        else: #dont update the track time just use the old data
-            current_track_time = prev_track_time
-            track_total_time = prev_total_time
-            
+        current_track_time = formatted_data[0]          #Time gotten from sound_player node
+        track_total_time = formatted_data[1] #Total track time
         progress = self.elapsed_time_secs / self.total_track_secs #elapsed time in percentage completion, so slider can represent that on a bar
         song_ended = progress >= 0.99 # if progress > 99% = song is finished, otherwise false
             
@@ -301,13 +290,12 @@ class Guess_The_Mood_Game():
                 graphics[key]() #run as func
     
     
-    def create_graphics(self, slider_scale, slider_x, slider_y):
+    def create_graphics(self):
         """Create the pygame objects that we will use """
-        self.sad_button = self.CreateButton("sad_button.png", "sad_button_depressed.png", (675,750), scale=1.3, unique_id="sad") 
-        self.happy_button = self.CreateButton("happy_button.png", "happy_button_depressed.png", (675,1150), scale=1.3, unique_id="happy") 
-        self.unsure_button = self.CreateButton("unsure_button.png", "unsure_button_depressed.png", (850,1550), scale=1, unique_id = "unsure") 
-        self.play_button = self.CreatePlayButton("pause_button.png", "pause_button_grey.png", "play_button.png",  "play_button_grey.png", "rewind_button.png", "rewind_button_grey.png", (self.cen_x-100, 175), scale = 1, on_play= self.sound_manager.unpause , on_pause = self.sound_manager.pause) #create pause and play button
-        self.song_duration_slider = self.CreateHorizontalSlider("track_duration_slider.png", "track_cursor.png", (slider_x,slider_y), on_click = self.sound_manager.stop_track, on_release = self.sound_manager.start_track, scale=slider_scale)
+        self.sad_button = self.CreateButton("sad_button.png", "sad_button_depressed.png", (675,650), scale=1.3, unique_id="sad") 
+        self.happy_button = self.CreateButton("happy_button.png", "happy_button_depressed.png", (675,1050), scale=1.3, unique_id="happy") 
+        self.unsure_button = self.CreateButton("unsure_button.png", "unsure_button_depressed.png", (850,1450), scale=1, unique_id = "unsure") 
+        self.play_button = self.CreatePlayButton("pause_button.png", "pause_button_grey.png", "play_button.png",  "play_button_grey.png", "rewind_button.png", "rewind_button_grey.png", (self.cen_x-175, 195), scale = 1.5, on_play= self.sound_manager.unpause , on_pause = self.sound_manager.pause) #create pause and play button
         
         
     def get_target_behaviour(self, key, progress):
@@ -318,9 +306,9 @@ class Guess_The_Mood_Game():
             target_graphics = [functools.partial(self.sad_button.render, self.window), functools.partial(self.happy_button.render, self.window)]
         elif key ==4:
             target_graphics = [functools.partial(self.unsure_button.render, self.window)]
+        #elif key == 5:
+            #target_graphics = [functools.partial(self.song_duration_slider.render, self.window, progress), functools.partial(self.play_button.render, self.window)]
         elif key == 5:
-            target_graphics = [functools.partial(self.song_duration_slider.render, self.window, progress), functools.partial(self.play_button.render, self.window)]
-        elif key == 8:
             target_graphics = [functools.partial(self.play_button.render, self.window)]
             
         return target_graphics, target_event_handler #if our logic sifts failed
@@ -344,7 +332,19 @@ class Guess_The_Mood_Game():
         """Draw any debug features we want to see """
         if self.debug:
             self.renderer.DrawText(fps, (70,50), font_size = 30) #draw fps
+
+    def qt_reward(self, time_taken, wrong_answers, hints_needed ):
+        """handles what QT should say and do on level end """
+        #"Perfect clear"
+        if time_taken < 30 and wrong_answers < 1 and hints_needed < 1:
+            self.command_manager.send_qt_command(emote = "happy", gesture = "nod")
+            qt_message = (self.behaviours_manager.get_praise())     #QT reads out level's hint
+        else:
+            self.command_manager.send_qt_command(emote = "happy", gesture = "nod")
+            qt_message = (self.behaviours_manager.get_agreements()) #QT reads out level's hint
+        #print(time_taken, wrong_answers, hints_needed)
         
+    
         
 #####################################################Level / screen code#################################################################
 
@@ -391,14 +391,11 @@ class Guess_The_Mood_Game():
             track_total_time = ""
             
             #Create buttons and slider
-            slider_scale = 2 #used for slider and for text adjacent to slider
-            slider_x = 275
-            slider_y = 450
-            self.create_graphics(slider_scale, slider_x, slider_y)
+            self.create_graphics()
             
             #Group elements
             self.buttons = [self.sad_button, self.happy_button, self.unsure_button, self.play_button]
-            self.sliders = [self.song_duration_slider] #Will be relevant eventually perhaps
+            #self.sliders = [self.song_duration_slider] #Will be relevant eventually perhaps
 
             #Define variables & start track
             self.sound_manager.load_track(self.track_name) #load song to sound player and get data back
@@ -421,7 +418,7 @@ class Guess_The_Mood_Game():
                 
                     #Get data
                     current_track_time, track_total_time, progress, song_ended = self.get_song_info(current_track_time, track_total_time) #get out some data from the current song playing
-                    grey_graphics = self.update_grey_graphics(current_track_time, track_total_time, progress, slider_x, slider_y) #update all grey graphics
+                    grey_graphics = self.update_grey_graphics() #update all grey graphics
                     
                     #Render graphics
                     self.renderer.DrawBackground(self.background_colour) #draw background
@@ -462,15 +459,11 @@ class Guess_The_Mood_Game():
             track_hint = level_data["hint"]
             track_mood = level_data["mood"]
             
-            #Create buttons and slider
-            slider_scale = 2 #used for slider and for text adjacent to slider
-            slider_x = 275
-            slider_y = 450
-            self.create_graphics(slider_scale, slider_x, slider_y)
+            #Create buttons
+            self.create_graphics()
             
             #Group elements
             self.buttons = [self.sad_button, self.happy_button, self.unsure_button, self.play_button]
-            self.sliders = [self.song_duration_slider] #Will be relevant eventually perhaps
 
             #Define variables & start track
             self.sound_manager.load_track(self.track_name) #load song to sound player and get data back
@@ -492,6 +485,9 @@ class Guess_The_Mood_Game():
             
             #Start recording time
             start_time = rospy.get_time()
+            wrong_answers = 0 #how many wrong answers
+            hints_given = 0 #how many hints they needed
+            
             
             #Main game loop
             while self.level_complete == False and not rospy.is_shutdown() and self.run:
@@ -510,13 +506,12 @@ class Guess_The_Mood_Game():
                 current_track_time, track_total_time, progress, song_ended = self.get_song_info(current_track_time, track_total_time) #get out some data from the current song playing
                 
                 #Draw background and objects
-                self.update_graphics(current_track_time, track_total_time, progress, slider_x, slider_y) #draw coloured graphics
-                self.rendered_graphics = self.update_grey_graphics(current_track_time, track_total_time, progress, slider_x, slider_y)  #save updated grey graphics into attribute
+                self.update_graphics() #draw coloured graphics
+                self.rendered_graphics = self.update_grey_graphics()  #save updated grey graphics into attribute
                 if self.debug: self.draw_debug_info(fps) #draw fps onto screen
                 self.pygame.display.update() #Update all drawn objects
                 
                 #Start event handling
-                
                 events = self.pygame.event.get()
                 self.behaviours_manager.qt_reminder(events)
                 for event in events:    
@@ -527,17 +522,8 @@ class Guess_The_Mood_Game():
                     if event.type == self.pygame.MOUSEBUTTONUP:  #on mouse release play animation to show where cursor is
                         self.animation_manager.StartTouchAnimation(mouse_pos) #tell system to play animation when drawing
                     
-                    #handle slider events
-                    for slider in self.sliders:
-                        slider_held = slider.get_event(event, mouse_pos, self.track_data) #Give the slider track info, so it can pause and play from there.
-                        
-                    #Events for pause button:
-                    if slider_held:  #slider will resume song, so swap the playbutton's logic to match
-                        self.play_button.rewind_off() #turn rewind icon off too
-                        music_playing = True
-                        slider_was_held = False
-                    else: #if slider not held, handle events from pause button. this will return if we're paused or not
-                        music_playing = not(self.play_button.get_event(event, mouse_pos))
+                    #Events for pause button this will also return if we're paused or not :
+                    music_playing = not(self.play_button.get_event(event, mouse_pos))
                     
                     #Check which button is pressed, if any.
                     for button in self.buttons[:-1]: #for all buttons except the play_button
@@ -552,12 +538,12 @@ class Guess_The_Mood_Game():
                             if button_pressed_id == track_mood:
                                 print("User has clicked the correct answer")
                                 correct_answer_given= True
-                                self.command_manager.send_qt_command(emote = "happy", gesture = "nod")
-                                qt_message = ("Good job, That is the right answer!") #QT reads out level's hint
+                                self.qt_reward(play_time, wrong_counter, hints_given)
                                 self.level_loader.QTSpeakingPopupScreen(qt_message, self.rendered_graphics, self.run, self.background_colour) # this is blocking
                             #if clicked button is unsure --> give hint
                             elif button_pressed_id == "unsure":
-                                print("User has clicked unsure")
+                                #print("User has clicked unsure")
+                                hints_given += 1
                                 self.command_manager.send_qt_command(emote = "talking", gesture = "explain_right")
                                 qt_message = ("I will give you a clue... " + track_hint) #QT reads out level's hint
                                 self.level_loader.QTSpeakingPopupScreen(qt_message, self.rendered_graphics, self.run, self.background_colour) # this is blocking
@@ -607,7 +593,7 @@ class Guess_The_Mood_Game():
             #self.pygame.quit
             self.sound_manager.stop_track()
             
-            return play_time
+            return play_time, wrong_counter, hints_given
 
 
         
@@ -633,8 +619,7 @@ class Guess_The_Mood_Game():
         #Run game code
         self.play_level(difficulty, level)
         """
-        #Run game code
-        self.gm.save_data(self.user_id, "Guess the mood", level)
+        self.play_level(difficulty, level)
 
 ######################################################On execution#######################################################################
 
