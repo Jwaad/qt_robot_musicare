@@ -80,31 +80,31 @@ class Behaviours():
         self.paused = False
         self.speaking_timer_id = ""
     
-    def qt_reminder(self, events, pause = True, timeout_message = "If you are stuck. please click the clue button"):
+    def qt_reminder(self, events, music_playing = True, timeout_message = "If you are stuck. please click the clue button"):
         """If x seconds of no inputs pass, qt should pause music and say something"""
         timer_id = "timeout"
         timeout_time = 7 #give some seconds until timeout
         #If first run of this method, start timer
         if not self.timeout_started:
             self.timer.CreateTimer(timer_id, timeout_time, verbose = False)
-            self.paused = False
+            self.talking = False
             self.timeout_started = True
         if self.timer.CheckTimer(timer_id):
-            if pause and not self.paused:
+            if music_playing and not self.talking:
                self.sound_manager.pause()
-               self.paused = True
+               self.talking = True
             self.speaking_timer_id = self.command_manager.qt_say(timeout_message)
         else:
             for event in events:
                 if event.type == self.pygame.MOUSEBUTTONDOWN:
                     print("starting timer")
                     self.timer.CreateTimer(timer_id, timeout_time, verbose = False) #restart timer
-                    self.paused = False
+                    self.talking = False
             
         #check if we're still paused and if QT is still speaking
-        if self.paused and pause:
+        if self.talking and music_playing:
             if self.command_manager.robo_timer.CheckTimer(self.speaking_timer_id): 
-                self.paused = False
+                self.talking = False
                 self.sound_manager.unpause()
                 self.timeout_started = False # so that we start a new timer
                 

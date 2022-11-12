@@ -362,11 +362,9 @@ class Guess_The_Mood_Game():
         """
 
         #Create rect to highlight and text for QT to say
-        #(250, 400, 2600-250, 650-400) #slider rect
-        #TODO ADD MORE TO THIS --> 
         #Lets try it now: listen to song --> this sounds happy to me. --> lets click "happy" --> highlight happy --> wait for press
         tut_graphics = {
-        1: {"rect":None, "keys":[1,2,3,4,5,6,7,8],  "speech" : "In this game, you will hear some music and you need to select whether it was happy or sad! When you are ready for the next step, tap the. Next. button."},
+        1: {"rect":None, "keys":[1,2,3,4,5],  "speech" : "In this game, you will hear some music and you need to select whether it was happy or sad! When you are ready for the next step, tap the. Next. button."},
         2: {"rect":(560, 30, 1790, 135), "keys":[1], "speech" : "This text at the top will remind you of what you have to do."},
         3: {"rect":(615, 600, 1675, 800), "keys":[2,3], "speech" : "These are your options. Tap happy if you think the song is happy, or sad if you think the song is sad."},
         4: {"rect":(800, 1400, 2050-800, 1850-1500), "keys":[4], "speech" : "If you need a hint, click this button. I will help you out!"},
@@ -389,7 +387,7 @@ class Guess_The_Mood_Game():
             qt_finished_talking = False
             
             #loop through each graphic that we care about 
-            key = 2 #iter var
+            key = 1 #iter var
             prev_key = key - 1 #to tell us if we've changed to next tut segment
             while key <= len(tut_graphics.keys()):
                 #Define some variables for the tut sequence
@@ -466,6 +464,8 @@ class Guess_The_Mood_Game():
                 option_chosen = False
                 if not repeat_instruction:
                     key+=1
+                
+        return self.run
 
 
     def play_level(self, difficulty, level_num):
@@ -537,7 +537,7 @@ class Guess_The_Mood_Game():
                 
                 #If the user has listened to the whole song once, start checking if they're stuck
                 if full_listen:
-                    self.behaviours_manager.qt_reminder(events)
+                    self.behaviours_manager.qt_reminder(events, music_playing = music_playing)
                 
                 for event in events:    
                     #reset / init variables      
@@ -618,7 +618,7 @@ class Guess_The_Mood_Game():
             #self.pygame.quit
             self.sound_manager.stop_track()
             
-            return play_time, wrong_counter, hints_given
+            return self.run play_time, wrong_counter, hints_given
 
 
         
@@ -626,14 +626,14 @@ class Guess_The_Mood_Game():
 #################################################################Main####################################################################   
 
     def Main(self, difficulty = "easy", level =  1): #input what level and difficulty to play, the program will handle the rest
-        """
+
         #Show starting screen
         self.run = self.level_loader.QTSpeakingScreen("Lets play Guess the mood!", self.run, self.background_colour)
 
         #Ask if they want tutorial
         self.run, tut = self.level_loader.yes_or_no_screen('Should I explain how to play "Guess The Mood" ?', self.run, self.background_colour)
         if tut:
-            self.guided_tut()
+            self.run = self.guided_tut()
         
         #Tap to continue screen to slow pacing
         self.run = self.level_loader.tap_to_continue(self.run, self.background_colour)
@@ -642,9 +642,8 @@ class Guess_The_Mood_Game():
         self.run = self.level_loader.countdown(3, self.run, self.background_colour, prelim_msg = "Get ready to play!")
         
         #Run game code
-        self.play_level(difficulty, level)
-        """
-        self.guided_tut()
+        self.run play_time, wrong_counter, hints_given = self.play_level(difficulty, level)
+
         
 ######################################################On execution#######################################################################
 
