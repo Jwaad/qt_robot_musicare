@@ -801,7 +801,7 @@ class Button():
             else:
                 return False   
         else:
-            return False 
+            return False
             
     def set_pos(self, newpos):
         """Takes a list of (x,y) and sets rect"""

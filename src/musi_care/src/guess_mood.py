@@ -258,13 +258,13 @@ class Guess_The_Mood_Game():
         should be used by being kept in a while loop with other graphics to be drawn
         """
         #Init vars so we dont return something we dont expect
-        arrow_rect = None
+        arrow_rect = None 
         
-        #Handle events
-        for event in events:
-            #reset / init variables
-            option_chosen = ""
-            mouse_pos = self.pygame.mouse.get_pos()
+        #Handle events 
+        for event in events: 
+            #reset / init variables 
+            option_chosen = "" 
+            mouse_pos = self.pygame.mouse.get_pos() 
             if event.type == self.pygame.MOUSEBUTTONUP:  #on mouse release play animation to show where cursor is
                 self.animation_manager.StartTouchAnimation(mouse_pos) #tell system to play animation when drawing
                 return True
@@ -371,48 +371,38 @@ class Guess_The_Mood_Game():
         3: {"rect":(615, 600, 1675, 800), "keys":[2,3], "speech" : "These are your options. Tap happy if you think the song is happy, or sad if you think the song is sad."},
         4: {"rect":(800, 1400, 2050-800, 1850-1500), "keys":[4], "speech" : "If you need a hint, click this button. I will help you out!"},
         5: {"rect":(1235, 180, 400, 400), "keys":[5], "speech" : "This is the play and pause button. Use this to stop and start the song as you like."},
-        6: {"rect": None, "keys":[1,2,3,4,5,6,7,8], "speech" : "That is all for Guess the mood, have fun!."}
+        6: {"rect": None, "keys":[1,2,3,4,5], "speech" : "That is all for Guess the mood, have fun!."}
         }
 
         if self.run:
-            
-            #Get the level's data
-            level_data = self.music_data["tut"][1] #load tut song data
-            self.track_name = level_data["song_name"]
-            track_hint = level_data["hint"]
-            track_mood = level_data["mood"]
-            current_track_time = ""
-            track_total_time = ""
-            
+        
             #Create buttons and slider
             self.create_graphics()
+            self.tut_next = self.CreateButton("tut_next.png", "tut_next.png", (0,0), scale=1, unique_id="next") 
+            self.tut_repeat = self.CreateButton("tut_repeat.png", "tut_repeat.png", (0,0), scale=1, unique_id="repeat") 
             
             #Group elements
             self.buttons = [self.sad_button, self.happy_button, self.unsure_button, self.play_button]
-            #self.sliders = [self.song_duration_slider] #Will be relevant eventually perhaps
+            tut_buttons = [self.tut_next, self.tut_repeat]
 
             #Define variables & start track
-            self.sound_manager.load_track(self.track_name) #load song to sound player and get data back
-            self.track_data = self.GetTrackInfo() #Get data from the sound_player node for this track and save it
-            current_track_time, track_total_time, progress, song_ended = self.get_song_info(current_track_time, track_total_time) #get out some data from the current song playing
             qt_finished_talking = False
-
+            
             #loop through each graphic that we care about 
-            #for key in tut_graphics.keys():
-            key = 1
+            key = 2 #iter var
+            prev_key = key - 1 #to tell us if we've changed to next tut segment
             while key <= len(tut_graphics.keys()):
                 #Define some variables for the tut sequence
                 tut_key = tut_graphics[key]["keys"] #draw grey graphics of everything except for our focused graphic
                 tut_speech = tut_graphics[key]["speech"]
                 tut_rect = tut_graphics[key]["rect"]
                 speaking_timer = self.command_manager.qt_say(tut_speech) #QT should say text out loud
-                next_button = False  #Hold execution until user clicks somewhere
+                option_chosen = False  #Hold execution until user clicks on button
                 
                 #set logic based on what graphic we focus on
                 target_graphics, target_event = self.get_target_behaviour(key)
-    
                 repeat_instruction = False
-                while not next_button and not rospy.is_shutdown() and self.run:
+                while not option_chosen and not rospy.is_shutdown() and self.run:
 
                     #Update all grey graphics
                     grey_graphics = self.update_grey_graphics() 
@@ -426,30 +416,43 @@ class Guess_The_Mood_Game():
                     self.animation_manager.DrawTouchAnimation(self.window) #Draw touch animation
                     if tut_rect != None:
                         arrow_rect = self.renderer.HighlightRect(tut_rect, self.pygame) #draw arrow and box 
-                    if qt_finished_talking:
-                        print("drawing_rects")
-                    
-                    
+                        #since the arrow keeps moving, take it's location once for the next and repeat buttons.
+                        if key != prev_key:
+                            self.tut_next.set_pos((arrow_rect[0] + 400 , arrow_rect[1]))
+                            self.tut_repeat.set_pos((arrow_rect[0] - 400 , arrow_rect[1]))
+                            prev_key = key
+                    if qt_finished_talking and tut_rect != None:
+                        for button in tut_buttons:
+                            button.render(self.window)
+                    #if there's no box highlighted, draw the buttons in a default pos
+                    elif qt_finished_talking and tut_rect == None:
+                        self.tut_next.set_pos((1500, 1100))
+                        self.tut_repeat.set_pos((1100, 1100))
+                        for button in tut_buttons:
+                            button.render(self.window)
                     #Handle events
                     events = self.pygame.event.get()
+                    mouse_pos = self.pygame.mouse.get_pos()
                     for event in events:
                         if event.type == self.pygame.QUIT:
                             self.run = False #Stops the program entirely
                             self.quit = True #Tells us that the game was quit out of, and it didn't end organically
                             #self.sound_manager.stop_track() #Stop the music
                         if event.type == self.pygame.MOUSEBUTTONUP:  #on mouse release play animation to show where cursor is
-                            self.animation_manager.StartTouchAnimation(self.pygame.mouse.get_pos()) #play animation
-                        elif event.type == self.pygame.KEYDOWN and event.key == self.pygame.K_RIGHT:
-                            next_button = True
-                        elif event.type == self.pygame.KEYDOWN and event.key == self.pygame.K_LEFT:
-                            repeat_instruction = True
-                            break
-                    if repeat_instruction:
-                        break
-
+                            self.animation_manager.StartTouchAnimation(mouse_pos) #play animation
+                        #handle tut button events
+                        if qt_finished_talking: #only handle events if buttons being rendered
+                            for button in tut_buttons: 
+                                button_pressed = button.get_event(event, mouse_pos)
+                                if button_pressed:
+                                    option_chosen = True #so we can choose when this goes to false
+                                if button_pressed:
+                                    button_pressed_id = button.id #get which button was pressed
+                                    print(button_pressed_id, "pressed")
+                                    if button_pressed_id == "repeat":
+                                        repeat_instruction = True
                     if target_event != None:
                         target_event(events) #render the target graphic
-                        pass
                         
                     #Check if QT is done talking
                     if len(self.command_manager.robo_timer.get_timers()) > 0: #if there's no timers active dont even check
@@ -460,6 +463,7 @@ class Guess_The_Mood_Game():
                     self.pygame.display.update() #Update all drawn objects
 
                 #Either replay the same instruction, or move onto the next
+                option_chosen = False
                 if not repeat_instruction:
                     key+=1
 
