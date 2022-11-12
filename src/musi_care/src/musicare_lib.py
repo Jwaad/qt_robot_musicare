@@ -786,12 +786,14 @@ class Button():
             self.id = unique_id
 
     def render(self, screen, grey = False ):
+        """Draw button onto given screen, either as greyscale or coloured"""
         if grey: #if we get a request to pause show greyscaled version
             screen.blit(self.image_greyscale_path, self.rect)
         else:
             screen.blit(self.image, self.rect)
     
     def get_event(self, event, mouse_pos):
+        """returns if button was pressed"""
         # If the mouse clicked this button
         if event.type == self.pygame.MOUSEBUTTONUP and event.button == 1:
             if self.rect.collidepoint(mouse_pos):
@@ -801,7 +803,13 @@ class Button():
         else:
             return False 
             
+    def set_pos(self, newpos):
+        """Takes a list of (x,y) and sets rect"""
+        self.rect[0] = newpos[0]
+        self.rect[1] = newpos[1]
+    
     def get_rect(self):
+        """returns object rect"""
         return self.rect
             
 ######################################################ToggleButton#################################################################
