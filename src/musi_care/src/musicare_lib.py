@@ -418,7 +418,10 @@ class Renderer():
 
 
     def HighlightRect(self, target_rect, pygame):
-        """Using the rect of the obj, draw a box around it and an arrow pointing towards it"""
+        """
+        Using the rect of the obj, draw a box around it and an arrow pointing towards it
+        Returns the rect of the produced arrow
+        """
         
         #Variables
         this_path = os.path.dirname(__file__)
@@ -452,6 +455,8 @@ class Renderer():
         #Draw
         bound_box = pygame.draw.rect(self.window, (255,0,0), bounding_rect, width=20, border_radius=5) #draw bounding box
         self.window.blit(image, arrow_rect) #draw arrow
+        
+        return arrow_rect
         
         
 

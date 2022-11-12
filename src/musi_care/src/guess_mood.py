@@ -249,7 +249,7 @@ class Guess_The_Mood_Game():
         return current_track_time, track_total_time, progress, song_ended
         
         
-    def highlight_block(self, events, target_rect = None, msg = "Click anywhere to continue ... ", timer_complete = None):
+    def highlight_block(self, events, target_rect = None, msg = "", timer_complete = None):
         """
         Highlight a certain object and check for click
         target_graphic = the graphic that's in colour
@@ -257,7 +257,9 @@ class Guess_The_Mood_Game():
         target_rect the rect that we want to high light around
         should be used by being kept in a while loop with other graphics to be drawn
         """
-
+        #Init vars so we dont return something we dont expect
+        arrow_rect = None
+        
         #Handle events
         for event in events:
             #reset / init variables
@@ -267,17 +269,17 @@ class Guess_The_Mood_Game():
                 self.animation_manager.StartTouchAnimation(mouse_pos) #tell system to play animation when drawing
                 return True
                 
-        #Render graphics
-        if target_rect != None: #so we can have blocking functionality without highlighting
-            self.renderer.HighlightRect(target_rect, self.pygame) #draw arrow and box
-        if msg != "": #we can send an empty msg to msg instead to have it not display anything
-            if timer_complete == None: #if user didnt specify a timer, just show text like normal
-                self.renderer.DrawTextCentered(msg, font_size = 75, font_colour = (0,0,0))
-            else:
-                if timer_complete: #only render once timer done
-                    self.renderer.DrawTextCentered(msg, font_size = 75, font_colour = (0,0,0))
+        #Render graphics 
+        if target_rect != None: #so we can have blocking functionality without highlighting 
+            self.renderer.HighlightRect(target_rect, self.pygame) #draw arrow and box 
+        if msg != "": #we can send an empty msg to msg instead to have it not display anything 
+            if timer_complete == None: #if user didnt specify a timer, just show text like normal 
+                self.renderer.DrawTextCentered(msg, font_size = 75, font_colour = (0,0,0)) 
+            else: 
+                if timer_complete: #only render once timer done 
+                    self.renderer.DrawTextCentered(msg, font_size = 75, font_colour = (0,0,0)) 
                 
-        return False
+        return False 
                  
                  
     def load_list_graphics(self, graphics, keys):
@@ -298,7 +300,7 @@ class Guess_The_Mood_Game():
         self.play_button = self.CreatePlayButton("pause_button.png", "pause_button_grey.png", "play_button.png",  "play_button_grey.png", "rewind_button.png", "rewind_button_grey.png", (self.cen_x-175, 195), scale = 1.5, on_play= self.sound_manager.unpause , on_pause = self.sound_manager.pause) #create pause and play button
         
         
-    def get_target_behaviour(self, key, progress):
+    def get_target_behaviour(self, key):
         """tells our tut what to draw and what to do with events"""
         target_graphics = []
         target_event_handler = None
@@ -306,8 +308,6 @@ class Guess_The_Mood_Game():
             target_graphics = [functools.partial(self.sad_button.render, self.window), functools.partial(self.happy_button.render, self.window)]
         elif key ==4:
             target_graphics = [functools.partial(self.unsure_button.render, self.window)]
-        #elif key == 5:
-            #target_graphics = [functools.partial(self.song_duration_slider.render, self.window, progress), functools.partial(self.play_button.render, self.window)]
         elif key == 5:
             target_graphics = [functools.partial(self.play_button.render, self.window)]
             
@@ -355,13 +355,10 @@ class Guess_The_Mood_Game():
         #String of our keys so i can remember them
         """
         1 = top text
-        2 = current_track_time 
-        3 = track_total_time
-        4 = song slider
-        5 = sad button
-        6 = happy button
-        7 = unsure button
-        8 = play/pause button
+        2 = sad button
+        3 = happy button
+        4 = unsure button
+        5 = play/pause button
         """
 
         #Create rect to highlight and text for QT to say
@@ -369,15 +366,12 @@ class Guess_The_Mood_Game():
         #TODO ADD MORE TO THIS --> 
         #Lets try it now: listen to song --> this sounds happy to me. --> lets click "happy" --> highlight happy --> wait for press
         tut_graphics = {
-        1: {"rect":None, "keys":[1,2,3,4,5,6,7,8],  "speech" : "In this game, you will hear some music and you need to select whether it was happy or sad! When you are ready for the next step, tap the screen."},
-        2: {"rect":(560, 30, 1790, 135), "keys":[1,2,3,4,5,6,7,8], "speech" : "This text at the top will remind you of what you have to do."},
-        3: {"rect":(615, 700, 1675, 800), "keys":[1,2,3,4,7,8], "speech" : "These are your options. Tap happy if you think the song is happy, or sad if you think the song is sad."},
-        4: {"rect":(800, 1500, 2050-800, 1850-1500), "keys":[1,2,3,4,5,6,8], "speech" : "If you need a hint, click this button. I will help you out!"},
-        5: {"rect": (125, 150, 2750-125, 700-150), "keys":[1, 2,3,5,6,7], "speech" : "This is how you listen to the music."},
-        6: {"rect":(100, 425, 180, 600-425), "keys":[1,2,3,4,5,6,7,8], "speech" : "This number is how long the song has been playing for"},
-        7: {"rect":(2575, 425, 180, 600-425), "keys":[1,2,3,4,5,6,7,8], "speech" : "This number is how long the song is in total."},
-        8: {"rect":(1300, 160, 1600-1300, 450-160), "keys":[1,2,3,4,5,6,7], "speech" : "This is the play and pause button. Use this to stop and start the song as you like."},
-        9: {"rect": None, "keys":[1,2,3,4,5,6,7,8], "speech" : "That is all for Guess the mood."}
+        1: {"rect":None, "keys":[1,2,3,4,5,6,7,8],  "speech" : "In this game, you will hear some music and you need to select whether it was happy or sad! When you are ready for the next step, tap the. Next. button."},
+        2: {"rect":(560, 30, 1790, 135), "keys":[1], "speech" : "This text at the top will remind you of what you have to do."},
+        3: {"rect":(615, 600, 1675, 800), "keys":[2,3], "speech" : "These are your options. Tap happy if you think the song is happy, or sad if you think the song is sad."},
+        4: {"rect":(800, 1400, 2050-800, 1850-1500), "keys":[4], "speech" : "If you need a hint, click this button. I will help you out!"},
+        5: {"rect":(1235, 180, 400, 400), "keys":[5], "speech" : "This is the play and pause button. Use this to stop and start the song as you like."},
+        6: {"rect": None, "keys":[1,2,3,4,5,6,7,8], "speech" : "That is all for Guess the mood, have fun!."}
         }
 
         if self.run:
@@ -401,24 +395,27 @@ class Guess_The_Mood_Game():
             self.sound_manager.load_track(self.track_name) #load song to sound player and get data back
             self.track_data = self.GetTrackInfo() #Get data from the sound_player node for this track and save it
             current_track_time, track_total_time, progress, song_ended = self.get_song_info(current_track_time, track_total_time) #get out some data from the current song playing
+            qt_finished_talking = False
 
             #loop through each graphic that we care about 
-            for key in tut_graphics.keys():
+            #for key in tut_graphics.keys():
+            key = 1
+            while key <= len(tut_graphics.keys()):
                 #Define some variables for the tut sequence
                 tut_key = tut_graphics[key]["keys"] #draw grey graphics of everything except for our focused graphic
                 tut_speech = tut_graphics[key]["speech"]
                 tut_rect = tut_graphics[key]["rect"]
                 speaking_timer = self.command_manager.qt_say(tut_speech) #QT should say text out loud
-                clicked = False  #Hold execution until user clicks somewhere
+                next_button = False  #Hold execution until user clicks somewhere
                 
                 #set logic based on what graphic we focus on
-                target_graphics, target_event = self.get_target_behaviour(key, progress)
+                target_graphics, target_event = self.get_target_behaviour(key)
+    
+                repeat_instruction = False
+                while not next_button and not rospy.is_shutdown() and self.run:
 
-                while not clicked and not rospy.is_shutdown() and self.run:
-                
-                    #Get data
-                    current_track_time, track_total_time, progress, song_ended = self.get_song_info(current_track_time, track_total_time) #get out some data from the current song playing
-                    grey_graphics = self.update_grey_graphics() #update all grey graphics
+                    #Update all grey graphics
+                    grey_graphics = self.update_grey_graphics() 
                     
                     #Render graphics
                     self.renderer.DrawBackground(self.background_colour) #draw background
@@ -427,26 +424,44 @@ class Guess_The_Mood_Game():
                         for graphic in target_graphics: #Render the target graphic
                             graphic() #Render graphics each
                     self.animation_manager.DrawTouchAnimation(self.window) #Draw touch animation
+                    if tut_rect != None:
+                        arrow_rect = self.renderer.HighlightRect(tut_rect, self.pygame) #draw arrow and box 
+                    if qt_finished_talking:
+                        print("drawing_rects")
+                    
                     
                     #Handle events
                     events = self.pygame.event.get()
                     for event in events:
-                        #print(self.pygame.mouse.get_pos())#TEMP
                         if event.type == self.pygame.QUIT:
                             self.run = False #Stops the program entirely
                             self.quit = True #Tells us that the game was quit out of, and it didn't end organically
                             #self.sound_manager.stop_track() #Stop the music
+                        if event.type == self.pygame.MOUSEBUTTONUP:  #on mouse release play animation to show where cursor is
+                            self.animation_manager.StartTouchAnimation(self.pygame.mouse.get_pos()) #play animation
+                        elif event.type == self.pygame.KEYDOWN and event.key == self.pygame.K_RIGHT:
+                            next_button = True
+                        elif event.type == self.pygame.KEYDOWN and event.key == self.pygame.K_LEFT:
+                            repeat_instruction = True
+                            break
+                    if repeat_instruction:
+                        break
+
                     if target_event != None:
                         target_event(events) #render the target graphic
                         pass
                         
-                    #Check for click
+                    #Check if QT is done talking
                     if len(self.command_manager.robo_timer.get_timers()) > 0: #if there's no timers active dont even check
                         qt_finished_talking = self.command_manager.robo_timer.CheckTimer(speaking_timer)
                     else:
                         qt_finished_talking = True
-                    clicked = self.highlight_block(events, target_rect = tut_rect, timer_complete = qt_finished_talking)
+                    
                     self.pygame.display.update() #Update all drawn objects
+
+                #Either replay the same instruction, or move onto the next
+                if not repeat_instruction:
+                    key+=1
 
 
     def play_level(self, difficulty, level_num):
@@ -487,7 +502,7 @@ class Guess_The_Mood_Game():
             start_time = rospy.get_time()
             wrong_answers = 0 #how many wrong answers
             hints_given = 0 #how many hints they needed
-            
+            full_listen = False #tracks if user has heard full song
             
             #Main game loop
             while self.level_complete == False and not rospy.is_shutdown() and self.run:
@@ -501,6 +516,8 @@ class Guess_The_Mood_Game():
                     self.sound_manager.load_track(self.track_name) 
                     music_playing = False
                     song_ended = False
+                    full_listen = True
+                    
         
                 #Get variables that we will draw onto screen
                 current_track_time, track_total_time, progress, song_ended = self.get_song_info(current_track_time, track_total_time) #get out some data from the current song playing
@@ -513,7 +530,11 @@ class Guess_The_Mood_Game():
                 
                 #Start event handling
                 events = self.pygame.event.get()
-                self.behaviours_manager.qt_reminder(events)
+                
+                #If the user has listened to the whole song once, start checking if they're stuck
+                if full_listen:
+                    self.behaviours_manager.qt_reminder(events)
+                
                 for event in events:    
                     #reset / init variables      
                     option_chosen = ""
@@ -550,7 +571,7 @@ class Guess_The_Mood_Game():
                             #if clicked button is incorrect --> direct to hint if they want one.
                             elif button_pressed_id != track_mood: 
                                 wrong_counter += 1 #how many time they have hit the wrong answer
-                                if wrong_counter < 2:
+                                if wrong_counter <= 1:
                                     print("User has clicked the wrong answer")
                                     self.command_manager.send_qt_command(emote = "sad", gesture = "shake_head")
                                     qt_message = ( "Sorry, that is not the right answer, click, i dont know, for a hint") #QT reads out level's hint
@@ -619,8 +640,8 @@ class Guess_The_Mood_Game():
         #Run game code
         self.play_level(difficulty, level)
         """
-        self.play_level(difficulty, level)
-
+        self.guided_tut()
+        
 ######################################################On execution#######################################################################
 
 #If we run this node, run the game on it's own
