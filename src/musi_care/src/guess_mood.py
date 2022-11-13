@@ -539,17 +539,16 @@ class Guess_The_Mood_Game():
                 if full_listen:
                     self.behaviours_manager.qt_reminder(events, music_playing = music_playing)
                 
-                for event in events:    
-                    #reset / init variables      
+                for event in events:
+                #reset / init variables
                     option_chosen = ""
                     mouse_pos = self.pygame.mouse.get_pos()
-
                     if event.type == self.pygame.MOUSEBUTTONUP:  #on mouse release play animation to show where cursor is
                         self.animation_manager.StartTouchAnimation(mouse_pos) #tell system to play animation when drawing
                     
                     #Events for pause button this will also return if we're paused or not :
-                    music_playing = not(self.play_button.get_event(event, mouse_pos))
-                    
+                    music_playing = (self.play_button.get_event(event, mouse_pos))
+
                     #Check which button is pressed, if any.
                     for button in self.buttons[:-1]: #for all buttons except the play_button
                         button_pressed = button.get_event(event, mouse_pos)
@@ -618,7 +617,7 @@ class Guess_The_Mood_Game():
             #self.pygame.quit
             self.sound_manager.stop_track()
             
-            return self.run play_time, wrong_counter, hints_given
+            return self.run, play_time, wrong_counter, hints_given
 
 
         
@@ -642,7 +641,7 @@ class Guess_The_Mood_Game():
         self.run = self.level_loader.countdown(3, self.run, self.background_colour, prelim_msg = "Get ready to play!")
         
         #Run game code
-        self.run play_time, wrong_counter, hints_given = self.play_level(difficulty, level)
+        self.run, play_time, wrong_counter, hints_given = self.play_level(difficulty, level)
 
         
 ######################################################On execution#######################################################################
