@@ -116,7 +116,7 @@ class Behaviours():
         return saying
         
     def get_disagreements(self): #List of all sayings when QT disagree EG no, sorry.
-        sayings = ["No, Please try again...", "Sorry, no, please try again", "No, that's not correct...", "I'm sorry that is not right, Please try again..."]
+        sayings = ["No, Please try again...", "Sorry, no, please try again...", "No, that's not correct...", "I'm sorry that is not right, Please try again...",  "Sorry, that is not the right answer..."]
         ind = random.randint(0, len(sayings)-1)
         saying = sayings[ind]
         return saying
@@ -138,7 +138,14 @@ class Behaviours():
         ind = random.randint(0, len(sayings)-1)
         saying = sayings[ind]
         return saying
-
+        
+    def get_help(self):
+        sayings = ["Okay, next level", "On to the next level", "Lets play the next level!", "Now onto the next one!", "Lets play another one!" ]
+        ind = random.randint(0, len(sayings)-1)
+        saying = sayings[ind]
+        return saying
+    
+    
 #####################################################General Levels##################################################################
 
 class StandardLevels():

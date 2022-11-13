@@ -349,7 +349,7 @@ class Guess_The_Mood_Game():
 #####################################################Level / screen code#################################################################
 
 
-    def guided_tut(self):
+    def guided_tut(self, run):
         """Code to play tut sequence for Guess the mood"""
             
         #String of our keys so i can remember them
@@ -468,7 +468,7 @@ class Guess_The_Mood_Game():
         return self.run
 
 
-    def play_level(self, difficulty, level_num):
+    def play_level(self, run, difficulty, level_num):
         """Sequence plays the levels"""
         if self.run: #Dont start this screen if the previous screen wanted to close out the game
 
@@ -577,13 +577,13 @@ class Guess_The_Mood_Game():
                                 if wrong_counter <= 1:
                                     print("User has clicked the wrong answer")
                                     self.command_manager.send_qt_command(emote = "sad", gesture = "shake_head")
-                                    qt_message = ( "Sorry, that is not the right answer, click, i dont know, for a hint") #QT reads out level's hint
+                                    qt_message = (self.behaviours_manager.get_disagreements()) #QT uses a randomly generated no
                                     self.level_loader.QTSpeakingPopupScreen(qt_message, self.rendered_graphics, self.run, self.background_colour) # this is blocking
                                 else:
                                     print("User has clicked the wrong answer for the 2nd time")
                                     self.command_manager.send_qt_command(emote = "sad")
                                     self.command_manager.send_qt_command(gesture = "shake_head")
-                                    qt_message = "Sorry, that is not the right answer, here is a hint." #QT reads out level's hint
+                                    qt_message = self.behaviours_manager.get_disagreements()+ "... here is a hint..." #QT reads out level's hint
                                     self.level_loader.QTSpeakingPopupScreen(qt_message, self.rendered_graphics, self.run, self.background_colour) # this is blocking
                                     qt_message = (track_hint) #QT reads out level's hint
                                     self.level_loader.QTSpeakingPopupScreen(qt_message, self.rendered_graphics, self.run, self.background_colour) # this is blocking    
@@ -632,7 +632,7 @@ class Guess_The_Mood_Game():
         #Ask if they want tutorial
         self.run, tut = self.level_loader.yes_or_no_screen('Should I explain how to play "Guess The Mood" ?', self.run, self.background_colour)
         if tut:
-            self.run = self.guided_tut()
+            self.run = self.guided_tut(self.run)
         
         #Tap to continue screen to slow pacing
         self.run = self.level_loader.tap_to_continue(self.run, self.background_colour)
@@ -641,8 +641,9 @@ class Guess_The_Mood_Game():
         self.run = self.level_loader.countdown(3, self.run, self.background_colour, prelim_msg = "Get ready to play!")
         
         #Run game code
-        self.run, play_time, wrong_counter, hints_given = self.play_level(difficulty, level)
+        self.run, play_time, wrong_counter, hints_given = self.play_level(self.run, difficulty, level)
 
+        
         
 ######################################################On execution#######################################################################
 
