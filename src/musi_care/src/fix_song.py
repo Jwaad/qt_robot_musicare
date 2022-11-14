@@ -68,7 +68,7 @@ class Fix_The_Song_Game():
         self.renderer = Renderer(self.window,self.window_center)
         self.level_loader = StandardLevels(self.window, self.window_center, self.pygame, self.music_filepath)
         self.segment_x_y = { 0: (600,800), 1:(1250,800), 2:(1900,800), 3:(600,1500), 4: (1250,1500), 5: (1900,1500)} #hard coded num locations of each segment
-        self.sayings = Behaviours()
+        self.sayings = Behaviours(self.pygame, self.music_filepath)
         self.t1 = 0 #t1 for FPS tracking
         self.debug = True
         #self.music_vol = 1 # change volume of laptop
@@ -443,7 +443,7 @@ class Fix_The_Song_Game():
 
 
     def guided_tut(self):
-        """Code to play tut sequence for Guess the mood"""
+        """Code to play tut sequence for fix the song"""
             
         #String of our keys so i can remember them
         """
@@ -529,17 +529,13 @@ class Fix_The_Song_Game():
         """Level with just music player"""
         if self.run:
             
-            
             #Get the level's data
             level_data = self.music_data[difficulty][level] #{"song_name":"title", "mood":"happy", "hint":"some text"}
             self.track_name = level_data["song_name"]
             
-            #Create slider and buttons
-            slider_x = 275
-            slider_y = 800
-            song_duration_slider = self.CreateHorizontalSlider("track_duration_slider.png", "track_cursor.png", (slider_x,slider_y), scale=2)
+            #Create buttons
             self.next_button = self.CreateButton("next_button.png", "next_button_grey.png", (self.cen_x - 300,1200), scale=1)
-            self.play_button = self.CreatePlayButton("pause_button.png", "pause_button_grey.png", "play_button.png",  "play_button_grey.png", "rewind_button.png", "rewind_button_grey.png", (self.cen_x-100, 450), scale = 1, on_play= self.sound_manager.unpause , on_pause = self.sound_manager.pause) #create pause and play button
+            self.play_button = self.CreatePlayButton("pause_button.png", "pause_button_grey.png", "play_button.png",  "play_button_grey.png", "rewind_button.png", "rewind_button_grey.png", (self.cen_x-175, 500), scale = 1.5, on_play= self.sound_manager.unpause , on_pause = self.sound_manager.pause) #create pause and play button
             
             #Load track
             self.sound_manager.load_track(self.track_name)
@@ -555,29 +551,29 @@ class Fix_The_Song_Game():
             self.sound_manager.unpause()
             music_ended = False
             next_pressed = False
+            
             while not next_pressed and not rospy.is_shutdown() and self.run:
                 time = rospy.get_time()
                 
-                #Format song time elapsed to display on screen
-                formatted_data = self.GetTrackInfo(formatted_output = True)
+                #get song data
                 self.current_track_time, self.track_total_time, self.progress, self.song_ended = self.get_song_info(self.current_track_time, self.track_total_time)
                 
                 if self.song_ended:
-                    self.play_button.its_rewind_time() #draw rewind symbol
                     self.sound_manager.load_track(self.track_name) #reload the track at the start
                     music_ended = True #use this var, so we have one that stays true for the rest of the loop
+                    self.play_button.its_rewind_time() #draw rewind symbol instead of play symbol
 
                 #Draw background and objects
                 self.renderer.DrawBackground(self.background_colour)
-                self.renderer.DrawText(str(self.current_track_time), (slider_x - 75, slider_y +75), font_size = 50) #draw current time
-                self.renderer.DrawText(str(self.track_total_time), (2650, slider_y +75), font_size = 50) #draw total track time
                 self.renderer.DrawTextCentered("Please listen to the song.", font_size = 100, y = 300)
-                song_duration_slider.render(self.window, self.progress)
                 if music_ended: #render next button grey until music ended
                     self.next_button.render(self.window, grey= False)
                 else:
                     self.next_button.render(self.window, grey = True)
-                self.play_button.render(self.window)
+                if music_ended:
+                    self.play_button.render(self.window)
+                else:
+                    self.play_button.render(self.window, grey = True)
                 self.animation_manager.DrawTouchAnimation(self.window) # also draw touches
                 self.pygame.display.update() #Update all drawn objects
 
@@ -589,14 +585,13 @@ class Fix_The_Song_Game():
                     mouse_pos = self.pygame.mouse.get_pos()
                     if event.type == self.pygame.MOUSEBUTTONUP:
                         self.animation_manager.StartTouchAnimation(mouse_pos) #draw mouse click animation
-                        pass
                     #Check for button press
                     if music_ended: #if music ended start checking for next press, otherwise ignore it
                         next_button_clicked = self.next_button.get_event(event, mouse_pos)
                         if next_button_clicked:
                             next_pressed = True
                             self.sound_manager.stop_track()
-                    self.play_button.get_event(event, mouse_pos)
+                        self.play_button.get_event(event, mouse_pos) #only check for button press on music end
                     
                  #print(rospy.get_time() - time)
 
@@ -635,7 +630,13 @@ class Fix_The_Song_Game():
                 
                 self.pygame.display.update() #Update all drawn objects
 
-                for event in self.pygame.event.get():
+                events = self.pygame.event.get()
+                
+                #Check if user is doing things 
+                self.sayings.qt_reminder(events)
+
+                for event in events:
+                    
                     if event.type == self.pygame.QUIT:
                         self.run = False #Stops the program entirely
                         
@@ -647,10 +648,10 @@ class Fix_The_Song_Game():
                     for button in main_buttons:
                         button_press = button.get_event(event, mouse_pos)
                 
-                    given_press = given_half.get_event(event, mouse_pos)
+                    given_press = given_half.get_event(event, mouse_pos) 
                     if given_press: #if the track was started, or stopped, set them all to false
                         for key in dragable_buttons:
-                            dragable_buttons[key].toggle = False
+                            dragable_buttons[key].toggle = False 
                             
                     for key in dragable_buttons: #loop through dict of buttons and handle events on press
                         press, button_pos = dragable_buttons[key].get_event(event, mouse_pos)
@@ -708,10 +709,7 @@ class Fix_The_Song_Game():
         #Ask if they want to play tutorial
         self.run, tut = self.level_loader.yes_or_no_screen('Should I explain how to play "Fix The Song" ?', self.run, self.background_colour)
         if tut:
-            confused = True
-            while confused:
-                self.guided_tut()
-                self.run, confused = self.level_loader.yes_or_no_screen('Should I explain again?', self.run, self.background_colour)
+            self.guided_tut()
         
         #Count in to the start of the game
         self.run = self.level_loader.tap_to_continue(self.run, self.background_colour)
@@ -721,11 +719,13 @@ class Fix_The_Song_Game():
         
         #Play the track and block
         self.play_music_blocking(difficulty, level)
-        """
-        
+
         #Play main level
         #self.play_level(difficulty, level)
-        self.play_level(difficulty, 3)
+
+        """
+        self.play_music_blocking(difficulty, level)
+        #self.play_level(difficulty, 3)
         
 ######################################################On execution#######################################################################
 

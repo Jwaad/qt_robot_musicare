@@ -376,8 +376,8 @@ class Guess_The_Mood_Game():
         
             #Create buttons and slider
             self.create_graphics()
-            self.tut_next = self.CreateButton("tut_next.png", "tut_next.png", (0,0), scale=1, unique_id="next") 
-            self.tut_repeat = self.CreateButton("tut_repeat.png", "tut_repeat.png", (0,0), scale=1, unique_id="repeat") 
+            self.tut_next = self.CreateButton("tut_next.png", "tut_next.png", (0,0), scale=1.5, unique_id="next") 
+            self.tut_repeat = self.CreateButton("tut_repeat.png", "tut_repeat.png", (0,0), scale=1.5, unique_id="repeat") 
             
             #Group elements
             self.buttons = [self.sad_button, self.happy_button, self.unsure_button, self.play_button]
@@ -416,16 +416,16 @@ class Guess_The_Mood_Game():
                         arrow_rect = self.renderer.HighlightRect(tut_rect, self.pygame) #draw arrow and box 
                         #since the arrow keeps moving, take it's location once for the next and repeat buttons.
                         if key != prev_key:
-                            self.tut_next.set_pos((arrow_rect[0] + 400 , arrow_rect[1]))
-                            self.tut_repeat.set_pos((arrow_rect[0] - 400 , arrow_rect[1]))
+                            self.tut_next.set_pos((arrow_rect[0] + 500 , arrow_rect[1]))
+                            self.tut_repeat.set_pos((arrow_rect[0] - 600 , arrow_rect[1]))
                             prev_key = key
                     if qt_finished_talking and tut_rect != None:
                         for button in tut_buttons:
                             button.render(self.window)
                     #if there's no box highlighted, draw the buttons in a default pos
                     elif qt_finished_talking and tut_rect == None:
-                        self.tut_next.set_pos((1500, 1100))
-                        self.tut_repeat.set_pos((1100, 1100))
+                        self.tut_next.set_pos((1600, 1100))
+                        self.tut_repeat.set_pos((900, 1100))
                         for button in tut_buttons:
                             button.render(self.window)
                     #Handle events
