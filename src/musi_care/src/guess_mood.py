@@ -172,14 +172,14 @@ class Guess_The_Mood_Game():
         return str(mins), str(secs)
 
 
-    def CreateButton(self,file_name, alt_file_name, location,  scale=1, unique_id=""):
+    def CreateButton(self,file_name, alt_file_name, location,return_info = {},  scale=1, unique_id=""):
         """code creates button using the button_image class."""
         this_file_path = os.path.dirname(__file__)
         relative_path = 'game_assets/graphics'
         file_path = os.path.join(this_file_path, relative_path, file_name)
         alt_path = os.path.join(this_file_path, relative_path, alt_file_name)
         
-        button = Button(file_path, alt_path, location, self.pygame, scale, unique_id)
+        button = Button(file_path, alt_path, location, self.pygame, return_info = {}, scale=scale, unique_id=unique_id)
         return(button)         
 
 
@@ -447,7 +447,6 @@ class Guess_The_Mood_Game():
                                     option_chosen = True #so we can choose when this goes to false
                                 if button_pressed:
                                     button_pressed_id = button.id #get which button was pressed
-                                    print(button_pressed_id, "pressed")
                                     if button_pressed_id == "repeat":
                                         repeat_instruction = True
                     if target_event != None:
@@ -561,7 +560,7 @@ class Guess_The_Mood_Game():
                             track_stopped = True
                             #if clicked button is correct
                             if button_pressed_id == track_mood:
-                                print("User has clicked the correct answer")
+                                #print("User has clicked the correct answer")
                                 correct_answer_given= True
                                 self.qt_reward(play_time, wrong_counter, hints_given)
                                 self.level_loader.QTSpeakingPopupScreen(qt_message, self.rendered_graphics, self.run, self.background_colour) # this is blocking
@@ -576,12 +575,12 @@ class Guess_The_Mood_Game():
                             elif button_pressed_id != track_mood: 
                                 wrong_counter += 1 #how many time they have hit the wrong answer
                                 if wrong_counter <= 1:
-                                    print("User has clicked the wrong answer")
+                                    #print("User has clicked the wrong answer")
                                     self.command_manager.send_qt_command(emote = "sad", gesture = "shake_head")
                                     qt_message = (self.behaviours_manager.get_disagreements()) #QT uses a randomly generated no
                                     self.level_loader.QTSpeakingPopupScreen(qt_message, self.rendered_graphics, self.run, self.background_colour) # this is blocking
                                 else:
-                                    print("User has clicked the wrong answer for the 2nd time")
+                                    #print("User has clicked the wrong answer for the 2nd time")
                                     self.command_manager.send_qt_command(emote = "sad")
                                     self.command_manager.send_qt_command(gesture = "shake_head")
                                     qt_message = self.behaviours_manager.get_disagreements()+ "... here is a hint..." #QT reads out level's hint

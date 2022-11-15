@@ -595,8 +595,7 @@ class Fix_The_Song_Game():
                         pass
 
                     # Check for when QT is done speaking_continue
-                    if len(self.command_manager.robo_timer.get_timers()) > 0:  # if there's no timers active dont even check
-                        qt_done_talking = self.command_manager.robo_timer.CheckTimer(speaking_timer)
+                    qt_done_talking = self.command_manager.robo_timer.CheckTimer(speaking_timer)
 
                     # highlight the box we want and draw it
                     self.highlight_block(events, target_rect=tut_rect, msg="", timer_complete=qt_done_talking)
