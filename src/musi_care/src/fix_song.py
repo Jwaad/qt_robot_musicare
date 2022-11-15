@@ -346,7 +346,9 @@ class Fix_The_Song_Game():
             0: ("music_segment_play_grey.png", "music_segment_pause_grey.png"),
             1: ("music_segment_play_blue.png", "music_segment_pause_blue.png"),
             2: ("music_segment_play_orange.png", "music_segment_pause_orange.png"),
-            3: ("music_segment_play_purple.png", "music_segment_pause_purple.png")
+            3: ("music_segment_play_purple.png", "music_segment_pause_purple.png"),
+            4: ("music_segment_play_green.png", "music_segment_pause_green.png"),
+            5: ("music_segment_play_pink.png", "music_segment_pause_pink.png")
         }
 
         # Get each segment position
@@ -360,7 +362,7 @@ class Fix_The_Song_Game():
             colour_same = True
             # Keep shuffling until we get a colour different from the last.
             while colour_same:
-                seg_colour = self.segment_graphics[random.randint(1, 3)]  # Ignore grey
+                seg_colour = self.segment_graphics[random.randint(1, 5)]  # Ignore grey
                 if seg_colour != prev_colour:
                     colour_same = False
                 print(seg_colour)
