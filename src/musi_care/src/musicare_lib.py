@@ -400,6 +400,31 @@ class StandardLevels():
             return True
 
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Text objects~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class TextObject():
+
+    def __init__(self,window, window_center, text, location=None, cen_x = False, cen_y=False, font_size=30, font_colour=(255,255,255)):
+        self.window = window
+        self.font = pygame.font.Font('freesansbold.ttf', font_size)
+        self.text = self.font.render(text, False, font_colour)
+        self.textRect = self.text.get_rect()
+        if location != None:
+            self.set_pos(location)
+        if cen_x:
+            self.textRect[0] = window_center[0] - (self.textRect[2]/2)
+        if cen_y:
+            self.textRect[1] = window_center[1] - (self.textRect[3]/2)
+        self.type = "TextObject"
+
+    def render(self, window):
+        """handle drawing text"""
+        self.window.blit(self.text, self.textRect)
+
+    def set_pos(self, pos):
+        self.textRect[0] = pos[0]
+        self.textRect[1] = pos[1]
+
 #####################################################Renderer##################################################################
 
 class Renderer():
@@ -812,6 +837,7 @@ class Button():
         else:
             self.id = unique_id
         self.return_info = return_info
+        self.type = "Button"
 
     def render(self, screen, grey=False):
         """Draw button onto given screen, either as greyscale or coloured"""
@@ -881,6 +907,7 @@ class ToggleButton():
             self.id = rospy.get_time()  # unique ID for each button based on time when made
         else:
             self.id = unique_id
+        self.type = "ToggleButton"
 
     def render(self, screen, grey=False):
         """Draw image onto screen"""
@@ -970,6 +997,7 @@ class PausePlayButton():
             self.id = rospy.get_time()  # unique ID for each button based on time when made
         else:
             self.id = unique_id
+        self.type = "PausePlayButton"
 
     def render(self, screen, grey=False):
         """Draw image onto screen"""
@@ -1069,6 +1097,7 @@ class DraggableButton():
         self.when_toggle_on = when_toggle_on
         self.when_toggle_off = when_toggle_off
         self.mouse_is_held = False
+        self.type = "DraggableButton"
 
     def render(self, screen, grey=False):
         """Draw image onto screen"""
@@ -1162,6 +1191,7 @@ class HorizontalSlider():
         self.slider_range = (slider_min, slider_max)  # min and max including space to left of bar
         self.on_click = on_click
         self.on_release = on_release
+        self.type = "HorizontalSlider"
 
     def render(self, screen, progress, grey=False):
         """Draw slider, cursor and progress bar onto screen """

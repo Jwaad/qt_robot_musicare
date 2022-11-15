@@ -26,7 +26,7 @@ from musicare_lib import Renderer
 from musicare_lib import HorizontalSlider
 from musicare_lib import StandardLevels
 from musicare_lib import Behaviours
-
+from musicare_lib import TextObject
 
 #################################################################Initialise#################################################################
 
@@ -268,6 +268,12 @@ class Fix_The_Song_Game():
         slider = HorizontalSlider(slider_path, cursor_path, x_y_locations, scale, on_click, on_release)
         return slider
 
+    def create_text(self,window, window_center, text, location=None, cen_x=False, cen_y=False, font_size=30,
+               font_colour=(255, 255, 255)):
+        text_object = TextObject(window, window_center, text, location=location, cen_x=cen_x, cen_y=cen_y, font_size=font_size,
+               font_colour=font_colour)
+        return text_object
+
     def update_graphics(self, given_half, draggable_buttons, main_buttons):
         """Redraw graphics """
         self.renderer.DrawBackground(self.background_colour)
@@ -414,7 +420,7 @@ class Fix_The_Song_Game():
         loading_button = self.create_button("loading_screen_button_depressed.png", "loading_screen_button_depressed.png",
                                            (270, 550), scale=2.3)
         # Create unknown button slots and have them scale according to how many there is
-        unknown_y = 200
+        unknown_y = 150
         unknown_slots = []
         # Create the segments we need
         for i in range(num_correct_slots):
@@ -431,6 +437,8 @@ class Fix_The_Song_Game():
             seg.set_pos((unknown_x, unknown_y))
             seg.set_info( {"pos":i} ) # Store the order of the unknown segments in the button
             i += 1
+
+        # TODO add text objects into here
 
         return randomised_segments, loading_button, unknown_slots
 
@@ -462,21 +470,13 @@ class Fix_The_Song_Game():
         if self.debug:
             self.renderer.DrawText(fps, (70, 50), font_size=30)  # draw fps
 
-    def get_target_behaviour(self, key, given_half, draggable_buttons, main_buttons):
-        """tells our tut what to draw and what to do with events"""
-        target_graphics = []
-        target_event_handler = None
-        if key == 2:  # given seg
-            target_graphics = [functools.partial(given_half.render, self.window)]  # given_half.render(self.window)
-        elif key == 3:  # segs
-            target_graphics = []
-            for key in draggable_buttons:
-                graphic = functools.partial(draggable_buttons[key].render, self.window, )
-                target_graphics.append(graphic)
-        elif key == 4:  # song slot
-            target_graphics = [functools.partial(main_buttons[1].render, self.window)]
-
-        return target_graphics, target_event_handler  # if our logic sifts failed
+    def render_target_graphics(self, window, graphics, key):
+        """draw graphics if they match the key"""
+        #render graphics 1 by 1, only if they match the key
+        for i in range(len(graphics)):
+            if (i+1) in key:
+                graphics[i].render(window)
+        # print(i)
 
     #######################################################Level / screen code###############################################################
 
@@ -485,31 +485,18 @@ class Fix_The_Song_Game():
 
         # String of our keys so i can remember them
         """
-        1 = top text 
-        2 = given seg
-        3 = instructions
-        4 = the box behind segs
-        5 = Slots for segs to go in
-        6 & 7 = segs
+        1 = basket 
+        2 - 3 = song slots
+        4 - 5 = song segs
         """
-
-        # Create rect to highlight and text for QT to say
-        # (250, 400, 2600-250, 650-400) #slider rect
-        # TODO ADD MORE TO THIS -->
-        # Lets try it now: listen to song --> this sounds happy to me. --> lets click "happy" --> highlight happy --> wait for press
         tut_graphics = {
             1: {"rect": None, "keys": [1, 2, 3, 4, 5, 6, 7],
-                "speech": "To play this game, first you will hear music... I will let you listen to it in full... After that I will split the song into 2 parts... Then you will need to find the correct pieces and put them back together..."},
-            # given rect
-            2: {"rect": (1100, 100, 300, 350), "keys": [1, 3, 4, 5, 6, 7],
-                "speech": "I have already given you the first half of the song... Click on it to play it and remind yourself of what the song sounds like."},
-            # segs
-            3: {"rect": (550, 750, 1050, 450), "keys": [1, 2, 3, 4, 5],
-                "speech": "These are the segments... Click on them once to listen to them. Only 1 of these is the correct answer, so listen to them all to figure out which is correct!"},
-            # Song slot
-            4: {"rect": (1350, 100, 400, 350), "keys": [1, 2, 3, 4, 5, 6, 7],
-                "speech": "This box is called the song slot... Once you have found the correct segment, drag it into this box to complete the level..."},
-            5: {"rect": None, "keys": [1, 2, 3, 4, 5, 6, 7], "speech": "That is everything for Fix the song! Have fun!"}
+                "speech": "To play this game, first you will hear music... I will let you listen to it in full... After that I will split the song into parts... Then you will need to find the correct pieces and put them back together..."},
+            2: {"rect": (1100, 100, 300, 350), "keys": [2, 3],
+                "speech": "These are the slots where the pieces of the songs need to go... Find the correct segments and drag them here... In the right order to complete the level...."},
+            3: {"rect": (550, 750, 1050, 450), "keys": [1, 4, 5],
+                "speech": "These are the segments... Click on them once to listen to them. I might put some in there to confuse you... so make sure to listen to them all!"},
+            4: {"rect": None, "keys": [1, 2, 3, 4, 5], "speech": "That is everything for Fix the song! Have fun!"}
         }
 
         # Get the level's data
@@ -521,29 +508,48 @@ class Fix_The_Song_Game():
         # Create graphics and buttons
         segments, num_correct_segs = self.create_segments(self.segment_num, self.track_name, self.distract_song)
         randomised_segments, loading_button, unknown_slots = self.create_graphics(segments, num_correct_segs)
+        top_text = self.create_text(self.window, self.window_center, "Put the song back together", cen_x=True, font_size=90)
+        middle_text = self.create_text(self.window, self.window_center, "Drag the pieces into the slots", location=[0,680], cen_x=True, font_size=90)
 
-        while self.run:
+        texts = [top_text, middle_text]
+        if self.run:
 
-            # Render graphics
-            self.renderer.DrawBackground(self.background_colour)
-            loading_button.render(self.window, grey=False)
-            for segment in randomised_segments:
-                segment.render(self.window, grey=False)
-            for slot in unknown_slots:
-                slot.render(self.window, grey=False)
-            self.animation_manager.DrawTouchAnimation(self.window)
+            key = 1
+            while key <= len(tut_graphics.keys()) and not rospy.is_shutdown() and self.run:
+                #print(key)
+                tut_key = tut_graphics[key]["keys"]  # draw grey graphics of everything except for our focused graphic
+                tut_speech = tut_graphics[key]["speech"]
+                tut_rect = tut_graphics[key]["rect"]
+                #speaking_timer = self.command_manager.qt_say(tut_speech)  # QT should say text out loud
+                qt_finished_talking = False  # Hold execution until user clicks somewhere
 
-            # Handle events
-            events = self.pygame.event.get()
-            for event in events:
-                mouse_pos = self.pygame.mouse.get_pos()
-                # print(mouse_pos)#TEMP
-                if event.type == self.pygame.QUIT:
-                    self.run = False  # Stops the program entirely
-                if event.type == self.pygame.MOUSEBUTTONUP:  # on mouse release play animation to show where cursor is
-                    self.animation_manager.StartTouchAnimation(mouse_pos)  # play animation
+                #while next button not pressed # TODO ADD THIS LOGIC
+                # Render graphics
+                graphics = [loading_button] + randomised_segments + unknown_slots + texts
+                self.renderer.DrawBackground(self.background_colour)
+                self.render_target_graphics(self.window,graphics,tut_key)
+                self.animation_manager.DrawTouchAnimation(self.window)
+                if qt_finished_talking:
+                    pass # TODO add rendering of next and repeat buttons here
 
-            self.pygame.display.update()  # Update all drawn objects
+                # Handle events
+                events = self.pygame.event.get()
+                for event in events:
+                    mouse_pos = self.pygame.mouse.get_pos()
+                    # print(mouse_pos) #TEMP
+                    if event.type == self.pygame.QUIT:
+                        self.run = False  # Stops the program entirely
+                    if event.type == self.pygame.MOUSEBUTTONUP:  # On mouse release play animation to show where cursor is
+                        self.animation_manager.StartTouchAnimation(mouse_pos)  # Play animation
+                    if event.type == pygame.KEYDOWN :
+                        if event.key == pygame.K_RIGHT:
+                            key += 1 # TODO replace this with next button
+                        elif event.key == pygame.K_LEFT:
+                            key -= 1 #TODO remove this, have key not change on back button
+
+                #qt_finished_talking = self.command_manager.robo_timer.CheckTimer(speaking_timer)
+
+                self.pygame.display.update()  # Update all drawn objects
 
         """
         if self.run:

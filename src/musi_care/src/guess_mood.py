@@ -453,11 +453,7 @@ class Guess_The_Mood_Game():
                         target_event(events) #render the target graphic
                         
                     #Check if QT is done talking
-                    if len(self.command_manager.robo_timer.get_timers()) > 0: #if there's no timers active dont even check
-                        qt_finished_talking = self.command_manager.robo_timer.CheckTimer(speaking_timer)
-                    else:
-                        qt_finished_talking = True
-                    
+                    qt_finished_talking = self.command_manager.robo_timer.CheckTimer(speaking_timer)
                     self.pygame.display.update() #Update all drawn objects
 
                 #Either replay the same instruction, or move onto the next
