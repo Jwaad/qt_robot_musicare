@@ -605,7 +605,7 @@ class Fix_Song_Game():
         song_segment_y = 550
         song_half = self.CreateToggleButton(self.segment_graphics[2][0], self.segment_graphics[2][1], (song_segment_y,90),return_info =correct_segments[0],  when_toggle_on = self.play_seg_track(correct_segments[0]), when_toggle_off = self.stop_seg_track(correct_segments[0]))
         song_unknown = self.CreateButton( "music_segment_greyed_out.png", "music_segment_greyed_out.png",(song_segment_y+150,90)) #TODO make this auto scale and spawn according to difficulty
-        #play_button = self.CreateToggleButton("play_button.png","pause_button.png",(song_segment_y+250,130))
+        #play_button = self.create_toggle_button("play_button.png","pause_button.png",(song_segment_y+250,130))
         check_button = self.CreateButton("check_button.png", "check_button.png", (song_segment_y+350,130))
         main_buttons = [loading_button, song_unknown] #list of buttons so we can easier render them
         

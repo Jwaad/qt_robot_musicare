@@ -428,6 +428,7 @@ class Guess_The_Mood_Game():
                         self.tut_repeat.set_pos((900, 1100))
                         for button in tut_buttons:
                             button.render(self.window)
+
                     #Handle events
                     events = self.pygame.event.get()
                     mouse_pos = self.pygame.mouse.get_pos()

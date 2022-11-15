@@ -704,11 +704,11 @@ class QTManager():
         return timer_id
 
     def qt_gesture(self, req_gesture):
-        """Make QT do gesture, non blocking """
+        """Make QT do gesture, non-blocking """
         self.send_qt_command(gesture=req_gesture)
 
     def qt_emote(self, req_emote):
-        """Make QT emote, non blocking"""
+        """Make QT emote, non-blocking"""
         self.send_qt_command(emote=req_emote)
 
 
@@ -788,7 +788,7 @@ class Button():
     class used for the generation and management of buttons
     """
 
-    def __init__(self, image_path, image_greyscale_path, x_y_locations, pygame, scale=1, unique_id="", on_click=object,
+    def __init__(self, image_path, image_greyscale_path, x_y_locations, pygame, return_info ={}, scale=1, unique_id="", on_click=object,
                  on_release=object):
 
         if not os.path.exists(image_path):
@@ -811,6 +811,7 @@ class Button():
             self.id = rospy.get_time()  # unique ID for each button based on time when made
         else:
             self.id = unique_id
+        self.return_info = return_info
 
     def render(self, screen, grey=False):
         """Draw button onto given screen, either as greyscale or coloured"""
@@ -834,6 +835,9 @@ class Button():
         """Takes a list of (x,y) and sets rect"""
         self.rect[0] = newpos[0]
         self.rect[1] = newpos[1]
+
+    def set_info(self, info):
+        self.return_info = info
 
     def get_rect(self):
         """returns object rect"""
@@ -1036,7 +1040,7 @@ class DraggableButton():
     """Class to load images that serve as buttons that can be dragged and dropped """
 
     def __init__(self, image_path, toggled_image_path, default_image_grey, toggled_image_grey, x_y_locations, pygame,
-                 scale=1, return_info="", when_toggle_on=object, when_toggle_off=object):
+                 scale=1, return_info={}, when_toggle_on=object, when_toggle_off=object):
         self.pygame = pygame
 
         # load images
@@ -1081,7 +1085,7 @@ class DraggableButton():
                 screen.blit(self.image, self.rect)
         return screen
 
-    def store_info(self, info):
+    def set_info(self, info):
         """Stores info into correct attribute"""
         self.return_info = info
 
