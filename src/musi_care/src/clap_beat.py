@@ -70,7 +70,7 @@ class Clap_To_Beat_Game():
         self.t1 = 0  # t1 for FPS tracking
         self.debug = True
 
-    #############################################################Low level methods###########################################################
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Low level methods~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def get_song_database(self):
         """Read the database file and get the levels data"""

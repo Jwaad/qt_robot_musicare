@@ -66,7 +66,7 @@ class General():
         #/user_saves
 
 
-######################################################DragableButton#################################################################
+######################################################DraggableButton#################################################################
 
 class Behaviours():
     """Class to store and return saved / repeatable behaviours other than builtin with QT"""
@@ -1006,7 +1006,7 @@ class PausePlayButton():
         
 ######################################################DragableButton#################################################################
 
-class DragableButton():
+class DraggableButton():
     """Class to load images that serve as buttons that can be dragged and dropped """
     
     def __init__(self, image_path, toggled_image_path, default_image_grey, toggled_image_grey, x_y_locations, pygame, scale=1, return_info="", when_toggle_on=object, when_toggle_off=object):
@@ -1054,7 +1054,7 @@ class DragableButton():
         return screen
 
     def store_info(self, info):
-        """Stores info into correct attribute """
+        """Stores info into correct attribute"""
         self.return_info = info
     
     def toggle_toggle(self):
@@ -1067,6 +1067,11 @@ class DragableButton():
         
         return (self.toggle)
     
+    def set_pos(self, newpos):
+        """Takes a list of (x,y) and sets rect"""
+        self.rect[0] = newpos[0]
+        self.rect[1] = newpos[1]
+        
     def get_event(self, event, mouse_pos):
         """Button event handle, if mouse release, then toggle"""
         mouse_on_button = self.rect.collidepoint(mouse_pos)
