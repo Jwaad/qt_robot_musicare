@@ -355,8 +355,17 @@ class Fix_The_Song_Game():
 
         # Make objects of correct segments
         i = 1  # pos in correct segs
+        prev_colour = 0
         for song_path in correct_segments:
-            seg_colour = self.segment_graphics[random.randint(1, 3)]  # Ignore grey
+            colour_same = True
+            # Keep shuffling until we get a colour different from the last.
+            while colour_same:
+                seg_colour = self.segment_graphics[random.randint(1, 3)]  # Ignore grey
+                if seg_colour != prev_colour:
+                    colour_same = False
+                print(seg_colour)
+            prev_colour = seg_colour
+
             button_grey = self.segment_graphics[0][0]
             seg_pos = [0, 0]  # Default pos, this will be changed later
             seg_data = {
