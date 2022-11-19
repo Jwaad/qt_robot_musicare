@@ -172,7 +172,7 @@ class Guess_The_Mood_Game():
         return str(mins), str(secs)
 
 
-    def CreateButton(self,file_name, alt_file_name, location,return_info = {},  scale=1, unique_id=""):
+    def create_button(self,file_name, alt_file_name, location,return_info = {},  scale=1, unique_id=""):
         """code creates button using the button_image class."""
         this_file_path = os.path.dirname(__file__)
         relative_path = 'game_assets/graphics'
@@ -294,9 +294,9 @@ class Guess_The_Mood_Game():
     
     def create_graphics(self):
         """Create the pygame objects that we will use """
-        self.sad_button = self.CreateButton("sad_button.png", "sad_button_depressed.png", (675,650), scale=1.3, unique_id="sad") 
-        self.happy_button = self.CreateButton("happy_button.png", "happy_button_depressed.png", (675,1050), scale=1.3, unique_id="happy") 
-        self.unsure_button = self.CreateButton("unsure_button.png", "unsure_button_depressed.png", (850,1450), scale=1, unique_id = "unsure") 
+        self.sad_button = self.create_button("sad_button.png", "sad_button_depressed.png", (675,650), scale=1.3, unique_id="sad")
+        self.happy_button = self.create_button("happy_button.png", "happy_button_depressed.png", (675,1050), scale=1.3, unique_id="happy")
+        self.unsure_button = self.create_button("unsure_button.png", "unsure_button_depressed.png", (850,1450), scale=1, unique_id = "unsure")
         self.play_button = self.CreatePlayButton("pause_button.png", "pause_button_grey.png", "play_button.png",  "play_button_grey.png", "rewind_button.png", "rewind_button_grey.png", (self.cen_x-175, 195), scale = 1.5, on_play= self.sound_manager.unpause , on_pause = self.sound_manager.pause) #create pause and play button
         
         
@@ -343,8 +343,22 @@ class Guess_The_Mood_Game():
             self.command_manager.send_qt_command(emote = "happy", gesture = "nod")
             qt_message = (self.behaviours_manager.get_agreements()) #QT reads out level's hint
         #print(time_taken, wrong_answers, hints_needed)
-        
-    
+
+    def draw_tut_options(self, arrow_rect):
+        """ Using arrow rect, decide where tut buttons should be drawn"""
+        arrow_x = arrow_rect[0]
+        arrow_y = arrow_rect[1]
+        # if arrow is too close to right edge of screen
+        if (arrow_x + 800) > self.window_x:
+            self.tut_next.set_pos((arrow_x - 600, arrow_y))
+            self.tut_repeat.set_pos((arrow_x - 600, arrow_y + 250))
+        # if arrow is too close to left edge of screen
+        elif (arrow_x - 800) < 0:
+            self.tut_next.set_pos((arrow_x + 400, arrow_y))
+            self.tut_repeat.set_pos((arrow_x + 400, arrow_y + 250))
+        else:
+            self.tut_next.set_pos((arrow_x + 450, arrow_y))
+            self.tut_repeat.set_pos((arrow_x - 600, arrow_y))
         
 #####################################################Level / screen code#################################################################
 
@@ -376,8 +390,8 @@ class Guess_The_Mood_Game():
         
             #Create buttons and slider
             self.create_graphics()
-            self.tut_next = self.CreateButton("tut_next.png", "tut_next.png", (0,0), scale=1.5, unique_id="next") 
-            self.tut_repeat = self.CreateButton("tut_repeat.png", "tut_repeat.png", (0,0), scale=1.5, unique_id="repeat") 
+            self.tut_next = self.create_button("tut_next.png", "tut_next.png", (0,0), scale=1.5, unique_id="next")
+            self.tut_repeat = self.create_button("tut_repeat.png", "tut_repeat.png", (0,0), scale=1.5, unique_id="repeat")
             
             #Group elements
             self.buttons = [self.sad_button, self.happy_button, self.unsure_button, self.play_button]
@@ -416,8 +430,7 @@ class Guess_The_Mood_Game():
                         arrow_rect = self.renderer.HighlightRect(tut_rect, self.pygame) #draw arrow and box 
                         #since the arrow keeps moving, take it's location once for the next and repeat buttons.
                         if key != prev_key:
-                            self.tut_next.set_pos((arrow_rect[0] + 500 , arrow_rect[1]))
-                            self.tut_repeat.set_pos((arrow_rect[0] - 600 , arrow_rect[1]))
+                            self.draw_tut_options(arrow_rect)
                             prev_key = key
                     if qt_finished_talking and tut_rect != None:
                         for button in tut_buttons:
@@ -436,7 +449,6 @@ class Guess_The_Mood_Game():
                         if event.type == self.pygame.QUIT:
                             self.run = False #Stops the program entirely
                             self.quit = True #Tells us that the game was quit out of, and it didn't end organically
-                            #self.sound_manager.stop_track() #Stop the music
                         if event.type == self.pygame.MOUSEBUTTONUP:  #on mouse release play animation to show where cursor is
                             self.animation_manager.StartTouchAnimation(mouse_pos) #play animation
                         #handle tut button events
