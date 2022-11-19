@@ -68,7 +68,7 @@ class Fix_The_Song_Game():
         self.command_manager = QTManager()
         self.renderer = Renderer(self.window, self.window_center)
         self.level_loader = StandardLevels(self.window, self.window_center, self.pygame, self.music_filepath)
-        self.segment_x_y = {0: (600, 800), 1: (1250, 800), 2: (1900, 800), 3: (600, 1500), 4: (1250, 1500),
+        self.segment_x_y = {0: (610, 800), 1: (1260, 800), 2: (1910, 800), 3: (600, 1500), 4: (1250, 1500),
                             5: (1900, 1500)}  # hard coded num locations of each segment
         self.sayings = Behaviours(self.pygame, self.music_filepath)
         self.t1 = 0  # t1 for FPS tracking
@@ -407,7 +407,7 @@ class Fix_The_Song_Game():
         return all_segs, len(correct_segments)
 
 
-    def create_graphics(self, segments, num_correct_slots):
+    def create_graphics(self, segments, num_correct_slots, single_out = False):
         """Create the pygame objects that we will use """
 
         # Randomise the positions of our buttons and change their pos
@@ -419,15 +419,15 @@ class Fix_The_Song_Game():
         # Create loading button
         loading_button = self.create_button("loading_screen_button_depressed.png", "loading_screen_button_depressed.png",
                                            (270, 550), scale=2.3)
+
         # Create unknown button slots and have them scale according to how many there is
         unknown_y = 150
         unknown_slots = []
-        # Create the segments we need
+        # Create the unknown slots we need
         for i in range(num_correct_slots):
             unknown_seg = self.create_button("music_segment_greyed_out.png", "music_segment_greyed_out.png", (
                 unknown_y, 0), scale = 2)
             unknown_slots.append(unknown_seg)
-
         # Change position of unknown slots
         step = (unknown_slots[0].get_rect()[2])  # step = width of slots
         starting_x = self.window_center[0] - (step * (len(unknown_slots) / 2) ) # the x of the left-most slot
@@ -438,9 +438,20 @@ class Fix_The_Song_Game():
             seg.set_info( {"pos":i} ) # Store the order of the unknown segments in the button
             i += 1
 
-        # TODO add text objects into here
+        # Create text objects
+        top_text = self.create_text(self.window, self.window_center, "Put the song back together", cen_x=True,
+                                    font_size=90)
+        middle_text = self.create_text(self.window, self.window_center, "Drag the pieces into the slots",
+                                       location=[0, 680], cen_x=True, font_size=90)
+        text_objs = [top_text, middle_text]
 
-        return randomised_segments, loading_button, unknown_slots
+        # Create help button
+        help_button = self.create_button("help_button.png", "help_button_grey.png", (2200, 100), scale=1,
+                                            unique_id="help")
+        if single_out:
+            return [loading_button] + randomised_segments + unknown_slots + text_objs + [help_button]
+        else:
+            return loading_button, randomised_segments, unknown_slots, text_objs, help_button
 
     def play_seg_track(self, song_path):
         """Uses the stored info attribute to play music on button press """
@@ -478,6 +489,22 @@ class Fix_The_Song_Game():
                 graphics[i].render(window)
         # print(i)
 
+    def draw_tut_options(self, arrow_rect):
+        """ Using arrow rect, decide where tut buttons should be drawn"""
+        arrow_x = arrow_rect[0]
+        arrow_y = arrow_rect[1]
+        # if arrow is too close to right edge of screen
+        if (arrow_x + 800) > self.window_x:
+            self.tut_next.set_pos((arrow_x - 600, arrow_y))
+            self.tut_repeat.set_pos((arrow_x - 600, arrow_y + 250))
+        # if arrow is too close to left edge of screen
+        elif (arrow_x - 800) < 0:
+            self.tut_next.set_pos((arrow_x + 400, arrow_y))
+            self.tut_repeat.set_pos((arrow_x + 400, arrow_y + 250))
+        else:
+            self.tut_next.set_pos((arrow_x + 450, arrow_y))
+            self.tut_repeat.set_pos((arrow_x - 600, arrow_y))
+
     #######################################################Level / screen code###############################################################
 
     def guided_tut(self):
@@ -485,18 +512,32 @@ class Fix_The_Song_Game():
 
         # String of our keys so i can remember them
         """
-        1 = basket 
+        1 = basket
         2 - 3 = song slots
         4 - 5 = song segs
+        6 = Top text
+        7 = Middle text
+        8 = help button
         """
         tut_graphics = {
-            1: {"rect": None, "keys": [1, 2, 3, 4, 5, 6, 7],
-                "speech": "To play this game, first you will hear music... I will let you listen to it in full... After that I will split the song into parts... Then you will need to find the correct pieces and put them back together..."},
-            2: {"rect": (1100, 100, 300, 350), "keys": [2, 3],
-                "speech": "These are the slots where the pieces of the songs need to go... Find the correct segments and drag them here... In the right order to complete the level...."},
-            3: {"rect": (550, 750, 1050, 450), "keys": [1, 4, 5],
-                "speech": "These are the segments... Click on them once to listen to them. I might put some in there to confuse you... so make sure to listen to them all!"},
-            4: {"rect": None, "keys": [1, 2, 3, 4, 5], "speech": "That is everything for Fix the song! Have fun!"}
+            1: {"rect": None, "keys": [1, 2, 3, 4, 5, 6, 7, 8],
+                "speech": "To play this game, first you will hear music... I will let you listen to it in full..."
+                          " After that I will split the song into parts... Then you will need to find the correct "
+                          "pieces and put them back together..."},
+            2: {"rect": (800, 0, 1235, 100), "keys": [6],
+                "speech": "This is a reminder of what you have to do."},
+            3: {"rect": (1075, 125, 700, 350), "keys": [4, 5],
+                "speech": "These are the slots where the pieces of the songs need to go..."
+                          " Find the correct segments and drag them here... In the right order to"
+                          " complete the level...."},
+            4: {"rect": (770, 670, 1310, 110), "keys": [7],
+                "speech": "This is another reminder of what you have to do."},
+            5: {"rect": (550, 780, 1050, 350), "keys": [2, 3],
+                "speech": "These are the segments... Click on them once to listen to them. I might put some in there "
+                          "to confuse you... so make sure to listen to them all!"},
+            6: {"rect": (2150, 50, 500, 475), "keys": [8], "speech": "This is the help button... Click this if you dont"
+                                                                      "know which song piece is the right one."},
+            7: {"rect": None, "keys": [1, 2, 3, 4, 5, 6, 7, 8], "speech": "That is everything for Fix the song! Have fun!"}
         }
 
         # Get the level's data
@@ -507,107 +548,87 @@ class Fix_The_Song_Game():
 
         # Create graphics and buttons
         segments, num_correct_segs = self.create_segments(self.segment_num, self.track_name, self.distract_song)
-        randomised_segments, loading_button, unknown_slots = self.create_graphics(segments, num_correct_segs)
-        top_text = self.create_text(self.window, self.window_center, "Put the song back together", cen_x=True, font_size=90)
-        middle_text = self.create_text(self.window, self.window_center, "Drag the pieces into the slots", location=[0,680], cen_x=True, font_size=90)
+        graphics = self.create_graphics(segments, num_correct_segs, single_out=True)
+        self.tut_next = self.create_button("tut_next.png", "tut_next.png", (0, 0), scale=1.5, unique_id="next")
+        self.tut_repeat = self.create_button("tut_repeat.png", "tut_repeat.png", (0, 0), scale=1.5, unique_id="repeat")
 
-        texts = [top_text, middle_text]
+        # Group graphics for easier processing
+        tut_buttons = [self.tut_next, self.tut_repeat]
+
         if self.run:
 
             key = 1
             while key <= len(tut_graphics.keys()) and not rospy.is_shutdown() and self.run:
-                #print(key)
-                tut_key = tut_graphics[key]["keys"]  # draw grey graphics of everything except for our focused graphic
+                #Get tut info for this section
+                tut_key = tut_graphics[key]["keys"]  # Draw grey graphics of everything except for our focused graphic
                 tut_speech = tut_graphics[key]["speech"]
                 tut_rect = tut_graphics[key]["rect"]
-                #speaking_timer = self.command_manager.qt_say(tut_speech)  # QT should say text out loud
+
+                #reset vars
                 qt_finished_talking = False  # Hold execution until user clicks somewhere
-
-                #while next button not pressed # TODO ADD THIS LOGIC
-                # Render graphics
-                graphics = [loading_button] + randomised_segments + unknown_slots + texts
-                self.renderer.DrawBackground(self.background_colour)
-                self.render_target_graphics(self.window,graphics,tut_key)
-                self.animation_manager.DrawTouchAnimation(self.window)
-                if qt_finished_talking:
-                    pass # TODO add rendering of next and repeat buttons here
-
-                # Handle events
-                events = self.pygame.event.get()
-                for event in events:
-                    mouse_pos = self.pygame.mouse.get_pos()
-                    # print(mouse_pos) #TEMP
-                    if event.type == self.pygame.QUIT:
-                        self.run = False  # Stops the program entirely
-                    if event.type == self.pygame.MOUSEBUTTONUP:  # On mouse release play animation to show where cursor is
-                        self.animation_manager.StartTouchAnimation(mouse_pos)  # Play animation
-                    if event.type == pygame.KEYDOWN :
-                        if event.key == pygame.K_RIGHT:
-                            key += 1 # TODO replace this with next button
-                        elif event.key == pygame.K_LEFT:
-                            key -= 1 #TODO remove this, have key not change on back button
-
-                #qt_finished_talking = self.command_manager.robo_timer.CheckTimer(speaking_timer)
-
-                self.pygame.display.update()  # Update all drawn objects
-
-        """
-        if self.run:
-
-            # Get the level's data
-            level_data = self.music_data["tut"][1]  # load tut song data
-            self.track_name = level_data["song_name"]
-            self.distract_song = level_data["distract_song"]  # will be None or a list of songs
-            self.segment_num = int(level_data["seg_num"])  # split song into this many segs
-
-            segments, num_correct_segs  = self.create_segments(self.segment_num, self.track_name, self.distract_song)
-            randomised_segments, loading_button, unknown_slots = self.create_graphics(segments, num_correct_segs)
-
-            # loop through each graphic that we care about
-            for key in tut_graphics.keys():
-                # Define some variables for the tut sequence
-                tut_key = tut_graphics[key]["keys"]  # draw grey graphics of everything except for our focused graphic
-                tut_speech = tut_graphics[key]["speech"]
-                tut_rect = tut_graphics[key]["rect"]
                 speaking_timer = self.command_manager.qt_say(tut_speech)  # QT should say text out loud
-                qt_done_talking = False  # Hold execution until user clicks somewhere
+                option_chosen = False # If user clicks next or repeat
+                repeat_instruction = False
+                prev_key = key - 1
 
-                # set logic based on what graphic we focus on
-                target_graphics, target_event = self.get_target_behaviour(key, given_half, draggable_buttons,
-                                                                          main_buttons)
-
-                while not qt_done_talking and not rospy.is_shutdown() and self.run:
-
-                    grey_graphics = self.update_grey_graphics(given_half, draggable_buttons,
-                                                              main_buttons)  # update all grey graphics
+                while not option_chosen and not rospy.is_shutdown() and self.run:
 
                     # Render graphics
-                    self.renderer.DrawBackground(self.background_colour)  # draw background
-                    self.load_list_graphics(grey_graphics, tut_key)  # load specified grey objects
-                    if target_graphics != []:
-                        for graphic in target_graphics:  # Render the target graphic
-                            graphic()  # Render graphics each
-                    self.animation_manager.DrawTouchAnimation(self.window)  # Draw touch animation
+                    self.renderer.DrawBackground(self.background_colour)
+                    self.render_target_graphics(self.window,graphics,tut_key)
+                    self.animation_manager.DrawTouchAnimation(self.window)
+                    #render the arrow and get it's pos
+                    if tut_rect != None:
+                        arrow_rect = self.renderer.HighlightRect(tut_rect, self.pygame) #draw arrow and box
+                        #since the arrow keeps moving, take it's location once for the next and repeat buttons.
+                        if key != prev_key:
+                            self.draw_tut_options(arrow_rect)
+                            prev_key = key
+                    if qt_finished_talking and tut_rect != None:
+                        for button in tut_buttons:
+                            button.render(self.window)
+                    # if there's no box highlighted, draw the buttons in a default pos
+                    elif qt_finished_talking and tut_rect == None:
+                        self.tut_next.set_pos((1540, 1200))
+                        self.tut_repeat.set_pos((840, 1200))
+                        for button in tut_buttons:
+                            button.render(self.window)
 
                     # Handle events
                     events = self.pygame.event.get()
                     for event in events:
-                        # print(self.pygame.mouse.get_pos())#TEMP
+                        mouse_pos = self.pygame.mouse.get_pos()
+                        # print(mouse_pos) #TEMP
                         if event.type == self.pygame.QUIT:
                             self.run = False  # Stops the program entirely
                             self.quit = True  # Tells us that the game was quit out of, and it didn't end organically
-                    if target_event != None:
-                        target_event(events)  # render the target graphic
-                        pass
+                        if event.type == self.pygame.MOUSEBUTTONUP:  # On mouse release play animation to show where cursor is
+                            self.animation_manager.StartTouchAnimation(mouse_pos)  # Play animation
+                        # Keyboard override for testing NOTE: this wont work unless you comment out the timer check
+                        if event.type == pygame.KEYDOWN :
+                            if event.key == pygame.K_RIGHT:
+                                qt_finished_talking = True
+                            elif event.key == pygame.K_LEFT:
+                                qt_finished_talking = False
 
-                    # Check for when QT is done speaking_continue
-                    qt_done_talking = self.command_manager.robo_timer.CheckTimer(speaking_timer)
-
-                    # highlight the box we want and draw it
-                    self.highlight_block(events, target_rect=tut_rect, msg="", timer_complete=qt_done_talking)
-
+                        #Detect button presses from buttons only after qt finishes speaking
+                        if qt_finished_talking:
+                            for button in tut_buttons:
+                                button_pressed = button.get_event(event, mouse_pos)
+                                if button_pressed:
+                                    option_chosen = True #so we can choose when this goes to false
+                                if button_pressed:
+                                    button_pressed_id = button.id #get which button was pressed
+                                    if button_pressed_id == "repeat":
+                                        repeat_instruction = True
+                    # TODO uncomment this
+                    #qt_finished_talking = self.command_manager.robo_timer.CheckTimer(speaking_timer)
                     self.pygame.display.update()  # Update all drawn objects
-        """
+
+                #If they wanted to repeat it, run the same loop again, otherwise move on
+                if not repeat_instruction:
+                    key+=1
+
 
     def play_music_blocking(self, difficulty, level):
         """Level with just music player"""
@@ -618,7 +639,7 @@ class Fix_The_Song_Game():
             self.track_name = level_data["song_name"]
 
             # Create buttons
-            self.next_button = self.CreateButton("next_button.png", "next_button_grey.png", (self.cen_x - 300, 1200),
+            self.next_button = self.create_button("next_button.png", "next_button_grey.png", (self.cen_x - 300, 1200),
                                                  scale=1)
             self.play_button = self.create_play_button("pause_button.png", "pause_button_grey.png", "play_button.png",
                                                      "play_button_grey.png", "rewind_button.png",
