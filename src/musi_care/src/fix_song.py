@@ -53,7 +53,6 @@ class Fix_The_Song_Game():
         self.background_colour = (100, 100, 100)  # background black by default
         self.pygame.display.set_caption("Fix The Song!")  # Label window
         self.run = True
-        # self.pygame.mouse.set_visible(False) #set to false when not testing
         self.quit = False  # Check to see if the game ended or it was quit
         self.track_playing = False
         self.previous_track_data = None
@@ -68,11 +67,13 @@ class Fix_The_Song_Game():
         self.command_manager = QTManager()
         self.renderer = Renderer(self.window, self.window_center)
         self.level_loader = StandardLevels(self.window, self.window_center, self.pygame, self.music_filepath)
-        self.segment_x_y = {0: (610, 800), 1: (1260, 800), 2: (1910, 800), 3: (600, 1500), 4: (1250, 1500),
-                            5: (1900, 1500)}  # hard coded num locations of each segment
+        self.segment_x_y = {0: (610, 850), 1: (1260, 850), 2: (1910, 850), 3: (610, 1400), 4: (1260, 1400),
+                            5: (1910, 1400)}  # hard coded num locations of each segment
         self.sayings = Behaviours(self.pygame, self.music_filepath)
         self.t1 = 0  # t1 for FPS tracking
         self.debug = True
+        if not self.debug:
+            self.pygame.mouse.set_visible(False) #set to false when not testing
         # self.music_vol = 1 # change volume of laptop
         # self.qt_voice_vol
         # self.sound_manager.volume_change(self.music_vol) # Set a default volume
@@ -225,7 +226,7 @@ class Fix_The_Song_Game():
         # default_image_path, toggled_image_path, default_image_grey, toggled_image_grey, x_y_locations, pygame, scale=1, unique_id = "", return_info="", when_toggle_on=object, when_toggle_off=object
 
     def create_drag_button(self, file_name, alt_file_name, file_grey, alt_file_grey, location, scale=2, return_info={},
-                           when_toggle_on=object, when_toggle_off=object):
+                           when_toggle_on=object, when_toggle_off=object, unique_id=""):
         """code creates button using the button_image class."""
         this_file_path = os.path.dirname(__file__)
         relative_path = 'game_assets/graphics'
@@ -236,7 +237,7 @@ class Fix_The_Song_Game():
 
         button = DraggableButton(file_path, alt_path, file_path_grey, alt_path_grey, location, self.pygame, scale,
                                  return_info=return_info, when_toggle_on=when_toggle_on,
-                                 when_toggle_off=when_toggle_off)
+                                 when_toggle_off=when_toggle_off, unique_id=unique_id)
         return (button)
 
     def create_play_button(self, file_name, alt_file_name, file_grey, alt_file_grey, rewind_name, rewind_name_grey,
@@ -371,7 +372,7 @@ class Fix_The_Song_Game():
                 seg_colour = self.segment_graphics[random.randint(1, 5)]  # Ignore grey
                 if seg_colour != prev_colour:
                     colour_same = False
-                print(seg_colour)
+                #print(seg_colour)
             prev_colour = seg_colour
 
             button_grey = self.segment_graphics[0][0]
@@ -449,9 +450,9 @@ class Fix_The_Song_Game():
         help_button = self.create_button("help_button.png", "help_button_grey.png", (2200, 100), scale=1,
                                             unique_id="help")
         if single_out:
-            return [loading_button] + randomised_segments + unknown_slots + text_objs + [help_button]
+            return [loading_button] +  unknown_slots + text_objs + [help_button] + randomised_segments
         else:
-            return loading_button, randomised_segments, unknown_slots, text_objs, help_button
+            return loading_button, unknown_slots,  text_objs, help_button, randomised_segments
 
     def play_seg_track(self, song_path):
         """Uses the stored info attribute to play music on button press """
@@ -514,28 +515,29 @@ class Fix_The_Song_Game():
         """
         1 = basket
         2 - 3 = song slots
-        4 - 5 = song segs
-        6 = Top text
-        7 = Middle text
-        8 = help button
+        4 = Top text
+        5 = Middle text
+        6 = help button
+        7 - 8 = song segs
         """
+
         tut_graphics = {
             1: {"rect": None, "keys": [1, 2, 3, 4, 5, 6, 7, 8],
                 "speech": "To play this game, first you will hear music... I will let you listen to it in full..."
-                          " After that I will split the song into parts... Then you will need to find the correct "
-                          "pieces and put them back together..."},
-            2: {"rect": (800, 0, 1235, 100), "keys": [6],
+                " After that I will split the song into parts... Then you will need to find the correct "
+                "pieces and put them back together..."},
+            2: {"rect": (800, 0, 1235, 100), "keys": [4],
                 "speech": "This is a reminder of what you have to do."},
-            3: {"rect": (1075, 125, 700, 350), "keys": [4, 5],
+            3: {"rect": (1075, 125, 700, 350), "keys": [2, 3],
                 "speech": "These are the slots where the pieces of the songs need to go..."
                           " Find the correct segments and drag them here... In the right order to"
                           " complete the level...."},
-            4: {"rect": (770, 670, 1310, 110), "keys": [7],
+            4: {"rect": (770, 670, 1310, 110), "keys": [5],
                 "speech": "This is another reminder of what you have to do."},
-            5: {"rect": (550, 780, 1050, 350), "keys": [2, 3],
+            5: {"rect": (550, 830, 1050, 350), "keys": [7, 8],
                 "speech": "These are the segments... Click on them once to listen to them. I might put some in there "
                           "to confuse you... so make sure to listen to them all!"},
-            6: {"rect": (2150, 50, 500, 475), "keys": [8], "speech": "This is the help button... Click this if you dont"
+            6: {"rect": (2150, 50, 500, 475), "keys": [6], "speech": "This is the help button... Click this if you dont"
                                                                       "know which song piece is the right one."},
             7: {"rect": None, "keys": [1, 2, 3, 4, 5, 6, 7, 8], "speech": "That is everything for Fix the song! Have fun!"}
         }
@@ -610,7 +612,6 @@ class Fix_The_Song_Game():
                                 qt_finished_talking = True
                             elif event.key == pygame.K_LEFT:
                                 qt_finished_talking = False
-
                         #Detect button presses from buttons only after qt finishes speaking
                         if qt_finished_talking:
                             for button in tut_buttons:
@@ -621,8 +622,10 @@ class Fix_The_Song_Game():
                                     button_pressed_id = button.id #get which button was pressed
                                     if button_pressed_id == "repeat":
                                         repeat_instruction = True
-                    # TODO uncomment this
-                    #qt_finished_talking = self.command_manager.robo_timer.CheckTimer(speaking_timer)
+
+                    # Dont check if QT already finished talking
+                    if not qt_finished_talking:
+                        qt_finished_talking = self.command_manager.robo_timer.CheckTimer(speaking_timer)
                     self.pygame.display.update()  # Update all drawn objects
 
                 #If they wanted to repeat it, run the same loop again, otherwise move on
@@ -695,7 +698,7 @@ class Fix_The_Song_Game():
                         self.run = False  # Stops the program entirely
                         self.sound_manager.stop_track()
                     mouse_pos = self.pygame.mouse.get_pos()
-                    if event.type == self.pygame.MOUSEBUTTONUP:
+                    if event.type == self.pygame.MOUSEBUTTONDOWN:
                         self.animation_manager.StartTouchAnimation(mouse_pos)  # draw mouse click animation
                     # Check for button press
                     if music_ended:  # if music ended start checking for next press, otherwise ignore it
@@ -711,6 +714,64 @@ class Fix_The_Song_Game():
         """Sequence plays the levels"""
         if self.run:  # Dont start this screen if the previous screen wanted to close out the game
 
+            # Get the level's data
+            level_data = self.music_data[difficulty][level_num]
+            self.track_name = level_data["song_name"]
+            self.distract_song = level_data["distract_song"]  # will be None or a list of songs
+            self.segment_num = int(level_data["seg_num"])  # split song into this many segs
+            fps = "0"  # for debug info
+
+            # Create graphics and buttons
+            segments, num_correct_segs = self.create_segments(self.segment_num, self.track_name, self.distract_song)
+            loading_button, unknown_slots, text_objs, help_button, randomised_segments = self.create_graphics(
+                segments, num_correct_segs, single_out=False)
+
+            # Group graphics for easier rendering
+            graphics = [loading_button] + unknown_slots + text_objs + [help_button] + randomised_segments
+
+            reset_segs  = False # If we have just pressed the segment
+            currently_playing = "" # The ID of the segment playing music
+            song_restored = False
+            while not song_restored and not rospy.is_shutdown() and self.run:
+
+                # Render graphics
+                self.renderer.DrawBackground(self.background_colour)
+                for graphic in graphics:
+                    graphic.render(self.window)
+                self.animation_manager.DrawTouchAnimation(self.window)
+                self.pygame.display.update()  # Update all drawn objects
+
+                # Handle events
+                events = self.pygame.event.get()
+                for event in events:
+                    mouse_pos = self.pygame.mouse.get_pos()
+                    # print(mouse_pos) #TEMP
+                    if event.type == self.pygame.QUIT:
+                        self.run = False  # Stops the program entirely
+                        self.quit = True  # Tells us that the game was quit out of, and it didn't end organically
+                    # On mouse release play animation to show where cursor is
+                    if event.type == self.pygame.MOUSEBUTTONUP:
+                        self.animation_manager.StartTouchAnimation(mouse_pos)  # Play animation
+                        reset_segs = True
+                    for segment in randomised_segments:
+                        playing, seg_rect = segment.get_event(event, mouse_pos)
+                        # Check if seg was pressed
+                        if event.type == self.pygame.MOUSEBUTTONUP and seg_rect.collidepoint(mouse_pos):
+                            currently_playing = segment.id
+                            reset_segs = True
+                    #Only reset once per mouse click
+                    if reset_segs:
+                        for segment in randomised_segments:
+                            # if a segment that isn't playing is showing pause sign, set it to play sign.
+                            if segment.id != currently_playing and segment.toggle:
+                                segment.toggle = False
+                        reset_segs = False
+                    #Check if song_playing stopped and seg still showing play
+
+
+
+
+            """
             # Get the level's data
             level_data = self.music_data[difficulty][
                 level_num]  # {"song_name":"title", "mood":"happy", "hint":"some text"}
@@ -821,6 +882,8 @@ class Fix_The_Song_Game():
 
                 if self.debug:
                     fps = self.get_fps()  # calculate FPS of this loop and show it next loop
+            """
+
 
     #################################################################Main####################################################################
 
@@ -851,8 +914,8 @@ class Fix_The_Song_Game():
         """
 
         # self.play_music_blocking(difficulty, level)
-        # self.play_level(difficulty, 3)
-        self.guided_tut()
+        self.play_level(difficulty, 3)
+        #self.guided_tut()
 
 
 ######################################################On execution#######################################################################
