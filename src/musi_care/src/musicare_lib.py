@@ -595,10 +595,13 @@ class SoundManager():
         data = self.call_sound_player("request_data")
         # data = rospy.wait_for_message("/song_data_publisher", SongData) #through the node
         # print("time taken waiting for node ", rospy.get_time() - time)
-
         return data
 
     def return_wav_lenth(self, song_path):
+        if not os.path.exists(song_path):
+            this_path = os.path.dirname(__file__)
+            music_filepath = r"/game_assets/music/"
+            song_path = this_path + music_filepath + song_path
         with contextlib.closing(wave.open(song_path, 'r')) as f:
             frames = f.getnframes()
             rate = f.getframerate()
@@ -614,13 +617,13 @@ class SoundManager():
         # Define variables
         this_path = os.path.dirname(__file__)
         music_filepath = r"/game_assets/music/"
-        correct_segs = []
-        distract_segments = []
         song_path = this_path + music_filepath + target_song_to_split
         self.path_to_save = this_path + music_filepath + "temp/"
         total_wav_len = (self.return_wav_lenth(song_path)) * 1000  # convert to millisecond
         slice_size = total_wav_len / num_segments
         prev_slice = 0
+        correct_segs = []
+        distract_segments = []
 
         # Slice and save songs
         for i in range(0, num_segments):
@@ -1083,6 +1086,8 @@ class DraggableButton():
         self.image_grey = self.pygame.transform.scale(raw_image_grey, scaled_size)
         self.toggled_image_grey = self.pygame.transform.scale(toggled_raw_image_grey, scaled_size)
         self.rect = self.pygame.Rect(img_x, img_y, self.img_w, self.img_h)
+        self.seg_init_pos = (img_x, img_y)
+        self.initial_mouse_pos = self.seg_init_pos
         #Set Vars
         self.highlighted = False
         self.block = False
@@ -1091,6 +1096,7 @@ class DraggableButton():
         self.when_toggle_on = when_toggle_on
         self.when_toggle_off = when_toggle_off
         self.mouse_is_held = False
+
         self.type = "DraggableButton"
         if unique_id == "":
             self.id = rospy.get_time()  # unique ID for each button based on time when made
@@ -1131,22 +1137,29 @@ class DraggableButton():
         self.rect[0] = newpos[0]
         self.rect[1] = newpos[1]
 
-    def get_event(self, event, mouse_pos):
+    def get_event(self, event, mouse_pos, snap_back = True):
         """Button event handle, if mouse release, then toggle"""
         mouse_on_button = self.rect.collidepoint(mouse_pos)
         if mouse_on_button:
+            # At start of drag/ long press, save some vars
             if event.type == self.pygame.MOUSEBUTTONDOWN and not self.mouse_is_held:
                 self.mouse_is_held = True  # Tells us that the mouse was clicked during this event handling
-                self.initial_pos = mouse_pos
+                self.initial_mouse_pos = mouse_pos
+                self.seg_init_pos = (self.rect.x, self.rect.y) # for snapping back
+            #During drag / long press
             if self.mouse_is_held:
-                if event.type == self.pygame.MOUSEBUTTONUP and mouse_pos == self.initial_pos:
+                if event.type == self.pygame.MOUSEBUTTONUP and mouse_pos == self.initial_mouse_pos:
                     self.mouse_is_held = False
+                    self.set_pos(self.seg_init_pos)
                     return self.toggle_toggle(), self.rect
-                elif event.type == self.pygame.MOUSEBUTTONUP and mouse_pos != self.initial_pos:
+                elif event.type == self.pygame.MOUSEBUTTONUP and mouse_pos != self.initial_mouse_pos:
                     self.mouse_is_held = False  # mouse was released somewhere else
+                    if snap_back:
+                        self.set_pos(self.seg_init_pos)
                 else:
-                    self.rect.x = mouse_pos[0] - self.img_w / 2
-                    self.rect.y = mouse_pos[1] - self.img_h / 2
+                    x = mouse_pos[0] - self.img_w / 2
+                    y = mouse_pos[1] - self.img_h / 2
+                    self.set_pos((x,y))
 
         return self.toggle, self.rect
 
