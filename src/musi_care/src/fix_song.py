@@ -78,6 +78,14 @@ class Fix_The_Song_Game():
         # self.qt_voice_vol
         # self.sound_manager.volume_change(self.music_vol) # Set a default volume
         # self.set_robot_volume(qt_voice_vol) #TODO add this functionality
+        self.segment_graphics = {
+            0: ("music_segment_play_grey.png", "music_segment_pause_grey.png"),
+            1: ("music_segment_play_blue.png", "music_segment_pause_blue.png"),
+            2: ("music_segment_play_orange.png", "music_segment_pause_orange.png"),
+            3: ("music_segment_play_purple.png", "music_segment_pause_purple.png"),
+            4: ("music_segment_play_green.png", "music_segment_pause_green.png"),
+            5: ("music_segment_play_pink.png", "music_segment_pause_pink.png")
+        }
 
     ########################################################Low level methods################################################################
 
@@ -346,18 +354,16 @@ class Fix_The_Song_Game():
             if key in keys:  # only draw the graphics we ask for
                 graphics[key]()  # run as func
 
+    def randomise_colour(self, prev_colour):
+        """Keep shuffling until we get a colour different from the last."""
+        num_colours = len(self.segment_graphics) -1
+        seg_colour = self.segment_graphics[random.randint(1, num_colours)]
+        while seg_colour == prev_colour:
+            seg_colour = self.segment_graphics[random.randint(1, num_colours)]
+        return seg_colour
+
     def create_segments(self,segment_num, correct_track, distract_track):
         """Create and return a list of segments (draggable buttons) """
-        # grey = 0 blue = 1 orange = 2 purple = 3.  #0, is for grey screen
-        self.segment_graphics = {
-            0: ("music_segment_play_grey.png", "music_segment_pause_grey.png"),
-            1: ("music_segment_play_blue.png", "music_segment_pause_blue.png"),
-            2: ("music_segment_play_orange.png", "music_segment_pause_orange.png"),
-            3: ("music_segment_play_purple.png", "music_segment_pause_purple.png"),
-            4: ("music_segment_play_green.png", "music_segment_pause_green.png"),
-            5: ("music_segment_play_pink.png", "music_segment_pause_pink.png")
-        }
-
         # Get each segment position
         correct_segments, distract_segments = self.sound_manager.slice_song(segment_num, correct_track, distract_track)
         all_segs = []
@@ -366,14 +372,12 @@ class Fix_The_Song_Game():
         i = 1  # pos in correct segs
         prev_colour = 0
         for song_path in correct_segments:
-            colour_same = True
-            # Keep shuffling until we get a colour different from the last.
-            while colour_same:
-                seg_colour = self.segment_graphics[random.randint(1, 5)]  # Ignore grey
-                if seg_colour != prev_colour:
-                    colour_same = False
-                #print(seg_colour)
+
+            seg_colour = self.randomise_colour(prev_colour)
             prev_colour = seg_colour
+
+            # THIS DOES IN FACT WORK AS INTENTED, but because we use it seperately for distract and answ segs, they can
+            # still end up the same colour
 
             button_grey = self.segment_graphics[0][0]
             seg_pos = [0, 0]  # Default pos, this will be changed later
@@ -391,7 +395,9 @@ class Fix_The_Song_Game():
 
         # Make objects of correct segments
         for song_path in distract_segments:
-            seg_colour = self.segment_graphics[random.randint(1, 3)]  # Ignore grey
+            seg_colour = self.randomise_colour(prev_colour)
+            prev_colour = seg_colour
+
             button_grey = self.segment_graphics[0][0]
             seg_pos = [0, 0]  # default pos, this will be changed later
             seg_data = {
@@ -411,11 +417,12 @@ class Fix_The_Song_Game():
     def create_graphics(self, segments, num_correct_slots, single_out = False):
         """Create the pygame objects that we will use """
 
-        # Randomise the positions of our buttons and change their pos
+        # Randomise the positions of our buttons and change their pos and store it
         randomised_segments = segments
         random.shuffle(randomised_segments)
         for seg_i in range(len(randomised_segments)):
             randomised_segments[seg_i].set_pos(self.segment_x_y[seg_i])
+            randomised_segments[seg_i].return_info["init_pos"] = self.segment_x_y[seg_i]
 
         # Create loading button
         loading_button = self.create_button("loading_screen_button_depressed.png", "loading_screen_button_depressed.png",
@@ -433,10 +440,10 @@ class Fix_The_Song_Game():
         step = (unknown_slots[0].get_rect()[2])  # step = width of slots
         starting_x = self.window_center[0] - (step * (len(unknown_slots) / 2) ) # the x of the left-most slot
         i = 0
-        for seg in unknown_slots:
+        for slot in unknown_slots:
             unknown_x = starting_x + step*i
-            seg.set_pos((unknown_x, unknown_y))
-            seg.set_info( {"pos":i} ) # Store the order of the unknown segments in the button
+            slot.set_pos((unknown_x, unknown_y))
+            slot.set_info( {"pos":i} ) # Store the order of the unknown segments in the button
             i += 1
 
         # Create text objects
@@ -732,6 +739,7 @@ class Fix_The_Song_Game():
             reset_segs  = False # If we have just pressed the segment
             currently_playing = "" # The ID of the segment playing music
             song_restored = False
+            music_time_id = ""
             while not song_restored and not rospy.is_shutdown() and self.run:
 
                 # Render graphics
@@ -754,11 +762,29 @@ class Fix_The_Song_Game():
                         self.animation_manager.StartTouchAnimation(mouse_pos)  # Play animation
                         reset_segs = True
                     for segment in randomised_segments:
-                        playing, seg_rect = segment.get_event(event, mouse_pos)
-                        # Check if seg was pressed
-                        if event.type == self.pygame.MOUSEBUTTONUP and seg_rect.collidepoint(mouse_pos):
-                            currently_playing = segment.id
-                            reset_segs = True
+                        segment.get_event(event, mouse_pos)
+                        # Handle segment events on mouse release
+                        if event.type == self.pygame.MOUSEBUTTONUP:
+                            if mouse_pos == segment.initial_mouse_pos:
+                                currently_playing = segment.id
+                                reset_segs = True
+                                # Start a timer telling us when the music should end
+                                song_time = (self.sound_manager.return_wav_lenth(segment.return_info["song_path"])) # get song len
+                                music_time_id = self.timer_manager.CreateTimer("music_finished",song_time,verbose=False)
+                            # Snapback or new pos for seg
+                            else:
+                                # If we hover over a slot, while holding a segment
+                                segment_init_pos = segment.return_info["init_pos"]
+                                hover = False
+                                for slot in unknown_slots:
+                                    slot_pos = slot.get_pos()
+                                    if slot.rect.collidepoint(segment.rect.center):
+                                        segment.set_pos(slot_pos)
+                                        hover = True
+                                # If we're not above a slot when mouse button up, reset seg pos
+                                if not hover :
+                                    segment.set_pos(segment_init_pos)  # snap back
+
                     #Only reset once per mouse click
                     if reset_segs:
                         for segment in randomised_segments:
@@ -766,7 +792,13 @@ class Fix_The_Song_Game():
                             if segment.id != currently_playing and segment.toggle:
                                 segment.toggle = False
                         reset_segs = False
-                    #Check if song_playing stopped and seg still showing play
+                #Check if song_playing stopped and seg still showing play
+                if len(self.timer_manager.timers) > 0:
+                    if self.timer_manager.CheckTimer(music_time_id):
+                        # Set all toggles to false
+                        for segment in randomised_segments:
+                            if segment.toggle:
+                                segment.toggle = False
 
 
 

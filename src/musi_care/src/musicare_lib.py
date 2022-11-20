@@ -609,7 +609,8 @@ class SoundManager():
             return (duration)
 
     def slice_song(self, num_segments, target_song_to_split, distracting_songs=None):
-        """Method that chops up a song and creates segments from it, this uses the file name, so you can use 2 differenty files and append the returned variabels together to jumble multiple songs
+        """
+        Method that chops up a song and creates segments from it, this uses the file name, so you can use 2 differenty files and append the returned variabels together to jumble multiple songs
         target_song should be the path to a single song
         distracting songs should be a list of paths to songs, even if only 1 song is used
         """
@@ -865,6 +866,10 @@ class Button():
         self.rect[0] = newpos[0]
         self.rect[1] = newpos[1]
 
+    def get_pos(self):
+        """Takes a list of (x,y) and sets rect"""
+        return (self.rect[0], self.rect[1])
+
     def set_info(self, info):
         self.return_info = info
 
@@ -957,6 +962,9 @@ class ToggleButton():
     def get_rect(self):
         return self.rect
 
+    def get_pos(self):
+        """Takes a list of (x,y) and sets rect"""
+        return (self.rect[0], self.rect[1])
 
 ######################################################ToggleButton#################################################################
 
@@ -1060,6 +1068,10 @@ class PausePlayButton():
     def get_rect(self):
         return self.rect
 
+    def get_pos(self):
+        """Takes a list of (x,y) and sets rect"""
+        return (self.rect[0], self.rect[1])
+
 
 ######################################################DragableButton#################################################################
 
@@ -1137,7 +1149,12 @@ class DraggableButton():
         self.rect[0] = newpos[0]
         self.rect[1] = newpos[1]
 
-    def get_event(self, event, mouse_pos, snap_back = True):
+    def get_pos(self):
+        """Takes a list of (x,y) and sets rect"""
+        return (self.rect[0], self.rect[1])
+
+
+    def get_event(self, event, mouse_pos, snap_back = False):
         """Button event handle, if mouse release, then toggle"""
         mouse_on_button = self.rect.collidepoint(mouse_pos)
         if mouse_on_button:
