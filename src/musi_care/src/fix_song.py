@@ -656,10 +656,8 @@ class Fix_The_Song_Game():
                                                      "rewind_button_grey.png", (self.cen_x - 175, 550), scale=1.5,
                                                        on_play=self.sound_manager.unpause,
                                                        on_pause=self.sound_manager.pause)  # create pause and play button
-
             # Load track
             self.sound_manager.load_track(self.track_name)
-
             # Variables
             music_playing = True
             self.song_ended = False
@@ -799,122 +797,6 @@ class Fix_The_Song_Game():
                         for segment in randomised_segments:
                             if segment.toggle:
                                 segment.toggle = False
-
-
-
-
-            """
-            # Get the level's data
-            level_data = self.music_data[difficulty][
-                level_num]  # {"song_name":"title", "mood":"happy", "hint":"some text"}
-            self.track_name = level_data["song_name"]
-            self.distract_song = level_data["distract_song"]  # will be None or a list of songs
-            self.segment_num = int(level_data["seg_num"])  # split song into this many segs
-            fps = "0"  # for debug info
-
-            given_half, song_unknown, draggable_buttons, draggable_pos, main_buttons, correct_segments = self.create_graphics(
-                self.segment_num, self.track_name, self.distract_song)
-
-            song_restored = False
-
-            # our correct slots
-            slots = {}
-            for slot in range(self.segment_num):
-                slots[slot] = ""
-
-            # Copy format of our previous data
-            is_in_slot = draggable_pos.copy()  # the inital pos of each draggable
-            for key in is_in_slot.keys():
-                is_in_slot[key] = False
-
-            #           -----------------------------------------------------------
-
-            while not song_restored and not rospy.is_shutdown() and self.run:
-
-                # Draw background and objects
-                self.update_graphics(given_half, draggable_buttons, main_buttons)  # draw coloured graphics
-                self.rendered_graphics = self.update_grey_graphics(given_half, draggable_buttons, main_buttons)
-
-                # self.rendered_graphics = self.update_grey_graphics(current_track_time, track_total_time, progress, slider_x, slider_y)  #save updated grey graphics into attribute
-                if self.debug:
-                    self.draw_debug_info(fps)  # draw fps onto screen
-
-                self.pygame.display.update()  # Update all drawn objects
-
-                events = self.pygame.event.get()
-
-                # Check if user is doing things
-                self.sayings.qt_reminder(events)
-
-                for event in events:
-
-                    if event.type == self.pygame.QUIT:
-                        self.run = False  # Stops the program entirely
-
-                    if event.type == self.pygame.MOUSEBUTTONUP:  # on mouse release play animation to show where cursor is
-                        self.animation_manager.StartTouchAnimation(
-                            mouse_pos)  # tell system to play animation when drawing
-
-                    # Check for button press
-                    mouse_pos = self.pygame.mouse.get_pos()
-                    for button in main_buttons:
-                        button_press = button.get_event(event, mouse_pos)
-
-                    given_press = given_half.get_event(event, mouse_pos)
-                    if given_press:  # if the track was started, or stopped, set them all to false
-                        for key in draggable_buttons:
-                            draggable_buttons[key].toggle = False
-
-                    for key in draggable_buttons:  # loop through dict of buttons and handle events on press
-                        press, button_pos = draggable_buttons[key].get_event(event, mouse_pos)
-                        # Check if toggle is pressed
-                        if press:
-                            given_half.toggle_state = False
-                            for inner_key in draggable_buttons:  # if pressed, set all others to false
-                                if inner_key != key:  # skip our pressed one
-                                    draggable_buttons[inner_key].toggle = False
-
-                                    # Check if seg is placed in the slot and allow only if the slot is free
-                        if song_unknown.rect.collidepoint(button_pos.center) and not draggable_buttons[
-                            key].mouse_is_held and slot_free:  # if our dragged part is released on top of the song slot
-                            draggable_buttons[key].rect.x = song_unknown.rect.x
-                            draggable_buttons[key].rect.y = song_unknown.rect.y
-                            current_seg_order = current_seg_order + [
-                                draggable_buttons[key].return_info]  # TODO change this so it's scaleable
-                            is_in_slot[key] = True  # this is currently in the slot
-                            slot_free = False
-
-                            # check if answers are corect once one is dragged in
-                            if current_seg_order == correct_segments:
-                                self.command_manager.send_qt_command(emote="happy", gesture="nod")
-                                qt_message = (self.sayings.get_agreements())  # QT reads out a randomised "good job"
-                                self.level_loader.QTSpeakingPopupScreen(qt_message, self.rendered_graphics, self.run,
-                                                                        self.background_colour)
-                                song_restored = True
-                            else:
-                                self.command_manager.send_qt_command(emote="sad", gesture="shake_head")
-                                qt_message = (self.sayings.get_disagreements())  # QT reads out level's hint
-                                self.level_loader.QTSpeakingPopupScreen(qt_message, self.rendered_graphics, self.run,
-                                                                        self.background_colour)
-                        # if it was placed into the slot when something else is in the slot
-                        elif song_unknown.rect.collidepoint(button_pos.center) and not draggable_buttons[
-                            key].mouse_is_held and not slot_free:
-                            draggable_buttons[key].rect.x = draggable_pos[key][0]
-                            draggable_buttons[key].rect.y = draggable_pos[key][1]
-                        # If it wasn't placed in the slot, place it back in it's original location, and track which seg has left the slot
-                        elif not song_unknown.rect.collidepoint(button_pos.center) and not draggable_buttons[
-                            key].mouse_is_held:  # move the button back to where it was if it was released somewhere random
-                            if is_in_slot[key]:  # if we moved out from the slot, reset some variables
-                                slot_free = True
-                                current_seg_order.pop(1)  # TODO change this to be scalable
-                                is_in_slot[key] = False
-                            else:
-                                draggable_buttons[key].rect.x = draggable_pos[key][0]
-                                draggable_buttons[key].rect.y = draggable_pos[key][1]
-
-                if self.debug:
-                    fps = self.get_fps()  # calculate FPS of this loop and show it next loop
-            """
 
 
     #################################################################Main####################################################################
