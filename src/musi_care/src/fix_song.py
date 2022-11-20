@@ -369,22 +369,18 @@ class Fix_The_Song_Game():
         all_segs = []
 
         # Make objects of correct segments
-        i = 1  # pos in correct segs
+        i = 0  # pos in correct segs
         prev_colour = 0
         for song_path in correct_segments:
 
             seg_colour = self.randomise_colour(prev_colour)
             prev_colour = seg_colour
-
-            # THIS DOES IN FACT WORK AS INTENTED, but because we use it seperately for distract and answ segs, they can
-            # still end up the same colour
-
             button_grey = self.segment_graphics[0][0]
             seg_pos = [0, 0]  # Default pos, this will be changed later
             seg_data = {
                 "song_path": song_path,
-                "correct_seg": True,
-                "order": i
+                "correct_slot":False,
+                "song_pos": i
             }
             segment = self.create_drag_button(seg_colour[0], seg_colour[1], button_grey, button_grey, seg_pos,
                                               return_info=seg_data,
@@ -402,8 +398,8 @@ class Fix_The_Song_Game():
             seg_pos = [0, 0]  # default pos, this will be changed later
             seg_data = {
                 "song_path": song_path,
-                "correct_seg": False,
-                "order": None
+                "correct_slot":False,
+                "song_pos": None
             }
             segment = self.create_drag_button(seg_colour[0], seg_colour[1], button_grey, button_grey, seg_pos,
                                               return_info=seg_data,
@@ -443,7 +439,7 @@ class Fix_The_Song_Game():
         for slot in unknown_slots:
             unknown_x = starting_x + step*i
             slot.set_pos((unknown_x, unknown_y))
-            slot.set_info( {"pos":i} ) # Store the order of the unknown segments in the button
+            slot.set_info( {"pos":i, "slot_full":False} ) # Store the order of the unknown segments in the button
             i += 1
 
         # Create text objects
@@ -776,11 +772,15 @@ class Fix_The_Song_Game():
                                 hover = False
                                 for slot in unknown_slots:
                                     slot_pos = slot.get_pos()
-                                    if slot.rect.collidepoint(segment.rect.center):
+                                    if slot.rect.collidepoint(segment.rect.center) and slot.return_info["slot_full"] == False:
                                         segment.set_pos(slot_pos)
+                                        #slot.return_info["slot_full"] = True
                                         hover = True
-                                # If we're not above a slot when mouse button up, reset seg pos
-                                if not hover :
+                                        if segment.return_info["song_pos"] == slot.return_info["pos"]:
+                                            segment.return_info["correct_slot"] = True
+                                            segment.disable_drag = True
+                                # If we're not above a slot when mouse button up, reset seg pos. Ignore segs that are in right slot
+                                if not hover and not segment.return_info["correct_slot"]:
                                     segment.set_pos(segment_init_pos)  # snap back
 
                     #Only reset once per mouse click
@@ -797,6 +797,15 @@ class Fix_The_Song_Game():
                         for segment in randomised_segments:
                             if segment.toggle:
                                 segment.toggle = False
+
+                # Check if level completed
+                i = 0
+                for seg in randomised_segments:
+                    if seg.return_info["correct_slot"]:
+                        i+=1
+                if i >= num_correct_segs:
+                    song_restored = True
+                #print(i,"/", num_correct_segs)
 
 
     #################################################################Main####################################################################

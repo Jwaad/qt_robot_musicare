@@ -1108,6 +1108,7 @@ class DraggableButton():
         self.when_toggle_on = when_toggle_on
         self.when_toggle_off = when_toggle_off
         self.mouse_is_held = False
+        self.disable_drag = False
 
         self.type = "DraggableButton"
         if unique_id == "":
@@ -1174,9 +1175,10 @@ class DraggableButton():
                     if snap_back:
                         self.set_pos(self.seg_init_pos)
                 else:
-                    x = mouse_pos[0] - self.img_w / 2
-                    y = mouse_pos[1] - self.img_h / 2
-                    self.set_pos((x,y))
+                    if not self.disable_drag:
+                        x = mouse_pos[0] - self.img_w / 2
+                        y = mouse_pos[1] - self.img_h / 2
+                        self.set_pos((x,y))
 
         return self.toggle, self.rect
 
