@@ -51,7 +51,6 @@ class Guess_The_Mood_Game():
         self.background_colour = (100,100,100) #background grey by default
         self.pygame.display.set_caption("Guess The Mood!") #Label window
         self.run = True
-        #self.pygame.mouse.set_visible(False) #set to false when not testing
         self.quit = False #Check to see if the game ended or it was quit
         self.track_playing = False
         self.previous_track_data = None
@@ -73,6 +72,8 @@ class Guess_The_Mood_Game():
         #self.set_robot_volume(qt_voice_vol) #TODO add this functionality  
         self.t1 = 0 #t1 for FPS tracking
         self.debug = True
+        if not self.debug:
+            self.pygame.mouse.set_visible(False) #set to false when not testing
                    
 #############################################################Low level methods###########################################################
                 
@@ -463,9 +464,10 @@ class Guess_The_Mood_Game():
                                         repeat_instruction = True
                     if target_event != None:
                         target_event(events) #render the target graphic
-                        
-                    #Check if QT is done talking
-                    qt_finished_talking = self.command_manager.robo_timer.CheckTimer(speaking_timer)
+
+                    # Dont check if QT already finished talking
+                    if not qt_finished_talking:
+                        qt_finished_talking = self.command_manager.robo_timer.CheckTimer(speaking_timer)
                     self.pygame.display.update() #Update all drawn objects
 
                 #Either replay the same instruction, or move onto the next
