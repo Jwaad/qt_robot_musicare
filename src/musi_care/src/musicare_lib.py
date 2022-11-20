@@ -962,7 +962,6 @@ class PausePlayButton():
 
     def __init__(self, pause_path, pause_path_grey, play_path, play_path_grey, rewind_path, rewind_path_grey,
                  x_y_locations, pygame, scale=1, unique_id="", on_pause=object, on_play=object):
-
         # Set vars
         self.pygame = pygame
         self.highlighted = False
@@ -970,15 +969,13 @@ class PausePlayButton():
         self.on_pause = on_pause
         self.on_play = on_play
         self.rewind_toggle = False  # show rewind or not
-
-        # load imges
+        # load images
         raw_play = self.pygame.image.load(play_path).convert_alpha()
         raw_play_grey = self.pygame.image.load(play_path_grey).convert_alpha()
         raw_pause = self.pygame.image.load(pause_path).convert_alpha()
         raw_pause_grey = self.pygame.image.load(pause_path_grey).convert_alpha()
         raw_rewind = self.pygame.image.load(rewind_path).convert_alpha()
         raw_rewind_grey = self.pygame.image.load(rewind_path_grey).convert_alpha()
-
         # Scale and set pos of imgs
         img_x = x_y_locations[0]
         img_y = x_y_locations[1]
@@ -991,7 +988,6 @@ class PausePlayButton():
         self.pause_grey = self.pygame.transform.scale(raw_pause_grey, scaled_size)
         self.rewind = self.pygame.transform.scale(raw_rewind, scaled_size)
         self.rewind_grey = self.pygame.transform.scale(raw_rewind_grey, scaled_size)
-
         self.rect = self.pygame.Rect(img_x, img_y, img_w, img_h)
         if unique_id == "":
             self.id = rospy.get_time()  # unique ID for each button based on time when made
@@ -1068,21 +1064,18 @@ class DraggableButton():
     """Class to load images that serve as buttons that can be dragged and dropped """
 
     def __init__(self, image_path, toggled_image_path, default_image_grey, toggled_image_grey, x_y_locations, pygame,
-                 scale=1, return_info={}, when_toggle_on=object, when_toggle_off=object):
+                 scale=1, return_info={}, when_toggle_on=object, when_toggle_off=object, unique_id=""):
         self.pygame = pygame
-
-        # load images
+        # Load images
         raw_image = self.pygame.image.load(image_path).convert_alpha()
         toggled_raw_image = self.pygame.image.load(toggled_image_path).convert_alpha()
         raw_image_grey = self.pygame.image.load(default_image_grey).convert_alpha()
         toggled_raw_image_grey = self.pygame.image.load(toggled_image_grey).convert_alpha()
-
         # Set pos
         img_x = x_y_locations[0]
         img_y = x_y_locations[1]
         self.img_w = int(raw_image.get_width() * scale)
         self.img_h = int(raw_image.get_height() * scale)
-
         # Scale
         scaled_size = (self.img_w, self.img_h)
         self.image = self.pygame.transform.scale(raw_image, scaled_size)
@@ -1090,6 +1083,7 @@ class DraggableButton():
         self.image_grey = self.pygame.transform.scale(raw_image_grey, scaled_size)
         self.toggled_image_grey = self.pygame.transform.scale(toggled_raw_image_grey, scaled_size)
         self.rect = self.pygame.Rect(img_x, img_y, self.img_w, self.img_h)
+        #Set Vars
         self.highlighted = False
         self.block = False
         self.return_info = return_info
@@ -1098,6 +1092,10 @@ class DraggableButton():
         self.when_toggle_off = when_toggle_off
         self.mouse_is_held = False
         self.type = "DraggableButton"
+        if unique_id == "":
+            self.id = rospy.get_time()  # unique ID for each button based on time when made
+        else:
+            self.id = unique_id
 
     def render(self, screen, grey=False):
         """Draw image onto screen"""
