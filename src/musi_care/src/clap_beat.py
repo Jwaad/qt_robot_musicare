@@ -174,7 +174,7 @@ class Fix_The_Song_Game():
 
     def get_song_info(self, prev_track_time="", prev_total_time="", song_comp_only=False):
         # Get variables that we will draw onto screen
-        formatted_data = self.GetTrackInfo(formatted_output=True)
+        formatted_data = self.get_track_info(formatted_output=True)
         current_track_time = formatted_data[0]  # Time gotten from sound_player node
         track_total_time = formatted_data[1]  # Total track time
         progress = self.elapsed_time_secs / self.total_track_secs  # elapsed time in percentage completion, so slider can represent that on a bar
@@ -378,7 +378,7 @@ class Fix_The_Song_Game():
 
     #######################################################Level / screen code###############################################################
 
-    def record_claps(self, , level_data ):
+    def record_claps(self, level_data ):
         """ Multithreaded function that records claps"""
         # TODO add functionallity that records audio and claps until a timer ends (timer is the song duration)
         while self.run:
@@ -393,7 +393,7 @@ class Fix_The_Song_Game():
 
     def analyse_performance(self):
         """Takes the recording / data from the recording of the clapping """
-        pass
+        return "timing", "accuracy"
 
     def play_level(self, difficulty, level):
         """Have QT clap to beat and record user clapping"""
@@ -415,7 +415,7 @@ class Fix_The_Song_Game():
             # Start song
             self.sound_manager.unpause()
 
-            while song_done and self.run and not rospy.is_shutdown():
+            while not song_done and self.run and not rospy.is_shutdown():
                 if still_fading:
                     # Have screen fade to black.
                     self.run = self.level_loader.screen_fade(self.run, self.background_colour, 5, "Please look at QT robot")
@@ -424,7 +424,7 @@ class Fix_The_Song_Game():
                     self.run = self.level_loader.black_screen(self.run)
 
                 # Hit the drum to the beat.
-                self.hit_drum()
+                self.hit_drum(level_data)
 
                 # Check if song done
                 song_done = self.get_song_info(song_comp_only=False)

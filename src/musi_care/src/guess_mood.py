@@ -138,7 +138,7 @@ class Guess_The_Mood_Game():
         return music_data        
 
 
-    def GetTrackInfo(self, formatted_output = False): 
+    def get_track_info(self, formatted_output = False):
         """Subscribe to sound_player publisher and get elapsed track time"""
         
         song_data = self.sound_manager.request_song_data()
@@ -241,7 +241,7 @@ class Guess_The_Mood_Game():
 
     def get_song_info(self, prev_track_time = "", prev_total_time="", song_comp_only = False):
     #Get variables that we will draw onto screen
-        formatted_data = self.GetTrackInfo(formatted_output = True)
+        formatted_data = self.get_track_info(formatted_output = True)
         current_track_time = formatted_data[0]          #Time gotten from sound_player node
         track_total_time = formatted_data[1] #Total track time
         progress = self.elapsed_time_secs / self.total_track_secs #elapsed time in percentage completion, so slider can represent that on a bar
@@ -500,7 +500,7 @@ class Guess_The_Mood_Game():
 
             #Define variables & start track
             self.sound_manager.load_track(self.track_name) #load song to sound player and get data back
-            self.track_data = self.GetTrackInfo() #Get data from the sound_player node for this track and save it
+            self.track_data = self.get_track_info() #Get data from the sound_player node for this track and save it
             self.level_complete = False #Check when level has been finished
             song_ended = False
             correct_answer_given = False

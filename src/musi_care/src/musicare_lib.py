@@ -15,6 +15,8 @@ from pydub import AudioSegment
 from musi_care.msg import SongData
 from musi_care.srv import sound_player_srv
 from musi_care.srv import qt_command
+import threading
+
 
 
 # TODO REPLACE ALL GREY SCALE VERSIONS TO QUICK SCRIPT OF CV2.convert to greyscale
@@ -66,7 +68,7 @@ class General():
         # /user_saves
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Threading~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-class ThreadWithReturnValue(Thread):
+class ThreadWithReturnValue():#Thread):
 
     #TODO come back to this, and give thread objects the functionality to return data, and be stopped from the main
     #TODO possibly self.run within this class
