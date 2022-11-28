@@ -378,7 +378,7 @@ class Fix_The_Song_Game():
 
     #######################################################Level / screen code###############################################################
 
-    def record_claps(self, level_data ):
+    def record_claps(self, , level_data ):
         """ Multithreaded function that records claps"""
         # TODO add functionallity that records audio and claps until a timer ends (timer is the song duration)
         while self.run:
@@ -388,6 +388,11 @@ class Fix_The_Song_Game():
 
     def hit_drum(self, level_data):
         """ Make QT physically hit the drum with alternating hands """
+        print("hitting the drum at the correct time")
+        pass
+
+    def analyse_performance(self):
+        """Takes the recording / data from the recording of the clapping """
         pass
 
     def play_level(self, difficulty, level):
@@ -403,8 +408,13 @@ class Fix_The_Song_Game():
             clap_recorder = threading.Thread(target=self.record_claps, args=(level_data,), daemon=True)
             clap_recorder.start()  # Start multi_threaded function
 
-            song_dong = False
+            self.sound_manager.load_track(self.track_name)
+            song_done = False
             still_fading = True
+
+            # Start song
+            self.sound_manager.unpause()
+
             while song_done and self.run and not rospy.is_shutdown():
                 if still_fading:
                     # Have screen fade to black.
@@ -413,8 +423,11 @@ class Fix_The_Song_Game():
                     # Once fading is done, have just black screen.
                     self.run = self.level_loader.black_screen(self.run)
 
-                #Hit the drum to the beat.
+                # Hit the drum to the beat.
                 self.hit_drum()
+
+                # Check if song done
+                song_done = self.get_song_info(song_comp_only=False)
 
             #Stop recording clapping and log the user's score
             temporal_accuracy, numerical_accuracy = self.analyse_performance()

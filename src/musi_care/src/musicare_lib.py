@@ -65,6 +65,24 @@ class General():
         print(os.path.exists(save_location))
         # /user_saves
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Threading~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+class ThreadWithReturnValue(Thread):
+
+    #TODO come back to this, and give thread objects the functionality to return data, and be stopped from the main
+    #TODO possibly self.run within this class
+    def __init__(self, group=None, target=None, name=None, args=(), kwargs={}, Verbose=False):
+        Thread.__init__(self, group, target, name, args, kwargs)
+        self._return = None
+    def run(self):
+
+        if self._target is not None:
+            self._return = self._target(*self._args,**self._kwargs)
+
+    def join(self, *args):
+        Thread.join(self, *args)
+        return self._return
+
+
 
 ######################################################DraggableButton#################################################################
 
