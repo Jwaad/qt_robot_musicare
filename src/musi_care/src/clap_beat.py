@@ -404,7 +404,7 @@ class Fix_The_Song_Game():
             level_data = self.music_data[difficulty][level]  # {"song_name":"title", "mood":"happy", "hint":"some text"}
             self.track_name = level_data["song_name"]
 
-            # Start parralel thread to record claps simultaneously
+            # Start parallel thread to record claps simultaneously
             clap_recorder = threading.Thread(target=self.record_claps, args=(level_data,), daemon=True)
             clap_recorder.start()  # Start multi_threaded function
 
@@ -414,20 +414,25 @@ class Fix_The_Song_Game():
 
             # Start song
             self.sound_manager.unpause()
-
+            # go from bright to black in 5 s
+            fade_time = 5
+            time_of_darkness = rospy.get_time() + fade_time
+            time_left = time_of_darkness - rospy.get_time()
             while not song_done and self.run and not rospy.is_shutdown():
-                if still_fading:
-                    # Have screen fade to black.
-                    self.run = self.level_loader.screen_fade(self.run, self.background_colour, 5, "Please look at QT robot")
-                else:
-                    # Once fading is done, have just black screen.
-                    self.run = self.level_loader.black_screen(self.run)
+                # Render screen, will fade to black and stay black
+                message = "Please Look At QT Robot"
+                if time_left > 0:
+                    time_left = time_of_darkness - rospy.get_time()
+                else: time_left = 0
+
+                fade_scalar = (time_left / fade_time)
+                self.run = self.level_loader.fade_to_black_screen(self.run, message, self.background_colour, fade_scalar )
 
                 # Hit the drum to the beat.
                 self.hit_drum(level_data)
 
                 # Check if song done
-                song_done = self.get_song_info(song_comp_only=False)
+                #song_done = self.get_song_info(song_comp_only=False)
 
             #Stop recording clapping and log the user's score
             temporal_accuracy, numerical_accuracy = self.analyse_performance()

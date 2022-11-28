@@ -429,7 +429,7 @@ class StandardLevels():
             return True
 
 
-    def screen_fade(self, run, background_colour, fade_time, message, speak_message = False, gesture = ""):
+    def blocking_fade(self, run, background_colour, fade_time, message, speak_message = False, gesture = ""):
         """ blank screen with text in middle that slowly fades to grey """
 
         if run:  # Dont start this screen if the previous screen wanted to close out the game
@@ -447,41 +447,38 @@ class StandardLevels():
             font_size=70, font_colour = (255, 255, 255))
 
             time_of_darkness = rospy.get_time() + fade_time
-            still_fading = True
             original_bg_col = background_colour
             background_colour = list(background_colour) # Background var we will change
-            while still_fading and not rospy.is_shutdown() and run:
 
-                # Get how much time is left till full darkness
-                time_left = time_of_darkness - rospy.get_time()
-                if time_left < 0.2:
-                    still_fading = False
+            # Get how much time is left till full darkness
+            time_left = time_of_darkness - rospy.get_time()
+            if time_left < 0.2:
+                still_fading = False
 
-                # Check for quit
-                for event in self.pygame.event.get():
-                    # Check if the user clicks the X
-                    if event.type == self.pygame.QUIT:
-                        return False
-                    # On mouse release play animation to show where cursor is
-                    elif (event.type == self.pygame.MOUSEBUTTONUP):
-                        # Tell system to play animation when drawing
-                        self.animation_manager.StartTouchAnimation(self.pygame.mouse.get_pos())
+            # Check for quit
+            for event in self.pygame.event.get():
+                # Check if the user clicks the X
+                if event.type == self.pygame.QUIT:
+                    return False
+                # On mouse release play animation to show where cursor is
+                elif (event.type == self.pygame.MOUSEBUTTONUP):
+                    # Tell system to play animation when drawing
+                    self.animation_manager.StartTouchAnimation(self.pygame.mouse.get_pos())
 
-                # Scale background and text brightness
-                fade_scalar = (time_left / fade_time)
-                for chan_idx in range(len(background_colour)):
-                    background_colour[chan_idx] = original_bg_col[chan_idx] * fade_scalar
-                new_text_col = int(255 * fade_scalar)
-                font_col = (new_text_col,new_text_col,new_text_col)
-                text_object.set_colour(font_col)
+            # Scale background and text brightness
+            fade_scalar = (time_left / fade_time)
+            for chan_idx in range(len(background_colour)):
+                background_colour[chan_idx] = original_bg_col[chan_idx] * fade_scalar
+            new_text_col = int(255 * fade_scalar)
+            font_col = (new_text_col,new_text_col,new_text_col)
+            text_object.set_colour(font_col)
 
-                # Draw background and objects
-                self.renderer.DrawBackground(background_colour)
-                text_object.render(self.window)
-                self.animation_manager.DrawTouchAnimation(self.window)  # Also draw touches
-                self.pygame.display.update()  # Update all drawn objects
+            # Draw background and objects
+            self.renderer.DrawBackground(background_colour)
+            text_object.render(self.window)
+            self.animation_manager.DrawTouchAnimation(self.window)  # Also draw touches
+            self.pygame.display.update()  # Update all drawn objects
 
-            return True
 
     def black_screen(self, run):
         """ Non-Blocking black screen. Will read events and work accordindly, but wont stick you into a while loop"""
@@ -504,6 +501,43 @@ class StandardLevels():
 
             return True
 
+    def fade_to_black_screen(self, run, message, background_colour, fade_scalar ):
+        """ Non-Blocking fade then stay on black screen.
+        Will read events and work accordingly, but wont stick you into a while loop"""
+
+        if run:
+            #Convert tuple to list so to make it mutable
+            background_colour = list(background_colour)
+
+            # Not ideal that we create a text object each time but...
+            text_object = TextObject(self.window, self.window_center, message, cen_x=True, cen_y=True,
+                                     font_size=70, font_colour=(255, 255, 255))
+
+            # Check for quit
+            for event in self.pygame.event.get():
+                # Check if the user clicks the X
+                if event.type == self.pygame.QUIT:
+                    return False
+                # On mouse release play animation to show where cursor is
+                elif (event.type == self.pygame.MOUSEBUTTONUP):
+                    # Tell system to play animation when drawing
+                    self.animation_manager.StartTouchAnimation(self.pygame.mouse.get_pos())
+
+            # Scale background and text brightness
+            for chan_idx in range(len(background_colour)):
+                background_colour[chan_idx] = background_colour[chan_idx] * fade_scalar
+            new_text_col = int(255 * fade_scalar)
+            font_col = (new_text_col, new_text_col, new_text_col)
+            print(font_col)
+            text_object.set_colour(font_col)
+
+            # Draw background and objects
+            self.renderer.DrawBackground(background_colour)
+            text_object.render(self.window)
+            self.animation_manager.DrawTouchAnimation(self.window)  # Also draw touches
+            self.pygame.display.update()  # Update all drawn objects
+
+            return True
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Text objects~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
