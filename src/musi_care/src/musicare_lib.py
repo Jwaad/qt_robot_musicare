@@ -108,14 +108,14 @@ class Behaviours():
                 self.sound_manager.unpause()
                 self.timeout_started = False  # so that we start a new timer
 
-    def get_agreements(self):  # List of all sayings when QT agrees EG yes, correct
+    def get_agreements(self):  # List of all behaviours_manager when QT agrees EG yes, correct
         sayings = ["Yes!", "Correct!", "That's right!", "That's correct!", "Great, that's right!",
                    "Good job, That is the right answer!"]
         ind = random.randint(0, len(sayings) - 1)
         saying = sayings[ind]
         return saying
 
-    def get_disagreements(self):  # List of all sayings when QT disagree EG no, sorry.
+    def get_disagreements(self):  # List of all behaviours_manager when QT disagree EG no, sorry.
         sayings = ["No, Please try again...", "Sorry, no, please try again...", "No, that's not correct...",
                    "I'm sorry that is not right, Please try again...", "Sorry, that is not the right answer..."]
         ind = random.randint(0, len(sayings) - 1)
@@ -166,7 +166,7 @@ class StandardLevels():
         self.sound_manager = SoundManager(path_to_music)
         self.timer = TimeFunctions()
 
-    def yes_or_no_screen(self, text, run, background_colour):
+    def yes_or_no_screen(self, text, run, background_colour, message = ""):
         """Screen for Yes or No questions"""
         # Variables
         this_file_path = os.path.dirname(__file__)
@@ -180,7 +180,7 @@ class StandardLevels():
 
         # Have QT act
         self.command_manager.qt_emote("talking")
-        self.command_manager.qt_say("Should i explain the rules of the game called, 'Guess, the  mood'?")
+        self.command_manager.qt_say(text)
 
         while not rospy.is_shutdown() and run:
 
@@ -237,7 +237,7 @@ class StandardLevels():
                 # Draw background and objects
                 self.renderer.DrawBackground(background_colour)
                 self.renderer.DrawTextCentered("Please listen to QT robot", font_size=70)
-                self.animation_manager.DrawTouchAnimation(self.window)  # also draw touches
+                self.animation_manager.DrawTouchAnimation(self.window)  # Also draw touches
                 self.pygame.display.update()  # Update all drawn objects
 
                 if self.command_manager.robo_timer.CheckTimer(speaking_timer_id):  # If our timer is done
@@ -245,8 +245,9 @@ class StandardLevels():
                     return True
 
     def QTSpeakingPopupScreen(self, qt_say, graphics, run, background_colour, should_gesture=True,
-                              gesture="explain_right"):
-        """Method displays all our gui with a popup infront with text in centre
+                              gesture="explain_right", partial_func = True):
+        """
+            Method displays all our gui with a popup in front with text in centre
            graphics = a dict of functions that are saved with the parameters needed to render them
         """
         # Variables
@@ -288,8 +289,16 @@ class StandardLevels():
 
                 # Draw background and objects
                 self.renderer.DrawBackground(background_colour)
-                for key in graphics:  # run each partial function
-                    graphics[key]()  # run as func
+
+                if partial_func:
+                    for key in graphics:  # run each partial function
+                        graphics[key]()  # run as func
+                else:
+                    for graphic in graphics:
+                        graphic.render(self.window, grey = True)
+
+
+
                 popup.render(self.window)
                 self.renderer.DrawTextCentered("Please listen to QT robot", font_size=70)
                 self.animation_manager.DrawTouchAnimation(self.window)  # also draw touches
@@ -400,6 +409,82 @@ class StandardLevels():
             return True
 
 
+    def screen_fade(self, run, background_colour, fade_time, message, speak_message = False, gesture = ""):
+        """ blank screen with text in middle that slowly fades to grey """
+
+        if run:  # Dont start this screen if the previous screen wanted to close out the game
+
+            # Handle speaking
+            if speak_message:
+                self.command_manager.qt_emote("talking")  # show mouth moving
+                speaking_timer_id = self.command_manager.qt_say(
+                    message)  # says text we give it, and starts an internal timer that we can check on
+            # Handle gesturing
+            if gesture != "":
+                self.command_manager.qt_gesture(gesture)
+            # Create text object
+            text_object = TextObject(self.window, self.window_center, message , cen_x=True, cen_y=True,
+            font_size=70, font_colour = (255, 255, 255))
+
+            time_of_darkness = rospy.get_time() + fade_time
+            still_fading = True
+            original_bg_col = background_colour
+            background_colour = list(background_colour) # Background var we will change
+            while still_fading and not rospy.is_shutdown() and run:
+
+                # Get how much time is left till full darkness
+                time_left = time_of_darkness - rospy.get_time()
+                if time_left < 0.2:
+                    still_fading = False
+
+                # Check for quit
+                for event in self.pygame.event.get():
+                    # Check if the user clicks the X
+                    if event.type == self.pygame.QUIT:
+                        return False
+                    # On mouse release play animation to show where cursor is
+                    elif (event.type == self.pygame.MOUSEBUTTONUP):
+                        # Tell system to play animation when drawing
+                        self.animation_manager.StartTouchAnimation(self.pygame.mouse.get_pos())
+
+                # Scale background and text brightness
+                fade_scalar = (time_left / fade_time)
+                for chan_idx in range(len(background_colour)):
+                    background_colour[chan_idx] = original_bg_col[chan_idx] * fade_scalar
+                new_text_col = int(255 * fade_scalar)
+                font_col = (new_text_col,new_text_col,new_text_col)
+                text_object.set_colour(font_col)
+
+                # Draw background and objects
+                self.renderer.DrawBackground(background_colour)
+                text_object.render(self.window)
+                self.animation_manager.DrawTouchAnimation(self.window)  # Also draw touches
+                self.pygame.display.update()  # Update all drawn objects
+
+            return True
+
+    def black_screen(self, run):
+        """ Non-Blocking black screen. Will read events and work accordindly, but wont stick you into a while loop"""
+
+        if run:
+            # Check for quit
+            for event in self.pygame.event.get():
+                # Check if the user clicks the X
+                if event.type == self.pygame.QUIT:
+                    return True
+                # On mouse release play animation to show where cursor is
+                elif (event.type == self.pygame.MOUSEBUTTONUP):
+                    # Tell system to play animation when drawing
+                    self.animation_manager.StartTouchAnimation(self.pygame.mouse.get_pos())
+
+            # Draw background and objects
+            self.renderer.DrawBackground((0,0,0))
+            self.animation_manager.DrawTouchAnimation(self.window)  # Also draw touches
+            self.pygame.display.update()  # Update all drawn objects
+
+            return False
+
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Text objects~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class TextObject():
@@ -407,8 +492,10 @@ class TextObject():
     def __init__(self,window, window_center, text, location=None, cen_x = False, cen_y=False, font_size=30, font_colour=(255,255,255)):
         self.window = window
         self.font = pygame.font.Font('freesansbold.ttf', font_size)
-        self.text = self.font.render(text, False, font_colour)
-        self.textRect = self.text.get_rect()
+        self.font_colour = font_colour
+        self.text = text
+        self.text_obj = self.font.render(self.text, False, self.font_colour)
+        self.textRect = self.text_obj.get_rect()
         if location != None:
             self.set_pos(location)
         if cen_x:
@@ -417,9 +504,15 @@ class TextObject():
             self.textRect[1] = window_center[1] - (self.textRect[3]/2)
         self.type = "TextObject"
 
-    def render(self, window):
+    def render(self, window, grey=False, re_render = False):
         """handle drawing text"""
-        self.window.blit(self.text, self.textRect)
+        if re_render:
+            self.text_obj = self.font.render(self.text, False, self.font_colour)
+        self.window.blit(self.text_obj, self.textRect)
+
+    def set_colour(self, font_col):
+        """Set new colour and re render obj"""
+        self.text_obj = self.font.render(self.text, False, font_col)
 
     def set_pos(self, pos):
         self.textRect[0] = pos[0]

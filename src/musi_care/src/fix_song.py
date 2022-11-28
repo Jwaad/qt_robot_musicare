@@ -38,8 +38,6 @@ class Fix_The_Song_Game():
         x = 145  # x pos of screen
         y = 0  # y pos of screen
         os.environ['SDL_VIDEO_WINDOW_POS'] = '%d,%d' % (x, y)  # move screen to x and y pos
-        self.previous_screen = ""  # used so we can go backwards a screen
-        self.next_screen = ""  # used to skip screen, low priority feature
         self.pygame = pygame
         self.pygame.init()  # start py engine
         self.pygame.freetype.init()
@@ -69,7 +67,7 @@ class Fix_The_Song_Game():
         self.level_loader = StandardLevels(self.window, self.window_center, self.pygame, self.music_filepath)
         self.segment_x_y = {0: (610, 850), 1: (1260, 850), 2: (1910, 850), 3: (610, 1400), 4: (1260, 1400),
                             5: (1910, 1400)}  # hard coded num locations of each segment
-        self.sayings = Behaviours(self.pygame, self.music_filepath)
+        self.behaviours_manager = Behaviours(self.pygame, self.music_filepath)
         self.t1 = 0  # t1 for FPS tracking
         self.debug = True
         if not self.debug:
@@ -295,26 +293,6 @@ class Fix_The_Song_Game():
             draggable_buttons[key].render(self.window)  # draw the segments
         self.animation_manager.DrawTouchAnimation(self.window)  # last so it shows up on top
 
-    def update_grey_graphics(self, given_half, draggable_buttons, main_buttons):
-        """reinitialise grey graphics taking with parameters they need """
-        # Load graphics into dict # need to be in a specific order for this tut
-        grey_graphics = {}
-        grey_graphics[1] = functools.partial(self.renderer.DrawTextCentered, "Put the song back together",
-                                             font_size=100, y=50)
-        grey_graphics[2] = functools.partial(given_half.render, self.window, grey=True)
-        grey_graphics[3] = functools.partial(self.renderer.DrawTextCentered,
-                                             "Drag the segments below into the empty slot above", font_size=100, y=550)
-        i = 4
-        for button in main_buttons:
-            grey_graphics[i] = functools.partial(button.render, self.window, grey=True)
-            i += 1
-        for key in draggable_buttons:  # render draggable buttons
-            grey_graphics[i] = functools.partial(draggable_buttons[key].render, self.window,
-                                                 grey=True)  # draw the segments
-            i += 1
-        return grey_graphics
-        # self.animation_manager.DrawTouchAnimation(self.window) #last so it shows up on top
-
     def highlight_block(self, events, target_rect=None, msg="Click anywhere to continue ... ", timer_complete=None):
         """
         Highlight a certain object and let QT explain it, it will then move on on it's own
@@ -509,6 +487,24 @@ class Fix_The_Song_Game():
             self.tut_next.set_pos((arrow_x + 450, arrow_y))
             self.tut_repeat.set_pos((arrow_x - 600, arrow_y))
 
+    def create_check(self, seg):
+        """Draws a check mark under the segment given"""
+        mark = self.create_button("check_mark.png", "check_mark_grey.png",
+                           (seg.rect.centerx - 35, seg.rect.centery + 155),
+                           scale=0.5)
+        return mark
+
+    def qt_reward(self, time_taken, wrong_answers, hints_needed ):
+        """handles what QT should say and do on level end """
+        #"Perfect clear"
+        if time_taken < 15 and wrong_answers < 1 and hints_needed < 1:
+            self.command_manager.send_qt_command(emote = "happy", gesture = "nod")
+            qt_message = (self.behaviours_manager.get_praise())     #QT reads out level's hint
+        else:
+            self.command_manager.send_qt_command(emote = "happy", gesture = "nod")
+            qt_message = (self.behaviours_manager.get_agreements()) #QT reads out level's hint
+        return qt_message
+
     #######################################################Level / screen code###############################################################
 
     def guided_tut(self):
@@ -654,7 +650,7 @@ class Fix_The_Song_Game():
                                                        on_pause=self.sound_manager.pause)  # create pause and play button
             # Load track
             self.sound_manager.load_track(self.track_name)
-            # Variables
+            # VariablesFte
             music_playing = True
             self.song_ended = False
             self.current_track_time = 0
@@ -729,17 +725,36 @@ class Fix_The_Song_Game():
 
             # Group graphics for easier rendering
             graphics = [loading_button] + unknown_slots + text_objs + [help_button] + randomised_segments
+            check_marks = [] # We will populate this with check marks later
 
             reset_segs  = False # If we have just pressed the segment
             currently_playing = "" # The ID of the segment playing music
-            song_restored = False
+            song_restored = False # the song is fixed, so do ending sequence
+            level_completed = False # End the gameplay loop
             music_time_id = ""
-            while not song_restored and not rospy.is_shutdown() and self.run:
+            blocking = False
+            start_time = rospy.get_time()
+            wrong_answers = 0
+            hints_needed = 0
+            while not level_completed and not rospy.is_shutdown() and self.run:
+                # End loop check at top, to let loop finish 1 last time
+                if song_restored:
+                    level_completed = True
 
                 # Render graphics
                 self.renderer.DrawBackground(self.background_colour)
                 for graphic in graphics:
-                    graphic.render(self.window)
+                    if blocking:
+                        graphic.render(self.window, grey=True )
+                    else:
+                        graphic.render(self.window, grey=False)
+                if check_marks != []:
+                    for check_mark in check_marks:
+                        if blocking:
+                            check_mark.render(self.window, grey=True)
+                        else:
+                            check_mark.render(self.window, grey=False)
+
                 self.animation_manager.DrawTouchAnimation(self.window)
                 self.pygame.display.update()  # Update all drawn objects
 
@@ -755,38 +770,78 @@ class Fix_The_Song_Game():
                     if event.type == self.pygame.MOUSEBUTTONUP:
                         self.animation_manager.StartTouchAnimation(mouse_pos)  # Play animation
                         reset_segs = True
-                    for segment in randomised_segments:
-                        segment.get_event(event, mouse_pos)
-                        # Handle segment events on mouse release
-                        if event.type == self.pygame.MOUSEBUTTONUP:
-                            if mouse_pos == segment.initial_mouse_pos:
-                                currently_playing = segment.id
-                                reset_segs = True
-                                # Start a timer telling us when the music should end
-                                song_time = (self.sound_manager.return_wav_lenth(segment.return_info["song_path"])) # get song len
-                                music_time_id = self.timer_manager.CreateTimer("music_finished",song_time,verbose=False)
-                            # Snapback or new pos for seg
-                            else:
-                                # If we hover over a slot, while holding a segment
-                                segment_init_pos = segment.return_info["init_pos"]
-                                hover = False
-                                for slot in unknown_slots:
+                    # Dont do any event handling if we're blocking currently
+                    if not blocking:
+                        # Handle help button events
+                        help_clicked = help_button.get_event(event, mouse_pos)
+                        if help_clicked:
+                            hints_needed += 1
+                            #Find the next segment and put it in the right slot
+                            slot_num = 999
+                            for segment in segments:
+                                # Skip distract songs. Not an and so we dont try to iterate with none
+                                if segment.return_info["song_pos"] != None:
+                                    if segment.return_info["song_pos"] < slot_num and not segment.return_info["correct_slot"] == True:
+                                        slot_num = segment.return_info["song_pos"]
+                                        given_seg = segment
+                            # Get pos of correct slot
+                            for slot in unknown_slots:
+                                if slot.return_info["pos"] == slot_num:
                                     slot_pos = slot.get_pos()
-                                    if slot.rect.collidepoint(segment.rect.center) and slot.return_info["slot_full"] == False:
-                                        segment.set_pos(slot_pos)
-                                        #slot.return_info["slot_full"] = True
-                                        hover = True
-                                        if segment.return_info["song_pos"] == slot.return_info["pos"]:
-                                            segment.return_info["correct_slot"] = True
-                                            segment.disable_drag = True
-                                # If we're not above a slot when mouse button up, reset seg pos. Ignore segs that are in right slot
-                                if not hover and not segment.return_info["correct_slot"]:
-                                    segment.set_pos(segment_init_pos)  # snap back
-
+                                    break
+                            # Not efficient, but loop through all segs again, to see if any are in the slot.
+                            for segment in segments:
+                                if slot.rect.collidepoint(segment.rect.center):
+                                    segment.set_pos(segment.return_info["init_pos"])
+                            # Move given seg to the slot it's meant to be in
+                            given_seg.set_pos(slot_pos)
+                            check = self.create_check(given_seg)
+                            check_marks.append(check)
+                            given_seg.return_info["correct_slot"] = True
+                            given_seg.disable_drag = True
+                        #Handle segment events
+                        for segment in randomised_segments:
+                            segment.get_event(event, mouse_pos)
+                            # Handle segment events on mouse release
+                            if event.type == self.pygame.MOUSEBUTTONUP:
+                                if mouse_pos == segment.initial_mouse_pos:
+                                    currently_playing = segment.id
+                                    reset_segs = True
+                                    # Start a timer telling us when the music should end
+                                    song_time = (self.sound_manager.return_wav_lenth(segment.return_info["song_path"])) # get song len
+                                    music_time_id = self.timer_manager.CreateTimer("music_finished",song_time,verbose=False)
+                                # Snapback or new pos for seg
+                                else:
+                                    # If we hover over a slot, while holding a segment
+                                    segment_init_pos = segment.return_info["init_pos"]
+                                    hover = False
+                                    for slot in unknown_slots:
+                                        slot_pos = slot.get_pos()
+                                        if slot.rect.collidepoint(segment.rect.center): #and slot.return_info["slot_full"] == False:
+                                            # slot.return_info["slot_full"] = True
+                                            segment.set_pos(slot_pos)
+                                            hover = True
+                                            if segment.return_info["song_pos"] == slot.return_info["pos"]:
+                                                # If this is the first time we checked if this slot was correct
+                                                if segment.return_info["correct_slot"] == False:
+                                                    check = self.create_check(segment)
+                                                    check_marks.append(check)
+                                                    qt_message = self.behaviours_manager.get_praise()
+                                                    self.command_manager.send_qt_command(speech = qt_message,gesture="nod", emote="talking")
+                                                segment.return_info["correct_slot"] = True
+                                                segment.disable_drag = True
+                                            else:
+                                                qt_message = self.behaviours_manager.get_disagreements()
+                                                self.command_manager.send_qt_command(speech=qt_message, gesture="shake_head",
+                                                                                     emote="talking")
+                                                wrong_answers += 1
+                                    # If we're not above a slot when mouse button up, reset seg pos. Ignore segs that are in right slot
+                                    if not hover and not segment.return_info["correct_slot"]:
+                                        segment.set_pos(segment_init_pos)  # snap back
                     #Only reset once per mouse click
                     if reset_segs:
                         for segment in randomised_segments:
-                            # if a segment that isn't playing is showing pause sign, set it to play sign.
+                            # If a segment that isn't playing is showing pause sign, set it to play sign.
                             if segment.id != currently_playing and segment.toggle:
                                 segment.toggle = False
                         reset_segs = False
@@ -797,7 +852,6 @@ class Fix_The_Song_Game():
                         for segment in randomised_segments:
                             if segment.toggle:
                                 segment.toggle = False
-
                 # Check if level completed
                 i = 0
                 for seg in randomised_segments:
@@ -805,41 +859,44 @@ class Fix_The_Song_Game():
                         i+=1
                 if i >= num_correct_segs:
                     song_restored = True
-                #print(i,"/", num_correct_segs)
+
+            time_taken = rospy.get_time() - start_time
+            qt_message = self.qt_reward(time_taken, wrong_answers, hints_needed)
+            self.level_loader.QTSpeakingPopupScreen(qt_message, graphics, self.run,
+                                                    self.background_colour, partial_func =  False)
+            self.command_manager.send_qt_command(gesture="clap",
+                                                 emote="talking")
+            return time_taken, wrong_answers, hints_needed
 
 
     #################################################################Main####################################################################
 
     def Main(self, difficulty="easy",
-             level=1):  # input what level and difficulty to play, the program will handle the rest
+             level=3):  # input what level and difficulty to play, the program will handle the rest
         """Main Func"""
 
-        """
-        #Introduce game
+        # Introduce game
         self.run = self.level_loader.QTSpeakingScreen("Lets play Fix The Song!", self.run, self.background_colour)
 
-        #Ask if they want to play tutorial
+        # Ask if they want to play tutorial
         self.run, tut = self.level_loader.yes_or_no_screen('Should I explain how to play "Fix The Song" ?', self.run, self.background_colour)
         if tut:
             self.guided_tut()
         
-        #Count in to the start of the game
+        # Count in to the start of the game
         self.run = self.level_loader.tap_to_continue(self.run, self.background_colour)
 
-        #Count into level to slow pacing
+        # Count into level to slow pacing
         self.run = self.level_loader.countdown(3, self.run, self.background_colour, prelim_msg = "Get ready to hear the song!")
         
-        #Play the track and block
+        # Play the track and block
         self.play_music_blocking(difficulty, level)
 
-        #Play main level
-        self.play_level(difficulty, level)
-        """
+        # Play main level
+        time_taken, wrong_answers, hints_needed = self.play_level(difficulty, level)
 
-        # self.play_music_blocking(difficulty, level)
-        self.play_level(difficulty, 3)
-        #self.guided_tut()
-
+        # Save user data
+        print(time_taken, wrong_answers, hints_needed)
 
 ######################################################On execution#######################################################################
 

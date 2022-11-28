@@ -343,6 +343,7 @@ class Guess_The_Mood_Game():
         else:
             self.command_manager.send_qt_command(emote = "happy", gesture = "nod")
             qt_message = (self.behaviours_manager.get_agreements()) #QT reads out level's hint
+        return qt_message
         #print(time_taken, wrong_answers, hints_needed)
 
     def draw_tut_options(self, arrow_rect):
@@ -572,7 +573,8 @@ class Guess_The_Mood_Game():
                             if button_pressed_id == track_mood:
                                 #print("User has clicked the correct answer")
                                 correct_answer_given= True
-                                self.qt_reward(play_time, wrong_counter, hints_given)
+                                qt_message = self.qt_reward(play_time, wrong_counter, hints_given)
+
                                 self.level_loader.QTSpeakingPopupScreen(qt_message, self.rendered_graphics, self.run, self.background_colour) # this is blocking
                             #if clicked button is unsure --> give hint
                             elif button_pressed_id == "unsure":
@@ -580,7 +582,10 @@ class Guess_The_Mood_Game():
                                 hints_given += 1
                                 self.command_manager.send_qt_command(emote = "talking", gesture = "explain_right")
                                 qt_message = ("I will give you a clue... " + track_hint) #QT reads out level's hint
+                                self.command_manager.send_qt_command(gesture="nod")
                                 self.level_loader.QTSpeakingPopupScreen(qt_message, self.rendered_graphics, self.run, self.background_colour) # this is blocking
+
+
                             #if clicked button is incorrect --> direct to hint if they want one.
                             elif button_pressed_id != track_mood: 
                                 wrong_counter += 1 #how many time they have hit the wrong answer
@@ -636,26 +641,28 @@ class Guess_The_Mood_Game():
 
     def Main(self, difficulty = "easy", level =  1): #input what level and difficulty to play, the program will handle the rest
 
-        #Show starting screen
+        # Show starting screen
         self.run = self.level_loader.QTSpeakingScreen("Lets play Guess the mood!", self.run, self.background_colour)
 
-        #Ask if they want tutorial
+        # Ask if they want tutorial
         self.run, tut = self.level_loader.yes_or_no_screen('Should I explain how to play "Guess The Mood" ?', self.run, self.background_colour)
         if tut:
             self.run = self.guided_tut(self.run)
         
-        #Tap to continue screen to slow pacing
+        # Tap to continue screen to slow pacing
         self.run = self.level_loader.tap_to_continue(self.run, self.background_colour)
         
-        #Countdown
+        # Countdown
         self.run = self.level_loader.countdown(3, self.run, self.background_colour, prelim_msg = "Get ready to play!")
         
-        #Run game code
+        # Run game code
         self.run, play_time, wrong_counter, hints_given = self.play_level(self.run, difficulty, level)
 
-        
-        
-######################################################On execution#######################################################################
+        # Save user data
+        print(play_time, wrong_counter, hints_given)
+
+
+    ######################################################On execution#######################################################################
 
 #If we run this node, run the game on it's own
 if __name__ == '__main__':
