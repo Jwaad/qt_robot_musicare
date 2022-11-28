@@ -172,14 +172,18 @@ class Fix_The_Song_Game():
         else:
             return self.track_title, self.elapsed_time_secs, self.total_track_secs
 
-    def get_song_info(self, prev_track_time="", prev_total_time=""):
-        """Get variables that we will draw onto screen"""
-        formatted_data = self.get_track_info(formatted_output=True)
-        self.current_track_time = formatted_data[0]  # Time gotten from sound_player node
-        self.track_total_time = formatted_data[1]  # Total track time
-        self.progress = self.elapsed_time_secs / self.total_track_secs  # elapsed time in percentage completion, so slider can represent that on a bar
-        self.song_ended = self.progress >= 0.99  # if self.progress > 99% = song is finished, otherwise false
-        return self.current_track_time, self.track_total_time, self.progress, self.song_ended
+    def get_song_info(self, prev_track_time="", prev_total_time="", song_comp_only=False):
+        # Get variables that we will draw onto screen
+        formatted_data = self.GetTrackInfo(formatted_output=True)
+        current_track_time = formatted_data[0]  # Time gotten from sound_player node
+        track_total_time = formatted_data[1]  # Total track time
+        progress = self.elapsed_time_secs / self.total_track_secs  # elapsed time in percentage completion, so slider can represent that on a bar
+        song_ended = progress >= 0.99  # if progress > 99% = song is finished, otherwise false
+
+        if song_comp_only:
+            return song_ended
+        else:
+            return current_track_time, track_total_time, progress, song_ended
 
     def format_elapsed_display(self, time):
         "bit of code that converts secs to mins and secs"
@@ -399,19 +403,22 @@ class Fix_The_Song_Game():
             clap_recorder = threading.Thread(target=self.record_claps, args=(level_data,), daemon=True)
             clap_recorder.start()  # Start multi_threaded function
 
-            #print(level_data)
-            while not rospy.is_shutdown() and self.run:
-                events = self.pygame.event.get()
-#                print("loop")
-#                time.sleep(1)
-                for event in events:
-                    mouse_pos = self.pygame.mouse.get_pos()
-                    # print(mouse_pos) #TEMP
-                    if event.type == self.pygame.QUIT:
-                        self.run = False  # Stops the program entirely
-                        self.quit = True  # Tells us that the game was quit out of, and it didn't end organically
+            song_dong = False
+            still_fading = True
+            while song_done and self.run and not rospy.is_shutdown():
+                if still_fading:
+                    # Have screen fade to black.
+                    self.run = self.level_loader.screen_fade(self.run, self.background_colour, 5, "Please look at QT robot")
+                else:
+                    # Once fading is done, have just black screen.
+                    self.run = self.level_loader.black_screen(self.run)
 
-            temporal_accuracy, numerical_accuracy = 1, 12 # temp
+                #Hit the drum to the beat.
+                self.hit_drum()
+
+            #Stop recording clapping and log the user's score
+            temporal_accuracy, numerical_accuracy = self.analyse_performance()
+
             return temporal_accuracy, numerical_accuracy
 
 
@@ -446,17 +453,14 @@ class Fix_The_Song_Game():
         # Count into level to slow pacing
         self.run = self.level_loader.countdown(3, self.run, self.background_colour,
                                                prelim_msg="Get ready to clap along!")
-        
+        """
         # Play main level
         temporal_accuracy, numerical_accuracy = self.play_level(difficulty, level)
 
         # Save user data
         #print(temporal_accuracy, numerical_accuracy)
-        """
-        self.run = self.level_loader.screen_fade(self.run,self.background_colour, 5, "Please look at QT robot")
-        quit = False
-        while not quit and not rospy.is_shutdown():
-            quit = self.level_loader.black_screen(self.run)
+
+
 
 ######################################################On execution#######################################################################
 

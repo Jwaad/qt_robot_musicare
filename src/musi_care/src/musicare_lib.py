@@ -471,7 +471,7 @@ class StandardLevels():
             for event in self.pygame.event.get():
                 # Check if the user clicks the X
                 if event.type == self.pygame.QUIT:
-                    return True
+                    return False
                 # On mouse release play animation to show where cursor is
                 elif (event.type == self.pygame.MOUSEBUTTONUP):
                     # Tell system to play animation when drawing
@@ -482,7 +482,7 @@ class StandardLevels():
             self.animation_manager.DrawTouchAnimation(self.window)  # Also draw touches
             self.pygame.display.update()  # Update all drawn objects
 
-            return False
+            return True
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Text objects~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

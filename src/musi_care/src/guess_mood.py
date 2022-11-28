@@ -239,15 +239,18 @@ class Guess_The_Mood_Game():
         return grey_graphics      
 
 
-    def get_song_info(self, prev_track_time = "", prev_total_time=""):
+    def get_song_info(self, prev_track_time = "", prev_total_time="", song_comp_only = False):
     #Get variables that we will draw onto screen
         formatted_data = self.GetTrackInfo(formatted_output = True)
         current_track_time = formatted_data[0]          #Time gotten from sound_player node
         track_total_time = formatted_data[1] #Total track time
         progress = self.elapsed_time_secs / self.total_track_secs #elapsed time in percentage completion, so slider can represent that on a bar
         song_ended = progress >= 0.99 # if progress > 99% = song is finished, otherwise false
-            
-        return current_track_time, track_total_time, progress, song_ended
+
+        if song_comp_only:
+            return song_ended
+        else:
+            return current_track_time, track_total_time, progress, song_ended
         
         
     def highlight_block(self, events, target_rect = None, msg = "", timer_complete = None):
