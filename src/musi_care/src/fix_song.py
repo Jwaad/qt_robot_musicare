@@ -33,8 +33,9 @@ from musicare_lib import TextObject
 class Fix_The_Song_Game():
     """ Class to generate and handle guess the mood game """
 
-    def __init__(self):
-        """Initialise"""
+    def __init__(self, user_id):
+        """Initialise and take user_id, user_id helps us save the data to the specific profiles"""
+        self.user_id = user_id
         x = 145  # x pos of screen
         y = 0  # y pos of screen
         os.environ['SDL_VIDEO_WINDOW_POS'] = '%d,%d' % (x, y)  # move screen to x and y pos

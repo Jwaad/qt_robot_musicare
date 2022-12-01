@@ -843,7 +843,7 @@ class QTManager():
 
     def init_robot(self, arm_vel):
         """Method to init robot parameters"""
-        # Set control mode, incase they were changed before hand
+        # Set control mode, incase they were changed beforehand
         rospy.wait_for_service('/qt_robot/motors/setControlMode')
         self.set_mode = rospy.ServiceProxy('/qt_robot/motors/setControlMode', set_control_mode)
         mode_changed = self.set_mode(["right_arm", "left_arm"], 1)
@@ -852,7 +852,6 @@ class QTManager():
         else:
             rospy.loginfo("Motor control mode could not be changed")
             self.run = False
-
         # Set velocity of arms incase they were set differently
         rospy.wait_for_service('/qt_robot/motors/setVelocity')
         set_vel = rospy.ServiceProxy('/qt_robot/motors/setVelocity', set_velocity)

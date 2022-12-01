@@ -36,8 +36,9 @@ import threading
 class Simon_Says_Clap_Game():
     """ Class to generate and handle guess the mood game """
 
-    def __init__(self):
-        """Initialise"""
+    def __init__(self, user_id):
+        """Initialise and take user_id, user_id helps us save the data to the specific profiles"""
+        self.user_id = user_id
         x = 145  # x pos of screen
         y = 0  # y pos of screen
         os.environ['SDL_VIDEO_WINDOW_POS'] = '%d,%d' % (x, y)  # move screen to x and y pos
@@ -523,7 +524,6 @@ class Simon_Says_Clap_Game():
     def Main(self, difficulty="easy",
              level=1):  # input what level and difficulty to play, the program will handle the rest
         """Main Func"""
-        """
         # Introduce game
         self.run = self.level_loader.QTSpeakingScreen("Lets play Clap To The Beat!", self.run, self.background_colour)
 
@@ -531,9 +531,9 @@ class Simon_Says_Clap_Game():
         self.run, tut = self.level_loader.yes_or_no_screen('Should I explain how to play "Clap To The Beat" ?', self.run,
                                                            self.background_colour)
         if tut:
-            tut_msg =
-            "I will drum along to the beat. You need to watch what I am doing and clap along with me...
-            If you want, you can click your fingers or tap the table instead of clapping."
+            tut_msg = """ I will drum along to the beat... You need to watch what I am doing,,, and clap along with me...
+            At times,, i will stop drumming and yell. Stop!... When that happens, you need to stop clapping as well.. Then
+            When i say. Go! you will need to start clapping with me again."""
             
             repeat = True
             while repeat:
@@ -548,7 +548,6 @@ class Simon_Says_Clap_Game():
         # Count into level to slow pacing
         self.run = self.level_loader.countdown(3, self.run, self.background_colour,
                                                prelim_msg="Get ready to clap along!")
-        """
         # Play main level
         temporal_accuracy, numerical_accuracy = self.play_level(difficulty, level)
 
