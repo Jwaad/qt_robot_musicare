@@ -544,7 +544,7 @@ if __name__ == '__main__':
     # Initialise game
     rospy.init_node('clap_bear_game', anonymous=False)
     rospy.loginfo("Node launched successfully")
-    game_object = Clap_To_Beat_Game()
+    game_object = Clap_To_Beat_Game("jwaad")
 
     # Run the game
     try:

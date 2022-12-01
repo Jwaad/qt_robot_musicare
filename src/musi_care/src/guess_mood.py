@@ -244,7 +244,7 @@ class Guess_The_Mood_Game():
 
 
     def get_song_info(self, prev_track_time = "", prev_total_time="", song_comp_only = False):
-    #Get variables that we will draw onto screen
+        #Get variables that we will draw onto screen
         formatted_data = self.get_track_info(formatted_output = True)
         current_track_time = formatted_data[0]          #Time gotten from sound_player node
         track_total_time = formatted_data[1] #Total track time

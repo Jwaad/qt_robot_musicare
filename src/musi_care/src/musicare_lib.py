@@ -289,6 +289,8 @@ class StandardLevels():
         """
             Method displays all our gui with a popup in front with text in centre
            graphics = a dict of functions that are saved with the parameters needed to render them
+           can work with (to be archived method) saved particial functions.
+           or a list of ojbects with the "render" method
         """
         # Variables
         this_file_path = os.path.dirname(__file__)
