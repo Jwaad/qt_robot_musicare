@@ -33,7 +33,7 @@ from std_msgs.msg import Float64MultiArray
 
 #################################################################Initialise#################################################################
 
-class Fix_The_Song_Game():
+class Clap_To_Beat_Game():
     """ Class to generate and handle guess the mood game """
 
     def __init__(self):
@@ -75,6 +75,10 @@ class Fix_The_Song_Game():
         self.debug = True
         if not self.debug:
             self.pygame.mouse.set_visible(False)  # set to false when not testing
+        self.right_arm_pos_pub = rospy.Publisher('/qt_robot/right_arm_position/command', Float64MultiArray,
+                                                 queue_size=10)
+        self.left_arm_pos_pub = rospy.Publisher('/qt_robot/left_arm_position/command', Float64MultiArray,
+                                                queue_size=10)
         # self.music_vol = 1 # change volume of laptop
         # self.qt_voice_vol
         # self.sound_manager.volume_change(self.music_vol) # Set a default volume
@@ -401,27 +405,29 @@ class Fix_The_Song_Game():
         self.left_arm_pos_pub.publish(arm_msg)
 
 
-    def hit_drum(self):
-        #Function that uses left or right arm to hit drum
-        if self.left_arm_hit and not self.right_arm_hit: #move left arm back up and move right arm down
-            #print("Hitting with right")
-            self.move_right_arm(self.hitting_drum)
-            self.move_left_arm(self.raised_arm)
-            self.right_arm_hit = True
-            self.left_arm_hit = False
-            return True
-        elif self.right_arm_hit and not self.left_arm_hit: #move right arm back up and left arm down
-            #print("Hitting with left")
-            self.move_right_arm(self.raised_arm)
-            self.move_left_arm(self.hitting_drum)
-            self.right_arm_hit = False
-            self.left_arm_hit = True
-            return True
-        else:
-            print("Somehow both arms have hit the drum at once")
-            return False
-        return False
+    def hit_drum(self, beat_timing, elapsed_time, prev_arm,):
+        """
+        Use a list of beat times, to hit drum at the right time
+        prev_arm will be either "left" or "right"
+        """
 
+        hit_the_drum = False
+        if hit_the_drum:
+            # Function that hits the drum with either the left or right hand
+            if prev_arm == "left":
+                # Move left arm back up and move right arm down
+                self.move_right_arm(self.hitting_drum)
+                self.move_left_arm(self.raised_arm)
+                prev_arm = "right"
+                return prev_arm
+            else:
+                # Move right arm back up and move left arm down
+                self.move_right_arm(self.raised_arm)
+                self.move_left_arm(self.hitting_drum)
+                prev_arm = "left"
+                return prev_arm
+        else:
+            return prev_arm
 
     def analyse_performance(self):
         """Takes the recording / data from the recording of the clapping """
@@ -447,13 +453,16 @@ class Fix_The_Song_Game():
             song_done = False
             still_fading = True
 
-            # Start song
-            self.sound_manager.unpause()
-            # go from bright to black in 5 s
             fade_time = 5
             time_of_darkness = rospy.get_time() + fade_time
             time_left = time_of_darkness - rospy.get_time()
+            self.sound_manager.unpause()
+            track_start_time = rospy.get_time()
+
             while not song_done and self.run and not rospy.is_shutdown():
+                # Get elapsed time
+                track_time = track_start_time - rospy.get_time()
+
                 # Render screen, will fade to black and stay black
                 message = "Please Look At QT Robot"
                 if time_left > 0:
@@ -520,9 +529,9 @@ class Fix_The_Song_Game():
 # If we run this node, run the game on it's own
 if __name__ == '__main__':
     # Initialise game
-    rospy.init_node('fix_song_game', anonymous=False)
+    rospy.init_node('clap_bear_game', anonymous=False)
     rospy.loginfo("Node launched successfully")
-    game_object = Fix_The_Song_Game()
+    game_object = Clap_To_Beat_Game()
 
     # Run the game
     try:
@@ -532,6 +541,4 @@ if __name__ == '__main__':
         SoundManager("").stop_track()
         print("Audio may not be stopped due to interrupt")
 
-    # on exit delete music files and stop music
-    # game_object.empty_temp_dir() # TODO finish this method
     SoundManager("").stop_track()
