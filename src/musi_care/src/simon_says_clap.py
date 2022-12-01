@@ -33,7 +33,7 @@ import threading
 
 #################################################################Initialise#################################################################
 
-class Clap_To_Beat_Game():
+class Simon_Says_Clap_Game():
     """ Class to generate and handle guess the mood game """
 
     def __init__(self):
@@ -52,7 +52,7 @@ class Clap_To_Beat_Game():
         self.cen_y = self.window_center[1]
         self.window = pygame.display.set_mode((self.window_x, self.window_y))  # Create window and set size
         self.background_colour = (100, 100, 100)  # background black by default
-        self.pygame.display.set_caption("Clap to the beat!")  # Label window
+        self.pygame.display.set_caption("Simon says clap!")  # Label window
         self.run = True
         self.quit = False  # Check to see if the game ended or it was quit
         self.track_playing = False
@@ -466,10 +466,24 @@ class Clap_To_Beat_Game():
             prev_arm = "left"
             track_total_time = self.get_track_info()[2]
             beat_timings = self.get_beat_timing(level_data, track_total_time)
+            new_random = True
+            freeze = False
             self.sound_manager.unpause()
             while not song_done and len(beat_timings) > 0 and self.run and not rospy.is_shutdown():
                 # Get elapsed time
                 elapsed_time = self.get_track_info()[1]
+
+                # Stop beat every 5 - 12 seconds
+                if new_random:
+                    freeze_time = self.timer_manager.CreateTimer("freeze", random.randint(5, 12))
+                    new_random = False
+                if len(self.timer_manager.timers) > 0:
+                    if self.timer_manager.CheckTimer(freeze_time):
+                        self.command_manager.send_qt_command(speech="Stop!")
+                        time_unfreeze = self.timer_manager.CreateTimer("unfreeze",random.randint(2, 5))
+                        freeze = True
+                        self.sound_manager.pause()
+
 
                 # Render screen, will fade to black and stay black
                 message = "Please Look At QT Robot"
@@ -480,11 +494,18 @@ class Clap_To_Beat_Game():
                 fade_scalar = (time_left / fade_time)
                 self.run = self.level_loader.fade_to_black_screen(self.run, message, self.background_colour, fade_scalar )
 
-                # Hit the drum to the beat.
-                beat_timings, prev_arm = self.hit_drum(beat_timings, elapsed_time, prev_arm)
+                if not freeze:
+                    # Hit the drum to the beat.
+                    beat_timings, prev_arm = self.hit_drum(beat_timings, elapsed_time, prev_arm)
 
-                # Check if song done
-                song_done = self.get_song_info(song_comp_only=True)
+                    # Check if song done
+                    song_done = self.get_song_info(song_comp_only=True)
+                else:
+                    if self.timer_manager.CheckTimer(time_unfreeze):
+                        freeze = False
+                        new_random = True
+                        self.command_manager.send_qt_command(speech="Go!", gesture="grin")
+                        self.sound_manager.unpause()
 
             # Stop recording clapping and log the user's score
             temporal_accuracy, numerical_accuracy = self.analyse_performance()
@@ -541,9 +562,9 @@ class Clap_To_Beat_Game():
 # If we run this node, run the game on it's own
 if __name__ == '__main__':
     # Initialise game
-    rospy.init_node('clap_bear_game', anonymous=False)
+    rospy.init_node('simon_says_clap', anonymous=False)
     rospy.loginfo("Node launched successfully")
-    game_object = Clap_To_Beat_Game()
+    game_object = Simon_Says_Clap_Game()
 
     # Run the game
     try:
