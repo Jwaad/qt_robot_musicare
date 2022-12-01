@@ -36,7 +36,7 @@ import threading
 class Simon_Says_Clap_Game():
     """ Class to generate and handle guess the mood game """
 
-    def __init__(self, user_id):
+    def __init__(self, user_id, reduce_screen = True):
         """Initialise and take user_id, user_id helps us save the data to the specific profiles"""
         self.user_id = user_id
         x = 145  # x pos of screen
@@ -46,7 +46,10 @@ class Simon_Says_Clap_Game():
         self.pygame.init()  # start py engine
         self.pygame.freetype.init()
         res = pygame.display.Info()  # get our screen resolution
-        self.window_x = res.current_w - 150  # Width of window -150 to account for the linux toolbar
+        if reduce_screen:
+            self.window_x = res.current_w - 150  # Width of window -150 to account for the linux toolbar
+        else:
+            self.window_x = res.current_w
         self.window_y = res.current_h  # Height of window
         self.window_center = (int(self.window_x / 2), int(self.window_y / 2))
         self.cen_x = self.window_center[0]
@@ -525,10 +528,10 @@ class Simon_Says_Clap_Game():
              level=1):  # input what level and difficulty to play, the program will handle the rest
         """Main Func"""
         # Introduce game
-        self.run = self.level_loader.QTSpeakingScreen("Lets play Clap To The Beat!", self.run, self.background_colour)
+        self.run = self.level_loader.QTSpeakingScreen("Lets play Simon Says Clap!", self.run, self.background_colour)
 
         # Ask if they want to play tutorial
-        self.run, tut = self.level_loader.yes_or_no_screen('Should I explain how to play "Clap To The Beat" ?', self.run,
+        self.run, tut = self.level_loader.yes_or_no_screen('Should I explain how to play "Simon Says Clap" ?', self.run,
                                                            self.background_colour)
         if tut:
             tut_msg = """ I will drum along to the beat... You need to watch what I am doing,,, and clap along with me...

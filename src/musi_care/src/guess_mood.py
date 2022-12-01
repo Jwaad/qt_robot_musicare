@@ -30,7 +30,7 @@ from musicare_lib import General
 class Guess_The_Mood_Game():
     """ Class to generate and handle guess the mood game """
 	
-    def __init__(self, user_id):
+    def __init__(self, user_id, reduce_screen = True):
         """Initialise and take user_id, user_id helps us save the data to the specific profiles"""
         self.user_id = user_id
         x=145 # x pos of screen
@@ -42,7 +42,11 @@ class Guess_The_Mood_Game():
         self.pygame.init() #start py engine
         self.pygame.freetype.init() 
         res = pygame.display.Info() #get our screen resolution
-        self.window_x = res.current_w -150 # Width of window -150 to account for the linux toolbar
+        # work around
+        if reduce_screen:
+            self.window_x = res.current_w - 150  # Width of window -150 to account for the linux toolbar
+        else:
+            self.window_x = res.current_w
         self.window_y = res.current_h      # Height of window
         self.window_center = (int(self.window_x/2), int(self.window_y/2))
         self.cen_x = self.window_center[0]
@@ -383,12 +387,12 @@ class Guess_The_Mood_Game():
         #Create rect to highlight and text for QT to say
         #Lets try it now: listen to song --> this sounds happy to me. --> lets click "happy" --> highlight happy --> wait for press
         tut_graphics = {
-        1: {"rect":None, "keys":[1,2,3,4,5],  "speech" : "In this game, you will hear some music and you need to select whether it was happy or sad! When you are ready for the next step, tap the. Next. button."},
-        2: {"rect":(560, 30, 1790, 135), "keys":[1], "speech" : "This text at the top will remind you of what you have to do."},
-        3: {"rect":(615, 600, 1675, 800), "keys":[2,3], "speech" : "These are your options. Tap happy if you think the song is happy, or sad if you think the song is sad."},
-        4: {"rect":(800, 1400, 2050-800, 1850-1500), "keys":[4], "speech" : "If you need a hint, click this button. I will help you out!"},
-        5: {"rect":(1235, 180, 400, 400), "keys":[5], "speech" : "This is the play and pause button. Use this to stop and start the song as you like."},
-        6: {"rect": None, "keys":[1,2,3,4,5], "speech" : "That is all for Guess the mood, have fun!."}
+        1: {"rect":None, "keys":[1,2,3,4,5],  "speech" : "In this game, you will hear some music, and you need to select, weather it was happy, or sad! When you are ready for the next step,, tap the. Next.. button."},
+        2: {"rect":(560, 30, 1790, 135), "keys":[1], "speech" : "This text at the top, will remind you of what you have to do."},
+        3: {"rect":(615, 600, 1675, 800), "keys":[2,3], "speech" : "These are your options.. Tap happy, if you think the song is happy, or sad if you think the song is sad."},
+        4: {"rect":(800, 1400, 2050-800, 1850-1500), "keys":[4], "speech" : "If you need a hint, click this button... I will help you out!"},
+        5: {"rect":(1235, 180, 400, 400), "keys":[5], "speech" : "This is the play button.. Use this to stop and start the song..."},
+        6: {"rect": None, "keys":[1,2,3,4,5], "speech" : "That is all for guess the mood, have fun!"}
         }
 
         if self.run:
@@ -414,6 +418,7 @@ class Guess_The_Mood_Game():
                 tut_speech = tut_graphics[key]["speech"]
                 tut_rect = tut_graphics[key]["rect"]
                 speaking_timer = self.command_manager.qt_say(tut_speech) #QT should say text out loud
+                qt_finished_talking = False
                 option_chosen = False  #Hold execution until user clicks on button
                 
                 #set logic based on what graphic we focus on
@@ -442,8 +447,8 @@ class Guess_The_Mood_Game():
                             button.render(self.window)
                     #if there's no box highlighted, draw the buttons in a default pos
                     elif qt_finished_talking and tut_rect == None:
-                        self.tut_next.set_pos((1600, 1100))
-                        self.tut_repeat.set_pos((900, 1100))
+                        self.tut_next.set_pos((1700, 250))
+                        self.tut_repeat.set_pos((700, 250))
                         for button in tut_buttons:
                             button.render(self.window)
 
