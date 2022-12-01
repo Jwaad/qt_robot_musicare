@@ -29,6 +29,7 @@ from musicare_lib import Behaviours
 from musicare_lib import TextObject
 import logging
 import threading
+from std_msgs.msg import Float64MultiArray
 
 #################################################################Initialise#################################################################
 
@@ -365,15 +366,15 @@ class Fix_The_Song_Game():
             self.tut_next.set_pos((arrow_x + 450, arrow_y))
             self.tut_repeat.set_pos((arrow_x - 600, arrow_y))
 
-    def qt_reward(self, time_taken, wrong_answers, hints_needed):
+    def qt_reward(self, temporal_accuracy, numerical_accuracy):
         """handles what QT should say and do on level end """
         # "Perfect clear"
-        if time_taken < 15 and wrong_answers < 1 and hints_needed < 1:
+        if temporal_accuracy > 0.8 and numerical_accuracy > 0.8:
             self.command_manager.send_qt_command(emote="happy", gesture="nod")
-            qt_message = (self.behaviours_manager.get_praise())  # QT reads out level's hint
+            qt_message = (self.behaviours_manager.get_generic_praise()) # QT reads out level's hint
         else:
             self.command_manager.send_qt_command(emote="happy", gesture="nod")
-            qt_message = (self.behaviours_manager.get_agreements())  # QT reads out level's hint
+            qt_message = (self.behaviours_manager.get_generic_light_praise())  # QT reads out level's hint
         return qt_message
 
     #######################################################Level / screen code###############################################################
@@ -386,14 +387,48 @@ class Fix_The_Song_Game():
             time.sleep(2) # TEMP
         print("Ended clap recording thread")
 
-    def hit_drum(self, level_data):
-        """ Make QT physically hit the drum with alternating hands """
-        print("hitting the drum at the correct time")
-        pass
+    def move_right_arm(self, joint_angles):
+        #Function that moves the right arm to specified locations
+        arm_msg = Float64MultiArray()
+        arm_msg.data = [joint_angles[0], joint_angles[1], joint_angles[2]]
+        self.right_arm_pos_pub.publish(arm_msg)
+
+
+    def move_left_arm(self, joint_angles):
+        #Function that moves the left arm to specified locations
+        arm_msg = Float64MultiArray()
+        arm_msg.data = [-joint_angles[0], joint_angles[1], joint_angles[2]]
+        self.left_arm_pos_pub.publish(arm_msg)
+
+
+    def hit_drum(self):
+        #Function that uses left or right arm to hit drum
+        if self.left_arm_hit and not self.right_arm_hit: #move left arm back up and move right arm down
+            #print("Hitting with right")
+            self.move_right_arm(self.hitting_drum)
+            self.move_left_arm(self.raised_arm)
+            self.right_arm_hit = True
+            self.left_arm_hit = False
+            return True
+        elif self.right_arm_hit and not self.left_arm_hit: #move right arm back up and left arm down
+            #print("Hitting with left")
+            self.move_right_arm(self.raised_arm)
+            self.move_left_arm(self.hitting_drum)
+            self.right_arm_hit = False
+            self.left_arm_hit = True
+            return True
+        else:
+            print("Somehow both arms have hit the drum at once")
+            return False
+        return False
+
 
     def analyse_performance(self):
         """Takes the recording / data from the recording of the clapping """
-        return "timing", "accuracy"
+        #TODO complete this section
+        temporal_accuracy = 0.9 #90%
+        numerical_accuracy = 0.9 #90%
+        return temporal_accuracy, numerical_accuracy
 
     def play_level(self, difficulty, level):
         """Have QT clap to beat and record user clapping"""

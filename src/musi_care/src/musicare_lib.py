@@ -72,6 +72,8 @@ class ThreadWithReturnValue():#Thread):
 
     #TODO come back to this, and give thread objects the functionality to return data, and be stopped from the main
     #TODO possibly self.run within this class
+    # https://stackoverflow.com/questions/323972/is-there-any-way-to-kill-a-thread
+
     def __init__(self, group=None, target=None, name=None, args=(), kwargs={}, Verbose=False):
         Thread.__init__(self, group, target, name, args, kwargs)
         self._return = None
@@ -143,6 +145,7 @@ class Behaviours():
         return saying
 
     def get_praise(self):
+        """ Sayings for when user does very well """
         sayings = ["Amazing, that is the right answer!", "Great job!", "Alright, that's correct!", "Wow, well done!",
                    "Nice! Well done!", "You did really well on that one!", "You are a natural",
                    "You made that one look easy!"]
@@ -150,8 +153,24 @@ class Behaviours():
         saying = sayings[ind]
         return saying
 
+    def get_generic_praise(self):
+        """ Generic sayings for when user does very well """
+        sayings = ["Amazing !", "Great job!", "Wow, well done!", "Nice! Well done!",
+                   "You did really well on that one!", "You are a natural", "You made that one look easy!"]
+        ind = random.randint(0, len(sayings) - 1)
+        saying = sayings[ind]
+        return saying
+
+    def get_generic_light_praise(self):
+        """ Level end sayings for when user does okay """
+        sayings = ["Good job!", "Great job!", "Alright, well done!", "Well done!",
+                   "Nice!", "You did well on that one!", "You made that one look easy!"]
+        ind = random.randint(0, len(sayings) - 1)
+        saying = sayings[ind]
+        return saying
+
     def get_incorrect(self):
-        sayings = ["Okay, next question", "On to the next question", ]
+        sayings = ["Okay, next question", "On to the next question", "Lets move on", "To the next" ]
         ind = random.randint(0, len(sayings) - 1)
         saying = sayings[ind]
         return saying
@@ -418,7 +437,7 @@ class StandardLevels():
                     else:
                         self.renderer.DrawTextCentered(qt_speech, font_size=500, font_colour=(150, 250, 150))
 
-                    self.animation_manager.DrawTouchAnimation(self.window)  # also draw touches
+                    self.animation_manager.DrawTouchAnimation(self.window)  # Also draw touches
                     self.pygame.display.update()  # Update all drawn objects
 
                     if prelim_msg != None and second == seconds:  # if 1st loop, check a different timer
