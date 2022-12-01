@@ -399,8 +399,12 @@ class Fix_The_Song_Game():
         randomised_segments = segments
         random.shuffle(randomised_segments)
         for seg_i in range(len(randomised_segments)):
-            randomised_segments[seg_i].set_pos(self.segment_x_y[seg_i])
-            randomised_segments[seg_i].return_info["init_pos"] = self.segment_x_y[seg_i]
+            pos_idx = random.randint(0, len(self.segment_x_y))
+            while pos_idx not in self.segment_x_y.keys():
+                pos_idx = random.randint(0, len(self.segment_x_y))
+            randomised_segments[seg_i].set_pos(self.segment_x_y[pos_idx])
+            randomised_segments[seg_i].return_info["init_pos"] = self.segment_x_y[pos_idx]
+            self.segment_x_y.pop(pos_idx)
 
         # Create loading button
         loading_button = self.create_button("loading_screen_button_depressed.png", "loading_screen_button_depressed.png",
@@ -413,6 +417,7 @@ class Fix_The_Song_Game():
         for i in range(num_correct_slots):
             unknown_seg = self.create_button("music_segment_greyed_out.png", "music_segment_greyed_out.png", (
                 unknown_y, 0), scale = 2)
+
             unknown_slots.append(unknown_seg)
         # Change position of unknown slots
         step = (unknown_slots[0].get_rect()[2])  # step = width of slots
@@ -741,6 +746,9 @@ class Fix_The_Song_Game():
             wrong_answers = 0
             hints_needed = 0
             while not level_completed and not rospy.is_shutdown() and self.run:
+                #Combine the two render lists into one so when we block the screen we can send this alone
+                combined_graphics = graphics + check_marks
+
                 # End loop check at top, to let loop finish 1 last time
                 if song_restored:
                     level_completed = True
@@ -803,6 +811,9 @@ class Fix_The_Song_Game():
                             check_marks.append(check)
                             given_seg.return_info["correct_slot"] = True
                             given_seg.disable_drag = True
+                            qt_message = "I will give you one of the pieces of the song..."
+                            self.level_loader.QTSpeakingPopupScreen(qt_message, combined_graphics, self.run,
+                                                                    self.background_colour, partial_func=False)  # this is blocking
                         #Handle segment events
                         for segment in randomised_segments:
                             segment.get_event(event, mouse_pos)
@@ -836,9 +847,14 @@ class Fix_The_Song_Game():
                                                 segment.disable_drag = True
                                             else:
                                                 qt_message = self.behaviours_manager.get_disagreements()
-                                                self.command_manager.send_qt_command(speech=qt_message, gesture="shake_head",
+                                                self.command_manager.send_qt_command(gesture="shake_head",
                                                                                      emote="talking")
+                                                self.level_loader.QTSpeakingPopupScreen(qt_message, combined_graphics, self.run,
+                                                                                        self.background_colour,
+                                                                                        partial_func=False)
+                                                segment.set_pos(segment_init_pos)
                                                 wrong_answers += 1
+
                                     # If we're not above a slot when mouse button up, reset seg pos. Ignore segs that are in right slot
                                     if not hover and not segment.return_info["correct_slot"]:
                                         segment.set_pos(segment_init_pos)  # snap back
@@ -866,7 +882,7 @@ class Fix_The_Song_Game():
 
             time_taken = rospy.get_time() - start_time
             qt_message = self.qt_reward(time_taken, wrong_answers, hints_needed)
-            self.level_loader.QTSpeakingPopupScreen(qt_message, graphics, self.run,
+            self.level_loader.QTSpeakingPopupScreen(qt_message, combined_graphics, self.run,
                                                     self.background_colour, partial_func =  False)
             self.command_manager.send_qt_command(gesture="clap",
                                                  emote="talking")
@@ -878,7 +894,7 @@ class Fix_The_Song_Game():
     def Main(self, difficulty="easy",
              level=3):  # input what level and difficulty to play, the program will handle the rest
         """Main Func"""
-
+        """
         # Introduce game
         self.run = self.level_loader.QTSpeakingScreen("Lets play Fix The Song!", self.run, self.background_colour)
 
@@ -889,13 +905,14 @@ class Fix_The_Song_Game():
         
         # Count in to the start of the game
         self.run = self.level_loader.tap_to_continue(self.run, self.background_colour)
-
-        # Count into level to slow pacing
-        self.run = self.level_loader.countdown(3, self.run, self.background_colour, prelim_msg = "Get ready to hear the song!")
         
         # Play the track and block
         self.play_music_blocking(difficulty, level)
 
+        # Count into level to slow pacing
+        self.run = self.level_loader.countdown(3, self.run, self.background_colour,
+                                               prelim_msg="Get ready to hear the song!")
+        """
         # Play main level
         time_taken, wrong_answers, hints_needed = self.play_level(difficulty, level)
 
@@ -909,7 +926,7 @@ if __name__ == '__main__':
     # Initialise game
     rospy.init_node('fix_song_game', anonymous=False)
     rospy.loginfo("Node launched successfully")
-    game_object = Fix_The_Song_Game()
+    game_object = Fix_The_Song_Game("jwaad")
 
     # Run the game
     try:
