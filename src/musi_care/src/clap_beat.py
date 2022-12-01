@@ -29,7 +29,7 @@ from musicare_lib import Behaviours
 from musicare_lib import TextObject
 import logging
 import threading
-from std_msgs.msg import Float64MultiArray
+
 
 #################################################################Initialise#################################################################
 
@@ -75,10 +75,7 @@ class Clap_To_Beat_Game():
         self.debug = True
         if not self.debug:
             self.pygame.mouse.set_visible(False)  # set to false when not testing
-        self.right_arm_pos_pub = rospy.Publisher('/qt_robot/right_arm_position/command', Float64MultiArray,
-                                                 queue_size=10)
-        self.left_arm_pos_pub = rospy.Publisher('/qt_robot/left_arm_position/command', Float64MultiArray,
-                                                queue_size=10)
+        #self.command_manager.init_robot(100) # Set robot arm speed to max for this game
         # self.music_vol = 1 # change volume of laptop
         # self.qt_voice_vol
         # self.sound_manager.volume_change(self.music_vol) # Set a default volume
@@ -370,64 +367,75 @@ class Clap_To_Beat_Game():
             self.tut_next.set_pos((arrow_x + 450, arrow_y))
             self.tut_repeat.set_pos((arrow_x - 600, arrow_y))
 
-    def qt_reward(self, temporal_accuracy, numerical_accuracy):
+    def qt_reward(self, temporal_accuracy, numerical_accuracy, should_gesture = False):
         """handles what QT should say and do on level end """
         # "Perfect clear"
         if temporal_accuracy > 0.8 and numerical_accuracy > 0.8:
-            self.command_manager.send_qt_command(emote="happy", gesture="nod")
             qt_message = (self.behaviours_manager.get_generic_praise()) # QT reads out level's hint
         else:
-            self.command_manager.send_qt_command(emote="happy", gesture="nod")
             qt_message = (self.behaviours_manager.get_generic_light_praise())  # QT reads out level's hint
+        if should_gesture:
+            self.command_manager.send_qt_command(emote="happy", gesture="nod")
         return qt_message
 
     #######################################################Level / screen code###############################################################
 
     def record_claps(self, level_data ):
         """ Multithreaded function that records claps"""
-        # TODO add functionallity that records audio and claps until a timer ends (timer is the song duration)
+        # TODO add functionality that records audio and claps until a timer ends (timer is the song duration)
         while self.run:
             print("Pretending to record clapping")
             time.sleep(2) # TEMP
         print("Ended clap recording thread")
 
-    def move_right_arm(self, joint_angles):
-        #Function that moves the right arm to specified locations
-        arm_msg = Float64MultiArray()
-        arm_msg.data = [joint_angles[0], joint_angles[1], joint_angles[2]]
-        self.right_arm_pos_pub.publish(arm_msg)
-
-
-    def move_left_arm(self, joint_angles):
-        #Function that moves the left arm to specified locations
-        arm_msg = Float64MultiArray()
-        arm_msg.data = [-joint_angles[0], joint_angles[1], joint_angles[2]]
-        self.left_arm_pos_pub.publish(arm_msg)
-
+    def get_beat_timing(self, level_data, track_total_time):
+        """
+        Use level data and return a list of the timings of each beat
+        track_total_time should be in seconds
+        """
+        print("Track time: ",track_total_time)
+        first_beat = float(level_data["first_beat"])
+        bpm = int(level_data["bpm"])
+        beat = first_beat
+        beat_timings = []
+        while beat < track_total_time:
+            beat_timings.append(beat)
+            beat += 60 / bpm
+        return beat_timings
 
     def hit_drum(self, beat_timing, elapsed_time, prev_arm,):
         """
         Use a list of beat times, to hit drum at the right time
         prev_arm will be either "left" or "right"
+        It will then pop the list of beat_timings, so that we dont keep hitting the same beat.
         """
+        # get out just the beat timing we want, and also the hard_coded time it takes to hit the drum
+        this_beat = beat_timing[0]
+        time_to_hit = 0.3
+        raised_arm = [-26.700000762939453, -85.4000015258789, -58.29999923706055]
+        hitting_drum = [17.200000762939453, -80.0999984741211, -46.599998474121094]
 
-        hit_the_drum = False
-        if hit_the_drum:
+        #Check if we should hit the drum this loop
+        if elapsed_time + time_to_hit > this_beat:
             # Function that hits the drum with either the left or right hand
             if prev_arm == "left":
                 # Move left arm back up and move right arm down
-                self.move_right_arm(self.hitting_drum)
-                self.move_left_arm(self.raised_arm)
+                self.command_manager.move_right_arm(hitting_drum)
+                self.command_manager.move_right_arm(raised_arm)
+                beat_timing.pop(0)
                 prev_arm = "right"
-                return prev_arm
+                print("Right arm")
+                return beat_timing, prev_arm
             else:
                 # Move right arm back up and move left arm down
-                self.move_right_arm(self.raised_arm)
-                self.move_left_arm(self.hitting_drum)
+                self.command_manager.move_right_arm(raised_arm)
+                self.command_manager.move_right_arm(hitting_drum)
+                beat_timing.pop(0)
                 prev_arm = "left"
-                return prev_arm
+                print("Left arm")
+                return beat_timing, prev_arm
         else:
-            return prev_arm
+            return beat_timing, prev_arm
 
     def analyse_performance(self):
         """Takes the recording / data from the recording of the clapping """
@@ -449,37 +457,41 @@ class Clap_To_Beat_Game():
             clap_recorder = threading.Thread(target=self.record_claps, args=(level_data,), daemon=True)
             clap_recorder.start()  # Start multi_threaded function
 
+            # Define some parameters and vars
             self.sound_manager.load_track(self.track_name)
             song_done = False
-            still_fading = True
-
             fade_time = 5
             time_of_darkness = rospy.get_time() + fade_time
             time_left = time_of_darkness - rospy.get_time()
+            prev_arm = "left"
+            track_total_time = self.get_track_info()[2]
+            beat_timings = self.get_beat_timing(level_data, track_total_time)
             self.sound_manager.unpause()
-            track_start_time = rospy.get_time()
-
-            while not song_done and self.run and not rospy.is_shutdown():
+            while not song_done and len(beat_timings) > 0 and self.run and not rospy.is_shutdown():
                 # Get elapsed time
-                track_time = track_start_time - rospy.get_time()
+                elapsed_time = self.get_track_info()[1]
 
                 # Render screen, will fade to black and stay black
                 message = "Please Look At QT Robot"
                 if time_left > 0:
                     time_left = time_of_darkness - rospy.get_time()
-                else: time_left = 0
-
+                else:
+                    time_left = 0
                 fade_scalar = (time_left / fade_time)
                 self.run = self.level_loader.fade_to_black_screen(self.run, message, self.background_colour, fade_scalar )
 
                 # Hit the drum to the beat.
-                self.hit_drum(level_data)
+                beat_timings, prev_arm = self.hit_drum(beat_timings, elapsed_time, prev_arm)
 
                 # Check if song done
-                #song_done = self.get_song_info(song_comp_only=False)
+                song_done = self.get_song_info(song_comp_only=True)
 
-            #Stop recording clapping and log the user's score
+            # Stop recording clapping and log the user's score
             temporal_accuracy, numerical_accuracy = self.analyse_performance()
+
+            # QT should praise user based on performance
+            message = self.qt_reward(temporal_accuracy, numerical_accuracy)
+            self.command_manager.send_qt_command(speech=message, gesture="arms_up", emote="Happy")
 
             return temporal_accuracy, numerical_accuracy
 

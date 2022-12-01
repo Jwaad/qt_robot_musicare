@@ -9,8 +9,8 @@ first_beat = 0.1
 EASY MODE
 {
 song_name = follow_the_van.wav
-bpm = 60
-first_beat = 0.1
+bpm = 57
+first_beat = 2.8
 £#
 song_name = sad_1.wav
 bpm = 60

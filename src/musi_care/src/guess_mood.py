@@ -577,7 +577,6 @@ class Guess_The_Mood_Game():
                                 #print("User has clicked the correct answer")
                                 correct_answer_given= True
                                 qt_message = self.qt_reward(play_time, wrong_counter, hints_given)
-
                                 self.level_loader.QTSpeakingPopupScreen(qt_message, self.rendered_graphics, self.run, self.background_colour) # this is blocking
                             #if clicked button is unsure --> give hint
                             elif button_pressed_id == "unsure":
@@ -587,11 +586,9 @@ class Guess_The_Mood_Game():
                                 qt_message = ("I will give you a clue... " + track_hint) #QT reads out level's hint
                                 self.command_manager.send_qt_command(gesture="nod")
                                 self.level_loader.QTSpeakingPopupScreen(qt_message, self.rendered_graphics, self.run, self.background_colour) # this is blocking
-
-
                             #if clicked button is incorrect --> direct to hint if they want one.
-                            elif button_pressed_id != track_mood: 
-                                wrong_counter += 1 #how many time they have hit the wrong answer
+                            elif button_pressed_id != track_mood:
+                                wrong_counter += 1 #how many times they have hit the wrong answer
                                 if wrong_counter <= 1:
                                     #print("User has clicked the wrong answer")
                                     self.command_manager.send_qt_command(emote = "sad", gesture = "shake_head")

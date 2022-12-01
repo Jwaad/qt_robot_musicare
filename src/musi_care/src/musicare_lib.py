@@ -16,6 +16,7 @@ from musi_care.msg import SongData
 from musi_care.srv import sound_player_srv
 from musi_care.srv import qt_command
 import threading
+from std_msgs.msg import Float64MultiArray
 
 
 
@@ -547,7 +548,6 @@ class StandardLevels():
                 background_colour[chan_idx] = background_colour[chan_idx] * fade_scalar
             new_text_col = int(255 * fade_scalar)
             font_col = (new_text_col, new_text_col, new_text_col)
-            print(font_col)
             text_object.set_colour(font_col)
 
             # Draw background and objects
@@ -835,6 +835,11 @@ class QTManager():
 
     def __init__(self):
         self.robo_timer = TimeFunctions()
+        self.time_per_word = 0.09
+        self.right_arm_pos_pub = rospy.Publisher('/qt_robot/right_arm_position/command', Float64MultiArray,
+                                                 queue_size=10)
+        self.left_arm_pos_pub = rospy.Publisher('/qt_robot/left_arm_position/command', Float64MultiArray,
+                                                queue_size=10)
 
     def init_robot(self, arm_vel):
         """Method to init robot parameters"""
@@ -860,7 +865,8 @@ class QTManager():
 
     def send_qt_command(self, speech=None, gesture=None, emote=None, command_blocking=False):
         """Neatens and simplifies sending commands to QT 
-        if we want to use multiple functions of QT at once and dont care about tracking time taken, we should use this method instead of the others
+        if we want to use multiple functions of QT at once and dont care about tracking time taken,
+        we should use this method instead of the others
         """
         if speech != None:  # do qt_speak
             # print("sending speech req")
@@ -881,7 +887,7 @@ class QTManager():
 
     def qt_say_blocking(self, text):
         """Makes QT say something, then makes you wait until the speaking is done"""
-        timer_len = len(text) * 0.08  # 0.2s per letter 4 letter word is given 0.8s to be said
+        timer_len = len(text) * self.time_per_word
         timer_id = "QT_SAY_BLOCKING"
         self.robo_timer.CreateTimer(timer_id, timer_len)  # creates timer with ID 1 for 8s
         self.send_qt_command(speech=text)
@@ -892,7 +898,7 @@ class QTManager():
 
     def qt_say(self, text):
         """Makes QT say something, then makes starts a timer until the speaking is done"""
-        timer_len = len(text) * 0.09  # 0.09s per letter. A 4 letter word is given 0.36 secs to be said
+        timer_len = len(text) * self.time_per_word
         timer_id = "QT_SAY"
         self.robo_timer.CreateTimer(timer_id, timer_len)  # Creates timer with ID 1 for 8s
         self.send_qt_command(speech=text)  # Have qt say the text
@@ -905,6 +911,27 @@ class QTManager():
     def qt_emote(self, req_emote):
         """Make QT emote, non-blocking"""
         self.send_qt_command(emote=req_emote)
+
+    def move_right_arm(self, joint_angles):
+        """ Move just right arm """
+        arm_msg = Float64MultiArray()
+        arm_msg.data = [joint_angles[0], joint_angles[1], joint_angles[2]]
+        self.right_arm_pos_pub.publish(arm_msg)
+
+    def move_left_arm(self, joint_angles):
+        """ Move left arm, but using coordinates for right arm, and flip them automatically"""
+        arm_msg = Float64MultiArray()
+        arm_msg.data = [-joint_angles[0], joint_angles[1], joint_angles[2]]
+        self.left_arm_pos_pub.publish(arm_msg)
+
+    def move_both_arms(self, joint_angles):
+        """ Move both arms symetrically, takes joint angles for right arm only. """
+        arm_msg_r = Float64MultiArray()
+        arm_msg_l = Float64MultiArray()
+        arm_msg_r.data = [joint_angles[0], joint_angles[1], joint_angles[2]]
+        arm_msg_l.data = [-joint_angles[0], joint_angles[1], joint_angles[2]]
+        self.right_arm_pos_pub.publish(arm_msg_r)
+        self.left_arm_pos_pub.publish(arm_msg_l)
 
 
 #####################################################AnimationManager##################################################################
