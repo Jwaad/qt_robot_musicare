@@ -206,7 +206,7 @@ class StandardLevels():
         self.sound_manager = SoundManager(path_to_music)
         self.timer = TimeFunctions()
 
-    def yes_or_no_screen(self, text, run, background_colour, message = ""):
+    def yes_or_no_screen(self, text, run, background_colour, silent = False):
         """Screen for Yes or No questions"""
         # Variables
         this_file_path = os.path.dirname(__file__)
@@ -215,12 +215,13 @@ class StandardLevels():
         no_img_path = os.path.join(this_file_path, path_to_imgs, "No_button.png")
 
         # Create buttons
-        yes = Button(yes_img_path, yes_img_path, (225, 500), self.pygame, scale=2.2)
-        no = Button(no_img_path, no_img_path, (1625, 500), self.pygame, scale=2.2)
+        yes = Button(yes_img_path, yes_img_path, (225, 600), self.pygame, scale=2.2)
+        no = Button(no_img_path, no_img_path, (1625, 600), self.pygame, scale=2.2)
 
-        # Have QT act
-        self.command_manager.qt_emote("talking")
-        self.command_manager.qt_say(text)
+        # Have QT say the text out loud if not silent mode
+        if not silent:
+            self.command_manager.qt_emote("talking")
+            self.command_manager.qt_say(text)
 
         while not rospy.is_shutdown() and run:
 
@@ -244,7 +245,7 @@ class StandardLevels():
             self.renderer.DrawBackground(background_colour)
             yes.render(self.window)
             no.render(self.window)
-            self.renderer.DrawTextCentered(text, font_size=100, y=200)  # top text
+            self.renderer.DrawTextCentered(text, font_size=120, y=300)  # top text
             self.animation_manager.DrawTouchAnimation(self.window)  # also draw touches
             self.pygame.display.update()  # Update all drawn objects
 
@@ -339,8 +340,6 @@ class StandardLevels():
                     for graphic in graphics:
                         graphic.render(self.window, grey = True)
 
-
-
                 popup.render(self.window)
                 self.renderer.DrawTextCentered("Please listen to QT robot", font_size=70)
                 self.animation_manager.DrawTouchAnimation(self.window)  # also draw touches
@@ -352,46 +351,52 @@ class StandardLevels():
                     return True
 
     def tap_to_continue(self, run, background_colour,
-                        text_display="Please tap the screen when you are ready to start the level.", qt_say=None,
+                        text_display="Please tap the screen when you are ready to start", qt_say=None,
                         should_gesture=True, gesture="explain_right"):
-        """Screen that waits until tap, non blocking even if QT speaking"""
+        """Screen that waits until tap, non-blocking even if QT speaking"""
 
         if run:  # Dont start this screen if the previous screen wanted to close out the game
 
             # Handle speaking
             if qt_say != None:
                 self.command_manager.qt_emote("talking")  # show mouth moving
-                speaking_timer_id = self.command_manager.qt_say(
-                    qt_say)  # says text we give it, and starts an internal timer that we can check on
+                speaking_timer_id = self.command_manager.qt_say(qt_say)
 
             # Handle gesturing
             if should_gesture:
                 self.command_manager.qt_gesture(gesture)
 
+            font_size = 200
             clicked = False
+            text_ob = TextObject(self.window, self.window_center, text_display, wrap_text=True, cen_x=True,
+                                 cen_y=True, font_size=font_size, font_colour=(255, 255, 255))
             while not clicked and not rospy.is_shutdown() and run:
-
-                # check for quit
+                # Check for quit
                 for event in self.pygame.event.get():
                     # Check if the user clicks the X
                     if event.type == self.pygame.QUIT:
                         return False
-                    elif (
-                            event.type == self.pygame.MOUSEBUTTONUP):  # on mouse release play animation to show where cursor is
+                    # On mouse release play animation to show where cursor is
+                    elif (event.type == self.pygame.MOUSEBUTTONUP):
                         clicked = True
-                        self.animation_manager.StartTouchAnimation(
-                            self.pygame.mouse.get_pos())  # tell system to play animation when drawing
+                        # Tell system to play animation when drawing
+                        self.animation_manager.StartTouchAnimation(self.pygame.mouse.get_pos())
                 # Draw background and objects
                 self.renderer.DrawBackground(background_colour)
                 speed_coefficient = 1  # half sine freq
                 dot_decider = math.sin(speed_coefficient * rospy.get_time())
+                #Change the text of the image depending on the time
                 if dot_decider < -1 / 3:
-                    self.renderer.DrawTextCentered(text_display, font_size=70)
+                    display = text_display
+                    text_ob.set_text(display)
                 elif dot_decider < 1 / 3:
-                    self.renderer.DrawTextCentered(text_display + ".", font_size=70)
+                    display = text_display + "."
+                    text_ob.set_text(display)
                 else:
-                    self.renderer.DrawTextCentered(text_display + "..", font_size=70)
-                self.animation_manager.DrawTouchAnimation(self.window)  # also draw touches
+                    display = text_display + ".."
+                    text_ob.set_text(display)
+                text_ob.render(self.window)
+                self.animation_manager.DrawTouchAnimation(self.window)  # Also draw touches
                 self.pygame.display.update()  # Update all drawn objects
 
             return True
@@ -564,34 +569,128 @@ class StandardLevels():
 
 class TextObject():
 
-    def __init__(self,window, window_center, text, location=None, cen_x = False, cen_y=False, font_size=30, font_colour=(255,255,255)):
+    def __init__(self,window, window_center, text, wrap_text = False, location=None, cen_x = False, cen_y=False, font_size=30, font_colour=(255,255,255)):
+        """
+        Create object that we can manipulate, ie move it's position and change it's parameters
+        Also allows text wrapping to screen. This will cause text to be a list instead of a single object internally
+        """
         self.window = window
-        self.font = pygame.font.Font('freesansbold.ttf', font_size)
+        self.window_center = window_center
+        self.font_size = font_size
+        self.font = pygame.font.Font('freesansbold.ttf', self.font_size)
         self.font_colour = font_colour
         self.text = text
-        self.text_obj = self.font.render(self.text, False, self.font_colour)
-        self.textRect = self.text_obj.get_rect()
-        if location != None:
-            self.set_pos(location)
-        if cen_x:
-            self.textRect[0] = window_center[0] - (self.textRect[2]/2)
-        if cen_y:
-            self.textRect[1] = window_center[1] - (self.textRect[3]/2)
         self.type = "TextObject"
+        self.location = location
+        self.cen_x = cen_x
+        self.cen_y = cen_y
+        self.wrap_text = wrap_text
+        if self.wrap_text:
+            self.text_obj = self.create_wrapped_text()
+        else:
+            self.text_obj = self.font.render(self.text, False, self.font_colour)
+            self.textRect = self.text_obj.get_rect()
+            if location != None:
+                self.set_pos(location)
+            if cen_x:
+                self.textRect[0] = window_center[0] - (self.textRect[2]/2)
+            if cen_y:
+                self.textRect[1] = window_center[1] - (self.textRect[3]/2)
 
     def render(self, window, grey=False, re_render = False):
         """handle drawing text"""
-        if re_render:
-            self.text_obj = self.font.render(self.text, False, self.font_colour)
-        self.window.blit(self.text_obj, self.textRect)
+        if self.wrap_text:
+            for obj_data in self.text_obj:
+                obj = obj_data[0]
+                obj_rect = obj_data[1]
+                if re_render:
+                    obj_data[0] = self.font.render(self.text, False, self.font_colour)
+                    obj = obj_data[0]
+                self.window.blit(obj, obj_rect)
+        else:
+            if re_render:
+                self.text_obj = self.font.render(self.text, False, self.font_colour)
+            self.window.blit(self.text_obj, self.textRect)
 
     def set_colour(self, font_col):
         """Set new colour and re render obj"""
-        self.text_obj = self.font.render(self.text, False, font_col)
+        if self.wrap_text:
+            for obj_data in self.text_obj:
+                obj_data[0] = self.font.render(self.text, False, font_col)
+        else:
+            self.text_obj = self.font.render(self.text, False, font_col)
 
     def set_pos(self, pos):
         self.textRect[0] = pos[0]
         self.textRect[1] = pos[1]
+        if self.wrap_text:
+            print("THIS FEATURE IS NOT MADE YET")
+
+
+    def set_text(self, text):
+        self.text = text
+        if self.wrap_text:
+            self.text_obj = self.create_wrapped_text()
+        else:
+            self.text_obj = self.font.render(self.text, False, self.font_colour)
+
+    def create_wrapped_text(self):
+        """
+        Method wraps text at given font and returns a text object of the block
+        """
+
+        # Get screen width
+        res = pygame.display.Info()
+        screen_width = res.current_w - 150
+        font = pygame.font.Font('freesansbold.ttf', self.font_size)
+
+        # Loop through woods and wrap them
+        lines = []
+        words = self.text.split()
+        while len(words) > 0:
+            # Get as many words as will fit within allowed_width
+            line_words = []
+            while len(words) > 0:
+                line_words.append(words.pop(0))
+                fw, fh = font.size(' '.join(line_words + words[:1]))
+                if fw > screen_width:
+                    break
+
+            # Add a line consisting of those words
+            line = ' '.join(line_words)
+            lines.append(line)
+
+        text_objs = []
+        x, y, w, h = 0, 0, 0, 0
+        # Make an object per line of text
+        for line in lines:
+            obj = self.font.render(line, False, self.font_colour)
+            text_objs.append( [obj, [x, y, w, h]] )
+            h += obj.get_height()
+            if obj.get_width() > w:
+                w = obj.get_width()
+        # Rect of all lines combined
+        self.textRect = [x, y, w, h]
+
+        # Get h and w of top line
+        line_height = text_objs[0][0].get_height()
+        line_width = text_objs[0][0].get_width()
+
+        # Get the x and y pos of starting line, we will use it to add to for each next line
+        if self.location == None:
+            location = [0, 0]
+        if self.cen_x:
+            location[0] = self.textRect[0] = self.window_center[0] - (w / 2)
+        if self.cen_y:
+            location[1] = self.window_center[1] - (h / 2)
+
+        # Set pos of each line
+        for line_idx in range(0, len(text_objs)):
+            x = location[0] + (line_height * line_idx)
+            y = location[1] + (line_height * line_idx)
+            text_objs[line_idx][1] = [x, y, line_width, line_height]
+
+        return text_objs
 
 #####################################################Renderer##################################################################
 
@@ -835,13 +934,19 @@ class SoundManager():
 class QTManager():
     """Handles sending communication to robot """
 
-    def __init__(self):
+    def __init__(self, levels = ""):
+        """
+        You can pass in levels which is the levels_loader class. this is a requirement if you want to use
+        qt_say_blocking with a blank screen
+
+        """
         self.robo_timer = TimeFunctions()
         self.time_per_word = 0.09
         self.right_arm_pos_pub = rospy.Publisher('/qt_robot/right_arm_position/command', Float64MultiArray,
                                                  queue_size=10)
         self.left_arm_pos_pub = rospy.Publisher('/qt_robot/left_arm_position/command', Float64MultiArray,
                                                 queue_size=10)
+        self.level_loader = levels
 
     def init_robot(self, arm_vel):
         """Method to init robot parameters"""
@@ -886,16 +991,22 @@ class QTManager():
             command_complete = command_controller("emote", emote, command_blocking)
             return command_complete
 
-    def qt_say_blocking(self, text):
+    def qt_say_blocking(self, text, black_screen = False):
         """Makes QT say something, then makes you wait until the speaking is done"""
         timer_len = len(text) * self.time_per_word
         timer_id = "QT_SAY_BLOCKING"
         self.robo_timer.CreateTimer(timer_id, timer_len)  # creates timer with ID 1 for 8s
         self.send_qt_command(speech=text)
         talking = True
-        while talking and not rospy.is_shutdown():
-            if self.robo_timer.CheckTimer("QT_SAY_BLOCKING"):  # if our timer is done
-                talking = False
+        if black_screen:
+            while talking and not rospy.is_shutdown():
+                self.level_loader.black_screen(True)
+                if self.robo_timer.CheckTimer("QT_SAY_BLOCKING"):  # if our timer is done
+                    talking = False
+        else:
+            while talking and not rospy.is_shutdown():
+                if self.robo_timer.CheckTimer("QT_SAY_BLOCKING"):  # if our timer is done
+                    talking = False
 
     def qt_say(self, text):
         """Makes QT say something, then makes starts a timer until the speaking is done"""
@@ -959,9 +1070,9 @@ class AnimationManager():
         if self.play_touch_animation:
             time_since_start = (
                                            rospy.get_time() - self.start_animation_time) * 1000  # seconds elapsed since start convert to milliseconds
-            if time_since_start < 400:  # animation time = under half a sec
+            if time_since_start < 300:  # animation time = under half a sec
                 scalar = time_since_start / 4  # low numbers = faster growth time
-                max_size = 50
+                max_size = 45
                 if scalar < max_size:
                     self.circle_radius = scalar
                 else:
