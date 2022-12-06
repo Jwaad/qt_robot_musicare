@@ -351,7 +351,7 @@ class StandardLevels():
                     return True
 
     def tap_to_continue(self, run, background_colour,
-                        text_display="Please tap the screen when you are ready to start", qt_say=None,
+                        text_display="Please tap the screen when you are ready to start.", qt_say=None,
                         should_gesture=True, gesture="explain_right"):
         """Screen that waits until tap, non-blocking even if QT speaking"""
 
@@ -1023,6 +1023,19 @@ class QTManager():
     def qt_emote(self, req_emote):
         """Make QT emote, non-blocking"""
         self.send_qt_command(emote=req_emote)
+
+    def qt_actuate(self, motors_pos, command_blocking = False):
+        """
+        Make QT move its arms and head
+        requires this data structure
+        [ [motor_list], [motor_pos] ]
+        e.g:
+        [ ["left_arm", "right_arm", "head"], [[0,0,0], [0,0,0], [0,0]] ]
+        """
+        rospy.wait_for_service('/qt_command_service')
+        command_controller = rospy.ServiceProxy('/qt_command_service', qt_command)
+        command_complete = command_controller("actuation", motors_pos, command_blocking)
+        return command_complete
 
     def move_right_arm(self, joint_angles):
         """ Move just right arm """

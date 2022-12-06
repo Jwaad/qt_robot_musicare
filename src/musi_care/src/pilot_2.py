@@ -36,7 +36,8 @@ behave = Behaviours(game.pygame, game.music_filepath)
 background = (100,100,100)
 run = True
 
-games_to_play = [1, 2, 3, 4 ] #[ 1, 2, 3, 4 ]
+games_to_play = [1, 2, 3, 4 ] # [ 1, 2, 3, 4 ]
+"""
 try:
     levels.tap_to_continue(run,background)
     # Guess the mood
@@ -109,3 +110,7 @@ finally:
     qt_manager.send_qt_command(emote="talking")
     qt_manager.qt_say_blocking("I am grateful for you spending time with me!", black_screen = True)
     print("Shutting game down")
+"""
+motor_msg = """ [["right_arm", "left_arm"], [arm_up_right, arm_up_left]] """
+
+qt_manager.qt_actuate(motor_msg)
