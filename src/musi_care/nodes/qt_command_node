@@ -12,6 +12,7 @@ from musi_care.srv import qt_command
 from qt_robot_interface.srv import * #so we can use the qt service srvs
 from qt_gesture_controller.srv import * # #so we can use the service srv "gesture_play" 
 from std_msgs.msg import String #so we can become a publisher and publish a string to the QT node that handles tts.
+from std_msgs.msg import Float64MultiArray
 
 #NEW COMMANDS NEED ONLY BE ADDED HERE. NO WHERE ELSE: 
 #Emotes
@@ -41,6 +42,10 @@ gesture_dict = {
 gesture_pub = rospy.Publisher('/qt_robot/gesture/play', String, queue_size=10)
 emote_pub = rospy.Publisher('/qt_robot/emotion/show', String, queue_size=10)
 speechSay_pub = rospy.Publisher('/qt_robot/speech/say', String, queue_size=10)
+right_arm_pos_pub = rospy.Publisher('/qt_robot/right_arm_position/command', Float64MultiArray,
+                                                 queue_size=10)
+left_arm_pos_pub = rospy.Publisher('/qt_robot/left_arm_position/command', Float64MultiArray,
+                                                queue_size=10)
 
 def execute_command(data):
     "uses the input to check within a list of things to see which sequence we should perform"
@@ -48,6 +53,7 @@ def execute_command(data):
     action_type = data.action_type
     action_content = data.action_content
     action_blocking = data.action_blocking
+    print(action_type)
     #---GESTURE---
     if action_type == "gesture": #/qt_robot/gesture/play
         rospy.loginfo("Received a Gesture request.")
@@ -83,19 +89,48 @@ def execute_command(data):
                 rospy.loginfo("Finished requested Emote")
         else:
             rospy.loginfo("You have entered in an unknown Emote")
-            #NOTE: Add some error handling here
+            # NOTE: Add some error handling here
+    # ---ACTUATION---
+    elif action_type == "actuation":
+        # Must follow this format: [ ["left_arm", "right_arm", "head"], [left_arm_joint_angles, right_arm] ]
+        # Move the QT motors
+        rospy.loginfo("Received an Actuation request.")
+        action_content = eval(action_content)
+        print(action_content)
+        arm_msg = Float64MultiArray()
+        if action_blocking:
+            print("This feature is not currently supporting blocking") # TODO finish this
+        if "left_arm" in action_content[0]:
+            pos_idx = action_content[0].index("left_arm")
+            arm_msg.data = action_content[pos_idx]
+            left_arm_pos_pub.publish(arm_msg)
+        if "right_arm" in action_content[0]:
+            pos_idx = action_content[0].index("right_arm")
+            arm_msg.data = action_content[pos_idx]
+            right_arm_pos_pub.publish(arm_msg)
+        if "head" in action_content[0]:
+            print("This feature is not currently supporting moving the head") # TODO finish this
+            pos_idx = action_content[0].index("head")
+            arm_msg.data = action_content[pos_idx]
+            #head_pos_pub.publish(arm_msg)
+        else:
+            rospy.loginfo("You have entered in an unknown Gesture")
+        rospy.loginfo("Finished requested Actuation")
+            # NOTE: Add some error handling here
     #---OTHER---
     elif action_type == "other":
         #ADD A STOP FUNCTION. ALL THE SERVICES HAVE A "/stop", so we can add in bools which tell us what communication we're in, and stop accordingly.
         #some unique actions that aren't numerous enough to have their own categories (such as a single clap)
+        #Confused by tha bove, why not just
         pass
     #---SETTINGS---
     elif action_type == "settings":
-        #Code that checks what setting they want changed ie: action_content = volume20 (Code could keyword search for "volume", "motorspeed" etc, then the only remaining text should be the numeric goal change ie 20, from "volume20" )
+        # Code that checks what setting they want changed ie: action_content = volume20 (Code could keyword search for "volume", "motorspeed" etc, then the only remaining text should be the numeric goal change ie 20, from "volume20" )
         pass
     #---ERROR HANDLING---
     else:
-        print("WARNING: An unknown action type was entered.") # Make this all fancy and yellow coloured
+        rospy.loginfo("WE MADE IT",action_type)
+        rospy.loginfo("WARNING: An unknown action type ({}) was entered.".format(action_type)) # TODO Make this all fancy and yellow coloured
         #exit callback but dont close node (Maybe put a try in the "wait_for_command" and then an error handle here)
    
 
@@ -105,7 +140,7 @@ def perform_command(message):
         if message.action_blocking:
             rospy.wait_for_service('/qt_robot/speech/say')
             qt_speech = rospy.ServiceProxy('/qt_robot/speech/say', speech_say) #The Service Type / class: speech_say
-            qt_say = qt_speech(message.action_content)
+            qt_speech(message.action_content)
             rospy.loginfo("Finished requested TTS message")
             return True
         else:
