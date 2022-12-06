@@ -894,7 +894,7 @@ class Fix_The_Song_Game():
     def Main(self, difficulty="easy",
              level=3):  # input what level and difficulty to play, the program will handle the rest
         """Main Func"""
-        """
+
         # Introduce game
         self.run = self.level_loader.QTSpeakingScreen("Lets play Fix The Song!", self.run, self.background_colour)
 
@@ -912,7 +912,7 @@ class Fix_The_Song_Game():
         # Count into level to slow pacing
         self.run = self.level_loader.countdown(3, self.run, self.background_colour,
                                                prelim_msg="Get ready to hear the song!")
-        """
+
         # Play main level
         time_taken, wrong_answers, hints_needed = self.play_level(difficulty, level)
 

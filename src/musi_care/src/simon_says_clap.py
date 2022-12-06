@@ -497,7 +497,6 @@ class Simon_Says_Clap_Game():
                     time_left = 0
                 fade_scalar = (time_left / fade_time)
                 self.run = self.level_loader.fade_to_black_screen(self.run, message, self.background_colour, fade_scalar )
-
                 if not freeze:
                     # Hit the drum to the beat.
                     beat_timings, prev_arm = self.hit_drum(beat_timings, elapsed_time, prev_arm)

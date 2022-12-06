@@ -425,7 +425,8 @@ class Clap_To_Beat_Game():
             if prev_arm == "left":
                 # Move left arm back up and move right arm down
                 self.command_manager.move_right_arm(hitting_drum)
-                self.command_manager.move_right_arm(raised_arm)
+                self.command_manager.move_left_arm(raised_arm)
+
                 beat_timing.pop(0)
                 prev_arm = "right"
                 print("Right arm")
@@ -433,7 +434,7 @@ class Clap_To_Beat_Game():
             else:
                 # Move right arm back up and move left arm down
                 self.command_manager.move_right_arm(raised_arm)
-                self.command_manager.move_right_arm(hitting_drum)
+                self.command_manager.move_left_arm(hitting_drum)
                 beat_timing.pop(0)
                 prev_arm = "left"
                 print("Left arm")
