@@ -53,7 +53,6 @@ def execute_command(data):
     action_type = data.action_type
     action_content = data.action_content
     action_blocking = data.action_blocking
-    print(action_type)
     #---GESTURE---
     if action_type == "gesture": #/qt_robot/gesture/play
         rospy.loginfo("Received a Gesture request.")
@@ -95,7 +94,7 @@ def execute_command(data):
         # Must follow this format: [ ["left_arm", "right_arm", "head"], [left_arm_joint_angles, right_arm] ]
         # Move the QT motors
         rospy.loginfo("Received an Actuation request.")
-        action_content = eval(action_content)
+        #action_content = eval(action_content)
         print(action_content)
         arm_msg = Float64MultiArray()
         if action_blocking:
