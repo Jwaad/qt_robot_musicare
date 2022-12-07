@@ -95,24 +95,24 @@ def execute_command(data):
         # Must follow this format: [ ["left_arm", "right_arm", "head"], [left_arm_joint_angles, right_arm] ]
         # Move the QT motors
         rospy.loginfo("Received an Actuation request.")
-        print("str", action_content)
         action_content = ast.literal_eval(action_content)
-        print("list", action_content)
         arm_msg = Float64MultiArray()
         if action_blocking:
             print("This feature is not currently supporting blocking") # TODO finish this
         if "left_arm" in action_content[0]:
+            #print("Left arm moving")
             pos_idx = action_content[0].index("left_arm")
-            arm_msg.data = action_content[pos_idx]
+            arm_msg.data = action_content[1][pos_idx]
             left_arm_pos_pub.publish(arm_msg)
         if "right_arm" in action_content[0]:
+            #print("Right arm moving")
             pos_idx = action_content[0].index("right_arm")
-            arm_msg.data = action_content[pos_idx]
+            arm_msg.data = action_content[1][pos_idx]
             right_arm_pos_pub.publish(arm_msg)
         if "head" in action_content[0]:
             print("This feature is not currently supporting moving the head") # TODO finish this
             pos_idx = action_content[0].index("head")
-            arm_msg.data = action_content[pos_idx]
+            arm_msg.data = action_content[1][pos_idx]
             #head_pos_pub.publish(arm_msg)
         else:
             rospy.loginfo("You have entered in an unknown Gesture")
