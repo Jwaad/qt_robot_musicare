@@ -891,8 +891,8 @@ class Fix_The_Song_Game():
 
     #################################################################Main####################################################################
 
-    def Main(self, difficulty="easy",
-             level=3):  # input what level and difficulty to play, the program will handle the rest
+    def Main(self, difficulty="easy",level=1):
+        # input what level and difficulty to play, the program will handle the rest
         """Main Func"""
 
         # Introduce game
@@ -911,7 +911,7 @@ class Fix_The_Song_Game():
 
         # Count into level to slow pacing
         self.run = self.level_loader.countdown(3, self.run, self.background_colour,
-                                               prelim_msg="Get ready to hear the song!")
+                                               prelim_msg="Lets Fix The Song!")
 
         # Play main level
         time_taken, wrong_answers, hints_needed = self.play_level(difficulty, level)
@@ -927,7 +927,6 @@ if __name__ == '__main__':
     rospy.init_node('fix_song_game', anonymous=False)
     rospy.loginfo("Node launched successfully")
     game_object = Fix_The_Song_Game("jwaad")
-
     # Run the game
     try:
         game_object.Main()

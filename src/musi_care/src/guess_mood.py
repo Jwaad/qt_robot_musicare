@@ -645,7 +645,7 @@ class Guess_The_Mood_Game():
 #################################################################Main####################################################################   
 
     def Main(self, difficulty = "easy", level =  1): #input what level and difficulty to play, the program will handle the rest
-        """
+
         # Show starting screen
         self.run = self.level_loader.QTSpeakingScreen("Lets play Guess the mood!", self.run, self.background_colour)
 
@@ -665,8 +665,7 @@ class Guess_The_Mood_Game():
 
         # Save user data
         print(play_time, wrong_counter, hints_given)
-        """
-        self.run = self.level_loader.tap_to_continue(self.run, self.background_colour)
+
 
 
     ######################################################On execution#######################################################################

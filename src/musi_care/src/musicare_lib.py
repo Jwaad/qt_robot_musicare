@@ -230,7 +230,7 @@ class StandardLevels():
             # Event handling
             for event in self.pygame.event.get():  # Check if the user clicks the X
                 if event.type == self.pygame.QUIT:
-                    return "QUIT"
+                    return False, False
                 elif (
                         event.type == self.pygame.MOUSEBUTTONUP):  # on mouse release play animation to show where cursor is
                     mouse_pos = self.pygame.mouse.get_pos()
@@ -251,7 +251,7 @@ class StandardLevels():
             self.animation_manager.DrawTouchAnimation(self.window)  # also draw touches
             self.pygame.display.update()  # Update all drawn objects
 
-    def QTSpeakingScreen(self, qt_say, run, background_colour, should_gesture=True, gesture="explain_right", ):
+    def QTSpeakingScreen(self, qt_say, run, background_colour, should_gesture=False, gesture="explain_right", rand_gest = True):
         """Method displays background and text in centre"""
         text_display = "Please listen to QT robot"
 
@@ -287,8 +287,8 @@ class StandardLevels():
                     qt_speaking = False
                     return True
 
-    def QTSpeakingPopupScreen(self, qt_say, graphics, run, background_colour, should_gesture=True,
-                              gesture="explain_right", partial_func = True):
+    def QTSpeakingPopupScreen(self, qt_say, graphics, run, background_colour, should_gesture=False,
+                              gesture="explain_right", partial_func = True, rand_gest = True):
         """
             Method displays all our gui with a popup in front with text in centre
            graphics = a dict of functions that are saved with the parameters needed to render them
@@ -354,7 +354,7 @@ class StandardLevels():
 
     def tap_to_continue(self, run, background_colour,
                         text_display="Please tap the screen when you are ready to start.", qt_say=None,
-                        should_gesture=True, gesture="explain_right"):
+                        should_gesture=False, gesture="explain_right",rand_gest = True):
         """Screen that waits until tap, non-blocking even if QT speaking"""
 
         if run:  # Dont start this screen if the previous screen wanted to close out the game
@@ -583,7 +583,10 @@ class TextObject():
         self.font_colour = font_colour
         self.text = text
         self.type = "TextObject"
-        self.location = list(location)
+        if location != None and type(location) != list:
+            self.location = list(location)
+        else:
+            self.location = location
         self.cen_x = cen_x
         self.cen_y = cen_y
         self.wrap_text = wrap_text
@@ -953,6 +956,7 @@ class QTManager():
     def init_robot(self, arm_vel):
         """Method to init robot parameters"""
         # Set control mode, incase they were changed beforehand
+
         rospy.wait_for_service('/qt_robot/motors/setControlMode')
         self.set_mode = rospy.ServiceProxy('/qt_robot/motors/setControlMode', set_control_mode)
         mode_changed = self.set_mode(["right_arm", "left_arm"], 1)
@@ -970,6 +974,15 @@ class QTManager():
         else:
             rospy.loginfo("Motor speed could not be changed")
             self.run = False
+
+    def set_arm_vel(self, arm_vel,command_blocking = False):
+        "Set velocity of arm motors"
+        #TODO change this to take in list of what motors to change speed of
+        rospy.wait_for_service('/qt_command_service')
+        command_controller = rospy.ServiceProxy('/qt_command_service', qt_command)
+        command_complete = command_controller("velocity", str(arm_vel), command_blocking)
+        return command_complete
+
 
     def send_qt_command(self, speech=None, gesture=None, emote=None, command_blocking=False):
         """Neatens and simplifies sending commands to QT 
@@ -996,19 +1009,21 @@ class QTManager():
     def qt_say_blocking(self, text, black_screen = False):
         """Makes QT say something, then makes you wait until the speaking is done"""
         timer_len = len(text) * self.time_per_word
-        timer_id = "QT_SAY_BLOCKING"
-        self.robo_timer.CreateTimer(timer_id, timer_len)  # creates timer with ID 1 for 8s
+        self.qt_emote("talking") # Show talking face
+        # Set timers
+        self.robo_timer.CreateTimer("QT_SAY_BLOCKING", timer_len) # Timer for done speaking
+        self.robo_timer.CreateTimer("EMOTE FINISHED", 3) # Timer for emote finished
         self.send_qt_command(speech=text)
         talking = True
-        if black_screen:
-            while talking and not rospy.is_shutdown():
+        while talking and not rospy.is_shutdown():
+            if black_screen:
                 self.level_loader.black_screen(True)
-                if self.robo_timer.CheckTimer("QT_SAY_BLOCKING"):  # if our timer is done
-                    talking = False
-        else:
-            while talking and not rospy.is_shutdown():
-                if self.robo_timer.CheckTimer("QT_SAY_BLOCKING"):  # if our timer is done
-                    talking = False
+            if self.robo_timer.CheckTimer("EMOTE FINISHED"):
+                #Renew talking emote and start timer again
+                self.qt_emote("talking")
+                self.robo_timer.CreateTimer("EMOTE FINISHED", 3)  # Timer for emote finished
+            if self.robo_timer.CheckTimer("QT_SAY_BLOCKING"):  # if our timer is done
+                talking = False
 
     def qt_say(self, text):
         """Makes QT say something, then makes starts a timer until the speaking is done"""

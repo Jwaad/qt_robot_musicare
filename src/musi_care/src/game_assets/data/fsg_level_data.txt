@@ -8,7 +8,7 @@ seg_num = 2
 
 EASY MODE
 {
-song_name = follow_the_van.wav
+song_name = beetles_dont_let_me_down_long.wav
 distract_song = none
 seg_num = 2
 £#
