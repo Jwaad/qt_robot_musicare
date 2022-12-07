@@ -13,6 +13,7 @@ from qt_robot_interface.srv import * #so we can use the qt service srvs
 from qt_gesture_controller.srv import * # #so we can use the service srv "gesture_play" 
 from std_msgs.msg import String #so we can become a publisher and publish a string to the QT node that handles tts.
 from std_msgs.msg import Float64MultiArray
+import ast
 
 #NEW COMMANDS NEED ONLY BE ADDED HERE. NO WHERE ELSE: 
 #Emotes
@@ -94,7 +95,7 @@ def execute_command(data):
         # Must follow this format: [ ["left_arm", "right_arm", "head"], [left_arm_joint_angles, right_arm] ]
         # Move the QT motors
         rospy.loginfo("Received an Actuation request.")
-        #action_content = eval(action_content)
+        action_content = ast.literal_eval(action_content)
         print(action_content)
         arm_msg = Float64MultiArray()
         if action_blocking:
