@@ -11,6 +11,7 @@ import time
 from musi_care.srv import qt_command
 from qt_robot_interface.srv import * #so we can use the qt service srvs
 from qt_gesture_controller.srv import * # #so we can use the service srv "gesture_play"
+from qt_motors_controller.srv import *
 from std_msgs.msg import *
 from std_msgs.msg import String #so we can become a publisher and publish a string to the QT node that handles tts.
 from std_msgs.msg import Float64MultiArray
@@ -128,8 +129,7 @@ def execute_command(data):
     #---SETTINGS---
     elif action_type == "velocity":
         # Code that checks what setting they want changed ie: action_content = volume20 (Code could keyword search for "volume", "motorspeed" etc, then the only remaining text should be the numeric goal change ie 20, from "volume20" )
-        print("Feature currently unavailiable")
-        """
+        #print("Feature currently unavailiable")
         rospy.loginfo("Received a request to change motor velocity.")
         new_vel = int(action_content)
         rospy.wait_for_service('/qt_robot/motors/setVelocity')
@@ -139,7 +139,6 @@ def execute_command(data):
             rospy.loginfo("Motor velocity changed successfully.")
         else:
             rospy.loginfo("Motor velocity could not be changed.")
-        """
     #---ERROR HANDLING---
     else:
         rospy.loginfo("WE MADE IT",action_type)
