@@ -164,6 +164,7 @@ def perform_command(message):
 def wait_for_command():
     """main code that runs and waits for a message """
     rospy.init_node('qt_command_node')
+    time.sleep(2)
     rospy.loginfo("QT Command Node has been launched")
     s = rospy.Service('qt_command_service', qt_command, perform_command) 
     rospy.spin() #Keep code running
