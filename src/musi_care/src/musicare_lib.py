@@ -1037,26 +1037,22 @@ class QTManager():
         command_complete = command_controller("actuation", motors_pos, command_blocking)
         return command_complete
 
-    def move_right_arm(self, joint_angles):
+    def move_right_arm(self, joint_angles, command_blocking = False):
         """ Move just right arm """
-        arm_msg = Float64MultiArray()
-        arm_msg.data = [joint_angles[0], joint_angles[1], joint_angles[2]]
-        self.right_arm_pos_pub.publish(arm_msg)
+        rospy.wait_for_service('/qt_command_service')
+        command_controller = rospy.ServiceProxy('/qt_command_service', qt_command)
+        motor_pos = str( [["right_arm"], [joint_angles] ] )
+        command_complete = command_controller("actuation", motor_pos, command_blocking)
+        return command_complete
 
-    def move_left_arm(self, joint_angles):
+    def move_left_arm(self, joint_angles, command_blocking = False):
         """ Move left arm, but using coordinates for right arm, and flip them automatically"""
-        arm_msg = Float64MultiArray()
-        arm_msg.data = [-joint_angles[0], joint_angles[1], joint_angles[2]]
-        self.left_arm_pos_pub.publish(arm_msg)
-
-    def move_both_arms(self, joint_angles):
-        """ Move both arms symetrically, takes joint angles for right arm only. """
-        arm_msg_r = Float64MultiArray()
-        arm_msg_l = Float64MultiArray()
-        arm_msg_r.data = [joint_angles[0], joint_angles[1], joint_angles[2]]
-        arm_msg_l.data = [-joint_angles[0], joint_angles[1], joint_angles[2]]
-        self.right_arm_pos_pub.publish(arm_msg_r)
-        self.left_arm_pos_pub.publish(arm_msg_l)
+        rospy.wait_for_service('/qt_command_service')
+        command_controller = rospy.ServiceProxy('/qt_command_service', qt_command)
+        joint_angles[0] = -joint_angles[0]
+        motor_pos = str([["left_arm"], [joint_angles]])
+        command_complete = command_controller("actuation", motor_pos, command_blocking)
+        return command_complete
 
 
 #####################################################AnimationManager##################################################################
