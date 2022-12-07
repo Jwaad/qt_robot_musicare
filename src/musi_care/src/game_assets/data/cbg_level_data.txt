@@ -12,7 +12,7 @@ song_name = follow_the_van.wav
 bpm = 57
 first_beat = 2.8
 £#
-song_name = sad_1.wav
+song_name = beetles_dont_let_me_down_long.wav
 bpm = 60
 first_beat = 0.1
 £#

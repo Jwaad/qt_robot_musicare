@@ -12,11 +12,11 @@ song_name = follow_the_van.wav
 distract_song = none
 seg_num = 2
 £#
-song_name = sad_1.wav
+song_name = bob_marl_could_you_be_loved_short.wav
 distract_song = none
 seg_num = 2
 £#
-song_name = happy_2.wav
+song_name = beetles_here_comes_the_sun_short.wav
 distract_song = follow_the_van.wav
 seg_num = 2
 £#

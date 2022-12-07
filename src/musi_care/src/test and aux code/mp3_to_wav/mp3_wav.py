@@ -3,8 +3,8 @@
 import os
 from pydub import AudioSegment
 
-input_path = "input/"
-output_path = "output/"
+input_path = r"./input/"
+output_path = r"./output/"
 
 input_contents = os.listdir(input_path)
 

@@ -3,6 +3,6 @@ converts mp3 into wav
 steps:
 move files to be converted into input folder
 run script from cmd
-    cd /home/qtrobot/Desktop/mp3_to_wav
-    python mp3_wav.py time_start time_end
+    cd ~/catkin_ws/src/musi_care/src/test and aux code/cut_wav
+    python cut_wav.py time_start time_end
 your .wav files will be in the output folder
