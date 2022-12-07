@@ -111,6 +111,6 @@ finally:
     qt_manager.qt_say_blocking("I am grateful for you spending time with me!", black_screen = True)
     print("Shutting game down")
 """
-motor_msg = """ [["right_arm", "left_arm"], [arm_up_right, arm_up_left]] """
 
+motor_msg = '[["right_arm", "left_arm"], [{}, {}]]'.format(arm_up_right,arm_up_left)
 qt_manager.qt_actuate(motor_msg)

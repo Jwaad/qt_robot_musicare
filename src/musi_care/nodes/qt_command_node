@@ -95,8 +95,9 @@ def execute_command(data):
         # Must follow this format: [ ["left_arm", "right_arm", "head"], [left_arm_joint_angles, right_arm] ]
         # Move the QT motors
         rospy.loginfo("Received an Actuation request.")
+        print("str", action_content)
         action_content = ast.literal_eval(action_content)
-        print(action_content)
+        print("list", action_content)
         arm_msg = Float64MultiArray()
         if action_blocking:
             print("This feature is not currently supporting blocking") # TODO finish this
