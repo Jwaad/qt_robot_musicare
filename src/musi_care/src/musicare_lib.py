@@ -214,9 +214,11 @@ class StandardLevels():
         yes_img_path = os.path.join(this_file_path, path_to_imgs, "Yes_button.png")
         no_img_path = os.path.join(this_file_path, path_to_imgs, "No_button.png")
 
-        # Create buttons
+        # Create buttons and text
         yes = Button(yes_img_path, yes_img_path, (225, 600), self.pygame, scale=2.2)
         no = Button(no_img_path, no_img_path, (1625, 600), self.pygame, scale=2.2)
+        text_obj = TextObject(self.window, self.window_center, text, wrap_text=True, location=(0,200), cen_x=True,
+                             cen_y=False, font_size=150, font_colour=(255, 255, 255))
 
         # Have QT say the text out loud if not silent mode
         if not silent:
@@ -245,7 +247,7 @@ class StandardLevels():
             self.renderer.DrawBackground(background_colour)
             yes.render(self.window)
             no.render(self.window)
-            self.renderer.DrawTextCentered(text, font_size=120, y=300)  # top text
+            text_obj.render(self.window)
             self.animation_manager.DrawTouchAnimation(self.window)  # also draw touches
             self.pygame.display.update()  # Update all drawn objects
 
@@ -581,7 +583,7 @@ class TextObject():
         self.font_colour = font_colour
         self.text = text
         self.type = "TextObject"
-        self.location = location
+        self.location = list(location)
         self.cen_x = cen_x
         self.cen_y = cen_y
         self.wrap_text = wrap_text
@@ -590,8 +592,8 @@ class TextObject():
         else:
             self.text_obj = self.font.render(self.text, False, self.font_colour)
             self.textRect = self.text_obj.get_rect()
-            if location != None:
-                self.set_pos(location)
+            if self.location != None:
+                self.set_pos(self.location)
             if cen_x:
                 self.textRect[0] = window_center[0] - (self.textRect[2]/2)
             if cen_y:
@@ -678,16 +680,16 @@ class TextObject():
 
         # Get the x and y pos of starting line, we will use it to add to for each next line
         if self.location == None:
-            location = [0, 0]
+            self.location = [0, 0]
         if self.cen_x:
-            location[0] = self.textRect[0] = self.window_center[0] - (w / 2)
+            self.location[0] = self.textRect[0] = self.window_center[0] - (w / 2)
         if self.cen_y:
-            location[1] = self.window_center[1] - (h / 2)
+            self.location[1] = self.window_center[1] - (h / 2)
 
         # Set pos of each line
         for line_idx in range(0, len(text_objs)):
-            x = location[0] + (line_height * line_idx)
-            y = location[1] + (line_height * line_idx)
+            x = self.location[0] + (line_height * line_idx)
+            y = self.location[1] + (line_height * line_idx)
             text_objs[line_idx][1] = [x, y, line_width, line_height]
 
         return text_objs
