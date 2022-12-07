@@ -114,8 +114,8 @@ def execute_command(data):
             pos_idx = action_content[0].index("head")
             arm_msg.data = action_content[1][pos_idx]
             #head_pos_pub.publish(arm_msg)
-        else:
-            rospy.loginfo("You have entered in an unknown Gesture")
+        if not "left_arm" in action_content[0] and not "right_arm" in action_content[0] and not "head" in action_content[0]:
+            rospy.loginfo("You have entered an unknown joint")
         rospy.loginfo("Finished requested Actuation")
             # NOTE: Add some error handling here
     #---OTHER---
