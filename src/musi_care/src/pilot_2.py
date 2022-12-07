@@ -20,6 +20,7 @@ left_arm_pos_pub = rospy.Publisher('/qt_robot/left_arm_position/command', Float6
 #create arm msgs to move qt arms
 arm_up_right = [-5, -59.599998474121094, -40.70000076293945] #motor pos for right arm to be in air
 arm_up_left = [5, -59.599998474121094, -40.70000076293945] #motor pos for right arm to be in air
+arms_up = '[["right_arm", "left_arm"], [{}, {}]]'.format(arm_up_right,arm_up_left)
 arm_right_msg = Float64MultiArray()
 arm_left_msg = Float64MultiArray()
 arm_left_msg.data = arm_up_right
@@ -37,7 +38,7 @@ background = (100,100,100)
 run = True
 
 games_to_play = [1, 2, 3, 4 ] # [ 1, 2, 3, 4 ]
-"""
+
 try:
     levels.tap_to_continue(run,background)
     # Guess the mood
@@ -47,7 +48,7 @@ try:
         qt_manager.send_qt_command(emote="talking")
         qt_manager.qt_say_blocking("Hope you are well!...", black_screen = True)
         qt_manager.send_qt_command(emote="talking")
-        #qt_manager.qt_say_blocking("Would you like to play some games with me?...")
+        qt_manager.qt_say_blocking("Would you like to play some games with me?...")
         run, consent = levels.yes_or_no_screen("Would you like to play some games with me?", run, background, silent=True)
         while not consent:
             # If they said no, say "please?"
@@ -85,8 +86,7 @@ try:
         ready = False
         while not ready:
             #Move arms up
-            qt_manager.move_right_arm(arm_up_right)
-            qt_manager.move_left_arm(arm_up_right)  # not a mistake, this method flips the pos of the 1st joint
+            qt_manager.qt_actuate(arms_up)
             run, ready = levels.yes_or_no_screen("Is it set up now?", run, background)
             levels.black_screen(run)
         game.Main()
@@ -95,7 +95,7 @@ try:
         game = Simon_Says_Clap_Game(user_id, reduce_screen=False)
         qt_manager.send_qt_command(gesture="happy", emote="grin")
         run = levels.QTSpeakingScreen("", run, background)
-        qt_manager.qt_say_blocking("Great!.. One last game, now!", black_screen = True)
+        qt_manager.qt_say_blocking("Great!.. One last game now!", black_screen = True)
         game.Main()
 except():
     #game.pygame.quit
@@ -110,7 +110,6 @@ finally:
     qt_manager.send_qt_command(emote="talking")
     qt_manager.qt_say_blocking("I am grateful for you spending time with me!", black_screen = True)
     print("Shutting game down")
-"""
 
-motor_msg = '[["right_arm", "left_arm"], [{}, {}]]'.format(arm_up_right,arm_up_left)
-qt_manager.qt_actuate(motor_msg)
+
+
