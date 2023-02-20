@@ -20,9 +20,9 @@ song_name = happy_2.wav
 bpm = 60
 first_beat = 0.1
 £#
-song_name = happy_3.wav
-bpm = 60
-first_beat = 0.1
+song_name = jingle_bells.wav
+bpm = 95
+first_beat = 2.8
 £#
 }
 

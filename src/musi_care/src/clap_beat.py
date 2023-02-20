@@ -80,6 +80,7 @@ class Clap_To_Beat_Game():
         if not self.debug:
             self.pygame.mouse.set_visible(False)  # set to false when not testing
         self.command_manager.set_arm_vel(100) # Set robot arm speed to max for this game
+        self.diy_box = True
         # self.music_vol = 1 # change volume of laptop
         # self.qt_voice_vol
         # self.sound_manager.volume_change(self.music_vol) # Set a default volume
@@ -416,8 +417,12 @@ class Clap_To_Beat_Game():
         # get out just the beat timing we want, and also the hard_coded time it takes to hit the drum
         this_beat = beat_timing[0]
         time_to_hit = 0.3
-        raised_arm = [-26.700000762939453, -85.4000015258789, -58.29999923706055]
-        hitting_drum = [17.200000762939453, -80.0999984741211, -46.599998474121094]
+        if self.diy_box:
+            hitting_drum = [-50.5, -84.69999694824219, -39.400001525878906]
+            raised_arm = [-16.299999237060547, -85.0, -25.700000762939453]
+        else:
+            raised_arm = [-26.700000762939453, -85.4000015258789, -58.29999923706055]
+            hitting_drum = [17.200000762939453, -80.0999984741211, -46.599998474121094]
 
         #Check if we should hit the drum this loop
         if elapsed_time + time_to_hit > this_beat:

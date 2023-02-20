@@ -15,8 +15,6 @@ import time
 #init node
 rospy.init_node('Pilot', anonymous=False)
 rospy.loginfo("Pilot node launched successfully")
-right_arm_pos_pub = rospy.Publisher('/qt_robot/right_arm_position/command', Float64MultiArray, queue_size=10)
-left_arm_pos_pub = rospy.Publisher('/qt_robot/left_arm_position/command', Float64MultiArray, queue_size=10)
 
 #create arm msgs to move qt arms
 arm_up_right = [20, -59.599998474121094, -40.70000076293945] #motor pos for right arm to be in air
@@ -38,7 +36,7 @@ behave = Behaviours(game.pygame, game.music_filepath)
 background = (100,100,100)
 run = True
 
-games_to_play = [3, 4]
+games_to_play = [1, 2, 3, 4]
 
 #Pause until they're ready
 levels.tap_to_continue(run,background, text_display="Tap when you want to start.")
@@ -66,7 +64,7 @@ if 2 in games_to_play:
     game = Fix_The_Song_Game(user_id, reduce_screen = False)
     qt_manager.send_qt_command(gesture="happy", emote="grin")
     qt_manager.qt_say_blocking("Great job on that last game... Lets play the next one now...!", black_screen = True)
-    game.Main("easy",3)
+    game.Main("easy", 1)
     qt_manager.qt_say_blocking(behave.get_next_level(), black_screen=True)
     for level in range(2, 4):
         if level == 3:
@@ -91,7 +89,7 @@ if 3 in games_to_play:
         run, ready = levels.yes_or_no_screen("Is it set up now?", run, background)
         levels.black_screen(run)
     # Play level 1
-    game.Main()
+    game.Main(level=4)
     time.sleep(2)
     qt_manager.send_qt_command(emote="grin")
     qt_manager.qt_say_blocking("I had fun! I hope you did too!", black_screen=True)
@@ -103,7 +101,7 @@ if 4 in games_to_play:
     qt_manager.send_qt_command(gesture="happy", emote="grin")
     qt_manager.qt_say_blocking("Great!.. One last game now!", black_screen = True)
     # Play level 1
-    game.Main()
+    game.Main(level = 4)
     time.sleep(2)
     # Get rid of drum so we can emote
     qt_manager.send_qt_command(emote="grin")

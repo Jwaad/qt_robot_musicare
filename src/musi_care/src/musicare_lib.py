@@ -19,7 +19,6 @@ import threading
 from std_msgs.msg import Float64MultiArray
 
 
-
 # TODO REPLACE ALL GREY SCALE VERSIONS TO QUICK SCRIPT OF CV2.convert to greyscale
 
 # rospy.init_node('musicare_lib', anonymous=False)

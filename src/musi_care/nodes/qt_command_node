@@ -11,7 +11,7 @@ import time
 from musi_care.srv import qt_command
 from qt_robot_interface.srv import * #so we can use the qt service srvs
 from qt_gesture_controller.srv import * # #so we can use the service srv "gesture_play"
-from qt_motors_controller.srv import *
+from qt_motors_controller.srv import * #So we can change motor vel
 from std_msgs.msg import *
 from std_msgs.msg import String #so we can become a publisher and publish a string to the QT node that handles tts.
 from std_msgs.msg import Float64MultiArray

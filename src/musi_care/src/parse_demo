@@ -1,0 +1,58 @@
+#!/usr/bin/env python
+
+#libraries
+from guess_mood import Guess_The_Mood_Game
+from fix_song import Fix_The_Song_Game
+from clap_beat import Clap_To_Beat_Game
+from simon_says_clap import Simon_Says_Clap_Game
+from musicare_lib import QTManager
+from musicare_lib import StandardLevels
+from musicare_lib import Behaviours
+from std_msgs.msg import Float64MultiArray
+import rospy
+import time
+
+#init node
+rospy.init_node('Pilot', anonymous=False)
+rospy.loginfo("Pilot node launched successfully")
+
+#create arm msgs to move qt arms
+arm_up_right = [20, -59.599998474121094, -40.70000076293945] #motor pos for right arm to be in air
+arm_up_left = [-20, -59.599998474121094, -40.70000076293945] #motor pos for right arm to be in air
+arms_up = '[["right_arm", "left_arm"], [{}, {}]]'.format(arm_up_right,arm_up_left)
+arm_right_msg = Float64MultiArray()
+arm_left_msg = Float64MultiArray()
+arm_left_msg.data = arm_up_right
+arm_left_msg.data = arm_up_left
+
+#init games
+user_id = "Jwaad"
+game = Simon_Says_Clap_Game(user_id, reduce_screen=False)
+
+levels = StandardLevels(game.window, game.window_center, game.pygame, game.music_filepath)
+qt_manager = QTManager(levels = levels)
+behave = Behaviours(game.pygame, game.music_filepath)
+
+background = (100,100,100)
+run = True
+
+#Pause until they're ready
+levels.tap_to_continue(run,background, text_display="Tap when you want to start.")
+qt_manager.send_qt_command(gesture="happy", emote="grin")
+qt_manager.qt_say_blocking("Hello everyone, I am QT the robot...", black_screen = True)
+time.sleep(1)
+qt_manager.qt_say_blocking("I hope you're all wide awake and ready to play...", black_screen = True)
+time.sleep(1)
+qt_manager.qt_say_blocking("I will. Drumm. to. the beat of this song...", black_screen = True)
+time.sleep(1)
+qt_manager.qt_say_blocking("Please, everyone, watch me and clap along!", black_screen = True)
+qt_manager.qt_actuate(arms_up)
+levels.tap_to_continue(run,background, text_display="Tap when you want to start.")
+game.play_level("easy",4)
+qt_manager.send_qt_command(gesture="wave", emote="grin")
+qt_manager.qt_say_blocking("Thank you for playing with me!", black_screen = True)
+qt_manager.qt_say_blocking("That was so fun!", black_screen = True)
+print("Shutting game down")
+
+
+
