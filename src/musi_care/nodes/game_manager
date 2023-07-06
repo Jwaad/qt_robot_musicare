@@ -1,0 +1,71 @@
+#!/usr/bin/env python
+# This code is the only node that needs to be run, instead of opening 3 different nodes before starting.
+
+import rospy
+import roslaunch
+import rosnode
+
+class GameManager():
+
+    # On start: check if we are connected to robot and decide which nodes to run
+    def __init__(self):
+        rospy.init_node('GameManager', anonymous=False)
+        self.PingNode = "/PLACEHOLDER FOR QT MOTOR CONTROLLER"
+        self.musicarePkgName = 'musi_care'
+        self.jwaadTestPkgName = "jwaad_test"
+        self.ActiveNodes =[] # Store reference to all nodes that we start
+
+        robot_connected = self.CheckRobotRunning()
+        if robot_connected:
+            self.StartRobotNodes()
+        else:
+            self.StartSimulatedRobotNodes()
+        self.StartLaptopNodes()
+
+    # Create GUI to control which level to play
+    def Main(self):
+
+        pass
+
+    # Check if the robot is connected, by calling nodes and seeing if we get a response
+    def CheckRobotRunning(self):
+        rospy.loginfo("Checking if robot is connected to laptop")
+        robot_connected = rosnode.rosnode_ping(self.PingNode, max_count=3)
+        if robot_connected:
+            rospy.loginfo("Connecting to robot and running control")
+        else:
+            rospy.loginfo("Could not detect robot, running in offline mode")
+        return robot_connected
+
+    # SSH into robot and start QT command node
+    def StartRobotNodes(self):
+        pass
+
+    # Start the laptop side fake node that just takes in the commands and prints them
+    def StartSimulatedRobotNodes(self):
+        nodeName = 'laptop_command_node'
+        node = self.StartNode(self.jwaadTestPkgName, nodeName)
+        self.ActiveNodes.append(node)
+
+    # Start the sound player on laptop side
+    def StartLaptopNodes(self):
+        nodeName = 'sound_player'
+        node = self.StartNode(self.musicarePkgName, nodeName)
+        self.ActiveNodes.append(node)
+
+    # Run some code before we close out of this node
+    def OnExit(self):
+        # Close all the nodes we started on launch
+        for node in self.ActiveNodes:
+            node.stop()
+
+    # Start a node and store the reference to it
+    def StartNode(self, nodePackage, nodeName):
+        node = roslaunch.core.Node(nodePackage, nodeName)
+        launch = roslaunch.scriptapi.ROSLaunch()
+        launch.start()
+        nodeRef = launch.launch(node)
+        return nodeRef
+
+if __name__ == '__main__':
+    game_manager = GameManager()
