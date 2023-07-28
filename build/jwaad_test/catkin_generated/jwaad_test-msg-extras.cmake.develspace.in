@@ -1,2 +1,0 @@
-set(jwaad_test_MESSAGE_FILES "/home/jwaad/catkin_ws/devel/share/jwaad_test/msg/FaceLockOnAction.msg;/home/jwaad/catkin_ws/devel/share/jwaad_test/msg/FaceLockOnActionGoal.msg;/home/jwaad/catkin_ws/devel/share/jwaad_test/msg/FaceLockOnActionResult.msg;/home/jwaad/catkin_ws/devel/share/jwaad_test/msg/FaceLockOnActionFeedback.msg;/home/jwaad/catkin_ws/devel/share/jwaad_test/msg/FaceLockOnGoal.msg;/home/jwaad/catkin_ws/devel/share/jwaad_test/msg/FaceLockOnResult.msg;/home/jwaad/catkin_ws/devel/share/jwaad_test/msg/FaceLockOnFeedback.msg")
-set(jwaad_test_SERVICE_FILES "")
