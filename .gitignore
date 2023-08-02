@@ -1,4 +1,5 @@
 .catkin_tools/
 build/
 devel/
-/src/tutorial_qt_motors/
+src/tutorial_qt_motors/
+/.idea/
