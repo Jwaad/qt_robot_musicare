@@ -34,6 +34,7 @@ class LockOnToFace(object):
 
     #Move head to watch person head on
     def MoveToFace(self, x_pixel_offset, y_pixel_offset):
+
         #Create message
         head_ref = Float64MultiArray()
         
@@ -49,7 +50,7 @@ class LockOnToFace(object):
         #Publish and move head        
         head_ref.data = [yaw, pitch]
         #print(head_ref)
-        #self.head_position_pub.publish(head_ref)
+        self.head_position_pub.publish(head_ref)
     
     #Move head to 0, 0
     def MoveHeadToDefault(self):
@@ -64,12 +65,12 @@ class LockOnToFace(object):
             qt_head_free = move_status.data #This should eventually return false
             if qt_head_free:
                 movement_ongoing = False
-                
+
             #TODO, ADD A TIMEOUT HERE
     
     ###MAIN CODE###
-   
-    #Action call back
+
+    #Action call             print("im_running")back
     def ExecuteCallback(self, goal):
         self.success = True
         #print("Action Name: ", self._action_name)

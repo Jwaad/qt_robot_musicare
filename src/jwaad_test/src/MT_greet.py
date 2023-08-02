@@ -33,8 +33,6 @@ from musi_care.msg import SongData
 from musi_care.srv import sound_player_srv
 from musi_care.srv import qt_command
 
-
-
 #TODO Add these to a new lib, QT CONTROL
 def send_qt_command( command_type, command_content= "", command_blocking = False):
     """Neatens and simplifies sending commands to QT """

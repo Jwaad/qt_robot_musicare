@@ -1,8 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="PYTHON_MODULE" version="4">
   <component name="NewModuleRootManager">
+<<<<<<< Updated upstream
     <content url="file://$MODULE_DIR$" />
     <orderEntry type="inheritedJdk" />
+=======
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/jwaad_test" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/jwaad_test/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/musi_care" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/musi_care/src" isTestSource="false" />
+    </content>
+    <orderEntry type="jdk" jdkName="Python 3.8 (qt_robot_env)" jdkType="Python SDK" />
+>>>>>>> Stashed changes
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="PyDocumentationSettings">

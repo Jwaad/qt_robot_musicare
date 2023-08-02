@@ -1148,7 +1148,7 @@ class Button():
     """
 
     def __init__(self, image_path, image_greyscale_path, x_y_locations, pygame, return_info ={}, scale=1, unique_id="", on_click=object,
-                 on_release=object):
+                 on_release=object, text = ""):
 
         if not os.path.exists(image_path):
             print("File does not exist path = ", image_path)

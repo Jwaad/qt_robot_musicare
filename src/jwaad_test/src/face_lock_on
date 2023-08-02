@@ -19,6 +19,7 @@ class face_tracker:
         self.face_sub = rospy.Subscriber("/qt_nuitrack_app/faces", Faces, self.face_callback)
 
     def face_callback(self, data):
+
         self.faces = data.faces
         self.faces_time = rospy.Time.now()
         (rows, cols, channels) = self.cv_image.shape
@@ -36,6 +37,9 @@ class face_tracker:
                 cv2.rectangle(self.cv_image, (x, y), (x+w, y+h), (255,0,0), 2)
                 cv2.imshow("QT Vision", self.cv_image)
                 key = cv2.waitKey(1)
+
+    def move_to_face(self,face_rect):
+        """ Move face to rect"""
 
     def image_callback(self, data):
         try:

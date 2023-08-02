@@ -4,13 +4,18 @@
 import rospy
 import roslaunch
 import rosnode
+import paramiko
+import pygame
+from musicare_lib import Renderer
+from musicare_lib import Button
+
 
 class GameManager():
 
     # On start: check if we are connected to robot and decide which nodes to run
     def __init__(self):
         rospy.init_node('GameManager', anonymous=False)
-        self.PingNode = "/PLACEHOLDER FOR QT MOTOR CONTROLLER"
+        self.PingNode = "/PLACEHOLDER FOR QT MOTOR CONTROLLER TOPIC"
         self.musicarePkgName = 'musi_care'
         self.jwaadTestPkgName = "jwaad_test"
         self.ActiveNodes =[] # Store reference to all nodes that we start
@@ -21,11 +26,53 @@ class GameManager():
         else:
             self.StartSimulatedRobotNodes()
         self.StartLaptopNodes()
+        self.Main()
+        self.OnExit()
+        self.InitPygame()
+        self.run = True
+
+    # Set screen and game related variables
+    def InitPygame(self):
+        self.FPS = 20
+        self.pygame.init()  # start py engine
+        self.pygame.freetype.init()
+        res = pygame.display.Info()  # get our screen resolution
+        self.window_x = res.current_w - 150  # Width of window -150 to account for the linux toolbar
+        self.window_y = res.current_h  # Height of window
+        self.window_center = (int(self.window_x / 2), int(self.window_y / 2))
+        self.cen_x = self.window_center[0]
+        self.cen_y = self.window_center[1]
+        self.window = pygame.display.set_mode((self.window_x, self.window_y))  # Create window and set size
+        self.background_colour = (100, 100, 100)  # background Gray by default
+        self.pygame.display.set_caption("Fix The Song!")  # Label window
+        self.renderer = Renderer(self.window, self.window_center)
+
+    def create_button(self, file_name, alt_file_name, location, return_info = {}, scale=1, unique_id="", text = ""):
+        """code creates button using the button_image class."""
+        this_file_path = os.path.dirname(__file__)
+        relative_path = 'game_assets/graphics'
+        file_path = os.path.join(this_file_path, relative_path, file_name)
+        alt_path = os.path.join(this_file_path, relative_path, alt_file_name)
+
+        button = Button(file_path, alt_path, location, self.pygame, return_info = {}, scale=scale, unique_id=unique_id, text=text)
+        return (button)
+
+    def CreateGameButtons(self):
+        backgroundImageGrey = ""
+        backgroundImage = ""
+        guessMoodButton = self.create_button(backgroundImage, backgroundImageGrey, (100,200), return_info = {})
 
     # Create GUI to control which level to play
     def Main(self):
+        while (not rospy.is_shutdown()) and (self.run):
 
-        pass
+            #Handle events
+            for event in self.pygame.event.get():
+                event
+
+            # Update graphics
+            self.pygame.display.update()  # Update all drawn objects
+
 
     # Check if the robot is connected, by calling nodes and seeing if we get a response
     def CheckRobotRunning(self):
@@ -43,7 +90,7 @@ class GameManager():
 
     # Start the laptop side fake node that just takes in the commands and prints them
     def StartSimulatedRobotNodes(self):
-        nodeName = 'laptop_command_node'
+        nodeName = 'laptop_command'
         node = self.StartNode(self.jwaadTestPkgName, nodeName)
         self.ActiveNodes.append(node)
 
@@ -53,9 +100,10 @@ class GameManager():
         node = self.StartNode(self.musicarePkgName, nodeName)
         self.ActiveNodes.append(node)
 
-    # Run some code before we close out of this node
+    # Run some code before we close out of this node (Ros does this automatically, but we do it again anyways, just incase)
     def OnExit(self):
-        # Close all the nodes we started on launch
+        # Close all the nodes we started on launch (though this happens automatically)
+        rospy.loginfo("Exiting...")
         for node in self.ActiveNodes:
             node.stop()
 

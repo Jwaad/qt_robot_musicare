@@ -4,7 +4,7 @@ from __future__ import print_function
 import sys
 import rospy
 from std_msgs.msg import String
-from qt_robot_interface.srv import *
+#from qt_robot_interface.srv import *
 import cv2
 import threading
 
@@ -40,7 +40,8 @@ class image_converter:
        
     def service_say_message(self, message):
         rospy.wait_for_service('/qt_robot/speech/say')
-        self.qt_speech = rospy.ServiceProxy('/qt_robot/speech/say', speech_say) #The Service Type / class: speech_say
+        #self.qt_speech = rospy.ServiceProxy('/qt_robot/speech/say', speech_say) #The Service Type / class: speech_say
+
         self.qt_speech(message)
 
     def face_callback(self, data):
