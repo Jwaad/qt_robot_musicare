@@ -4,11 +4,12 @@
 import rospy
 import roslaunch
 import rosnode
-import paramiko
+#import paramiko # For SSH
 import pygame
+import os
 from musicare_lib import Renderer
 from musicare_lib import Button
-
+import time
 
 class GameManager():
 
@@ -21,21 +22,23 @@ class GameManager():
         self.ActiveNodes =[] # Store reference to all nodes that we start
 
         robot_connected = self.CheckRobotRunning()
+        rospy.set_param('/activity_status', 1) # Tell ros this node is starting
         if robot_connected:
             self.StartRobotNodes()
         else:
             self.StartSimulatedRobotNodes()
         self.StartLaptopNodes()
-        self.Main()
-        self.OnExit()
         self.InitPygame()
         self.run = True
 
     # Set screen and game related variables
     def InitPygame(self):
-        self.FPS = 20
+        self.run = True
+        self.pygame = pygame
         self.pygame.init()  # start py engine
         self.pygame.freetype.init()
+        self.FPS = 20
+        self.clock = self.pygame.time.Clock()
         res = pygame.display.Info()  # get our screen resolution
         self.window_x = res.current_w - 150  # Width of window -150 to account for the linux toolbar
         self.window_y = res.current_h  # Height of window
@@ -44,7 +47,7 @@ class GameManager():
         self.cen_y = self.window_center[1]
         self.window = pygame.display.set_mode((self.window_x, self.window_y))  # Create window and set size
         self.background_colour = (100, 100, 100)  # background Gray by default
-        self.pygame.display.set_caption("Fix The Song!")  # Label window
+        self.pygame.display.set_caption("Game Selector")  # Label window
         self.renderer = Renderer(self.window, self.window_center)
 
     def create_button(self, file_name, alt_file_name, location, return_info = {}, scale=1, unique_id="", text = ""):
@@ -64,15 +67,29 @@ class GameManager():
 
     # Create GUI to control which level to play
     def Main(self):
+        fps = "999"
         while (not rospy.is_shutdown()) and (self.run):
-
-            #Handle events
+            t1 = time.time()
+            # Handle events
             for event in self.pygame.event.get():
-                event
+                # Check quit
+                if event.type == pygame.QUIT:
+                    self.run = False
+                    print("Quitting...")
 
+            #Draw background
+            self.renderer.DrawBackground(self.background_colour)
+            # Draw fps
+            self.renderer.DrawText(fps,(2800,25), 50)
             # Update graphics
             self.pygame.display.update()  # Update all drawn objects
 
+            # Cap FPS (save resources)
+            self.clock.tick(self.FPS)
+            fps = str(round(1 / (time.time() - t1)))
+
+        self.OnExit()
+        print("Ending...")
 
     # Check if the robot is connected, by calling nodes and seeing if we get a response
     def CheckRobotRunning(self):
@@ -86,22 +103,28 @@ class GameManager():
 
     # SSH into robot and start QT command node
     def StartRobotNodes(self):
-        pass
+        time.sleep(1)
+        # TODO ADD SSH INTO ROBO AND START SERVER HERE
 
     # Start the laptop side fake node that just takes in the commands and prints them
     def StartSimulatedRobotNodes(self):
         nodeName = 'laptop_command'
         node = self.StartNode(self.jwaadTestPkgName, nodeName)
+        time.sleep(1)
         self.ActiveNodes.append(node)
 
     # Start the sound player on laptop side
     def StartLaptopNodes(self):
         nodeName = 'sound_player'
         node = self.StartNode(self.musicarePkgName, nodeName)
+        time.sleep(1)
         self.ActiveNodes.append(node)
 
     # Run some code before we close out of this node (Ros does this automatically, but we do it again anyways, just incase)
     def OnExit(self):
+        # End pygame
+        self.pygame.quit()
+
         # Close all the nodes we started on launch (though this happens automatically)
         rospy.loginfo("Exiting...")
         for node in self.ActiveNodes:
@@ -110,10 +133,13 @@ class GameManager():
     # Start a node and store the reference to it
     def StartNode(self, nodePackage, nodeName):
         node = roslaunch.core.Node(nodePackage, nodeName)
+
         launch = roslaunch.scriptapi.ROSLaunch()
+
         launch.start()
         nodeRef = launch.launch(node)
         return nodeRef
 
 if __name__ == '__main__':
     game_manager = GameManager()
+    game_manager.Main()
