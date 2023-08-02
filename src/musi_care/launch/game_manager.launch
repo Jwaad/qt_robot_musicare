@@ -1,0 +1,4 @@
+<launch>
+    <node pkg="musi_care" type="game_manager" name="game_manager" output="screen"/>
+</launch>
+
