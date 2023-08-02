@@ -3,3 +3,4 @@ build/
 devel/
 src/tutorial_qt_motors/
 /.idea/
+*.pyc
