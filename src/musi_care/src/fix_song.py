@@ -165,7 +165,7 @@ class Fix_The_Song_Game():
         """empties temp folder after use, NOT IN USE BECAUSE IM SCARED OF DELETING THE WRONG FILES"""
         path = os.path.dirname(__file__) + self.music_filepath + "temp"
         song_names = os.listdir(path)
-        # add part that deletes files here
+        for seg in
 
     def get_track_info(self, formatted_output=False):
         """Subscribe to sound_player publisher and get elapsed track time"""
@@ -209,63 +209,57 @@ class Fix_The_Song_Game():
             secs = "0" + str(secs)
         return str(mins), str(secs)
 
-    def create_button(self, file_name, alt_file_name, location,return_info = {}, scale=1, unique_id=""):
+    def create_button(self, file_name, location, return_info = {}, scale=1, unique_id="", should_grey= True):
         """code creates button using the button_image class."""
         this_file_path = os.path.dirname(__file__)
         relative_path = 'game_assets/graphics'
         file_path = os.path.join(this_file_path, relative_path, file_name)
-        alt_path = os.path.join(this_file_path, relative_path, alt_file_name)
 
-        button = Button(file_path, alt_path, location, self.pygame, return_info = {}, scale=scale, unique_id=unique_id)
+        button = Button(file_path, location, self.pygame, return_info = {}, scale=scale, unique_id=unique_id, should_grey = should_grey)
         return (button)
 
-    def create_toggle_button(self, file_name, alt_file_name, default_image_grey, toggled_image_grey, location, scale=2,
-                             unique_id="", return_info="", when_toggle_on=object, when_toggle_off=object):
+    def create_toggle_button(self, file_name, default_image_grey, location, scale=2,
+                             unique_id="", return_info="", when_toggle_on=object, when_toggle_off=object, should_grey = True):
         """code creates button using the button_image class."""
         this_file_path = os.path.dirname(__file__)
         relative_path = '/game_assets/graphics/'
         file_path = this_file_path + relative_path + file_name
-        alt_path = this_file_path + relative_path + alt_file_name
         file_path_grey = this_file_path + relative_path + default_image_grey
-        alt_path_grey = this_file_path + relative_path + toggled_image_grey
 
-        button = ToggleButton(file_path, alt_path, file_path_grey, alt_path_grey, location, self.pygame, scale,
-                              unique_id, return_info, when_toggle_on, when_toggle_off)
+        button = ToggleButton(file_path, file_path_grey, location, self.pygame, scale,
+                              unique_id, return_info, when_toggle_on, when_toggle_off, should_grey = should_grey)
         return (button)
 
         # default_image_path, toggled_image_path, default_image_grey, toggled_image_grey, x_y_locations, pygame, scale=1, unique_id = "", return_info="", when_toggle_on=object, when_toggle_off=object
 
-    def create_drag_button(self, file_name, alt_file_name, file_grey, alt_file_grey, location, scale=2, return_info={},
-                           when_toggle_on=object, when_toggle_off=object, unique_id=""):
+    def create_drag_button(self, file_name, toggled_file, location, scale=2, return_info={},
+                           when_toggle_on=object, when_toggle_off=object, unique_id="", should_grey = True):
         """code creates button using the button_image class."""
         this_file_path = os.path.dirname(__file__)
         relative_path = 'game_assets/graphics'
-        file_path = os.path.join(this_file_path, relative_path, file_name)
-        alt_path = os.path.join(this_file_path, relative_path, alt_file_name)
-        file_path_grey = os.path.join(this_file_path, relative_path, file_grey)
-        alt_path_grey = os.path.join(this_file_path, relative_path, alt_file_grey)
 
-        button = DraggableButton(file_path, alt_path, file_path_grey, alt_path_grey, location, self.pygame, scale,
+        # Form img paths
+        file_path = os.path.join(this_file_path, relative_path, file_name)
+        toggled_path = os.path.join(this_file_path, relative_path, toggled_file)
+
+        button = DraggableButton(file_path, toggled_path, location, self.pygame, scale,
                                  return_info=return_info, when_toggle_on=when_toggle_on,
-                                 when_toggle_off=when_toggle_off, unique_id=unique_id)
+                                 when_toggle_off=when_toggle_off, unique_id=unique_id, should_grey = should_grey)
         return (button)
 
-    def create_play_button(self, file_name, alt_file_name, file_grey, alt_file_grey, rewind_name, rewind_name_grey,
-                           location, scale=1, unique_id="", on_pause=object, on_play=object):
+    def create_play_button(self, file_name, alt_file_name, rewind_name,
+                           location, scale=1, unique_id="", on_pause=object, on_play=object, should_grey = True):
         """code creates toggle button using the toggle button class."""
         this_file_path = os.path.dirname(__file__)
         relative_path = 'game_assets/graphics'
-        file_path = os.path.join(this_file_path, relative_path, file_name)
-        alt_path = os.path.join(this_file_path, relative_path, alt_file_name)
-        file_path_grey = os.path.join(this_file_path, relative_path, file_grey)
-        alt_path_grey = os.path.join(this_file_path, relative_path, alt_file_grey)
+
+        # Load imgs
         file_path = os.path.join(this_file_path, relative_path, file_name)
         alt_path = os.path.join(this_file_path, relative_path, alt_file_name)
         rewind_path = os.path.join(this_file_path, relative_path, rewind_name)
-        rewind_path_grey = os.path.join(this_file_path, relative_path, rewind_name_grey)
 
-        button = PausePlayButton(file_path, alt_path, file_path_grey, alt_path_grey, rewind_path, rewind_path_grey,
-                                 location, self.pygame, scale, unique_id, on_pause, on_play)
+        button = PausePlayButton(file_path, alt_path, rewind_path,
+                                 location, self.pygame, scale, unique_id, on_pause, on_play, should_grey = should_grey)
         return (button)
 
     def create_horizontal_slider(self, slider_name, cursor_name, x_y_locations, scale=1, on_click=object,
@@ -364,7 +358,7 @@ class Fix_The_Song_Game():
                 "correct_slot":False,
                 "song_pos": i
             }
-            segment = self.create_drag_button(seg_colour[0], seg_colour[1], button_grey, button_grey, seg_pos,
+            segment = self.create_drag_button(seg_colour[0], seg_colour[1], seg_pos,
                                               return_info=seg_data,
                                               when_toggle_on=self.play_seg_track(song_path),
                                               when_toggle_off=self.stop_seg_track(song_path))
@@ -407,15 +401,15 @@ class Fix_The_Song_Game():
             self.segment_x_y.pop(pos_idx)
 
         # Create loading button
-        loading_button = self.create_button("loading_screen_button_depressed.png", "loading_screen_button_depressed.png",
-                                           (270, 550), scale=2.3)
+        loading_button = self.create_button("loading_screen_button_depressed.png",
+                                           (270, 550), scale=2.3, should_grey= False)
 
         # Create unknown button slots and have them scale according to how many there is
         unknown_y = 150
         unknown_slots = []
         # Create the unknown slots we need
         for i in range(num_correct_slots):
-            unknown_seg = self.create_button("music_segment_greyed_out.png", "music_segment_greyed_out.png", (
+            unknown_seg = self.create_button("music_segment_greyed_out.png", (
                 unknown_y, 0), scale = 2)
 
             unknown_slots.append(unknown_seg)
@@ -437,7 +431,7 @@ class Fix_The_Song_Game():
         text_objs = [top_text, middle_text]
 
         # Create help button
-        help_button = self.create_button("help_button.png", "help_button_grey.png", (2200, 100), scale=1,
+        help_button = self.create_button("help_button.png", (2200, 100), scale=1,
                                             unique_id="help")
         if single_out:
             return [loading_button] +  unknown_slots + text_objs + [help_button] + randomised_segments
@@ -498,7 +492,7 @@ class Fix_The_Song_Game():
 
     def create_check(self, seg):
         """Draws a check mark under the segment given"""
-        mark = self.create_button("check_mark.png", "check_mark_grey.png",
+        mark = self.create_button("check_mark.png",
                            (seg.rect.centerx - 35, seg.rect.centery + 155),
                            scale=0.5)
         return mark
@@ -559,8 +553,8 @@ class Fix_The_Song_Game():
         # Create graphics and buttons
         segments, num_correct_segs = self.create_segments(self.segment_num, self.track_name, self.distract_song)
         graphics = self.create_graphics(segments, num_correct_segs, single_out=True)
-        self.tut_next = self.create_button("tut_next.png", "tut_next.png", (0, 0), scale=1.5, unique_id="next")
-        self.tut_repeat = self.create_button("tut_repeat.png", "tut_repeat.png", (0, 0), scale=1.5, unique_id="repeat")
+        self.tut_next = self.create_button("tut_next.png", (0, 0), scale=1.5, unique_id="next", should_grey = False)
+        self.tut_repeat = self.create_button("tut_repeat.png", (0, 0), scale=1.5, unique_id="repeat", should_grey = False)
 
         # Group graphics for easier processing
         tut_buttons = [self.tut_next, self.tut_repeat]
@@ -650,11 +644,10 @@ class Fix_The_Song_Game():
             self.track_name = level_data["song_name"]
 
             # Create buttons
-            self.next_button = self.create_button("next_button.png", "next_button_grey.png", (self.cen_x - 300, 1200),
+            self.next_button = self.create_button("next_button.png", (self.cen_x - 300, 1200),
                                                  scale=1)
-            self.play_button = self.create_play_button("pause_button.png", "pause_button_grey.png", "play_button.png",
-                                                     "play_button_grey.png", "rewind_button.png",
-                                                     "rewind_button_grey.png", (self.cen_x - 175, 550), scale=1.5,
+            self.play_button = self.create_play_button("pause_button.png", "play_button.png",
+                                                     "rewind_button.png", (self.cen_x - 175, 550), scale=1.5,
                                                        on_play=self.sound_manager.unpause,
                                                        on_pause=self.sound_manager.pause)  # create pause and play button
             # Load track
@@ -894,7 +887,7 @@ class Fix_The_Song_Game():
     def Main(self, difficulty="easy",level=1):
         # input what level and difficulty to play, the program will handle the rest
         """Main Func"""
-
+        """
         # Introduce game
         self.run = self.level_loader.QTSpeakingScreen("Lets play Fix The Song!", self.run, self.background_colour)
 
@@ -908,11 +901,11 @@ class Fix_The_Song_Game():
         
         # Play the track and block
         self.play_music_blocking(difficulty, level)
-
+        
         # Count into level to slow pacing
         self.run = self.level_loader.countdown(3, self.run, self.background_colour,
                                                prelim_msg="Lets Fix The Song!")
-
+        """
         # Play main level
         time_taken, wrong_answers, hints_needed = self.play_level(difficulty, level)
 
@@ -936,5 +929,5 @@ if __name__ == '__main__':
         print("Audio may not be stopped due to interrupt")
 
     # on exit delete music files and stop music
-    #game_object.empty_temp_dir() # TODO finish this method
+    game_object.empty_temp_dir() # TODO finish this method
     SoundManager("").stop_track()
