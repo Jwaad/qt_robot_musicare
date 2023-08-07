@@ -907,14 +907,14 @@ class Fix_The_Song_Game():
         
         # Count in to the start of the game
         self.run = self.level_loader.tap_to_continue(self.run, self.background_colour)
-        
+        """
         # Play the track and block
         self.play_music_blocking(difficulty, level)
-        
+
         # Count into level to slow pacing
         self.run = self.level_loader.countdown(3, self.run, self.background_colour,
                                                prelim_msg="Lets Fix The Song!")
-        """
+
         # Play main level
         time_taken, wrong_answers, hints_needed = self.play_level(difficulty, level)
 
