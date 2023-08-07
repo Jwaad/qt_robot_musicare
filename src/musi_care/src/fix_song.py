@@ -161,11 +161,19 @@ class Fix_The_Song_Game():
                     line_num += 1
             return music_data
 
-    def empty_temp_dir(self):
-        """empties temp folder after use, NOT IN USE BECAUSE IM SCARED OF DELETING THE WRONG FILES"""
-        path = os.path.dirname(__file__) + self.music_filepath + "temp"
-        song_names = os.listdir(path)
-        for seg in
+    def empty_temp_dir(self, segments):
+        """Takes a list of segments / dragable objects and deletes the sound file they play"""
+        path = os.path.dirname(__file__) + self.music_filepath
+        file_paths =  []
+        for seg in segments:
+            file_paths.append(seg.return_info["song_path"])
+        # Delete files
+        for file_path in file_paths:
+            file = path + file_path
+            if os.path.exists(file):
+                os.remove(file)
+
+        rospy.loginfo("Temp files deleted")
 
     def get_track_info(self, formatted_output=False):
         """Subscribe to sound_player publisher and get elapsed track time"""
@@ -879,6 +887,7 @@ class Fix_The_Song_Game():
                                                     self.background_colour, partial_func =  False)
             self.command_manager.send_qt_command(gesture="clap",
                                                  emote="talking")
+            self.empty_temp_dir(randomised_segments)
             return time_taken, wrong_answers, hints_needed
 
 
@@ -929,5 +938,4 @@ if __name__ == '__main__':
         print("Audio may not be stopped due to interrupt")
 
     # on exit delete music files and stop music
-    game_object.empty_temp_dir() # TODO finish this method
     SoundManager("").stop_track()
