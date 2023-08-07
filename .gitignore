@@ -2,6 +2,7 @@
 build/
 devel/
 src/tutorial_qt_motors/
+src/musi_care/src/game_assets/music/temp/
 /.idea/
 *.pyc
 src/musi_care/src/__pycache__/musicare_lib.cpython-38.pyc
