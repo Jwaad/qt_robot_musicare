@@ -34,8 +34,8 @@ class Guess_The_Mood_Game():
     def __init__(self, user_id, reduce_screen = True):
         """Initialise and take user_id, user_id helps us save the data to the specific profiles"""
         self.user_id = user_id
-        x=145 # x pos of screen
-        y=0   # y pos of screen
+        x= 145 # x pos of screen
+        y= 0   # y pos of screen
         os.environ['SDL_VIDEO_WINDOW_POS'] = '%d,%d' % (x,y) #move screen to x and y pos
         self.previous_screen = "" # used so we can go backwards a screen
         self.next_screen = "" #used to skip screen, low priority feature
@@ -178,34 +178,28 @@ class Guess_The_Mood_Game():
         return str(mins), str(secs)
 
 
-    def create_button(self,file_name, location, return_info = {},  scale=1, unique_id="", should_grey = False):
+    def create_button(self, file_name, location, return_info = {},  scale=1.0, unique_id="", should_grey = True):
         """code creates button using the button_image class."""
         this_file_path = os.path.dirname(__file__)
         relative_path = 'game_assets/graphics'
         file_path = os.path.join(this_file_path, relative_path, file_name)
         
-        button = Button(file_path, location, self.pygame, return_info = {}, scale=scale, unique_id=unique_id)
+        button = Button(file_path, location, self.pygame, return_info = {}, scale=scale, unique_id=unique_id, should_grey = should_grey)
         return(button)         
 
 
-    def CreatePlayButton(self, file_name, file_grey, alt_file_grey, rewind_name, rewind_name_grey, location,  scale=1, unique_id = "", on_pause=object, on_play=object):
+    def CreatePlayButton(self, pause_path, play_path, rewind_path, location,  scale=1, unique_id = "", on_pause=object, on_play=object, should_grey = True):
         """code creates toggle button using the toggle button class."""
         #get path to imgs
         this_file_path = os.path.dirname(__file__)
         relative_path = 'game_assets/graphics'
         
-        #paths for play img
-        file_path = os.path.join(this_file_path, relative_path, file_name)
+        #load imgs
+        pause_path = os.path.join(this_file_path, relative_path, pause_path)
+        play_path = os.path.join(this_file_path, relative_path, play_path)
+        rewind_path = os.path.join(this_file_path, relative_path, rewind_path)
         
-        #paths for pause img
-        file_path_grey = os.path.join(this_file_path, relative_path, file_grey)
-        alt_path_grey = os.path.join(this_file_path, relative_path, alt_file_grey)
-        
-        #Path for replay img  
-        rewind_path = os.path.join(this_file_path, relative_path, rewind_name)
-        rewind_path_grey = os.path.join(this_file_path, relative_path, rewind_name_grey)
-        
-        button = PausePlayButton(file_path, file_path_grey, alt_path_grey, rewind_path, rewind_path_grey, location, self.pygame, scale, unique_id, on_pause, on_play)
+        button = PausePlayButton(pause_path, play_path, rewind_path, location, self.pygame, scale, unique_id, on_pause, on_play, should_grey = should_grey)
         return(button)  
         
         
@@ -304,7 +298,7 @@ class Guess_The_Mood_Game():
         self.sad_button = self.create_button("sad_button.png", (675,650), scale=1.3, unique_id="sad")
         self.happy_button = self.create_button("happy_button.png", (675,1050), scale=1.3, unique_id="happy")
         self.unsure_button = self.create_button("unsure_button.png", (850,1450), scale=1, unique_id = "unsure")
-        self.play_button = self.CreatePlayButton("pause_button.png", "play_button.png",  "play_button_grey.png", "rewind_button.png", "rewind_button_grey.png", (self.cen_x-175, 195), scale = 1.5, on_play= self.sound_manager.unpause , on_pause = self.sound_manager.pause) #create pause and play button
+        self.play_button = self.CreatePlayButton("pause_button.png", "play_button.png", "rewind_button.png", (self.cen_x-175, 195), scale = 1.5, on_play= self.sound_manager.unpause , on_pause = self.sound_manager.pause) #create pause and play button
         
         
     def get_target_behaviour(self, key):
@@ -620,7 +614,7 @@ class Guess_The_Mood_Game():
                 if self.debug:
                     fps = self.get_fps() #calculate FPS of this loop and show it next loop
                         
-                #check if level won
+                # Check if level won
                 if correct_answer_given:
                     self.level_complete = True
                     print("Ending level")
@@ -658,7 +652,7 @@ class Guess_The_Mood_Game():
         
         # Countdown
         self.run = self.level_loader.countdown(3, self.run, self.background_colour, prelim_msg = "Get ready to play!")
-        
+
         # Run game code
         self.run, play_time, wrong_counter, hints_given = self.play_level(self.run, difficulty, level)
 
