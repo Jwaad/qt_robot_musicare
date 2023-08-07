@@ -28,17 +28,15 @@ import cv2
 ######################################################Uncategorised#################################################################
 class General():
     """
-    Class for methods that are hard / are too few to categorise.
+    Class for methods that are hard to / are too few to categorise.
     """
 
     def __init__(self):
         pass
 
-    def convert_to_grey(self, image_path):
-        img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
-        img = pygame.surfarray.make_surface(img)
-        return img
-
+    def convert_to_grey(self, image):
+        image_grey = pygame.transform.grayscale(image) #.convert_alpha()
+        return image_grey
 
     def save_data(self, user_id, game_name, level):
         """Save the user's level data to file
@@ -1093,7 +1091,7 @@ class AnimationManager():
     def StartTouchAnimation(self, mouse_pos):
         """Start animation """
         # animation vars
-        self.colour = (180, 180, 180)  # light grey
+        self.colour = (230, 230, 230)  # white
         self.circle_radius = 0  # will be changed dynamically
         self.border_width = 10  # 0 = filled circle
         self.start_animation_time = rospy.get_time()
@@ -1166,7 +1164,7 @@ class Button():
             # print("File located at",image_path)
         self.pygame = pygame
         raw_image = self.pygame.image.load(image_path).convert_alpha()
-        grey_scaled_raw_image = General.convert_to_grey(image_path)
+        grey_scaled_raw_image = General().convert_to_grey(raw_image)
         img_x = x_y_locations[0]
         img_y = x_y_locations[1]
         img_w = int(raw_image.get_width() * scale)
@@ -1238,9 +1236,9 @@ class ToggleButton():
 
         # load images and make grey versions
         raw_image = self.pygame.image.load(default_image_path).convert_alpha()
-        raw_img_grey = General.convert_to_grey(default_image_path)
+        raw_img_grey = General().convert_to_grey(raw_image)
         toggled_raw_image = self.pygame.image.load(toggled_image_path).convert_alpha()
-        toggled_raw_grey = General.convert_to_grey(toggled_image_path)
+        toggled_raw_grey = General().convert_to_grey(toggled_raw_image)
 
         # Scale and set pos of imgs
         img_x = x_y_locations[0]
@@ -1328,11 +1326,11 @@ class PausePlayButton():
 
         # load images
         raw_play = self.pygame.image.load(play_path).convert_alpha()
-        raw_play_grey = General.convert_to_grey(play_path)
+        raw_play_grey = General().convert_to_grey(raw_play)
         raw_pause = self.pygame.image.load(pause_path).convert_alpha()
-        raw_pause_grey = General.convert_to_grey(pause_path)
+        raw_pause_grey = General().convert_to_grey(raw_pause)
         raw_rewind = self.pygame.image.load(rewind_path).convert_alpha()
-        raw_rewind_grey = General.convert_to_grey(rewind_path)
+        raw_rewind_grey = General().convert_to_grey(raw_rewind)
 
         # Scale and set pos of imgs
         img_x = x_y_locations[0]
@@ -1432,9 +1430,9 @@ class DraggableButton():
 
         # Load images
         raw_image = self.pygame.image.load(image_path).convert_alpha()
-        raw_image_grey = General.convert_to_grey(image_path)
+        raw_image_grey = General().convert_to_grey(raw_image)
         toggled_raw_image = self.pygame.image.load(toggled_image_path).convert_alpha()
-        toggled_raw_image_grey = General.convert_to_grey(toggled_image_path)
+        toggled_raw_image_grey = General().convert_to_grey(toggled_raw_image)
 
         # Set pos
         img_x = x_y_locations[0]
