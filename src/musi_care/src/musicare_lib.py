@@ -17,6 +17,7 @@ from musi_care.srv import sound_player_srv
 from musi_care.srv import qt_command
 import threading
 from std_msgs.msg import Float64MultiArray
+import cv2
 
 
 # TODO REPLACE ALL GREY SCALE VERSIONS TO QUICK SCRIPT OF CV2.convert to greyscale
@@ -26,9 +27,18 @@ from std_msgs.msg import Float64MultiArray
 
 ######################################################Uncategorised#################################################################
 class General():
+    """
+    Class for methods that are hard / are too few to categorise.
+    """
 
     def __init__(self):
         pass
+
+    def convert_to_grey(self, image_path):
+        img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+        img = pygame.surfarray.make_surface(img)
+        return img
+
 
     def save_data(self, user_id, game_name, level):
         """Save the user's level data to file
@@ -214,8 +224,8 @@ class StandardLevels():
         no_img_path = os.path.join(this_file_path, path_to_imgs, "No_button.png")
 
         # Create buttons and text
-        yes = Button(yes_img_path, yes_img_path, (225, 600), self.pygame, scale=2.2)
-        no = Button(no_img_path, no_img_path, (1625, 600), self.pygame, scale=2.2)
+        yes = Button(yes_img_path, (225, 600), self.pygame, scale=2.2,should_grey=False)
+        no = Button(no_img_path, (1625, 600), self.pygame, scale=2.2,should_grey=False)
         text_obj = TextObject(self.window, self.window_center, text, wrap_text=True, location=(0,200), cen_x=True,
                              cen_y=False, font_size=150, font_colour=(255, 255, 255))
 
@@ -289,7 +299,7 @@ class StandardLevels():
     def QTSpeakingPopupScreen(self, qt_say, graphics, run, background_colour, should_gesture=False,
                               gesture="explain_right", partial_func = True, rand_gest = True):
         """
-            Method displays all our gui with a popup in front with text in centre
+           Method displays all our gui with a popup in front with text in centre
            graphics = a dict of functions that are saved with the parameters needed to render them
            can work with (to be archived method) saved particial functions.
            or a list of ojbects with the "render" method
@@ -309,7 +319,7 @@ class StandardLevels():
         if run and not rospy.is_shutdown():  # Dont start this screen if the previous screen wanted to close out the game
 
             # create popup button in center
-            popup = Button(popup_path, popup_path_grey, (700, 550), self.pygame, scale=1.5)
+            popup = Button(popup_path, (700, 550), self.pygame, scale=1.5)
             popup.rect.center = self.window_center
 
             self.command_manager.qt_emote("talking")  # show mouth moving
@@ -1147,9 +1157,8 @@ class Button():
     class used for the generation and management of buttons
     """
 
-    def __init__(self, image_path, image_greyscale_path, x_y_locations, pygame, return_info ={}, scale=1, unique_id="", on_click=object,
-                 on_release=object, text = ""):
-
+    def __init__(self, image_path, x_y_locations, pygame, return_info ={}, scale=1, unique_id="", on_click=object,
+                 on_release=object, text = "", should_grey = True):
         if not os.path.exists(image_path):
             print("File does not exist path = ", image_path)
         else:
@@ -1157,14 +1166,14 @@ class Button():
             # print("File located at",image_path)
         self.pygame = pygame
         raw_image = self.pygame.image.load(image_path).convert_alpha()
-        grey_scaled_raw_image = self.pygame.image.load(image_greyscale_path).convert_alpha()
+        grey_scaled_raw_image = General.convert_to_grey(image_path)
         img_x = x_y_locations[0]
         img_y = x_y_locations[1]
         img_w = int(raw_image.get_width() * scale)
         img_h = int(raw_image.get_height() * scale)
         scaled_size = (img_w, img_h)
         self.image = self.pygame.transform.scale(raw_image, scaled_size)
-        self.image_greyscale_path = self.pygame.transform.scale(grey_scaled_raw_image, scaled_size)
+        self.image_greyscale = self.pygame.transform.scale(grey_scaled_raw_image, scaled_size)
         self.rect = self.pygame.Rect(img_x, img_y, img_w, img_h)
         if unique_id == "":
             self.id = rospy.get_time()  # unique ID for each button based on time when made
@@ -1172,11 +1181,12 @@ class Button():
             self.id = unique_id
         self.return_info = return_info
         self.type = "Button"
+        self.should_grey = should_grey
 
     def render(self, screen, grey=False):
         """Draw button onto given screen, either as greyscale or coloured"""
-        if grey:  # if we get a request to pause show greyscaled version
-            screen.blit(self.image_greyscale_path, self.rect)
+        if grey and self.should_grey:  # if we get a request to pause show greyscaled version
+            screen.blit(self.image_greyscale, self.rect)
         else:
             screen.blit(self.image, self.rect)
 
@@ -1197,11 +1207,14 @@ class Button():
         self.rect[1] = newpos[1]
 
     def get_pos(self):
-        """Takes a list of (x,y) and sets rect"""
+        """Return X and Y coordinates"""
         return (self.rect[0], self.rect[1])
 
     def set_info(self, info):
         self.return_info = info
+
+    def get_info(self, info):
+        return self.return_info
 
     def get_rect(self):
         """returns object rect"""
@@ -1213,8 +1226,8 @@ class Button():
 class ToggleButton():
     """Class to load images that serve as buttons """
 
-    def __init__(self, default_image_path, toggled_image_path, default_image_grey, toggled_image_grey, x_y_locations,
-                 pygame, scale=1, unique_id="", return_info="", when_toggle_on=object, when_toggle_off=object):
+    def __init__(self, default_image_path, toggled_image_path, x_y_locations,
+                 pygame, scale=1, unique_id="", return_info="", when_toggle_on=object, when_toggle_off=object, should_grey = True):
         # Set vars
         self.pygame = pygame
         self.highlighted = False
@@ -1223,11 +1236,11 @@ class ToggleButton():
         self.when_toggle_on = when_toggle_on
         self.when_toggle_off = when_toggle_off
 
-        # load imges
+        # load images and make grey versions
         raw_image = self.pygame.image.load(default_image_path).convert_alpha()
-        raw_img_grey = self.pygame.image.load(default_image_grey).convert_alpha()
+        raw_img_grey = General.convert_to_grey(default_image_path)
         toggled_raw_image = self.pygame.image.load(toggled_image_path).convert_alpha()
-        toggled_raw_grey = self.pygame.image.load(toggled_image_grey).convert_alpha()
+        toggled_raw_grey = General.convert_to_grey(toggled_image_path)
 
         # Scale and set pos of imgs
         img_x = x_y_locations[0]
@@ -1239,24 +1252,25 @@ class ToggleButton():
         self.image_grey = self.pygame.transform.scale(raw_img_grey, scaled_size)
         self.toggled_image = self.pygame.transform.scale(toggled_raw_image, scaled_size)
         self.toggled_image_grey = self.pygame.transform.scale(toggled_raw_grey, scaled_size)
-
         self.rect = self.pygame.Rect(img_x, img_y, img_w, img_h)
+
         if unique_id == "":
             self.id = rospy.get_time()  # unique ID for each button based on time when made
         else:
             self.id = unique_id
         self.type = "ToggleButton"
+        self.should_grey = should_grey
 
     def render(self, screen, grey=False):
         """Draw image onto screen"""
         if self.toggle_state:
-            if grey:
+            if grey and self.should_grey:
                 screen.blit(self.toggled_image_grey,
                             self.rect)  # TODO replace this with the greyscaled version of this image
             else:
                 screen.blit(self.toggled_image, self.rect)
         else:
-            if grey:
+            if grey and self.should_grey:
                 screen.blit(self.image_grey, self.rect)  # TODO replace this with the greyscaled version of this image
             else:
                 screen.blit(self.image, self.rect)
@@ -1301,8 +1315,8 @@ class ToggleButton():
 class PausePlayButton():
     """All functionality of toggle button, but with an option to replace with a 3rd image"""
 
-    def __init__(self, pause_path, pause_path_grey, play_path, play_path_grey, rewind_path, rewind_path_grey,
-                 x_y_locations, pygame, scale=1, unique_id="", on_pause=object, on_play=object):
+    def __init__(self, pause_path, play_path, rewind_path,
+                 x_y_locations, pygame, scale=1, unique_id="", on_pause=object, on_play=object, should_grey = True):
         # Set vars
         self.pygame = pygame
         self.highlighted = False
@@ -1310,13 +1324,16 @@ class PausePlayButton():
         self.on_pause = on_pause
         self.on_play = on_play
         self.rewind_toggle = False  # show rewind or not
+        self.should_grey = should_grey
+
         # load images
         raw_play = self.pygame.image.load(play_path).convert_alpha()
-        raw_play_grey = self.pygame.image.load(play_path_grey).convert_alpha()
+        raw_play_grey = General.convert_to_grey(play_path)
         raw_pause = self.pygame.image.load(pause_path).convert_alpha()
-        raw_pause_grey = self.pygame.image.load(pause_path_grey).convert_alpha()
+        raw_pause_grey = General.convert_to_grey(pause_path)
         raw_rewind = self.pygame.image.load(rewind_path).convert_alpha()
-        raw_rewind_grey = self.pygame.image.load(rewind_path_grey).convert_alpha()
+        raw_rewind_grey = General.convert_to_grey(rewind_path)
+
         # Scale and set pos of imgs
         img_x = x_y_locations[0]
         img_y = x_y_locations[1]
@@ -1339,19 +1356,19 @@ class PausePlayButton():
     def render(self, screen, grey=False):
         """Draw image onto screen"""
         if self.rewind_toggle:
-            if grey:
+            if grey and self.should_grey:
                 screen.blit(self.rewind_grey, self.rect)  # TODO replace this with the greyscaled version of this image
             else:
                 screen.blit(self.rewind, self.rect)
         else:
             if self.playing:
-                if grey:
+                if grey and self.should_grey:
                     screen.blit(self.pause_grey,
                                 self.rect)  # TODO replace this with the greyscaled version of this image
                 else:
                     screen.blit(self.pause, self.rect)
             else:
-                if grey:
+                if grey and self.should_grey:
                     screen.blit(self.play_grey,
                                 self.rect)  # TODO replace this with the greyscaled version of this image
                 else:
@@ -1408,19 +1425,23 @@ class PausePlayButton():
 class DraggableButton():
     """Class to load images that serve as buttons that can be dragged and dropped """
 
-    def __init__(self, image_path, toggled_image_path, default_image_grey, toggled_image_grey, x_y_locations, pygame,
-                 scale=1, return_info={}, when_toggle_on=object, when_toggle_off=object, unique_id=""):
+    def __init__(self, image_path, toggled_image_path, x_y_locations, pygame,
+                 scale=1, return_info={}, when_toggle_on=object, when_toggle_off=object, unique_id="" , should_grey = True):
+
         self.pygame = pygame
+
         # Load images
         raw_image = self.pygame.image.load(image_path).convert_alpha()
+        raw_image_grey = General.convert_to_grey(image_path)
         toggled_raw_image = self.pygame.image.load(toggled_image_path).convert_alpha()
-        raw_image_grey = self.pygame.image.load(default_image_grey).convert_alpha()
-        toggled_raw_image_grey = self.pygame.image.load(toggled_image_grey).convert_alpha()
+        toggled_raw_image_grey = General.convert_to_grey(toggled_image_path)
+
         # Set pos
         img_x = x_y_locations[0]
         img_y = x_y_locations[1]
         self.img_w = int(raw_image.get_width() * scale)
         self.img_h = int(raw_image.get_height() * scale)
+
         # Scale
         scaled_size = (self.img_w, self.img_h)
         self.image = self.pygame.transform.scale(raw_image, scaled_size)
@@ -1430,6 +1451,7 @@ class DraggableButton():
         self.rect = self.pygame.Rect(img_x, img_y, self.img_w, self.img_h)
         self.seg_init_pos = (img_x, img_y)
         self.initial_mouse_pos = self.seg_init_pos
+
         #Set Vars
         self.highlighted = False
         self.block = False
@@ -1439,6 +1461,7 @@ class DraggableButton():
         self.when_toggle_off = when_toggle_off
         self.mouse_is_held = False
         self.disable_drag = False
+        self.should_grey = should_grey
 
         self.type = "DraggableButton"
         if unique_id == "":
@@ -1449,14 +1472,14 @@ class DraggableButton():
     def render(self, screen, grey=False):
         """Draw image onto screen"""
         if self.toggle:
-            if grey:
+            if grey and self.should_grey:
                 screen.blit(self.toggled_image_grey,
-                            self.rect)  # TODO replace this with the greyscaled version of this image
+                            self.rect)
             else:
                 screen.blit(self.toggled_image, self.rect)
         else:
-            if grey:
-                screen.blit(self.image_grey, self.rect)  # TODO replace this with the greyscaled version of this image
+            if grey and self.should_grey:
+                screen.blit(self.image_grey, self.rect)
             else:
                 screen.blit(self.image, self.rect)
         return screen
@@ -1530,7 +1553,7 @@ class HorizontalSlider():
         scaled_size = (slider_img_w, slider_img_h)
         self.slider_image = pygame.transform.scale(raw_slider_image, scaled_size)  # scale up the slider
         self.slider_rect = pygame.Rect(self.img_x, self.img_y, slider_img_w,
-                                       slider_img_h)  # make collision box around it according it it's size
+                                       slider_img_h)  # make collision box around it according to it's size
 
         # init cursor
         raw_cursor_image = pygame.image.load(image_path_cursor).convert_alpha()
