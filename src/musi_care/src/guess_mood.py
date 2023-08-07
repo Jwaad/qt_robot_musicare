@@ -25,6 +25,7 @@ from musicare_lib import StandardLevels
 from musicare_lib import Behaviours
 from musicare_lib import General
 
+
 #################################################################Initialise#################################################################
 
 class Guess_The_Mood_Game():
@@ -177,18 +178,17 @@ class Guess_The_Mood_Game():
         return str(mins), str(secs)
 
 
-    def create_button(self,file_name, alt_file_name, location,return_info = {},  scale=1, unique_id=""):
+    def create_button(self,file_name, location, return_info = {},  scale=1, unique_id="", should_grey = False):
         """code creates button using the button_image class."""
         this_file_path = os.path.dirname(__file__)
         relative_path = 'game_assets/graphics'
         file_path = os.path.join(this_file_path, relative_path, file_name)
-        alt_path = os.path.join(this_file_path, relative_path, alt_file_name)
         
-        button = Button(file_path, alt_path, location, self.pygame, return_info = {}, scale=scale, unique_id=unique_id)
+        button = Button(file_path, location, self.pygame, return_info = {}, scale=scale, unique_id=unique_id)
         return(button)         
 
 
-    def CreatePlayButton(self, file_name, alt_file_name, file_grey, alt_file_grey, rewind_name, rewind_name_grey, location,  scale=1, unique_id = "", on_pause=object, on_play=object):
+    def CreatePlayButton(self, file_name, file_grey, alt_file_grey, rewind_name, rewind_name_grey, location,  scale=1, unique_id = "", on_pause=object, on_play=object):
         """code creates toggle button using the toggle button class."""
         #get path to imgs
         this_file_path = os.path.dirname(__file__)
@@ -196,7 +196,6 @@ class Guess_The_Mood_Game():
         
         #paths for play img
         file_path = os.path.join(this_file_path, relative_path, file_name)
-        alt_path = os.path.join(this_file_path, relative_path, alt_file_name)
         
         #paths for pause img
         file_path_grey = os.path.join(this_file_path, relative_path, file_grey)
@@ -206,7 +205,7 @@ class Guess_The_Mood_Game():
         rewind_path = os.path.join(this_file_path, relative_path, rewind_name)
         rewind_path_grey = os.path.join(this_file_path, relative_path, rewind_name_grey)
         
-        button = PausePlayButton(file_path, alt_path, file_path_grey, alt_path_grey, rewind_path, rewind_path_grey, location, self.pygame, scale, unique_id, on_pause, on_play)
+        button = PausePlayButton(file_path, file_path_grey, alt_path_grey, rewind_path, rewind_path_grey, location, self.pygame, scale, unique_id, on_pause, on_play)
         return(button)  
         
         
@@ -302,10 +301,10 @@ class Guess_The_Mood_Game():
     
     def create_graphics(self):
         """Create the pygame objects that we will use """
-        self.sad_button = self.create_button("sad_button.png", "sad_button_depressed.png", (675,650), scale=1.3, unique_id="sad")
-        self.happy_button = self.create_button("happy_button.png", "happy_button_depressed.png", (675,1050), scale=1.3, unique_id="happy")
-        self.unsure_button = self.create_button("unsure_button.png", "unsure_button_depressed.png", (850,1450), scale=1, unique_id = "unsure")
-        self.play_button = self.CreatePlayButton("pause_button.png", "pause_button_grey.png", "play_button.png",  "play_button_grey.png", "rewind_button.png", "rewind_button_grey.png", (self.cen_x-175, 195), scale = 1.5, on_play= self.sound_manager.unpause , on_pause = self.sound_manager.pause) #create pause and play button
+        self.sad_button = self.create_button("sad_button.png", (675,650), scale=1.3, unique_id="sad")
+        self.happy_button = self.create_button("happy_button.png", (675,1050), scale=1.3, unique_id="happy")
+        self.unsure_button = self.create_button("unsure_button.png", (850,1450), scale=1, unique_id = "unsure")
+        self.play_button = self.CreatePlayButton("pause_button.png", "play_button.png",  "play_button_grey.png", "rewind_button.png", "rewind_button_grey.png", (self.cen_x-175, 195), scale = 1.5, on_play= self.sound_manager.unpause , on_pause = self.sound_manager.pause) #create pause and play button
         
         
     def get_target_behaviour(self, key):
@@ -399,8 +398,8 @@ class Guess_The_Mood_Game():
         
             #Create buttons and slider
             self.create_graphics()
-            self.tut_next = self.create_button("tut_next.png", "tut_next.png", (0,0), scale=1.5, unique_id="next")
-            self.tut_repeat = self.create_button("tut_repeat.png", "tut_repeat.png", (0,0), scale=1.5, unique_id="repeat")
+            self.tut_next = self.create_button("tut_next.png", (0,0), scale=1.5, unique_id="next", should_grey = False)
+            self.tut_repeat = self.create_button("tut_repeat.png", (0,0), scale=1.5, unique_id="repeat", should_grey = False)
             
             #Group elements
             self.buttons = [self.sad_button, self.happy_button, self.unsure_button, self.play_button]
@@ -562,14 +561,14 @@ class Guess_The_Mood_Game():
                 #reset / init variables
                     option_chosen = ""
                     mouse_pos = self.pygame.mouse.get_pos()
-                    if event.type == self.pygame.MOUSEBUTTONUP:  #on mouse release play animation to show where cursor is
-                        self.animation_manager.StartTouchAnimation(mouse_pos) #tell system to play animation when drawing
-                    
+                    # on mouse release play animation to show where cursor is
+                    if event.type == self.pygame.MOUSEBUTTONUP:
+                        self.animation_manager.StartTouchAnimation(mouse_pos)
                     #Events for pause button this will also return if we're paused or not :
                     music_playing = (self.play_button.get_event(event, mouse_pos))
 
                     #Check which button is pressed, if any.
-                    for button in self.buttons[:-1]: #for all buttons except the play_button
+                    for button in self.buttons[:-1]: #For all buttons except the play_button
                         button_pressed = button.get_event(event, mouse_pos)
                         if button_pressed:
                             button_pressed_id = button.id
@@ -628,11 +627,11 @@ class Guess_The_Mood_Game():
                     
             #Ending sequence after while loop
             if self.quit:
-                self.pygame.quit
                 print("You have quit the game.")
             else:
                 print("You completed the level.")
-                
+            self.pygame.quit
+
             #close out before end
             #self.pygame.quit
             self.sound_manager.stop_track()
