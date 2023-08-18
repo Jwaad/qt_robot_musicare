@@ -36,25 +36,31 @@ import threading
 class Simon_Says_Clap_Game():
     """ Class to generate and handle guess the mood game """
 
-    def __init__(self, user_id, reduce_screen = True):
+    def __init__(self, user_id, reduce_screen = True, screen = None, my_pygame = None):
         """Initialise and take user_id, user_id helps us save the data to the specific profiles"""
         self.user_id = user_id
         x = 145  # x pos of screen
         y = 0  # y pos of screen
         os.environ['SDL_VIDEO_WINDOW_POS'] = '%d,%d' % (x, y)  # move screen to x and y pos
-        self.pygame = pygame
-        self.pygame.init()  # start py engine
-        self.pygame.freetype.init()
-        res = pygame.display.Info()  # get our screen resolution
-        if reduce_screen:
-            self.window_x = res.current_w - 150  # Width of window -150 to account for the linux toolbar
+        if my_pygame == None:
+            self.pygame = pygame
+            self.pygame.init()  # start py engine
+            self.pygame.freetype.init()
         else:
-            self.window_x = res.current_w
-        self.window_y = res.current_h  # Height of window
-        self.window_center = (int(self.window_x / 2), int(self.window_y / 2))
-        self.cen_x = self.window_center[0]
-        self.cen_y = self.window_center[1]
-        self.window = pygame.display.set_mode((self.window_x, self.window_y))  # Create window and set size
+            self.pygame = my_pygame
+        res = pygame.display.Info()  # get our screen resolution
+        if screen == None:
+            if reduce_screen:
+                self.window_x = res.current_w - 150  # Width of window -150 to account for the linux toolbar
+            else:
+                self.window_x = res.current_w
+            self.window_y = res.current_h  # Height of window
+            self.window_center = (int(self.window_x / 2), int(self.window_y / 2))
+            self.cen_x = self.window_center[0]
+            self.cen_y = self.window_center[1]
+            self.window = pygame.display.set_mode((self.window_x, self.window_y))  # Create window and set size
+        else:
+            self.window = screen
         self.background_colour = (100, 100, 100)  # background black by default
         self.pygame.display.set_caption("Simon says clap!")  # Label window
         self.run = True
@@ -214,21 +220,17 @@ class Simon_Says_Clap_Game():
         button = Button(file_path, alt_path, location, self.pygame, return_info={}, scale=scale, unique_id=unique_id)
         return (button)
 
-    def create_toggle_button(self, file_name, alt_file_name, default_image_grey, toggled_image_grey, location, scale=2,
+    def create_toggle_button(self, file_name, alt_file_name, location, scale=2,
                              unique_id="", return_info="", when_toggle_on=object, when_toggle_off=object):
         """code creates button using the button_image class."""
         this_file_path = os.path.dirname(__file__)
         relative_path = '/game_assets/graphics/'
         file_path = this_file_path + relative_path + file_name
         alt_path = this_file_path + relative_path + alt_file_name
-        file_path_grey = this_file_path + relative_path + default_image_grey
-        alt_path_grey = this_file_path + relative_path + toggled_image_grey
 
-        button = ToggleButton(file_path, alt_path, file_path_grey, alt_path_grey, location, self.pygame, scale,
+        button = ToggleButton(file_path, alt_path, location, self.pygame, scale,
                               unique_id, return_info, when_toggle_on, when_toggle_off)
         return (button)
-
-        # default_image_path, toggled_image_path, default_image_grey, toggled_image_grey, x_y_locations, pygame, scale=1, unique_id = "", return_info="", when_toggle_on=object, when_toggle_off=object
 
     def create_text(self, window, window_center, text, location=None, cen_x=False, cen_y=False, font_size=30,
                     font_colour=(255, 255, 255)):
@@ -308,7 +310,7 @@ class Simon_Says_Clap_Game():
         unknown_slots = []
         # Create the unknown slots we need
         for i in range(num_correct_slots):
-            unknown_seg = self.create_button("music_segment_greyed_out.png", "music_segment_greyed_out.png", (
+            unknown_seg = self.create_button("music_segment_greyed_out.png",(
                 unknown_y, 0), scale=2)
             unknown_slots.append(unknown_seg)
         # Change position of unknown slots
@@ -329,7 +331,7 @@ class Simon_Says_Clap_Game():
         text_objs = [top_text, middle_text]
 
         # Create help button
-        help_button = self.create_button("help_button.png", "help_button_grey.png", (2200, 100), scale=1,
+        help_button = self.create_button("help_button.png", (2200, 100), scale=1,
                                          unique_id="help")
         if single_out:
             return [loading_button] + unknown_slots + text_objs + [help_button] + randomised_segments
