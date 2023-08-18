@@ -204,31 +204,26 @@ class Clap_To_Beat_Game():
             secs = "0" + str(secs)
         return str(mins), str(secs)
 
-    def create_button(self, file_name, alt_file_name, location, return_info={}, scale=1, unique_id=""):
+    def create_button(self, file_name, location, return_info={}, scale=1, unique_id=""):
         """code creates button using the button_image class."""
         this_file_path = os.path.dirname(__file__)
         relative_path = 'game_assets/graphics'
         file_path = os.path.join(this_file_path, relative_path, file_name)
-        alt_path = os.path.join(this_file_path, relative_path, alt_file_name)
 
-        button = Button(file_path, alt_path, location, self.pygame, return_info={}, scale=scale, unique_id=unique_id)
+        button = Button(file_path, location, self.pygame, return_info={}, scale=scale, unique_id=unique_id)
         return (button)
 
-    def create_toggle_button(self, file_name, alt_file_name, default_image_grey, toggled_image_grey, location, scale=2,
+    def create_toggle_button(self, file_name, alt_file_name, location, scale=2,
                              unique_id="", return_info="", when_toggle_on=object, when_toggle_off=object):
         """code creates button using the button_image class."""
         this_file_path = os.path.dirname(__file__)
         relative_path = '/game_assets/graphics/'
         file_path = this_file_path + relative_path + file_name
         alt_path = this_file_path + relative_path + alt_file_name
-        file_path_grey = this_file_path + relative_path + default_image_grey
-        alt_path_grey = this_file_path + relative_path + toggled_image_grey
 
-        button = ToggleButton(file_path, alt_path, file_path_grey, alt_path_grey, location, self.pygame, scale,
+        button = ToggleButton(file_path, alt_path, location, self.pygame, scale,
                               unique_id, return_info, when_toggle_on, when_toggle_off)
         return (button)
-
-        # default_image_path, toggled_image_path, default_image_grey, toggled_image_grey, x_y_locations, pygame, scale=1, unique_id = "", return_info="", when_toggle_on=object, when_toggle_off=object
 
     def create_text(self, window, window_center, text, location=None, cen_x=False, cen_y=False, font_size=30,
                     font_colour=(255, 255, 255)):
@@ -308,7 +303,7 @@ class Clap_To_Beat_Game():
         unknown_slots = []
         # Create the unknown slots we need
         for i in range(num_correct_slots):
-            unknown_seg = self.create_button("music_segment_greyed_out.png", "music_segment_greyed_out.png", (
+            unknown_seg = self.create_button("music_segment_greyed_out.png", (
                 unknown_y, 0), scale=2)
             unknown_slots.append(unknown_seg)
         # Change position of unknown slots
@@ -329,7 +324,7 @@ class Clap_To_Beat_Game():
         text_objs = [top_text, middle_text]
 
         # Create help button
-        help_button = self.create_button("help_button.png", "help_button_grey.png", (2200, 100), scale=1,
+        help_button = self.create_button("help_button.png", (2200, 100), scale=1,
                                          unique_id="help")
         if single_out:
             return [loading_button] + unknown_slots + text_objs + [help_button] + randomised_segments

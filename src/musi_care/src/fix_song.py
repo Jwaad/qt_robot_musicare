@@ -33,25 +33,32 @@ from musicare_lib import TextObject
 class Fix_The_Song_Game():
     """ Class to generate and handle guess the mood game """
 
-    def __init__(self, user_id, reduce_screen = True):
+    def __init__(self, user_id, reduce_screen = True, screen = None, my_pygame = None):
         """Initialise and take user_id, user_id helps us save the data to the specific profiles"""
         self.user_id = user_id
         x = 145  # x pos of screen
         y = 0  # y pos of screen
         os.environ['SDL_VIDEO_WINDOW_POS'] = '%d,%d' % (x, y)  # move screen to x and y pos
-        self.pygame = pygame
-        self.pygame.init()  # start py engine
-        self.pygame.freetype.init()
-        res = pygame.display.Info()  # get our screen resolution
-        if reduce_screen:
-            self.window_x = res.current_w - 150  # Width of window -150 to account for the linux toolbar
+
+        if my_pygame == None:
+            self.pygame = pygame
+            self.pygame.init()  # start py engine
+            self.pygame.freetype.init()
         else:
-            self.window_x = res.current_w
-        self.window_y = res.current_h  # Height of window
-        self.window_center = (int(self.window_x / 2), int(self.window_y / 2))
-        self.cen_x = self.window_center[0]
-        self.cen_y = self.window_center[1]
-        self.window = pygame.display.set_mode((self.window_x, self.window_y))  # Create window and set size
+            self.pygame = my_pygame
+        res = pygame.display.Info()  # get our screen resolution
+        if screen == None:
+            if reduce_screen:
+                self.window_x = res.current_w - 150  # Width of window -150 to account for the linux toolbar
+            else:
+                self.window_x = res.current_w
+            self.window_y = res.current_h  # Height of window
+            self.window_center = (int(self.window_x / 2), int(self.window_y / 2))
+            self.cen_x = self.window_center[0]
+            self.cen_y = self.window_center[1]
+            self.window = pygame.display.set_mode((self.window_x, self.window_y))  # Create window and set size
+        else:
+            self.window = screen
         self.background_colour = (100, 100, 100)  # background black by default
         self.pygame.display.set_caption("Fix The Song!")  # Label window
         self.run = True
@@ -226,19 +233,17 @@ class Fix_The_Song_Game():
         button = Button(file_path, location, self.pygame, return_info = {}, scale=scale, unique_id=unique_id, should_grey = should_grey)
         return (button)
 
-    def create_toggle_button(self, file_name, default_image_grey, location, scale=2,
+    def create_toggle_button(self, file_name, alt_img, location, scale=2,
                              unique_id="", return_info="", when_toggle_on=object, when_toggle_off=object, should_grey = True):
         """code creates button using the button_image class."""
         this_file_path = os.path.dirname(__file__)
         relative_path = '/game_assets/graphics/'
         file_path = this_file_path + relative_path + file_name
-        file_path_grey = this_file_path + relative_path + default_image_grey
+        alt_img_path = this_file_path + relative_path + alt_img
 
-        button = ToggleButton(file_path, file_path_grey, location, self.pygame, scale,
+        button = ToggleButton(file_path, alt_img_path, location, self.pygame, scale,
                               unique_id, return_info, when_toggle_on, when_toggle_off, should_grey = should_grey)
         return (button)
-
-        # default_image_path, toggled_image_path, default_image_grey, toggled_image_grey, x_y_locations, pygame, scale=1, unique_id = "", return_info="", when_toggle_on=object, when_toggle_off=object
 
     def create_drag_button(self, file_name, toggled_file, location, scale=2, return_info={},
                            when_toggle_on=object, when_toggle_off=object, unique_id="", should_grey = True):
@@ -349,6 +354,7 @@ class Fix_The_Song_Game():
     def create_segments(self,segment_num, correct_track, distract_track):
         """Create and return a list of segments (draggable buttons) """
         # Get each segment position
+
         correct_segments, distract_segments = self.sound_manager.slice_song(segment_num, correct_track, distract_track)
         all_segs = []
 
@@ -373,7 +379,7 @@ class Fix_The_Song_Game():
             all_segs.append(segment)
             i += 1
 
-        # Make objects of correct segments
+        # Make objects of distract segments
         for song_path in distract_segments:
             seg_colour = self.randomise_colour(prev_colour)
             prev_colour = seg_colour
@@ -385,7 +391,7 @@ class Fix_The_Song_Game():
                 "correct_slot":False,
                 "song_pos": None
             }
-            segment = self.create_drag_button(seg_colour[0], seg_colour[1], button_grey, button_grey, seg_pos,
+            segment = self.create_drag_button(seg_colour[0], seg_colour[1], seg_pos,
                                               return_info=seg_data,
                                               when_toggle_on=self.play_seg_track(song_path),
                                               when_toggle_off=self.stop_seg_track(song_path))
@@ -398,15 +404,20 @@ class Fix_The_Song_Game():
         """Create the pygame objects that we will use """
 
         # Randomise the positions of our buttons and change their pos and store it
-        randomised_segments = segments
+        #TODO: replace this with a fitting algorithm URGENT
+        randomised_segments = segments # Make a copy, cause random shuffle doesnt have a return
         random.shuffle(randomised_segments)
-        for seg_i in range(len(randomised_segments)):
-            pos_idx = random.randint(0, len(self.segment_x_y))
-            while pos_idx not in self.segment_x_y.keys():
-                pos_idx = random.randint(0, len(self.segment_x_y))
-            randomised_segments[seg_i].set_pos(self.segment_x_y[pos_idx])
-            randomised_segments[seg_i].return_info["init_pos"] = self.segment_x_y[pos_idx]
-            self.segment_x_y.pop(pos_idx)
+        i = 0
+        offset = 0
+        for segment in randomised_segments:
+            pos = [(self.segment_x_y[i][0] + offset), self.segment_x_y[i][1]]
+            segment.set_pos(pos)
+            segment.return_info["init_pos"] = pos
+            i += 1
+            # workaround / temp fix for having too many seg slots
+            if i >= len(self.segment_x_y):
+                i = 0 # Loop from first pos again
+                offset += 50
 
         # Create loading button
         loading_button = self.create_button("loading_screen_button_depressed.png",
@@ -907,16 +918,16 @@ class Fix_The_Song_Game():
         
         # Count in to the start of the game
         self.run = self.level_loader.tap_to_continue(self.run, self.background_colour)
-        """
+        
         # Play the track and block
         self.play_music_blocking(difficulty, level)
 
         # Count into level to slow pacing
         self.run = self.level_loader.countdown(3, self.run, self.background_colour,
                                                prelim_msg="Lets Fix The Song!")
-
+        """
         # Play main level
-        time_taken, wrong_answers, hints_needed = self.play_level(difficulty, level)
+        time_taken, wrong_answers, hints_needed = self.play_level("medium", 1)
 
         # Save user data
         print(time_taken, wrong_answers, hints_needed)
