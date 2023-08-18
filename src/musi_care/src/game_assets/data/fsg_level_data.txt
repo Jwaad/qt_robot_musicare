@@ -37,7 +37,7 @@ seg_num = 3
 HARD MODE
 {
 song_name = happy/happy_1.wav
-mood = happy
-hint = Hint coming soon!
+distract_song = happy_2.wav
+seg_num = 3
 £#
 }
