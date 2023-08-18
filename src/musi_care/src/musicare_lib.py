@@ -1180,6 +1180,28 @@ class Button():
         self.return_info = return_info
         self.type = "Button"
         self.should_grey = should_grey
+        self.text = text
+        self.init_text()
+
+    def init_text(self):
+        font_scale = 80
+        too_large = True
+        # Keep scaling down text until it fits in the button
+        while too_large:
+            text, textRect = self.create_text(font_scale)
+            if textRect[2] < self.rect[2]:
+                too_large = False
+            font_scale -= 10
+        self.text = text
+        self.textRect = textRect
+        self.textRect.center = self.rect.center # Center text in center button
+
+    def create_text(self, font_percent=70):
+        self.font_size = int(self.rect[3] * (font_percent / 100))  # 70% of button height by default
+        font = self.pygame.font.Font('freesansbold.ttf', self.font_size)
+        text = font.render(self.text, False, (0, 0, 0))
+        textRect = text.get_rect()
+        return text, textRect
 
     def render(self, screen, grey=False):
         """Draw button onto given screen, either as greyscale or coloured"""
@@ -1187,6 +1209,8 @@ class Button():
             screen.blit(self.image_greyscale, self.rect)
         else:
             screen.blit(self.image, self.rect)
+        if self.text != "":
+            screen.blit(self.text, self.textRect)
 
     def get_event(self, event, mouse_pos):
         """returns if button was pressed"""
