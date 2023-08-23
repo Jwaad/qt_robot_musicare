@@ -4,7 +4,7 @@
 import rospy
 import roslaunch
 import rosnode
-#import paramiko # For SSH
+import paramiko # For SSH
 import pygame
 import os
 from musicare_lib import Renderer
@@ -17,12 +17,22 @@ class GameManager():
     # On start: check if we are connected to robot and decide which nodes to run
     def __init__(self):
         rospy.init_node('GameManager', anonymous=False)
-        self.PingNode = "/PLACEHOLDER FOR QT MOTOR CONTROLLER TOPIC"
-        self.musicarePkgName = 'musi_care'
+        self.PingNode = "/qt_motor"
+        self.musicarePkgName = "musi_care"
         self.jwaadTestPkgName = "jwaad_test"
         self.ActiveNodes =[] # Store reference to all nodes that we start
         robot_connected = self.CheckRobotRunning()
-        rospy.set_param('/activity_status', 1) # Tell ros this node is startingariables
+        rospy.set_param('/activity_status', 1) # Tell ros this node is starting variables
+        if robot_connected:
+            self.StartRobotNodes()
+        else:
+            self.StartSimulatedRobotNodes()
+        self.StartLaptopNodes()
+        self.InitPygame()
+        self.run = True
+        self.animation_manager = AnimationManager(self.pygame)
+
+
     def InitPygame(self):
         self.run = True
         self.pygame = pygame
@@ -43,36 +53,32 @@ class GameManager():
         self.pygame.display.set_caption("Game Selector")  # Label window
         self.renderer = Renderer(self.window, self.window_center)
 
-    def create_button(self, file_name, location, return_info = {}, scale=1, unique_id="", text = ""):
+    def create_button(self, file_name, location, return_info = {}, scale=1, unique_id="", text = "",
+                      on_click=None, on_release=None):
         """code creates button using the button_image class."""
         this_file_path = os.path.dirname(__file__)
         relative_path = 'game_assets/graphics'
         file_path = os.path.join(this_file_path, relative_path, file_name)
 
-        if robot_connected:
-            self.StartRobotNodes()
-        else:
-            self.StartSimulatedRobotNodes()
-        self.StartLaptopNodes()
-        self.InitPygame()
-        self.run = True
-        self.animation_manager = AnimationManager(self.pygame)
-
-    # Set screen and game related v
-        button = Button(file_path, location, self.pygame, return_info = {}, scale=scale, unique_id=unique_id, text=text)
-        return (button)
+        button = Button(file_path, location, self.pygame, return_info = {}, scale=scale, unique_id=unique_id,
+                        text=text, on_click=on_click, on_release=on_release)
+        return button
 
     def CreateGameButtons(self):
-        blankButton = "blank_button.png"
-        guessMoodButton = self.create_button(blankButton, (100,200), return_info = {}, text = "Guess The Mood")
-        testButton =  self.create_button(blankButton, (100,600), return_info = {}, text = "Fix The Song")
-        return [guessMoodButton, testButton]
+        """Archived"""
+        def temp():
+            print("text")
+
+        blank_button = "blank_button.png"
+        guess_mood_button = self.create_button(blank_button, (100, 200), return_info={}, text="Guess The Mood",
+                                               on_click=temp)
+        fix_song_button = self.create_button(blank_button, (100, 600), return_info={}, text="Fix The Song")
+        return [guess_mood_button, fix_song_button]
 
     # Create GUI to control which level to play
     def Main(self):
         fps = "999"
 
-        buttons = self.CreateGameButtons()
         while (not rospy.is_shutdown()) and (self.run):
             t1 = time.time()
 
@@ -85,10 +91,6 @@ class GameManager():
                 if event.type == self.pygame.MOUSEBUTTONUP:  # On mouse release play animation to show where cursor is
                     self.animation_manager.StartTouchAnimation(mouse_pos)  # Play animation
 
-                # Handle game selector buttons
-                for button in buttons:
-                    button.get_event(event, mouse_pos=mouse_pos)
-
                 # Check quit
                 if event.type == pygame.QUIT:
                     self.run = False
@@ -98,11 +100,9 @@ class GameManager():
             self.renderer.DrawBackground(self.background_colour)
 
             # Draw fps
-            self.renderer.DrawText(fps, (2800,25), 50)
+            self.renderer.DrawText(fps, (2800, 25), 50)
 
             # Update graphics
-            for button in buttons:
-                button.render(self.window)
             self.animation_manager.DrawTouchAnimation(self.window)
             self.pygame.display.update()  # Update all drawn objects
 
@@ -125,8 +125,10 @@ class GameManager():
 
     # SSH into robot and start QT command node
     def StartRobotNodes(self):
+        nodeName = 'qt_command_node'
+        node = self.StartNode(self.musicarePkgName, nodeName)
         time.sleep(1)
-        # TODO ADD SSH INTO ROBO AND START SERVER HERE
+        self.ActiveNodes.append(node)
 
     # Start the laptop side fake node that just takes in the commands and prints them
     def StartSimulatedRobotNodes(self):
@@ -162,6 +164,32 @@ class GameManager():
         nodeRef = launch.launch(node)
         return nodeRef
 
+    def SaveNewUser(self, name, surname, DoB):
+        """ Save a New User to System """
+        file_name = name[0] + surname[0] + DoB[-2:]
+        # Format data of new user
+        data = {}
+        data["name"] = name
+        data["surname"] = surname
+        data["dob"] = DoB
+        data["blacklist"] = []
+        data["game_data"] = {}
+
+        #Get path and save
+        this_file_path = os.path.dirname(__file__)
+        relative_path = 'game_assets/data/user_data/'
+        file_path = os.path.join(this_file_path, relative_path, file_name)
+
+        # TODO, save with pickle and encrypt
+
+        return data
+
+    def Test(self):
+        data = self.SaveNewUser("Jwaad", "Hussain", "02-03-1999")
+        print(data)
+
+
 if __name__ == '__main__':
     game_manager = GameManager()
+    #game_manager.LoadUserData()
     game_manager.Main()
