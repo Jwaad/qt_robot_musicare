@@ -1180,6 +1180,8 @@ class Button():
         self.return_info = return_info
         self.type = "Button"
         self.should_grey = should_grey
+        self.on_click = on_click
+
         self.text = text
         self.init_text()
 
@@ -1217,6 +1219,7 @@ class Button():
         # If the mouse clicked this button
         if event.type == self.pygame.MOUSEBUTTONUP and event.button == 1:
             if self.rect.collidepoint(mouse_pos):
+                self.on_click()
                 return True
             else:
                 return False

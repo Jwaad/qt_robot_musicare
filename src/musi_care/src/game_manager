@@ -4,13 +4,14 @@
 import rospy
 import roslaunch
 import rosnode
-import paramiko # For SSH
+import pickle
 import pygame
 import os
 from musicare_lib import Renderer
 from musicare_lib import Button
 from musicare_lib import AnimationManager
 import time
+import glob
 
 class GameManager():
 
@@ -31,6 +32,8 @@ class GameManager():
         self.InitPygame()
         self.run = True
         self.animation_manager = AnimationManager(self.pygame)
+        this_file_path = os.path.dirname(__file__)
+        self.path_to_userdata = os.path.join(this_file_path, 'game_assets/data/user_data/')
 
 
     def InitPygame(self):
@@ -164,9 +167,26 @@ class GameManager():
         nodeRef = launch.launch(node)
         return nodeRef
 
+    def LoadUserDatabase(self):
+        """ Load all users into memory, so we can  """
+        self.user_database = []
+        users = []
+        # Get list of all users
+        users = glob.glob(self.path_to_userdata + "/*.p")
+        if users == []:
+            return self.user_database
+        for path in users:
+            user_data = {}
+            with open(path, "rb") as f:
+                print("attempting to open {0}".format(path))
+                user_data = pickle.load(f)
+            self.user_database.append(user_data)
+        return self.user_database
+
     def SaveNewUser(self, name, surname, DoB):
         """ Save a New User to System """
-        file_name = name[0] + surname[0] + DoB[-2:]
+        file_name = name[0] + surname[0] + DoB[-4:] + ".p"
+
         # Format data of new user
         data = {}
         data["name"] = name
@@ -175,21 +195,21 @@ class GameManager():
         data["blacklist"] = []
         data["game_data"] = {}
 
-        #Get path and save
-        this_file_path = os.path.dirname(__file__)
-        relative_path = 'game_assets/data/user_data/'
-        file_path = os.path.join(this_file_path, relative_path, file_name)
+        # Get path and save
+        file_path = os.path.join(self.path_to_userdata, file_name)
 
-        # TODO, save with pickle and encrypt
-
+        # Save to file if it doesnt exist already
+        if not os.path.exists(file_path):
+            open(file_path, "w").close()
+            with open(file_path, "wb") as f:
+                pickle.dump(data, f)
+            rospy.loginfo("User data saved to {0}".format(file_path))
+        else:
+            rospy.loginfo("User data not saved, user already exists.")
         return data
-
-    def Test(self):
-        data = self.SaveNewUser("Jwaad", "Hussain", "02-03-1999")
-        print(data)
-
 
 if __name__ == '__main__':
     game_manager = GameManager()
-    #game_manager.LoadUserData()
+    game_manager.LoadUserDatabase()
+    #game_manager.SaveNewUser("Lily", "Mahendaraja", "01-01-1992")
     game_manager.Main()
