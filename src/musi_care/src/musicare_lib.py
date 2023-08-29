@@ -1335,7 +1335,7 @@ class ToggleButton():
         """Takes a list of (x,y) and sets rect"""
         return (self.rect[0], self.rect[1])
 
-######################################################ToggleButton#################################################################
+######################################################PausePlayButton#################################################################
 
 class PausePlayButton():
     """All functionality of toggle button, but with an option to replace with a 3rd image"""
@@ -1560,6 +1560,75 @@ class DraggableButton():
 
         return self.toggle, self.rect
 
+######################################################InputBox#################################################################
+class InputBox():
+    """ rect that you can click on and write text in. Text can be read by method get_text"""
+
+    def __init__(self, x, y, w, h, default_text='', allowed_chars=""):
+        """
+        Creates input box, with some grey text in it, that disappears when typing
+        x = horizontal placement of text box (bottom left origin)
+        y = vertical placement of text box (bottom left origin)
+        w = width of text box
+        h = height of text box
+        default_text = the text that shows when text box is empty
+        allowed_chars = if a char doesn't match any in the string given, then dont add it to text.
+        By default, this is all upper and lowercase letters and numbers
+        """
+        self.COLOR_INACTIVE = pygame.Color('lightskyblue3')
+        self.COLOR_ACTIVE = pygame.Color('dodgerblue2')
+        self.FONT = pygame.font.Font(None, 32)
+        self.rect = pygame.Rect(x, y, w, h)
+        self.color = self.COLOR_INACTIVE
+        self.default_text = default_text
+        self.text = self.default_text
+        self.txt_surface = self.FONT.render(self.text, True, self.color)
+        self.active = False
+        self.returnInput = None
+        alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+        integers = "0123456789"
+        # other_chars = "."
+        self.allowed_chars = allowed_chars
+        if allowed_chars == "" or type(allowed_chars) != str:
+            self.allowed_chars = alphabet + integers
+
+    def handle_event(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            # If the user clicked on the input_box rect.
+            if self.rect.collidepoint(event.pos):
+                # Toggle the active variable.
+                self.active = not self.active
+            else:
+                self.active = False
+            # Change the current color of the input box.
+            self.color = self.COLOR_ACTIVE if self.active else self.COLOR_INACTIVE
+        if event.type == pygame.KEYDOWN:
+            if self.active:
+                # Let user delete chars
+                if event.key == pygame.K_BACKSPACE:
+                    self.text = self.text[:-1]
+                    # If user deletes all the text, show default text and un highlight
+                    if len(self.text) >= 0:
+                        self.reset_text()
+                else:
+                    char = event.unicode
+                    if char in self.allowed_chars:
+                        self.text += char
+                # Re-render the text.
+                self.txt_surface = self.FONT.render(self.text, True, self.color)
+
+    def get_text(self):
+        return self.text
+
+    def reset_text(self):
+        self.text = self.default_text
+        self.active = False
+
+    def draw(self, screen):
+        # Blit the text.
+        screen.blit(self.txt_surface, (self.rect.x+5, self.rect.y+5))
+        # Blit the rect.
+        pygame.draw.rect(screen, self.color, self.rect, 2)
 
 ######################################################HorizontalSlider#################################################################
 
