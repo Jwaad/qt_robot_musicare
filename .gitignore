@@ -6,3 +6,4 @@ src/musi_care/src/game_assets/music/temp/
 /.idea/
 *.pyc
 src/musi_care/src/__pycache__
+*.pyc
