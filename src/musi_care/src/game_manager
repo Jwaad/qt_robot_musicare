@@ -57,7 +57,7 @@ class GameManager():
         self.pygame.display.set_caption("Game Selector")  # Label window
         self.renderer = Renderer(self.window, self.window_center)
 
-    def create_button(self, file_name, location, return_info = {}, scale=1, unique_id="", text = "",
+    def create_button(self, file_name, location, return_info={}, scale=1.0, unique_id="", text="",
                       on_click=None, on_release=None):
         """code creates button using the button_image class."""
         this_file_path = os.path.dirname(__file__)
@@ -178,6 +178,38 @@ class GameManager():
             rospy.loginfo("User data not saved, user already exists.")
         return data
 
+    def SignupScreen(self):
+        back = False
+        while (not rospy.is_shutdown()) and (self.run) and not back:
+
+            # Handle events
+            mouse_pos = self.pygame.mouse.get_pos()
+            for event in self.pygame.event.get():
+
+                # Handle on click animation
+                if event.type == self.pygame.MOUSEBUTTONUP:  # On mouse release play animation to show where cursor is
+                    self.animation_manager.StartTouchAnimation(mouse_pos)  # Play animation
+
+                # Check quit
+                if event.type == pygame.QUIT:
+                    self.run = False
+                    print("Quitting...")
+
+                # TEMP
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        back = True
+
+            # Draw background
+            self.renderer.DrawBackground(self.background_colour)
+
+            # Update graphics
+            self.animation_manager.DrawTouchAnimation(self.window)
+            self.pygame.display.update()  # Update all drawn objects
+
+            # Cap FPS (save resources)
+            self.clock.tick(self.FPS)
+
     def LogInScreen(self):
         """ Use database, and check if user is inputting credentials we have seen before. """
         first_names = []
@@ -188,13 +220,17 @@ class GameManager():
             first_names.append(user["name"])
             surnames.append(user["surname"])
 
+        # Input / text boxes
         name_box = InputBox(200, 600, 1000, 200, "First Name")
         surname_box = InputBox(1600, 600, 1000, 200, "Last Name")
         inputboxes = [name_box, surname_box]
-        next_button = self.create_button("next_button.png", (1200, 1200))
+        # Check marks
         name_tick = self.create_button("check_mark.png", (650, 800))
         surname_tick = self.create_button("check_mark.png", (2050, 800))
         ticks = {}
+        # Buttons
+        next_button = self.create_button("next_button.png", (1200, 1200))
+        signup_button = self.create_button("blank_button.png", (2500, 0), text="New User", scale=0.5)
 
         log_in = False
         user_recognised = False
@@ -248,6 +284,11 @@ class GameManager():
                         #TODO add flash or simple animation, to show wrong user here.
                         print("Animation just played, did you see it?")
 
+                # Handle event for new user
+                signup = signup_button.get_event(event,mouse_pos)
+                if signup:
+                    self.SignupScreen()
+
                 # Check quit
                 if event.type == pygame.QUIT:
                     self.run = False
@@ -263,6 +304,7 @@ class GameManager():
                 for tick in ticks.values():
                     tick.render(self.window)
             next_button.render(self.window)
+            signup_button.render(self.window)
             self.animation_manager.DrawTouchAnimation(self.window)
             self.pygame.display.update()  # Update all drawn objects
 
