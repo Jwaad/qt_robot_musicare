@@ -10,6 +10,7 @@ import os
 from musicare_lib import Renderer
 from musicare_lib import Button
 from musicare_lib import AnimationManager
+from musicare_lib import InputBox
 import time
 import glob
 
@@ -80,38 +81,7 @@ class GameManager():
 
     # Create GUI to control which level to play
     def Main(self):
-        fps = "999"
-
-        while (not rospy.is_shutdown()) and (self.run):
-            t1 = time.time()
-
-            mouse_pos = self.pygame.mouse.get_pos()
-
-            # Handle events
-            for event in self.pygame.event.get():
-
-                # Handle on click animation
-                if event.type == self.pygame.MOUSEBUTTONUP:  # On mouse release play animation to show where cursor is
-                    self.animation_manager.StartTouchAnimation(mouse_pos)  # Play animation
-
-                # Check quit
-                if event.type == pygame.QUIT:
-                    self.run = False
-                    print("Quitting...")
-
-            # Draw background
-            self.renderer.DrawBackground(self.background_colour)
-
-            # Draw fps
-            self.renderer.DrawText(fps, (2800, 25), 50)
-
-            # Update graphics
-            self.animation_manager.DrawTouchAnimation(self.window)
-            self.pygame.display.update()  # Update all drawn objects
-
-            # Cap FPS (save resources)
-            self.clock.tick(self.FPS)
-            fps = str(round(1 / (time.time() - t1)))
+        user = game_manager.LogInScreen()
 
         self.OnExit()
         print("Ending...")
@@ -208,8 +178,60 @@ class GameManager():
             rospy.loginfo("User data not saved, user already exists.")
         return data
 
+    def LogInScreen(self):
+        """ Use database, and check if user is inputting credentials we have seen before. """
+        first_names = []
+        surnames = []
+        # important that these have the same order
+        for user in self.user_database:
+            first_names.append(user["name"])
+            surnames.append(user["surname"])
+
+        name_box = InputBox(200, 600, 1000, 200, "First Name")
+        surname_box = InputBox(1600, 600, 1000, 200, "Last Name")
+        inputboxes = [name_box, surname_box]
+        next_button = self.create_button("next_button.png", (1200, 1200))
+
+        log_in = False
+        while (not rospy.is_shutdown()) and (self.run) and not log_in:
+            print(name_box.get_text(), surname_box.get_text())
+            mouse_pos = self.pygame.mouse.get_pos()
+
+            # Handle events
+            for event in self.pygame.event.get():
+
+                # Handle on click animation
+                if event.type == self.pygame.MOUSEBUTTONUP:  # On mouse release play animation to show where cursor is
+                    self.animation_manager.StartTouchAnimation(mouse_pos)  # Play animation
+
+                # Handle events for text boxes
+                for box in inputboxes:
+                    box.handle_event(event)
+
+                # Handle event for next button
+                next_button.get_event(event,mouse_pos)
+                # TO DO, add check for username and surname here
+
+                # Check quit
+                if event.type == pygame.QUIT:
+                    self.run = False
+                    print("Quitting...")
+
+            # Draw background
+            self.renderer.DrawBackground(self.background_colour)
+
+            # Update graphics
+            for box in inputboxes:
+                box.render(self.window)
+            next_button.render(self.window)
+            self.animation_manager.DrawTouchAnimation(self.window)
+            self.pygame.display.update()  # Update all drawn objects
+
+            # Cap FPS (save resources)
+            self.clock.tick(self.FPS)
+
+
 if __name__ == '__main__':
     game_manager = GameManager()
     game_manager.LoadUserDatabase()
-    #game_manager.SaveNewUser("Lily", "Mahendaraja", "01-01-1992")
     game_manager.Main()
