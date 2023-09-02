@@ -1219,7 +1219,8 @@ class Button():
         # If the mouse clicked this button
         if event.type == self.pygame.MOUSEBUTTONUP and event.button == 1:
             if self.rect.collidepoint(mouse_pos):
-                self.on_click()
+                if self.on_click is not None:
+                    self.on_click()
                 return True
             else:
                 return False
@@ -1597,9 +1598,11 @@ class InputBox():
             self.allowed_chars = alphabet + integers
 
     def handle_event(self, event):
+        event_triggered = None
         if event.type == pygame.MOUSEBUTTONDOWN:
             # If the user clicked on the input_box rect.
             if self.rect.collidepoint(event.pos):
+                event_triggered = "MOUSEBUTTONDOWN"
                 # Set to active, if deault text in there, remove it
                 if self.text == self.default_text:
                     self.text = ""
@@ -1612,6 +1615,7 @@ class InputBox():
             self.color = self.COLOR_ACTIVE if self.active else self.COLOR_INACTIVE
         if event.type == pygame.KEYDOWN:
             if self.active:
+                event_triggered = "KEYDOWN"
                 # Let user delete chars
                 if event.key == pygame.K_BACKSPACE:
                     self.text = self.text[:-1]
@@ -1622,6 +1626,7 @@ class InputBox():
         # Re-render the text only on certain events, to save performance
         if event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONUP:
             self.txt_surface = self.FONT.render(self.text, True, self.color)
+        return event_triggered
 
     def get_text(self):
         return self.text
