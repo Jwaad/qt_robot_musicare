@@ -182,6 +182,7 @@ class GameManager():
         """ Use database, and check if user is inputting credentials we have seen before. """
         first_names = []
         surnames = []
+        temp_data = []
         # important that these have the same order
         for user in self.user_database:
             first_names.append(user["name"])
@@ -191,26 +192,61 @@ class GameManager():
         surname_box = InputBox(1600, 600, 1000, 200, "Last Name")
         inputboxes = [name_box, surname_box]
         next_button = self.create_button("next_button.png", (1200, 1200))
+        name_tick = self.create_button("check_mark.png", (650, 800))
+        surname_tick = self.create_button("check_mark.png", (2050, 800))
+        ticks = {}
 
         log_in = False
+        user_recognised = False
+        correct_surname = "#}$"
         while (not rospy.is_shutdown()) and (self.run) and not log_in:
-            print(name_box.get_text(), surname_box.get_text())
-            mouse_pos = self.pygame.mouse.get_pos()
 
             # Handle events
+            mouse_pos = self.pygame.mouse.get_pos()
             for event in self.pygame.event.get():
 
                 # Handle on click animation
                 if event.type == self.pygame.MOUSEBUTTONUP:  # On mouse release play animation to show where cursor is
                     self.animation_manager.StartTouchAnimation(mouse_pos)  # Play animation
 
-                # Handle events for text boxes
-                for box in inputboxes:
-                    box.handle_event(event)
+                # Handle events for name box
+                event_triggered = name_box.handle_event(event)
+                if event_triggered == "KEYDOWN":
+                    if name_box.get_text() in first_names:
+                        ticks["name"] = name_tick
+                        # Get the corresponding surname
+                        ind = first_names.index(name_box.get_text())
+                        print(correct_surname)
+                        correct_surname = surnames[ind]
+                    else:
+                        # If tick is already in our dict, remove it
+                        if "name" in ticks:
+                            del ticks["name"]
+                            user_recognised = False
+                            correct_surname = "#}$"
+
+                # Handle events for surname box
+                event_triggered = surname_box.handle_event(event)
+                if event_triggered == "KEYDOWN":
+                    if surname_box.get_text() == correct_surname:
+                        ticks["surname"] = surname_tick
+                        user_recognised = True
+                    else:
+                        # If tick is already in our dict, remove it
+                        if "surname" in ticks:
+                            del ticks["surname"]
+                            user_recognised = False
+                            correct_surname = "#}$"
 
                 # Handle event for next button
-                next_button.get_event(event,mouse_pos)
-                # TO DO, add check for username and surname here
+                next_clicked = next_button.get_event(event, mouse_pos)
+                if next_clicked:
+                    if user_recognised:
+                        self.user_data = self.user_database[surnames.index(surname_box.get_text())]
+                        log_in = True
+                    else:
+                        #TODO add flash or simple animation, to show wrong user here.
+                        print("Animation just played, did you see it?")
 
                 # Check quit
                 if event.type == pygame.QUIT:
@@ -223,6 +259,9 @@ class GameManager():
             # Update graphics
             for box in inputboxes:
                 box.render(self.window)
+            if len(ticks.values()) > 0:
+                for tick in ticks.values():
+                    tick.render(self.window)
             next_button.render(self.window)
             self.animation_manager.DrawTouchAnimation(self.window)
             self.pygame.display.update()  # Update all drawn objects
