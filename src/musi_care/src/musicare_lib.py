@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+
+# !/usr/bin/env python
 #
 # Library of useful classes that the other games use
 #
@@ -19,9 +20,6 @@ import threading
 from std_msgs.msg import Float64MultiArray
 import cv2
 
-
-# TODO REPLACE ALL GREY SCALE VERSIONS TO QUICK SCRIPT OF CV2.convert to greyscale
-
 # rospy.init_node('musicare_lib', anonymous=False)
 # rospy.loginfo("musicare_lib launched successfully")
 
@@ -35,13 +33,13 @@ class General():
         pass
 
     def convert_to_grey(self, image):
-        image_grey = pygame.transform.grayscale(image) #.convert_alpha()
+        image_grey = pygame.transform.grayscale(image)  # .convert_alpha()
         return image_grey
 
     def save_data(self, user_id, game_name, level):
         """Save the user's level data to file
         How save system works:
-        Data is all in a dictionary of dictionaires,        
+        Data is all in a dictionary of dictionaires,
         Example data:
         {
             {"guess_the_mood":
@@ -57,7 +55,7 @@ class General():
                     }
                 }
             },
-            
+
             {"fix_the_song":
                 {1:
                     {"time_taken":123
@@ -67,19 +65,20 @@ class General():
                 }
             },
         }
-        
-        
+
+
         """
         save_location = r"./user_saves/"
         save_name = save_location  # + user_id
         print(os.path.exists(save_location))
         # /user_saves
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Threading~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-class ThreadWithReturnValue():#Thread):
 
-    #TODO come back to this, and give thread objects the functionality to return data, and be stopped from the main
-    #TODO possibly self.run within this class
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Threading~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+class ThreadWithReturnValue()  :  # Thread):
+
+    # TODO come back to this, and give thread objects the functionality to return data, and be stopped from the main
+    # TODO possibly self.run within this class
     # https://stackoverflow.com/questions/323972/is-there-any-way-to-kill-a-thread
 
     def __init__(self, group=None, target=None, name=None, args=(), kwargs={}, Verbose=False):
@@ -88,7 +87,7 @@ class ThreadWithReturnValue():#Thread):
     def run(self):
 
         if self._target is not None:
-            self._return = self._target(*self._args,**self._kwargs)
+            self._return = self._target(*self._args ,**self._kwargs)
 
     def join(self, *args):
         Thread.join(self, *args)
@@ -222,10 +221,10 @@ class StandardLevels():
         no_img_path = os.path.join(this_file_path, path_to_imgs, "No_button.png")
 
         # Create buttons and text
-        yes = Button(yes_img_path, (225, 600), self.pygame, scale=2.2,should_grey=False)
-        no = Button(no_img_path, (1625, 600), self.pygame, scale=2.2,should_grey=False)
-        text_obj = TextObject(self.window, self.window_center, text, wrap_text=True, location=(0,200), cen_x=True,
-                             cen_y=False, font_size=150, font_colour=(255, 255, 255))
+        yes = Button(yes_img_path, (225, 600), self.pygame, scale=2.2 ,should_grey=False)
+        no = Button(no_img_path, (1625, 600), self.pygame, scale=2.2 ,should_grey=False)
+        text_obj = TextObject(self.window, self.window_center, text, wrap_text=True, location=(0 ,200), cen_x=True,
+                              cen_y=False, font_size=150, font_colour=(255, 255, 255))
 
         # Have QT say the text out loud if not silent mode
         if not silent:
@@ -361,7 +360,7 @@ class StandardLevels():
 
     def tap_to_continue(self, run, background_colour,
                         text_display="Please tap the screen when you are ready to start.", qt_say=None,
-                        should_gesture=False, gesture="explain_right",rand_gest = True):
+                        should_gesture=False, gesture="explain_right" ,rand_gest = True):
         """Screen that waits until tap, non-blocking even if QT speaking"""
 
         if run:  # Dont start this screen if the previous screen wanted to close out the game
@@ -394,7 +393,7 @@ class StandardLevels():
                 self.renderer.DrawBackground(background_colour)
                 speed_coefficient = 1  # half sine freq
                 dot_decider = math.sin(speed_coefficient * rospy.get_time())
-                #Change the text of the image depending on the time
+                # Change the text of the image depending on the time
                 if dot_decider < -1 / 3:
                     display = text_display
                     text_ob.set_text(display)
@@ -480,7 +479,7 @@ class StandardLevels():
                 self.command_manager.qt_gesture(gesture)
             # Create text object
             text_object = TextObject(self.window, self.window_center, message , cen_x=True, cen_y=True,
-            font_size=70, font_colour = (255, 255, 255))
+                                     font_size=70, font_colour = (255, 255, 255))
 
             time_of_darkness = rospy.get_time() + fade_time
             original_bg_col = background_colour
@@ -506,7 +505,7 @@ class StandardLevels():
             for chan_idx in range(len(background_colour)):
                 background_colour[chan_idx] = original_bg_col[chan_idx] * fade_scalar
             new_text_col = int(255 * fade_scalar)
-            font_col = (new_text_col,new_text_col,new_text_col)
+            font_col = (new_text_col ,new_text_col ,new_text_col)
             text_object.set_colour(font_col)
 
             # Draw background and objects
@@ -531,7 +530,7 @@ class StandardLevels():
                     self.animation_manager.StartTouchAnimation(self.pygame.mouse.get_pos())
 
             # Draw background and objects
-            self.renderer.DrawBackground((0,0,0))
+            self.renderer.DrawBackground((0 ,0 ,0))
             self.animation_manager.DrawTouchAnimation(self.window)  # Also draw touches
             self.pygame.display.update()  # Update all drawn objects
 
@@ -542,7 +541,7 @@ class StandardLevels():
         Will read events and work accordingly, but wont stick you into a while loop"""
 
         if run:
-            #Convert tuple to list so to make it mutable
+            # Convert tuple to list so to make it mutable
             background_colour = list(background_colour)
 
             # Not ideal that we create a text object each time but...
@@ -574,11 +573,12 @@ class StandardLevels():
 
             return True
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Text objects~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Text objects~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class TextObject():
 
-    def __init__(self,window, window_center, text, wrap_text = False, location=None, cen_x = False, cen_y=False, font_size=30, font_colour=(255,255,255)):
+    def __init__(self ,window, window_center, text, wrap_text = False, location=None, cen_x = False, cen_y=False, font_size=30, font_colour=(255 ,255 ,255)):
         """
         Create object that we can manipulate, ie move it's position and change it's parameters
         Also allows text wrapping to screen. This will cause text to be a list instead of a single object internally
@@ -605,9 +605,9 @@ class TextObject():
             if self.location != None:
                 self.set_pos(self.location)
             if cen_x:
-                self.textRect[0] = window_center[0] - (self.textRect[2]/2)
+                self.textRect[0] = window_center[0] - (self.textRect[2 ] /2)
             if cen_y:
-                self.textRect[1] = window_center[1] - (self.textRect[3]/2)
+                self.textRect[1] = window_center[1] - (self.textRect[3 ] /2)
 
     def render(self, window, grey=False, re_render = False):
         """handle drawing text"""
@@ -770,7 +770,7 @@ class Renderer():
         # Create Arrow
         bounding_rect_center = (bound_x + (bound_w / 2), bound_y + (bound_h / 2))
         arrow_x = bound_x + (bound_w / 2) - (
-                    arrow_size[0] / 2)  # use our Y not cen y. 150 is half the width of the arrow
+                arrow_size[0] / 2)  # use our Y not cen y. 150 is half the width of the arrow
         if bounding_rect_center[1] > 600:  # if our arrow would hit the top of the screen draw it under the box
             arrow_y = bound_y - arrow_size[1] - 50 - (math.sin(time) * time_scalar)
             image = pygame.transform.scale(arrow_img, arrow_size)
@@ -982,9 +982,9 @@ class QTManager():
             rospy.loginfo("Motor speed could not be changed")
             self.run = False
 
-    def set_arm_vel(self, arm_vel,command_blocking = False):
+    def set_arm_vel(self, arm_vel ,command_blocking = False):
         "Set velocity of arm motors"
-        #TODO change this to take in list of what motors to change speed of
+        # TODO change this to take in list of what motors to change speed of
         rospy.wait_for_service('/qt_command_service')
         command_controller = rospy.ServiceProxy('/qt_command_service', qt_command)
         command_complete = command_controller("velocity", str(arm_vel), command_blocking)
@@ -992,7 +992,7 @@ class QTManager():
 
 
     def send_qt_command(self, speech=None, gesture=None, emote=None, command_blocking=False):
-        """Neatens and simplifies sending commands to QT 
+        """Neatens and simplifies sending commands to QT
         if we want to use multiple functions of QT at once and dont care about tracking time taken,
         we should use this method instead of the others
         """
@@ -1026,7 +1026,7 @@ class QTManager():
             if black_screen:
                 self.level_loader.black_screen(True)
             if self.robo_timer.CheckTimer("EMOTE FINISHED"):
-                #Renew talking emote and start timer again
+                # Renew talking emote and start timer again
                 self.qt_emote("talking")
                 self.robo_timer.CreateTimer("EMOTE FINISHED", 3)  # Timer for emote finished
             if self.robo_timer.CheckTimer("QT_SAY_BLOCKING"):  # if our timer is done
@@ -1102,7 +1102,7 @@ class AnimationManager():
         """Handle / play animation """
         if self.play_touch_animation:
             time_since_start = (
-                                           rospy.get_time() - self.start_animation_time) * 1000  # seconds elapsed since start convert to milliseconds
+                                       rospy.get_time() - self.start_animation_time) * 1000  # seconds elapsed since start convert to milliseconds
             if time_since_start < 300:  # animation time = under half a sec
                 scalar = time_since_start / 4  # low numbers = faster growth time
                 max_size = 45
@@ -1291,12 +1291,12 @@ class ToggleButton():
         if self.toggle_state:
             if grey and self.should_grey:
                 screen.blit(self.toggled_image_grey,
-                            self.rect)  # TODO replace this with the greyscaled version of this image
+                            self.rect)
             else:
                 screen.blit(self.toggled_image, self.rect)
         else:
             if grey and self.should_grey:
-                screen.blit(self.image_grey, self.rect)  # TODO replace this with the greyscaled version of this image
+                screen.blit(self.image_grey, self.rect)
             else:
                 screen.blit(self.image, self.rect)
         return screen
@@ -1477,7 +1477,7 @@ class DraggableButton():
         self.seg_init_pos = (img_x, img_y)
         self.initial_mouse_pos = self.seg_init_pos
 
-        #Set Vars
+        # Set Vars
         self.highlighted = False
         self.block = False
         self.return_info = return_info
@@ -1542,7 +1542,7 @@ class DraggableButton():
                 self.mouse_is_held = True  # Tells us that the mouse was clicked during this event handling
                 self.initial_mouse_pos = mouse_pos
                 self.seg_init_pos = (self.rect.x, self.rect.y) # for snapping back
-            #During drag / long press
+            # During drag / long press
             if self.mouse_is_held:
                 if event.type == self.pygame.MOUSEBUTTONUP and mouse_pos == self.initial_mouse_pos:
                     self.mouse_is_held = False
@@ -1556,7 +1556,7 @@ class DraggableButton():
                     if not self.disable_drag:
                         x = mouse_pos[0] - self.img_w / 2
                         y = mouse_pos[1] - self.img_h / 2
-                        self.set_pos((x,y))
+                        self.set_pos((x ,y))
 
         return self.toggle, self.rect
 
@@ -1564,7 +1564,7 @@ class DraggableButton():
 class InputBox():
     """ rect that you can click on and write text in. Text can be read by method get_text"""
 
-    def __init__(self, x, y, w, h, default_text='', allowed_chars=""):
+    def __init__(self, x, y, w, h, default_text='', allowed_chars="", fontsize = -1):
         """
         Creates input box, with some grey text in it, that disappears when typing
         x = horizontal placement of text box (bottom left origin)
@@ -1574,10 +1574,14 @@ class InputBox():
         default_text = the text that shows when text box is empty
         allowed_chars = if a char doesn't match any in the string given, then dont add it to text.
         By default, this is all upper and lowercase letters and numbers
+        fontsize = the size of the font, -1 or 0 results to font size being equal to box height
         """
         self.COLOR_INACTIVE = pygame.Color('lightskyblue3')
         self.COLOR_ACTIVE = pygame.Color('dodgerblue2')
-        self.FONT = pygame.font.Font(None, 32)
+        if fontsize > 0:
+            self.FONT = pygame.font.Font(None, fontsize)
+        else:
+            self.FONT = pygame.font.Font(None, h)
         self.rect = pygame.Rect(x, y, w, h)
         self.color = self.COLOR_INACTIVE
         self.default_text = default_text
@@ -1596,9 +1600,13 @@ class InputBox():
         if event.type == pygame.MOUSEBUTTONDOWN:
             # If the user clicked on the input_box rect.
             if self.rect.collidepoint(event.pos):
-                # Toggle the active variable.
-                self.active = not self.active
+                # Set to active, if deault text in there, remove it
+                if self.text == self.default_text:
+                    self.text = ""
+                self.active = True
             else:
+                if self.text == "" or self.text == None:
+                    self.text = self.default_text
                 self.active = False
             # Change the current color of the input box.
             self.color = self.COLOR_ACTIVE if self.active else self.COLOR_INACTIVE
@@ -1607,28 +1615,20 @@ class InputBox():
                 # Let user delete chars
                 if event.key == pygame.K_BACKSPACE:
                     self.text = self.text[:-1]
-                    # If user deletes all the text, show default text and un highlight
-                    if len(self.text) >= 0:
-                        self.reset_text()
                 else:
                     char = event.unicode
                     if char in self.allowed_chars:
                         self.text += char
-                # Re-render the text.
-                self.txt_surface = self.FONT.render(self.text, True, self.color)
+        # Re-render the text only on certain events, to save performance
+        if event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONUP:
+            self.txt_surface = self.FONT.render(self.text, True, self.color)
 
     def get_text(self):
         return self.text
 
-    def reset_text(self):
-        self.text = self.default_text
-        self.active = False
-
-    def draw(self, screen):
-        # Blit the text.
+    def render(self, screen):
         screen.blit(self.txt_surface, (self.rect.x+5, self.rect.y+5))
-        # Blit the rect.
-        pygame.draw.rect(screen, self.color, self.rect, 2)
+        pygame.draw.rect(screen, self.color, self.rect, 3)
 
 ######################################################HorizontalSlider#################################################################
 
