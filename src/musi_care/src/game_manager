@@ -230,7 +230,7 @@ class GameManager():
         ticks = {}
         # Buttons
         next_button = self.create_button("next_button.png", (1200, 1200))
-        signup_button = self.create_button("blank_button.png", (2500, 0), text="New User", scale=0.5)
+        signup_button = self.create_button("blank_button.png", (2300, 20), text="New User", scale=0.5)
 
         log_in = False
         user_recognised = False

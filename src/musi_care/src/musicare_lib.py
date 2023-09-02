@@ -1156,12 +1156,11 @@ class Button():
     """
 
     def __init__(self, image_path, x_y_locations, pygame, return_info={}, scale=1.0, unique_id="", on_click=object,
-                 on_release=object, text = "", should_grey = True):
+                 on_release=object, text="", should_grey=True):
         if not os.path.exists(image_path):
-            print("File does not exist path = ", image_path)
-        else:
-            pass
-            # print("File located at",image_path)
+            print("File does not exist. Path = ", image_path)
+        #else:
+        #     print("File located at",image_path)
         self.pygame = pygame
         raw_image = self.pygame.image.load(image_path).convert_alpha()
         grey_scaled_raw_image = General().convert_to_grey(raw_image)
@@ -1189,11 +1188,11 @@ class Button():
         font_scale = 80
         too_large = True
         # Keep scaling down text until it fits in the button
-        while too_large:
+        while too_large or font_scale <= 2:
             text, textRect = self.create_text(font_scale)
-            if textRect[2] < self.rect[2]:
+            if textRect[2] < (self.rect[2] * 0.85): # *0.9 gives a buffer on either side of the text
                 too_large = False
-            font_scale -= 10
+            font_scale -= 2
         self.text = text
         self.textRect = textRect
         self.textRect.center = self.rect.center # Center text in center button
