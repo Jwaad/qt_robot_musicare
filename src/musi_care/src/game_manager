@@ -140,6 +140,7 @@ class GameManager():
     def LoadUserDatabase(self):
         """ Load all users into memory, so we can  """
         self.user_database = []
+        
         users = []
         # Get list of all users
         users = glob.glob(self.path_to_userdata + "/*.p")
@@ -151,10 +152,23 @@ class GameManager():
                 print("attempting to open {0}".format(path))
                 user_data = pickle.load(f)
             self.user_database.append(user_data)
+
+        # Also extract / update names, for log in screen
+        self.first_names = []
+        self.surnames = []
+        for user in self.user_database:
+            self.first_names.append(user["name"])
+            self.surnames.append(user["surname"])
+
         return self.user_database
 
     def SaveNewUser(self, name, surname, DoB):
-        """ Save a New User to System """
+        """
+        Save a New User to System
+        name = string of first name
+        surname = string of last name
+        DoB = string of Date of birth in format dd-mm-yy as integers. e.g: 01-01-99
+        """
         file_name = name[0] + surname[0] + DoB[-4:] + ".p"
 
         # Format data of new user
@@ -179,12 +193,79 @@ class GameManager():
         return data
 
     def SignupScreen(self):
+
+        # Input / text boxes
+        name_box = InputBox(600, 300, 1000, 200, "First Name")
+        surname_box = InputBox(600, 700, 1000, 200, "Last Name")
+        dob_box = InputBox(600, 1100, 1000, 200, "dd-mm-yy", allowed_chars="0123456789", max_chars=8)
+        inputboxes = [name_box, surname_box, dob_box]
+        # Check marks
+        name_tick = self.create_button("check_mark.png", (1750, 325))
+        surname_tick = self.create_button("check_mark.png", (1750, 725))
+        dob_tick = self.create_button("check_mark.png", (1750, 1125))
+        ticks = {}
+        #ticks = {1: name_tick, 2: surname_tick, 3: dob_tick}
+        # Buttons
+        back_button = self.create_button("tut_back.png", (20, 20))
+        confirm_button = self.create_button("blank_button.png", (900, 1500), text="Done")
+        buttons = [back_button, confirm_button]
+
+
         back = False
         while (not rospy.is_shutdown()) and (self.run) and not back:
 
             # Handle events
             mouse_pos = self.pygame.mouse.get_pos()
             for event in self.pygame.event.get():
+
+                # Handle events for name box
+                event_triggered = name_box.handle_event(event)
+                if event_triggered == "KEYDOWN":
+                    if (name_box.get_text() is not None) and (name_box.get_text() != ""):
+                        ticks["name"] = name_tick
+                    else:
+                        # If tick is already in our dict, remove it
+                        if "name" in ticks:
+                            del ticks["name"]
+
+                # Handle events for surname box
+                event_triggered = surname_box.handle_event(event)
+                if event_triggered == "KEYDOWN":
+                    if (surname_box.get_text() is not None) and (surname_box.get_text() != ""):
+                        ticks["surname"] = surname_tick
+                    else:
+                        if "surname" in ticks:
+                            del ticks["surname"]
+
+                # Handle events for dob box
+                event_triggered = dob_box.handle_event(event)
+                if event_triggered == "KEYDOWN":
+                    # Add the - at set intervals
+                    if event.key != pygame.K_BACKSPACE:
+                        if len(dob_box.get_text()) in [2, 5]:
+                            dob_box.text += "-"
+                    # If backspace over a "-", then take additional char
+                    else:
+                        if len(dob_box.get_text()) in [3, 6]:
+                            dob_box.text = dob_box.text[:-1]
+                    # Check length is correct for dob:
+                    if len(dob_box.get_text()) == 8:
+                        ticks["dob"] = dob_tick
+                    else:
+                        if "dob" in ticks:
+                            del ticks["dob"]
+
+                # Check back button and done button
+                back = back_button.get_event(event, mouse_pos)
+                done_clicked = confirm_button.get_event(event, mouse_pos)
+
+                # Check "Done"
+                if len(ticks.values()) == 3:
+                    if done_clicked:
+                        new_user = self.SaveNewUser(name_box.get_text(), surname_box.get_text(), dob_box.get_text())
+                        self.LoadUserDatabase()
+                        back = True
+                        print(new_user)
 
                 # Handle on click animation
                 if event.type == self.pygame.MOUSEBUTTONUP:  # On mouse release play animation to show where cursor is
@@ -195,15 +276,17 @@ class GameManager():
                     self.run = False
                     print("Quitting...")
 
-                # TEMP
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_ESCAPE:
-                        back = True
-
             # Draw background
             self.renderer.DrawBackground(self.background_colour)
 
             # Update graphics
+            for button in buttons:
+                button.render(self.window)
+            for box in inputboxes:
+                box.render(self.window)
+            if len(ticks.values()) > 0:
+                for tick in ticks.values():
+                    tick.render(self.window)
             self.animation_manager.DrawTouchAnimation(self.window)
             self.pygame.display.update()  # Update all drawn objects
 
@@ -212,13 +295,6 @@ class GameManager():
 
     def LogInScreen(self):
         """ Use database, and check if user is inputting credentials we have seen before. """
-        first_names = []
-        surnames = []
-        temp_data = []
-        # important that these have the same order
-        for user in self.user_database:
-            first_names.append(user["name"])
-            surnames.append(user["surname"])
 
         # Input / text boxes
         name_box = InputBox(200, 600, 1000, 200, "First Name")
@@ -229,7 +305,7 @@ class GameManager():
         surname_tick = self.create_button("check_mark.png", (2050, 800))
         ticks = {}
         # Buttons
-        next_button = self.create_button("next_button.png", (1200, 1200))
+        next_button = self.create_button("next_button.png", (1100, 1200))
         signup_button = self.create_button("blank_button.png", (2300, 20), text="New User", scale=0.5)
 
         log_in = False
@@ -248,12 +324,11 @@ class GameManager():
                 # Handle events for name box
                 event_triggered = name_box.handle_event(event)
                 if event_triggered == "KEYDOWN":
-                    if name_box.get_text() in first_names:
+                    if name_box.get_text() in self.first_names:
                         ticks["name"] = name_tick
                         # Get the corresponding surname
-                        ind = first_names.index(name_box.get_text())
-                        print(correct_surname)
-                        correct_surname = surnames[ind]
+                        ind = self.first_names.index(name_box.get_text())
+                        correct_surname = self.surnames[ind]
                     else:
                         # If tick is already in our dict, remove it
                         if "name" in ticks:
@@ -278,14 +353,14 @@ class GameManager():
                 next_clicked = next_button.get_event(event, mouse_pos)
                 if next_clicked:
                     if user_recognised:
-                        self.user_data = self.user_database[surnames.index(surname_box.get_text())]
+                        self.user_data = self.user_database[self.surnames.index(surname_box.get_text())]
                         log_in = True
                     else:
                         #TODO add flash or simple animation, to show wrong user here.
                         print("Animation just played, did you see it?")
 
                 # Handle event for new user
-                signup = signup_button.get_event(event,mouse_pos)
+                signup = signup_button.get_event(event, mouse_pos)
                 if signup:
                     self.SignupScreen()
 
