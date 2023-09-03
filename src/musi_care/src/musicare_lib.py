@@ -1564,7 +1564,7 @@ class DraggableButton():
 class InputBox():
     """ rect that you can click on and write text in. Text can be read by method get_text"""
 
-    def __init__(self, x, y, w, h, default_text='', allowed_chars="", fontsize = -1):
+    def __init__(self, x, y, w, h, default_text='', allowed_chars="", fontsize = -1, max_chars = -1):
         """
         Creates input box, with some grey text in it, that disappears when typing
         x = horizontal placement of text box (bottom left origin)
@@ -1582,6 +1582,7 @@ class InputBox():
             self.FONT = pygame.font.Font(None, fontsize)
         else:
             self.FONT = pygame.font.Font(None, h)
+        self.max_chars = max_chars
         self.rect = pygame.Rect(x, y, w, h)
         self.color = self.COLOR_INACTIVE
         self.default_text = default_text
@@ -1589,12 +1590,13 @@ class InputBox():
         self.txt_surface = self.FONT.render(self.text, True, self.color)
         self.active = False
         self.returnInput = None
-        alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+        # uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        lower_case = "abcdefghijklmnopqrstuvwxyz"
         integers = "0123456789"
-        # other_chars = "."
+        # other_chars = ".-"
         self.allowed_chars = allowed_chars
         if allowed_chars == "" or type(allowed_chars) != str:
-            self.allowed_chars = alphabet + integers
+            self.allowed_chars = lower_case + integers
 
     def handle_event(self, event):
         event_triggered = None
@@ -1621,7 +1623,13 @@ class InputBox():
                 else:
                     char = event.unicode
                     if char in self.allowed_chars:
-                        self.text += char
+                        # impose char limit
+                        if self.max_chars > 0:
+                            if len(self.text) < self.max_chars:
+                                self.text += char
+                        else:
+                            self.text += char
+
         # Re-render the text only on certain events, to save performance
         if event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONUP:
             self.txt_surface = self.FONT.render(self.text, True, self.color)
