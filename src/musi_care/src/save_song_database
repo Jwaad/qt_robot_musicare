@@ -1,0 +1,148 @@
+#!/usr/bin/env python
+# This code is the only node that needs to be run, instead of opening 3 different nodes before starting.
+
+import pickle
+import os
+import rospy
+
+
+def SaveDatabase():
+    """
+    Manually written database, saves it in pickle format for other code to read from it easily
+    """
+    this_path = os.path.dirname(__file__)
+    save_name = "song_database.p"
+    save_path = os.path.join(this_path, 'game_assets/data/', save_name)
+
+    # Song data
+    song_database = \
+        {
+            "Follow the van":
+                {
+                    "file_name": "follow_the_van.wav",
+                    "bpm": 57.0,
+                    "first_beat": 2.8,
+                    "mood": "happy",
+                    "GTM": "medium",
+                    "FTM": "easy",
+                    "CTB": "easy",
+                    "SSC": "easy"
+                },
+
+            "Don't fence me in":
+                {
+                    "file_name": "dont_fence_me_in_long.wav",
+                    "bpm": 40.0,
+                    "first_beat": 0.1,
+                    "mood": "sad",
+                    "GTM": "medium",
+                    "FTM": "easy",
+                    "CTB": "easy",
+                    "SSC": "easy"
+                },
+
+            "Jingle bells":
+                {
+                    "file_name": "jingle_bells.wav",
+                    "bpm": 95.0,
+                    "first_beat": 2.8,
+                    "mood": "happy",
+                    "GTM": "easy",
+                    "FTM": "easy",
+                    "CTB": "hard",
+                    "SSC": "hard"
+                },
+
+            "Happy instrumental 3":
+                {
+                    "file_name": "happy_3.wav",
+                    "bpm": 60.0,
+                    "first_beat": 0.1,
+                    "mood": "happy",
+                    "GTM": "easy",
+                    "FTM": "hard",
+                    "CTB": "medium",
+                    "SSC": "medium"
+                },
+
+            "Happy instrumental 1":
+                {
+                    "file_name": "happy_1.wav",
+                    "bpm": 0.0,
+                    "first_beat": 0.0,
+                    "mood": "happy",
+                    "GTM": "easy",
+                    "FTM": "hard",
+                    "CTB": "hard",
+                    "SSC": "hard"
+                },
+
+            "Don't let me down short":
+                {
+                    "file_name": "beetles_dont_let_me_down_short.wav",
+                    "bpm": 76,
+                    "first_beat": 0.0,
+                    "mood": "sad",
+                    "GTM": "easy",
+                    "FTM": "easy",
+                    "CTB": "hard",
+                    "SSC": "hard"
+                },
+
+            "Sad instrumental 1":
+                {
+                    "file_name": "sad_1.wav",
+                    "bpm": 0.0,
+                    "first_beat": 0.0,
+                    "mood": "sad",
+                    "GTM": "easy",
+                    "FTM": "easy",
+                    "CTB": "hard",
+                    "SSC": "hard"
+                },
+
+            "Happy instrumental 4":
+                {
+                    "file_name": "happy_4.wav",
+                    "bpm": 0.0,
+                    "first_beat": 0.0,
+                    "mood": "sad",
+                    "GTM": "easy",
+                    "FTM": "hard",
+                    "CTB": "medium",
+                    "SSC": "medium"
+                },
+
+            "Don't let me down long":
+                {
+                    "file_name": "beetles_dont_let_me_down_long.wav",
+                    "bpm": 76,
+                    "first_beat": 0.0,
+                    "mood": "sad",
+                    "GTM": "easy",
+                    "FTM": "easy",
+                    "CTB": "hard",
+                    "SSC": "hard"
+                },
+
+            "Could you be loved short":
+                {
+                    "file_name": "bob_marl_could_you_be_loved_short.wav",
+                    "bpm": 76,
+                    "first_beat": 0.0,
+                    "mood": "sad",
+                    "GTM": "easy",
+                    "FTM": "easy",
+                    "CTB": "easy",
+                    "SSC": "easy"
+                }
+        }
+
+    # Get path and save
+    open(save_path, "w").close()    # Close it if it's in use ? maybe
+    with open(save_path, "wb") as f:
+        pickle.dump(song_database, f)
+    rospy.loginfo("Song data saved to {}".format(save_path))
+
+if __name__ == '__main__':
+    SaveDatabase()
