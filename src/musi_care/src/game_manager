@@ -197,7 +197,7 @@ class GameManager():
         # Input / text boxes
         name_box = InputBox(600, 300, 1000, 200, "First Name")
         surname_box = InputBox(600, 700, 1000, 200, "Last Name")
-        dob_box = InputBox(600, 1100, 1000, 200, "dd-mm-yy", allowed_chars="0123456789", max_chars=8)
+        dob_box = InputBox(600, 1100, 1000, 200, "dd-mm-yyyy", allowed_chars="0123456789", max_chars=10)
         inputboxes = [name_box, surname_box, dob_box]
         # Check marks
         name_tick = self.create_button("check_mark.png", (1750, 325))
@@ -249,7 +249,7 @@ class GameManager():
                         if len(dob_box.get_text()) in [3, 6]:
                             dob_box.text = dob_box.text[:-1]
                     # Check length is correct for dob:
-                    if len(dob_box.get_text()) == 8:
+                    if len(dob_box.get_text()) == 10:
                         ticks["dob"] = dob_tick
                     else:
                         if "dob" in ticks:
