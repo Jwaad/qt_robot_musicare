@@ -6,12 +6,13 @@
 #
 import rospy
 import pygame
-import pygame.freetype  # some reason fixed events repeating themselves
+import pygame.freetype  # some reason fixes events repeating themselves
 import os
 import math
 import random
 import wave
 import contextlib
+import pickle
 from pydub import AudioSegment
 from musi_care.msg import SongData
 from musi_care.srv import sound_player_srv
@@ -36,42 +37,33 @@ class General():
         image_grey = pygame.transform.grayscale(image)  # .convert_alpha()
         return image_grey
 
-    def save_data(self, user_id, game_name, level):
-        """Save the user's level data to file
-        How save system works:
-        Data is all in a dictionary of dictionaires,
-        Example data:
-        {
-            {"guess_the_mood":
-                {1:
-                    {"time_taken":123
-                    "accuracy":100
-                    "hints_given":2
-                    },
-                2:
-                    {"time_taken":123
-                    "accuracy":100
-                    "hints_given":2
-                    }
-                }
-            },
-
-            {"fix_the_song":
-                {1:
-                    {"time_taken":123
-                    "accuracy":100
-                    "hints_given":2
-                    }
-                }
-            },
-        }
-
-
+    def Load_Song_Data(self, game):
         """
-        save_location = r"./user_saves/"
-        save_name = save_location  # + user_id
-        print(os.path.exists(save_location))
-        # /user_saves
+        game = string of the game name options: gtm, fts, ctb, ssc
+        """
+        # Load the save data in full
+        this_path = os.path.dirname(__file__)
+        save_name = "song_database.p"
+        save_path = os.path.join(this_path, 'game_assets/data/', save_name)
+        song_data = {}
+        with open(save_path, "rb") as f:
+            print("attempting to open {0}".format(save_path))
+            song_data = pickle.load(f)
+
+        easy = []
+        medium = []
+        hard = []
+
+        for song_name, song_data in song_data.items():
+            if song_data[game] == "easy":
+                easy.append({song_name:song_data})
+            elif song_data[game] == "medium":
+                medium.append({song_name:song_data})
+            elif song_data[game] == "hard":
+                hard.append({song_name:song_data})
+
+        level_data = {"easy":easy, "medium":medium, "hard":hard}
+        return level_data
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Threading~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
