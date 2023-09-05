@@ -4,7 +4,7 @@
 import pickle
 import os
 import rospy
-
+from musicare_lib import General
 
 def SaveDatabase():
     """
@@ -24,7 +24,7 @@ def SaveDatabase():
                     "first_beat": 2.8,
                     "mood": "happy",
                     "GTM": "medium",
-                    "FTM": "easy",
+                    "FTS": "easy",
                     "CTB": "easy",
                     "SSC": "easy"
                 },
@@ -36,7 +36,7 @@ def SaveDatabase():
                     "first_beat": 0.1,
                     "mood": "sad",
                     "GTM": "medium",
-                    "FTM": "easy",
+                    "FTS": "easy",
                     "CTB": "easy",
                     "SSC": "easy"
                 },
@@ -48,7 +48,7 @@ def SaveDatabase():
                     "first_beat": 2.8,
                     "mood": "happy",
                     "GTM": "easy",
-                    "FTM": "easy",
+                    "FTS": "easy",
                     "CTB": "hard",
                     "SSC": "hard"
                 },
@@ -60,7 +60,7 @@ def SaveDatabase():
                     "first_beat": 0.1,
                     "mood": "happy",
                     "GTM": "easy",
-                    "FTM": "hard",
+                    "FTS": "hard",
                     "CTB": "medium",
                     "SSC": "medium"
                 },
@@ -72,7 +72,7 @@ def SaveDatabase():
                     "first_beat": 0.0,
                     "mood": "happy",
                     "GTM": "easy",
-                    "FTM": "hard",
+                    "FTS": "hard",
                     "CTB": "hard",
                     "SSC": "hard"
                 },
@@ -84,7 +84,7 @@ def SaveDatabase():
                     "first_beat": 0.0,
                     "mood": "sad",
                     "GTM": "easy",
-                    "FTM": "easy",
+                    "FTS": "easy",
                     "CTB": "hard",
                     "SSC": "hard"
                 },
@@ -96,7 +96,7 @@ def SaveDatabase():
                     "first_beat": 0.0,
                     "mood": "sad",
                     "GTM": "easy",
-                    "FTM": "easy",
+                    "FTS": "easy",
                     "CTB": "hard",
                     "SSC": "hard"
                 },
@@ -108,7 +108,7 @@ def SaveDatabase():
                     "first_beat": 0.0,
                     "mood": "sad",
                     "GTM": "easy",
-                    "FTM": "hard",
+                    "FTS": "hard",
                     "CTB": "medium",
                     "SSC": "medium"
                 },
@@ -120,7 +120,7 @@ def SaveDatabase():
                     "first_beat": 0.0,
                     "mood": "sad",
                     "GTM": "easy",
-                    "FTM": "easy",
+                    "FTS": "easy",
                     "CTB": "hard",
                     "SSC": "hard"
                 },
@@ -132,17 +132,28 @@ def SaveDatabase():
                     "first_beat": 0.0,
                     "mood": "sad",
                     "GTM": "easy",
-                    "FTM": "easy",
+                    "FTS": "easy",
                     "CTB": "easy",
                     "SSC": "easy"
                 }
         }
 
     # Get path and save
-    open(save_path, "w").close()    # Close it if it's in use ? maybe
+    open(save_path, "w").close()  # Close it if it's in use ? maybe
     with open(save_path, "wb") as f:
         pickle.dump(song_database, f)
     rospy.loginfo("Song data saved to {}".format(save_path))
 
+
 if __name__ == '__main__':
     SaveDatabase()
+    games = ["GTM", "FTS", "CTB", "SSC"]
+    diff = ["easy", "medium", "hard"]
+
+    for game in games:
+        data = General().Load_Song_Data(game)
+
+        print("For {} there is...".format(game))
+        for d in diff:
+            print("{} {} levels:".format(len(data[d]), d))
+            #print(data[d])
