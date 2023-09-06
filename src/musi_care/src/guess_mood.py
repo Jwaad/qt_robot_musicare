@@ -31,11 +31,10 @@ from musicare_lib import General
 class Guess_The_Mood_Game():
     """ Class to generate and handle guess the mood game """
 	
-    def __init__(self, user_id, reduce_screen = True):
+    def __init__(self, reduce_screen = True, debug = false):
         """Initialise and take user_id, user_id helps us save the data to the specific profiles"""
-        self.user_id = user_id
-        x= 145 # x pos of screen
-        y= 0   # y pos of screen
+        x = 145 # x pos of screen
+        y = 0   # y pos of screen
         os.environ['SDL_VIDEO_WINDOW_POS'] = '%d,%d' % (x,y) #move screen to x and y pos
         self.previous_screen = "" # used so we can go backwards a screen
         self.next_screen = "" #used to skip screen, low priority feature
@@ -70,13 +69,13 @@ class Guess_The_Mood_Game():
         self.renderer = Renderer(self.window,self.window_center)
         self.behaviours_manager = Behaviours(self.pygame, self.music_filepath)
         self.level_loader = StandardLevels(self.window, self.window_center, self.pygame, self.music_filepath)
-        self.gm = General() #gm = general methods      
+        self.gm = General() #gm = general methods
         #self.music_vol = 1 # change volume of laptop
         #self.qt_voice_vol
         #self.sound_manager.volume_change(self.music_vol) # Set a default volume
         #self.set_robot_volume(qt_voice_vol) #TODO add this functionality  
         self.t1 = 0 #t1 for FPS tracking
-        self.debug = True
+        self.debug = debug
         if not self.debug:
             self.pygame.mouse.set_visible(False) #set to false when not testing
                    
