@@ -90,7 +90,10 @@ class ThreadWithReturnValue()  :  # Thread):
 ######################################################DraggableButton#################################################################
 
 class Behaviours():
-    """Class to store and return saved / repeatable behaviours other than builtin with QT"""
+    """Class to store and return saved / repeatable behaviours other than builtin with QT
+        When using methods to get randomised frequent messages, you can pass in the previous message to
+        ensure there's no repeat.
+    """
 
     def __init__(self, pygame, path_to_music):
         self.timeout_started = False
@@ -101,8 +104,10 @@ class Behaviours():
         self.paused = False
         self.speaking_timer_id = ""
 
-    def qt_reminder(self, events, music_playing=True, timeout_message="If you are stuck. please click the clue button"):
+    def qt_reminder(self, events, music_playing=True, timeout_message=None):
         """If x seconds of no inputs pass, qt should pause music and say something"""
+        if timeout_message == None:
+            timeout_message = self.get_refocus()
         timer_id = "timeout"
         timeout_time = 7  # give some seconds until timeout
         # If first run of this method, start timer
@@ -129,66 +134,157 @@ class Behaviours():
                 self.sound_manager.unpause()
                 self.timeout_started = False  # so that we start a new timer
 
-    def get_agreements(self):  # List of all behaviours_manager when QT agrees EG yes, correct
-        sayings = ["Yes!", "Correct!", "That's right!", "That's correct!", "Great, that's right!",
+    def get_refocus(self, previous_saying=""):
+        """ Things QT can say, when bringing user's attention back to game """
+        sayings = ["If you are stuck. please click the clue button",
+                   "Hey, if you need help, click the. Clue button",
+                   "Click the clue button if you need help",
+                   "I can help if you need it ! Just click the clue button"]
+        ind = random.randint(0, len(sayings) - 1)
+        saying = sayings[ind]
+        # If saying is the same, as the one previously used, re-randomise
+        while saying == previous_saying:
+            ind = random.randint(0, len(sayings) - 1)
+            saying = sayings[ind]
+        return saying
+
+    def get_agreements(self, previous_saying=""):  # List of all behaviours_manager when QT agrees EG yes, correct
+        sayings = ["Yes!",
+                   "Correct!",
+                   "That's right!",
+                   "That's correct!",
+                   "Great, that's right!",
                    "Good job, That is the right answer!"]
         ind = random.randint(0, len(sayings) - 1)
         saying = sayings[ind]
+        # If saying is the same, as the one previously used, re-randomise
+        while saying == previous_saying:
+            ind = random.randint(0, len(sayings) - 1)
+            saying = sayings[ind]
         return saying
 
-    def get_disagreements(self):  # List of all behaviours_manager when QT disagree EG no, sorry.
-        sayings = ["No, Please try again...", "Sorry, no, please try again...", "No, that's not correct...",
-                   "I'm sorry that is not right, Please try again...", "Sorry, that is not the right answer..."]
+    def get_disagreements(self, previous_saying=""):  # List of all behaviours_manager when QT disagree EG no, sorry.
+        sayings = ["No, Please try again...",
+                   "Sorry, no, please try again...",
+                   "No, that's not correct...",
+                   "I'm sorry that is not right, Please try again...",
+                   "Sorry, that is not the right answer..."]
         ind = random.randint(0, len(sayings) - 1)
         saying = sayings[ind]
+        # If saying is the same, as the one previously used, re-randomise
+        while saying == previous_saying:
+            ind = random.randint(0, len(sayings) - 1)
+            saying = sayings[ind]
         return saying
 
-    def get_praise(self):
-        """ Sayings for when user does very well """
-        sayings = ["Amazing, that is the right answer!", "Great job!", "Alright, that's correct!", "Wow, well done!",
-                   "Nice! Well done!", "You did really well on that one!", "You are a natural",
+    def get_praise(self, previous_saying=""):
+        """ Sayings for when user does very well, relating to answers"""
+        sayings = ["Amazing, that is the right answer!",
+                   "Great job!",
+                   "Alright, that's correct!",
+                   "Wow, well done!",
+                   "Nice! Well done!",
+                   "You did really well on that one!",
+                   "You are a natural",
+                   "You made that one look easy!",
+                   "Wow! You did that perfectly!"]
+        ind = random.randint(0, len(sayings) - 1)
+        saying = sayings[ind]
+        # If saying is the same, as the one previously used, re-randomise
+        while saying == previous_saying:
+            ind = random.randint(0, len(sayings) - 1)
+            saying = sayings[ind]
+        return saying
+
+    def get_generic_praise(self, previous_saying=""):
+        """ Generic sayings for when user does very well, for non question types """
+        sayings = ["Amazing !",
+                   "Great job!",
+                   "Wow, well done!",
+                   "Nice! Well done!",
+                   "You did really well on that one!",
+                   "You are a natural",
                    "You made that one look easy!"]
         ind = random.randint(0, len(sayings) - 1)
         saying = sayings[ind]
+        # If saying is the same, as the one previously used, re-randomise
+        while saying == previous_saying:
+            ind = random.randint(0, len(sayings) - 1)
+            saying = sayings[ind]
         return saying
 
-    def get_generic_praise(self):
-        """ Generic sayings for when user does very well """
-        sayings = ["Amazing !", "Great job!", "Wow, well done!", "Nice! Well done!",
-                   "You did really well on that one!", "You are a natural", "You made that one look easy!"]
-        ind = random.randint(0, len(sayings) - 1)
-        saying = sayings[ind]
-        return saying
-
-    def get_generic_light_praise(self):
+    def get_generic_light_praise(self, previous_saying=""):
         """ Level end sayings for when user does okay """
-        sayings = ["Good job!", "Great job!", "Alright, well done!", "Well done!",
-                   "Nice!", "You did well on that one!", "You made that one look easy!"]
+        sayings = ["Good job!",
+                   "Great job!",
+                   "Alright, well done!",
+                   "Well done!",
+                   "Nice! you did it!",
+                   "You did well on that one!",
+                   "You made that one look easy!"]
         ind = random.randint(0, len(sayings) - 1)
         saying = sayings[ind]
+        # If saying is the same, as the one previously used, re-randomise
+        while saying == previous_saying:
+            ind = random.randint(0, len(sayings) - 1)
+            saying = sayings[ind]
         return saying
 
-    def get_incorrect(self):
-        sayings = ["Okay, next question", "On to the next question", "Lets move on", "To the next" ]
+    def get_incorrect(self, previous_saying=""):
+        """ Gentle ways to move onto next task, if user is not correct"""
+        sayings = ["Okay, next question",
+                   "On to the next question",
+                   "Lets move on",
+                   "Lets go the next task" ]
         ind = random.randint(0, len(sayings) - 1)
         saying = sayings[ind]
+        # If saying is the same, as the one previously used, re-randomise
+        while saying == previous_saying:
+            ind = random.randint(0, len(sayings) - 1)
+            saying = sayings[ind]
         return saying
 
-    def get_next_level(self):
-        sayings = ["Okay, next level", "On to the next level", "Lets play the next level!", "Now onto the next one!",
+    def get_next_level(self, previous_saying=""):
+        """ Different ways to move onto the next task"""
+        sayings = ["Okay, next level",
+                   "On to the next level",
+                   "Lets play the next level!",
+                   "Now onto the next one!",
                    "Lets play another one!"]
         ind = random.randint(0, len(sayings) - 1)
         saying = sayings[ind]
+        # If saying is the same, as the one previously used, re-randomise
+        while saying == previous_saying:
+            ind = random.randint(0, len(sayings) - 1)
+            saying = sayings[ind]
         return saying
 
-    def get_help(self):
-        sayings = ["Okay, next level", "On to the next level", "Lets play the next level!", "Now onto the next one!",
-                   "Lets play another one!"]
+    def get_help(self, previous_saying=""):
+        """ Sentences QT can say, before giving a hint """
+        sayings = ["Okay! I will try my best to help!",
+                   "I will give you a hint",
+                   "I can help!" ]
         ind = random.randint(0, len(sayings) - 1)
         saying = sayings[ind]
+        # If saying is the same, as the one previously used, re-randomise
+        while saying == previous_saying:
+            ind = random.randint(0, len(sayings) - 1)
+            saying = sayings[ind]
         return saying
 
-
+    def get_next_difficulty(self, previous_saying=""):
+        """ Sentences QT can say, before increasing difficulty """
+        sayings = ["You have done so well on those last games! I am going to mark it harder now, hehe",
+                   "Wow! I'm so impressed, you made such short work of those levels, the next level will have to be harder!"
+                   ]
+        ind = random.randint(0, len(sayings) - 1)
+        saying = sayings[ind]
+        # If saying is the same, as the one previously used, re-randomise
+        while saying == previous_saying:
+            ind = random.randint(0, len(sayings) - 1)
+            saying = sayings[ind]
+        return saying
+    
 #####################################################General Levels##################################################################
 
 class StandardLevels():
