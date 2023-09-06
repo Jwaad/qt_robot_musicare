@@ -31,7 +31,7 @@ from musicare_lib import General
 class Guess_The_Mood_Game():
     """ Class to generate and handle guess the mood game """
 	
-    def __init__(self, reduce_screen = True, debug = false):
+    def __init__(self, reduce_screen = True, debug = False):
         """Initialise and take user_id, user_id helps us save the data to the specific profiles"""
         x = 145 # x pos of screen
         y = 0   # y pos of screen
