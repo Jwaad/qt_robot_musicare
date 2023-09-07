@@ -324,6 +324,43 @@ class Guess_The_Mood_Game():
             self.tut_next.set_pos((arrow_x + 450, arrow_y))
             self.tut_repeat.set_pos((arrow_x - 600, arrow_y))
 
+    def get_GTM_phaseone_help(self, previous_saying=""):
+        """ Sentences QT will say when giving phase 1 help """
+        sayings = ["Try to focus on how this song makes you feel... If you want a better hint, click the clue button again",
+                   "How does the song make you feel? Does it make you feel happy? If you need another hint, click the clue button one more time",
+                   "Focus on how you are feeling... Does the song make you feel happy? Click the clue button again, for another hint" ]
+        ind = random.randint(0, len(sayings) - 1)
+        saying = sayings[ind]
+        # If saying is the same, as the one previously used, re-randomise
+        while saying == previous_saying:
+            ind = random.randint(0, len(sayings) - 1)
+            saying = sayings[ind]
+        return saying
+
+    def get_GTM_phasetwo_help(self, mood, previous_saying=""):
+        """ Sentences QT will say when giving phase 2 help """
+        happy_sayings = ["This song makes me want to dance",
+                         "I feel so cheerful listening to this song",
+                         "I would like to listen to this song on a sunny day",
+                         "This song makes me want to bust a move!"]
+        sad_sayings = ["This song makes me think about old times",
+                         "I feel a bit down listening to this song",
+                         "I would like to listen to this song on a rainy day",
+                         "This song doesn't sound very cheerful..."]
+        sayings = ["Jwaad, you have mistyped the mood of this song...",
+                   "Jwaad, you messed up the mood of the song."]
+        if mood == "happy":
+            sayings = happy_sayings
+        elif mood == "sad":
+            sayings = sad_sayings
+        ind = random.randint(0, len(sayings) - 1)
+        saying = sayings[ind]
+        # If saying is the same, as the one previously used, re-randomise
+        while saying == previous_saying:
+            ind = random.randint(0, len(sayings) - 1)
+            saying = sayings[ind]
+        return saying
+
     #####################################################Level / screen code#################################################################
 
     def guided_tut(self, run):
@@ -446,29 +483,12 @@ class Guess_The_Mood_Game():
 
         return self.run
 
-    def get_GTM_help(self, previous_saying=""):
-        """ Sentences QT will say when giving phase 1 help """
-        sayings = ["Try to focus on how this song makes you feel... If you want a better hint, click the clue button again",
-                   "How does the song make you feel? Does it make you feel happy? If you need another hint, click the clue button one more time",
-                   "Focus on how you are feeling... Does the song make you feel happy? Click the clue button again, for another hint" ]
-        ind = random.randint(0, len(sayings) - 1)
-        saying = sayings[ind]
-        # If saying is the same, as the one previously used, re-randomise
-        while saying == previous_saying:
-            ind = random.randint(0, len(sayings) - 1)
-            saying = sayings[ind]
-        return saying
-
-    def play_level(self, run, difficulty, level_num):
+    def play_level(self, run, track_mood, track_name):
         """Sequence plays the levels"""
         if self.run:  # Dont start this screen if the previous screen wanted to close out the game
 
             # Get the level's data
-            level_data = self.music_data[difficulty][
-                level_num]  # {"song_name":"title", "mood":"happy", "hint":"some text"}
-            self.track_name = level_data["song_name"]
-            track_hint = level_data["hint"]
-            track_mood = level_data["mood"]
+            self.track_name = track_name
 
             # Create buttons
             self.create_graphics()
@@ -483,7 +503,6 @@ class Guess_The_Mood_Game():
             song_ended = False
             answer_given = False
             track_stopped = True  # this makes it play on start
-            wrong_counter = 0
             qt_message = ""
             current_track_time = ""
             track_total_time = ""
@@ -496,15 +515,13 @@ class Guess_The_Mood_Game():
 
             # Start recording time
             start_time = rospy.get_time()
-            wrong_answers = 0  # how many wrong answers
-            hints_given = 0  # how many hints they needed
-            full_listen = False  # tracks if user has heard full song
+            play_time = 0
+            correct_answer = False  # If the answer they gave was correct or not
+            hints_given = 0  # How many hints they needed
+            full_listen = False  # Tracks if user has heard full song
 
             # Main game loop
             while self.level_complete == False and not rospy.is_shutdown() and self.run:
-
-                # update play time
-                play_time = rospy.get_time() - start_time
 
                 # if the song ended, start player to the beginning and pause it.
                 if song_ended:
@@ -555,10 +572,7 @@ class Guess_The_Mood_Game():
                             if button_pressed_id == track_mood:
                                 # print("User has clicked the correct answer")
                                 answer_given = True
-                                clear_type = self.compute_clear_type(play_time, wrong_counter, hints_given)
-                                qt_message = self.qt_reward(clear_type)
-                                self.level_loader.QTSpeakingPopupScreen(qt_message, self.rendered_graphics, self.run,
-                                                                        self.background_colour)  # this is blocking
+
                             # if clicked button is unsure --> give hint
                             elif button_pressed_id == "unsure":
                                 # print("User has clicked unsure")
@@ -566,23 +580,28 @@ class Guess_The_Mood_Game():
                                 if hints_given == 1:
                                     # Phase 1 hint, reminder of what to do
                                     self.command_manager.send_qt_command(emote="talking", gesture="explain_right")
-                                    qt_message = self.behaviours_manager.get_help() + self.get_GTM_help()
-
+                                    qt_message = self.behaviours_manager.get_help() + self.get_GTM_phaseone_help()
+                                    self.level_loader.QTSpeakingPopupScreen(qt_message, self.rendered_graphics,
+                                                                            self.run,
+                                                                            self.background_colour)  # this is blocking
                                 else:
                                     # Phase 2, suggestive language
-                                    # TODO, REPLACE THIS WITH RANDOMISED HINTS
                                     self.command_manager.send_qt_command(emote="talking", gesture="explain_right")
-                                    qt_message = ("I will give you a clue... " + track_hint)  # QT reads out level's hint
+                                    qt_message = self.behaviours_manager.get_help() + self.get_GTM_phasetwo_help(track_mood)
                                     self.command_manager.send_qt_command(gesture="nod")
                                     self.level_loader.QTSpeakingPopupScreen(qt_message, self.rendered_graphics, self.run,
-                                                                            self.background_colour)  # this is blocking
-                            # if clicked button is incorrect --> direct to hint if they want one.
+                                                                            self.background_colour) # this is blocking
+
+                            # Even if answer is wrong, move on
                             elif button_pressed_id != track_mood:
-                                wrong_counter += 1  # how many times they have hit the wrong answer
+                                correct_answer = False
+                                answer_given = True
 
                             if song_interrupt:  # if we had paused the music, resume it
                                 self.sound_manager.unpause()
                                 song_interrupt = False
+
+
 
                     # Check if the user clicks the X
                     if event.type == self.pygame.QUIT:
@@ -596,6 +615,13 @@ class Guess_The_Mood_Game():
 
                 # Check if level won
                 if answer_given:
+                    # Record stats, and give message based on clear type
+                    play_time = rospy.get_time() - start_time
+                    clear_type = self.compute_clear_type(play_time, correct_answer, hints_given)
+                    qt_message = self.qt_reward(clear_type)
+                    self.level_loader.QTSpeakingPopupScreen(qt_message, self.rendered_graphics, self.run,
+                                                            self.background_colour)  # this is blocking
+                    # End level
                     self.level_complete = True
                     print("Ending level")
 
@@ -604,27 +630,24 @@ class Guess_The_Mood_Game():
                 print("You have quit the game.")
             else:
                 print("You completed the level.")
-            self.pygame.quit
 
-            # close out before end
-            # self.pygame.quit
             self.sound_manager.stop_track()
 
-            return self.run, play_time, wrong_counter, hints_given
+            return self.run, play_time, correct_answer, hints_given
 
     #################################################################Main####################################################################
 
-    def Main(self, difficulty="easy",
-             level=1):  # input what level and difficulty to play, the program will handle the rest
+    def Main(self, track_mood, track_name, ask_tut = True):  # input what level and difficulty to play, the program will handle the rest
 
         # Show starting screen
         self.run = self.level_loader.QTSpeakingScreen("Lets play Guess the mood!", self.run, self.background_colour)
 
-        # Ask if they want tutorial
-        self.run, tut = self.level_loader.yes_or_no_screen('Should I explain how to play "Guess The Mood" ?', self.run,
-                                                           self.background_colour)
-        if tut:
-            self.run = self.guided_tut(self.run)
+        if ask_tut:
+            # Ask if they want tutorial
+            self.run, tut = self.level_loader.yes_or_no_screen('Should I explain how to play "Guess The Mood" ?', self.run,
+                                                               self.background_colour)
+            if tut:
+                self.run = self.guided_tut(self.run)
 
         # Tap to continue screen to slow pacing
         self.run = self.level_loader.tap_to_continue(self.run, self.background_colour)
@@ -633,10 +656,12 @@ class Guess_The_Mood_Game():
         self.run = self.level_loader.countdown(3, self.run, self.background_colour, prelim_msg="Get ready to play!")
 
         # Run game code
-        self.run, play_time, wrong_counter, hints_given = self.play_level(self.run, difficulty, level)
+        self.run, play_time, correct_answer, hints_given = self.play_level(self.run, track_mood, track_name)
+
+        level_data = {"time_taken":play_time, }
 
         # Save user data
-        print(play_time, wrong_counter, hints_given)
+        return self.run, level_data
 
     ######################################################On execution#######################################################################
 
@@ -646,12 +671,12 @@ if __name__ == '__main__':
     # Initialise game
     rospy.init_node('guess_the_mood_game', anonymous=False)
     rospy.loginfo("Node launched successfully")
-    game_object = Guess_The_Mood_Game("Jwaad")
+    game_object = Guess_The_Mood_Game()
 
     # Run the game
     try:
-        game_object.Main()
+        game_object.Main("happy", "happy_3.wav")
     except(KeyboardInterrupt or rospy.exceptions.ROSInterruptException):
-        game_object.pygame.quit
-        SoundManager().stop_track()
+        game_object.pygame.quit()
+        game_object.sound_manager.stop_track()
         print("Audio may not be stopped due to interrupt")
