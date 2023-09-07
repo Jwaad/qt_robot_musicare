@@ -1130,8 +1130,8 @@ class QTManager():
         """Makes QT say something, then makes starts a timer until the speaking is done"""
         timer_len = len(text) * self.time_per_char
         timer_id = "QT_SAY"
-        self.robo_timer.CreateTimer(timer_id, timer_len)  # Creates timer with ID 1 for 8s
-        self.send_qt_command(speech=text)  # Have qt say the text
+        self.robo_timer.CreateTimer(timer_id, timer_len)  # Creates timer with ID QT_SAY
+        self.send_qt_command(speech=text)  # Have QT say the text
         return timer_id
 
     def qt_gesture(self, req_gesture):
