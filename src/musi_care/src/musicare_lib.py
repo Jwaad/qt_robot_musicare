@@ -1034,14 +1034,13 @@ class SoundManager():
 class QTManager():
     """Handles sending communication to robot """
 
-    def __init__(self, levels = ""):
+    def __init__(self, levels = None):
         """
         You can pass in levels which is the levels_loader class. this is a requirement if you want to use
         qt_say_blocking with a blank screen
-
         """
         self.robo_timer = TimeFunctions()
-        self.time_per_word = 0.09
+        self.time_per_char = 0.12
         self.right_arm_pos_pub = rospy.Publisher('/qt_robot/right_arm_position/command', Float64MultiArray,
                                                  queue_size=10)
         self.left_arm_pos_pub = rospy.Publisher('/qt_robot/left_arm_position/command', Float64MultiArray,
@@ -1084,26 +1083,33 @@ class QTManager():
         if we want to use multiple functions of QT at once and dont care about tracking time taken,
         we should use this method instead of the others
         """
+        #If any command fails, send false
+        command_status = []
         if speech != None:  # do qt_speak
             # print("sending speech req")
             rospy.wait_for_service('/qt_command_service')
             command_controller = rospy.ServiceProxy('/qt_command_service', qt_command)
             command_complete = command_controller("tts", speech, command_blocking)
-            return command_complete
+            command_status.append(command_complete)
         if gesture != None:  # do qt_speak
             rospy.wait_for_service('/qt_command_service')
             command_controller = rospy.ServiceProxy('/qt_command_service', qt_command)
             command_complete = command_controller("gesture", gesture, command_blocking)
-            return command_complete
+            command_status.append(command_complete)
         if emote != None:  # do qt_speak
             rospy.wait_for_service('/qt_command_service')
             command_controller = rospy.ServiceProxy('/qt_command_service', qt_command)
             command_complete = command_controller("emote", emote, command_blocking)
-            return command_complete
+            command_status.append(command_complete)
+
+        success = True
+        if False in command_status:
+            success = False
+        return success
 
     def qt_say_blocking(self, text, black_screen = False):
         """Makes QT say something, then makes you wait until the speaking is done"""
-        timer_len = len(text) * self.time_per_word
+        timer_len = len(text) * self.time_per_char
         self.qt_emote("talking") # Show talking face
         # Set timers
         self.robo_timer.CreateTimer("QT_SAY_BLOCKING", timer_len) # Timer for done speaking
@@ -1122,7 +1128,7 @@ class QTManager():
 
     def qt_say(self, text):
         """Makes QT say something, then makes starts a timer until the speaking is done"""
-        timer_len = len(text) * self.time_per_word
+        timer_len = len(text) * self.time_per_char
         timer_id = "QT_SAY"
         self.robo_timer.CreateTimer(timer_id, timer_len)  # Creates timer with ID 1 for 8s
         self.send_qt_command(speech=text)  # Have qt say the text

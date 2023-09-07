@@ -8,6 +8,7 @@ import sys
 import rospy
 import os
 import functools
+import random
 import math
 from random import randint
 from musi_care.msg import SongData
@@ -445,6 +446,19 @@ class Guess_The_Mood_Game():
 
         return self.run
 
+    def get_GTM_help(self, previous_saying=""):
+        """ Sentences QT will say when giving phase 1 help """
+        sayings = ["Try to focus on how this song makes you feel... If you want a better hint, click the clue button again",
+                   "How does the song make you feel? Does it make you feel happy? If you need another hint, click the clue button one more time",
+                   "Focus on how you are feeling... Does the song make you feel happy? Click the clue button again, for another hint" ]
+        ind = random.randint(0, len(sayings) - 1)
+        saying = sayings[ind]
+        # If saying is the same, as the one previously used, re-randomise
+        while saying == previous_saying:
+            ind = random.randint(0, len(sayings) - 1)
+            saying = sayings[ind]
+        return saying
+
     def play_level(self, run, difficulty, level_num):
         """Sequence plays the levels"""
         if self.run:  # Dont start this screen if the previous screen wanted to close out the game
@@ -550,9 +564,12 @@ class Guess_The_Mood_Game():
                                 # print("User has clicked unsure")
                                 hints_given += 1
                                 if hints_given == 1:
+                                    # Phase 1 hint, reminder of what to do
                                     self.command_manager.send_qt_command(emote="talking", gesture="explain_right")
-                                    qt_message = ("Okay! I'll help you out!")  # QT reads out level's hint
+                                    qt_message = self.behaviours_manager.get_help() + self.get_GTM_help()
+
                                 else:
+                                    # Phase 2, suggestive language
                                     # TODO, REPLACE THIS WITH RANDOMISED HINTS
                                     self.command_manager.send_qt_command(emote="talking", gesture="explain_right")
                                     qt_message = ("I will give you a clue... " + track_hint)  # QT reads out level's hint

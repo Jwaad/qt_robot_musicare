@@ -24,7 +24,7 @@ class GameManager():
         self.jwaadTestPkgName = "jwaad_test"
         self.ActiveNodes =[] # Store reference to all nodes that we start
         robot_connected = self.CheckRobotRunning()
-        rospy.set_param('/activity_status', 1) # Tell ros this node is starting variables
+        rospy.set_param('/activity_status', 1) # Tell ros this node is starting
         if robot_connected:
             self.StartRobotNodes()
         else:
@@ -57,9 +57,11 @@ class GameManager():
         self.pygame.display.set_caption("Game Selector")  # Label window
         self.renderer = Renderer(self.window, self.window_center)
 
-    def create_button(self, file_name, location, return_info={}, scale=1.0, unique_id="", text="",
+    def create_button(self, file_name, location, return_info=None, scale=1.0, unique_id="", text="",
                       on_click=None, on_release=None):
         """code creates button using the button_image class."""
+        if return_info is None:
+            return_info = {}
         this_file_path = os.path.dirname(__file__)
         relative_path = 'game_assets/graphics'
         file_path = os.path.join(this_file_path, relative_path, file_name)
