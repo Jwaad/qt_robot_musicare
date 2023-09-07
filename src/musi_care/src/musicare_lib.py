@@ -18,6 +18,7 @@ from musi_care.msg import SongData
 from musi_care.srv import sound_player_srv
 from musi_care.srv import qt_command
 import threading
+from qt_motors_controller.srv import set_control_mode, set_velocity
 from std_msgs.msg import Float64MultiArray
 import cv2
 
@@ -1044,11 +1045,11 @@ class QTManager():
         self.left_arm_pos_pub = rospy.Publisher('/qt_robot/left_arm_position/command', Float64MultiArray,
                                                 queue_size=10)
         self.level_loader = levels
+        self.talking_anim_time = 4 # How long the talking animation plays for (seconds)
 
     def init_robot(self, arm_vel):
         """Method to init robot parameters"""
         # Set control mode, incase they were changed beforehand
-
         rospy.wait_for_service('/qt_robot/motors/setControlMode')
         self.set_mode = rospy.ServiceProxy('/qt_robot/motors/setControlMode', set_control_mode)
         mode_changed = self.set_mode(["right_arm", "left_arm"], 1)
@@ -1111,7 +1112,7 @@ class QTManager():
         self.qt_emote("talking") # Show talking face
         # Set timers
         self.robo_timer.CreateTimer("QT_SAY_BLOCKING", timer_len) # Timer for done speaking
-        self.robo_timer.CreateTimer("EMOTE FINISHED", 3) # Timer for emote finished
+        self.robo_timer.CreateTimer("EMOTE FINISHED", self.talking_anim_time) # Timer for emote finished
         self.send_qt_command(speech=text)
         talking = True
         while talking and not rospy.is_shutdown():
@@ -1120,17 +1121,19 @@ class QTManager():
             if self.robo_timer.CheckTimer("EMOTE FINISHED"):
                 # Renew talking emote and start timer again
                 self.qt_emote("talking")
-                self.robo_timer.CreateTimer("EMOTE FINISHED", 3)  # Timer for emote finished
+                self.robo_timer.CreateTimer("EMOTE FINISHED", self.talking_anim_time)  # Timer for emote finished
             if self.robo_timer.CheckTimer("QT_SAY_BLOCKING"):  # if our timer is done
                 talking = False
 
     def qt_say(self, text):
         """Makes QT say something, then makes starts a timer until the speaking is done"""
+        # TODO add threading here, to keep repeating the emote, until the speach timer ends.
         timer_len = len(text) * self.time_per_char
         timer_id = "QT_SAY"
         self.robo_timer.CreateTimer(timer_id, timer_len)  # Creates timer with ID QT_SAY
         self.send_qt_command(speech=text)  # Have QT say the text
         return timer_id
+
 
     def qt_gesture(self, req_gesture):
         """Make QT do gesture, non-blocking """
