@@ -345,11 +345,10 @@ class StandardLevels():
             self.animation_manager.DrawTouchAnimation(self.window)  # also draw touches
             self.pygame.display.update()  # Update all drawn objects
 
-    def QTSpeakingScreen(self, qt_say, run, background_colour, should_gesture=False, gesture="explain_right", rand_gest = True):
+    def QTSpeakingScreen(self, qt_say, run, background_colour, should_gesture=False, gesture="explain_right", rand_gest = True, on_screen_text = "Please listen to QT robot"):
         """Method displays background and text in centre"""
-        text_display = "Please listen to QT robot"
 
-        if run:  # Dont start this screen if the previous screen wanted to close out the game
+        if run:  # Don't start this screen if the previous screen wanted to close out the game
 
             self.command_manager.qt_emote("talking")  # show mouth moving
             speaking_timer_id = self.command_manager.qt_say(
@@ -365,15 +364,14 @@ class StandardLevels():
                     # Check if the user clicks the X
                     if event.type == self.pygame.QUIT:
                         return False
-                    elif (
-                            event.type == self.pygame.MOUSEBUTTONUP):  # on mouse release play animation to show where cursor is
+                    elif (event.type == self.pygame.MOUSEBUTTONUP):
                         mouse_pos = self.pygame.mouse.get_pos()
                         self.animation_manager.StartTouchAnimation(
                             mouse_pos)  # tell system to play animation when drawing
 
                 # Draw background and objects
                 self.renderer.DrawBackground(background_colour)
-                self.renderer.DrawTextCentered("Please listen to QT robot", font_size=70)
+                self.renderer.DrawTextCentered(on_screen_text, font_size=70)
                 self.animation_manager.DrawTouchAnimation(self.window)  # Also draw touches
                 self.pygame.display.update()  # Update all drawn objects
 
