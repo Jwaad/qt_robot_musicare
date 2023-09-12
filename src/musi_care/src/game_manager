@@ -125,6 +125,11 @@ class GameManager():
         for node in self.ActiveNodes:
             node.stop()
 
+        # END ROSCORE HERE, maybe?
+
+        print("Ending...")
+
+
     # Start a node and store the reference to it
     def StartNode(self, nodePackage, nodeName):
         node = roslaunch.core.Node(nodePackage, nodeName)
@@ -384,37 +389,61 @@ class GameManager():
             # Cap FPS (save resources)
             self.clock.tick(self.FPS)
 
+        return self.user_data
+
     def QTPreamble(self, user):
         name = user["name"]
 
         # If this is a new user act differently
-        if len(user["game_data"]) > 1:
+        if len(user["game_data"]) < 1:
             s_1 = "Hi {}! It's so nice to meet you!... My name is QT robot.".format(name)
-            s_2 = "Unfortunetly. I can not understand human language..."
+            s_2 = "Unfortunately. I can not understand human language..."
             s_3 = "If you want to interact with me, you will need to use the screen."
             s_4 = "Anyways! How are you?"
 
             dialogue = [s_1, s_2, s_3, s_4]
-            gestures = ["wave", ]
-            self.Levels.QTSpeakingScreen()
+            gestures = ["wave", "shake_head", "", "" ]
+            for i in range(0, len(dialogue)):
+                print(dialogue[i], gestures[i])
+                if gestures[i] == "":
+                    self.Levels.QTSpeakingScreen(dialogue[i], self.run, self.background_colour)
+                else:
+                    self.Levels.QTSpeakingScreen(dialogue[i], self.run, self.background_colour, should_gesture = True,
+                                                 gesture = gestures[i])
+                time.sleep(1) # Add 1s delay between sentences
+
+            # HOW ARE YOU SCREEN
+        else:
+            pass
+            # Randomised welcome back sayings, "i missed you", "hello again, it's been too long" etc
+            # Then how are you screen
 
 
 
+        """
         self.command_manager.send_qt_command(emote="talking", gesture="explain_right")
         qt_message = self.behaviours_manager.get_help() + self.get_GTM_phasetwo_help(track_mood)
         self.command_manager.send_qt_command(gesture="nod")
         self.level_loader.QTSpeakingPopupScreen(qt_message, self.rendered_graphics, self.run,
                                                 self.background_colour)  # This is blocking
+        """
 
     # Create GUI to control which level to play
     def Main(self):
+
+        # Load all users into memory
         self.LoadUserDatabase()
+
+        # use name and surname to get user data
         user = game_manager.LogInScreen()
+
+        # Wat QT should say to the returning or new user
         self.QTPreamble(user)
 
+        # Play levels
+        pass
 
         self.OnExit()
-        print("Ending...")
 
 
 if __name__ == '__main__':
