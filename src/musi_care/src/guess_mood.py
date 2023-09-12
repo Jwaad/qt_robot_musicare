@@ -379,7 +379,7 @@ class Guess_The_Mood_Game():
         # Lets try it now: listen to song --> this sounds happy to me. --> lets click "happy" --> highlight happy --> wait for press
         tut_graphics = {
             1: {"rect": None, "keys": [1, 2, 3, 4, 5],
-                "speech": "In this game, you will hear some music, and you need to select, weather it was happy, or sad! When you are ready for the next step,, tap the. Next.. button."},
+                "speech": "In this game, you will hear some music, and you need to select, whether it was happy, or sad! When you are ready for the next step,, tap the. Next.. button."},
             2: {"rect": (560, 30, 1790, 135), "keys": [1],
                 "speech": "This text at the top, will remind you of what you have to do."},
             3: {"rect": (615, 600, 1675, 800), "keys": [2, 3],
