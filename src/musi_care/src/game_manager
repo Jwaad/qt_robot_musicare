@@ -200,7 +200,7 @@ class GameManager():
         surname = string of last name
         DoB = string of Date of birth in format dd-mm-yy as integers. e.g: 01-01-99
         """
-        file_name = name[0] + surname[0] + DoB[-4:] + ".p"
+        file_name = name[0] + surname[0] + DoB + ".p"
 
         # Format data of new user
         data = {}
