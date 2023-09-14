@@ -141,14 +141,14 @@ def execute_command(data):
             rospy.loginfo("Motor velocity could not be changed.")
     #---ERROR HANDLING---
     else:
-        rospy.loginfo("WE MADE IT",action_type)
+        rospy.loginfo("WE MADE IT", action_type)
         rospy.loginfo("WARNING: An unknown action type ({}) was entered.".format(action_type)) # TODO Make this all fancy and yellow coloured
         #exit callback but dont close node (Maybe put a try in the "wait_for_command" and then an error handle here)
    
 
 def perform_command(message):
     "Callback response, it is really just to help the flow of the code, also handles tts."
-    if message.action_type == "tts":  #If we get a TTS request then handle it upfront, it need not be searched for.
+    if message.action_type == "tts":  # If we get a TTS request then handle it upfront, it need not be searched for.
         if message.action_blocking:
             rospy.wait_for_service('/qt_robot/speech/say')
             qt_speech = rospy.ServiceProxy('/qt_robot/speech/say', speech_say) #The Service Type / class: speech_say
