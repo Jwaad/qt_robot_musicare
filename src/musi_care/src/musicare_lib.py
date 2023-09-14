@@ -1053,19 +1053,20 @@ class SoundManager():
 class QTManager():
     """Handles sending communication to robot """
 
-    def __init__(self, levels = None):
+    def __init__(self, levels = None, debug = False):
         """
         You can pass in levels which is the levels_loader class. this is a requirement if you want to use
         qt_say_blocking with a blank screen
         """
         self.robo_timer = TimeFunctions()
-        self.time_per_char = 0.12
+        self.time_per_char = 0.14
         self.right_arm_pos_pub = rospy.Publisher('/qt_robot/right_arm_position/command', Float64MultiArray,
                                                  queue_size=10)
         self.left_arm_pos_pub = rospy.Publisher('/qt_robot/left_arm_position/command', Float64MultiArray,
                                                 queue_size=10)
         self.level_loader = levels
         self.talking_anim_time = 4 # How long the talking animation plays for (seconds)
+        self.debug = debug
 
     def init_robot(self, arm_vel):
         """Method to init robot parameters"""
@@ -1128,6 +1129,8 @@ class QTManager():
 
     def qt_say_blocking(self, text, black_screen = False):
         """Makes QT say something, then makes you wait until the speaking is done"""
+        if self.debug:
+            print("QT: {}".format(text))
         timer_len = len(text) * self.time_per_char
         self.qt_emote("talking") # Show talking face
         # Set timers
@@ -1148,19 +1151,24 @@ class QTManager():
     def qt_say(self, text):
         """Makes QT say something, then makes starts a timer until the speaking is done"""
         # TODO add threading here, to keep repeating the emote, until the speach timer ends.
+        if self.debug:
+            print("QT: {}".format(text))
         timer_len = len(text) * self.time_per_char
         timer_id = "QT_SAY"
         self.robo_timer.CreateTimer(timer_id, timer_len)  # Creates timer with ID QT_SAY
         self.send_qt_command(speech=text)  # Have QT say the text
         return timer_id
 
-
     def qt_gesture(self, req_gesture):
         """Make QT do gesture, non-blocking """
+        if self.debug:
+            print("QT will do gesture {}".format(req_gesture))
         self.send_qt_command(gesture=req_gesture)
 
     def qt_emote(self, req_emote):
         """Make QT emote, non-blocking"""
+        if self.debug:
+            print("QT will do emote {}".format(req_emote))
         self.send_qt_command(emote=req_emote)
 
     def qt_actuate(self, motors_pos, command_blocking = False):
@@ -1171,6 +1179,8 @@ class QTManager():
         e.g:
         [ ["left_arm", "right_arm", "head"], [[0,0,0], [0,0,0], [0,0]] ]
         """
+        if self.debug:
+            print("Moving QT's {} joints to {}".format(motors_pos[0], motors_pos[1]))
         rospy.wait_for_service('/qt_command_service')
         command_controller = rospy.ServiceProxy('/qt_command_service', qt_command)
         command_complete = command_controller("actuation", motors_pos, command_blocking)
@@ -1178,6 +1188,8 @@ class QTManager():
 
     def move_right_arm(self, joint_angles, command_blocking = False):
         """ Move just right arm """
+        if self.debug:
+            print("Moving QT's right arm joint to ".format(joint_angles))
         rospy.wait_for_service('/qt_command_service')
         command_controller = rospy.ServiceProxy('/qt_command_service', qt_command)
         motor_pos = str( [["right_arm"], [joint_angles] ] )
@@ -1186,6 +1198,8 @@ class QTManager():
 
     def move_left_arm(self, joint_angles, command_blocking = False):
         """ Move left arm, but using coordinates for right arm, and flip them automatically"""
+        if self.debug:
+            print("Moving QT's left arm joint to ".format(joint_angles))
         rospy.wait_for_service('/qt_command_service')
         command_controller = rospy.ServiceProxy('/qt_command_service', qt_command)
         joint_angles[0] = -joint_angles[0]
