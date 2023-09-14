@@ -51,17 +51,17 @@ class General():
             print("attempting to open {0}".format(save_path))
             song_data = pickle.load(f)
 
-        easy = []
-        medium = []
-        hard = []
+        easy = {}
+        medium = {}
+        hard = {}
 
         for song_name, song_data in song_data.items():
             if song_data[game] == "easy":
-                easy.append({song_name:song_data})
+                easy[song_name] = song_data
             elif song_data[game] == "medium":
-                medium.append({song_name:song_data})
+                medium[song_name] = song_data
             elif song_data[game] == "hard":
-                hard.append({song_name:song_data})
+                hard[song_name] = song_data
 
         level_data = {"easy":easy, "medium":medium, "hard":hard}
         return level_data
