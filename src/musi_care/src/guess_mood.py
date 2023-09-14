@@ -41,50 +41,28 @@ class Guess_The_Mood_Game():
         my_pygame = pygame lib, should be initiated pygame lib. Similar to screen, can be parameter, to use a pre init
             pygame, instead of init our own
         """
-        """x = 145  # x pos of screen
-        y = 0  # y pos of screen
-        os.environ['SDL_VIDEO_WINDOW_POS'] = '%d,%d' % (x, y)  # move screen to x and y pos
-        self.previous_screen = ""  # used so we can go backwards a screen
-        self.next_screen = ""  # used to skip screen, low priority feature
-        self.pygame = pygame
-        self.pygame.init()  # start py engine
-        self.pygame.freetype.init()
-        res = pygame.display.Info()  # get our screen resolution
-        # work around
-        if reduce_screen:
-            self.window_x = res.current_w - 150  # Width of window -150 to account for the linux toolbar
-        else:
-            self.window_x = res.current_w
-        self.window_y = res.current_h  # Height of window
-        self.window_center = (int(self.window_x / 2), int(self.window_y / 2))
-        self.cen_x = self.window_center[0]
-        self.cen_y = self.window_center[1]
-        self.window = pygame.display.set_mode((self.window_x, self.window_y))  # Create window and set size
-        """
-        x = 145  # x pos of screen
-        y = 0  # y pos of screen
-        os.environ['SDL_VIDEO_WINDOW_POS'] = '%d,%d' % (x, y)  # move screen to x and y pos
-
+        self.debug = debug
         if my_pygame == None:
             self.pygame = pygame
             self.pygame.init()  # start py engine
             self.pygame.freetype.init()
         else:
             self.pygame = my_pygame
-        res = pygame.display.Info()  # get our screen resolution
         if screen == None:
+            x = 150  # x pos of screen
+            y = 0  # y pos of screen
+            os.environ['SDL_VIDEO_WINDOW_POS'] = '%d,%d' % (x, y)  # move screen to x and y pos
+            res = pygame.display.Info()  # get our screen resolution
+            self.window_x = res.current_w
             if reduce_screen:
-                self.window_x = res.current_w - 150  # Width of window -150 to account for the linux toolbar
-            else:
-                self.window_x = res.current_w
+                self.window_x -= x # Width of window -150 to account for the linux toolbar
             self.window_y = res.current_h  # Height of window
             self.window_center = (int(self.window_x / 2), int(self.window_y / 2))
-            self.cen_x = self.window_center[0]
-            self.cen_y = self.window_center[1]
             self.window = pygame.display.set_mode((self.window_x, self.window_y))  # Create window and set size
         else:
+            # TODO, this is currently dysfunctional, and throwing off scaling. fix with low priority
             self.window = screen
-            self.window_center = (int(self.window.get_height() / 2), int(self.window.get_width() / 2))
+            self.window_center = (self.window.get_height(), self.window.get_width())
         self.background_colour = (100, 100, 100)  # background grey by default
         self.pygame.display.set_caption("Guess The Mood!")  # Label window
         self.run = True
@@ -93,7 +71,7 @@ class Guess_The_Mood_Game():
         self.timer_manager = TimeFunctions()
         self.animation_manager = AnimationManager(self.pygame)
         self.sound_manager = SoundManager(self.music_filepath)  # load soundplayer with sound file path
-        self.command_manager = QTManager()
+        self.command_manager = QTManager(debug = self.debug)
         self.renderer = Renderer(self.window, self.window_center)
         self.behaviours_manager = Behaviours(self.pygame, self.music_filepath)
         self.level_loader = StandardLevels(self.window, self.window_center, self.pygame, self.music_filepath)
@@ -108,7 +86,6 @@ class Guess_The_Mood_Game():
         # self.sound_manager.volume_change(self.music_vol) # Set a default volume
         # self.set_robot_volume(qt_voice_vol) #TODO add this functionality
         self.t1 = 0  # t1 for FPS tracking
-        self.debug = debug
         if not self.debug:
             self.pygame.mouse.set_visible(False)  # set to false when not testing
 
@@ -267,11 +244,11 @@ class Guess_The_Mood_Game():
 
     def create_graphics(self):
         """Create the pygame objects that we will use """
-        self.sad_button = self.create_button("sad_button.png", (675, 650), scale=1.3, unique_id="sad")
-        self.happy_button = self.create_button("happy_button.png", (675, 1050), scale=1.3, unique_id="happy")
-        self.unsure_button = self.create_button("unsure_button.png", (850, 1450), scale=1, unique_id="unsure")
+        self.sad_button = self.create_button("sad_button.png", (625, 650), scale=1.3, unique_id="sad")
+        self.happy_button = self.create_button("happy_button.png", (625, 1050), scale=1.3, unique_id="happy")
+        self.unsure_button = self.create_button("unsure_button.png", (800, 1450), scale=1, unique_id="unsure")
         self.play_button = self.CreatePlayButton("pause_button.png", "play_button.png", "rewind_button.png",
-                                                 (self.cen_x - 175, 195), scale=1.5, on_play=self.sound_manager.unpause,
+                                                 (self.window_center[0] - 175, 195), scale=1.5, on_play=self.sound_manager.unpause,
                                                  on_pause=self.sound_manager.pause)  # create pause and play button
 
     def get_target_behaviour(self, key):
@@ -576,6 +553,12 @@ class Guess_The_Mood_Game():
                 # Start event handling
                 events = self.pygame.event.get()
 
+                # start checking if they're stuck after user has listened to the whole song once,
+                #if full_listen:
+                #    # TODO, check if QT is busy or not, before doing this.
+                # TODO CURRENTLY THIS IS COMPLETELY BROKEN. FIX FIX FIX
+                #    self.behaviours_manager.qt_reminder(events, music_playing=music_playing)
+
                 for event in events:
                     # reset / init variables
                     option_chosen = ""
@@ -585,11 +568,6 @@ class Guess_The_Mood_Game():
                         self.animation_manager.StartTouchAnimation(mouse_pos)
                     # Events for pause button this will also return if we're paused or not :
                     music_playing = (self.play_button.get_event(event, mouse_pos))
-
-                    # start checking if they're stuck after user has listened to the whole song once,
-                    if full_listen:
-                        # TODO, check if QT is busy or not, before doing this.
-                        self.behaviours_manager.qt_reminder(event, music_playing=music_playing)
 
                     # Check which button is pressed, if any.
                     for button in self.buttons[:-1]:  # For all buttons except the play_button
@@ -623,6 +601,7 @@ class Guess_The_Mood_Game():
                                     self.command_manager.send_qt_command(gesture="nod")
                                     self.level_loader.QTSpeakingPopupScreen(qt_message, self.rendered_graphics, self.run,
                                                                             self.background_colour) # this is blocking
+                                # TODO maybe add 3 phase, where if again clue = finish level as fail
 
                             # Even if answer is wrong, move on
                             elif button_pressed_id != track_mood:
