@@ -587,6 +587,7 @@ class Guess_The_Mood_Game():
                             # if clicked button is correct
                             if button_pressed_id == track_mood:
                                 # print("User has clicked the correct answer")
+                                correct_answer = True
                                 answer_given = True
 
                             # if clicked button is unsure --> give hint
