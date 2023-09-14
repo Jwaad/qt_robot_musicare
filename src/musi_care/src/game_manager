@@ -33,7 +33,10 @@ class GameManager():
         this_file_path = os.path.dirname(__file__)
         self.path_to_userdata = os.path.join(this_file_path, 'game_assets/data/user_data/')
         self.session_time = 15  # Time in minutes that sessions should last for. (this is the Min time)
+        self.session_name = "session_" # this should be appended with a number e.g: session_3
         self.session_data = {}
+        self.game_names = ["GTM", "FTS", "CTB", "SSC"]
+        self.this_session = [0, 0, 0, 0] # Keep record of which games have been played, and how many times (see above)
 
         # Init ros side
         rospy.init_node('GameManager', anonymous=False)
@@ -201,11 +204,12 @@ class GameManager():
 
         # Format data of new user
         data = {}
-        data["name"] = name
-        data["surname"] = surname
-        data["dob"] = DoB
-        data["blacklist"] = []
-        data["game_data"] = {}
+        data["name"] = name # first name
+        data["surname"] = surname # surnanme
+        data["dob"] = DoB # dob in format dd-mm-yyyy
+        data["blacklist"] = [] # songs which receive negative survey
+        data["song_preference"] = {}  #
+        data["game_data"] = {"difficulty": {"GTM":"easy", "FTS":"easy", "CTB":"easy", "SSC":"easy"} }
 
         # Get path and save
         file_path = os.path.join(self.path_to_userdata, file_name)
@@ -219,6 +223,26 @@ class GameManager():
         else:
             rospy.loginfo("User data not saved, user already exists.")
         return data
+
+    def SaveExistingUserData(self, user ={}):
+        """
+        Overwrite the save data of an existing user. Can specify user.
+        If user is not specified will assume there's a user in memory stored in "self.user_data"
+        """
+        if user == {} or user is None:
+            user = self.user_data
+
+        file_name = user["name"][0] + user["surname"][0] + user["dob"] + ".p"
+
+        # Get path and save
+        file_path = os.path.join(self.path_to_userdata, file_name)
+
+        # Save to file if it doesnt exist already
+        open(file_path, "w").close()
+        with open(file_path, "wb") as f:
+            pickle.dump(user, f)
+        rospy.loginfo("User data saved to {0}".format(file_path))
+        return user
 
     def SignupScreen(self):
 
@@ -414,6 +438,9 @@ class GameManager():
             # Cap FPS (save resources)
             self.clock.tick(self.FPS)
 
+        # Get what session this is
+        self.count_session()
+
         return self.user_data
 
     def mood_comment(self, mood_rating):
@@ -461,11 +488,82 @@ class GameManager():
             self.Levels.QTSpeakingScreen(message, self.run, self.background_colour, should_gesture=True,
                                      gesture=gesture)
 
+    def count_session(self):
+        """
+        Loop through data and figure out what session we're in
+        this sets self.session_name.
+        e.g: loop through data, and find there's 4 keys with string "session" in them.
+        then set session_name to session_5
+        """
+        game_data = self.user_data["game_data"]
+        session_num = 1 #start at 1, so we always 1 more than sessions total
+        for key in game_data.keys():
+            if "session_" in key:
+                session_num += 1
+
+        self.session_name += str(session_num)
+        return session_num
+
+    def count_games(self):
+        """
+        Method to return the correct string to save game data under.
+        Read current user data and returns a string of the next game_num
+        """
+        if self.session_name not in self.user_data["game_data"].keys():
+            return "game_1"
+        session_data = self.user_data["game_data"][self.session_name]
+
+        num_games = 1 # start at 1, to add 1 to result
+        for key in session_data.keys():
+            if "game_" in key:  # All keys in session should contain "game_", but just in case i add more later
+                num_games += 1
+
+        return "game_" + str(num_games)
+
+    def get_latest_data(self, session_name = "", game_name = ""):
+        """
+        Loop through a given session, and retreive data of most recent game. Can specify a game type.
+        Must be called after a user is already loaded into memory and stored in self.user_data
+        session_name = string, should be name of a previous session. if no name is given, then uses current session
+            (self.session_name)
+        game_name = string, if no game is given, returns the latest game of any type
+        If no prior level data exists, then return None
+        """
+        if session_name == "" or session_name == None:
+            session_name = self.session_name
+
+        if session_name not in self.user_data["game_data"].keys():
+            return None
+
+        session_data = self.user_data["game_data"][session_name]
+
+        lastest_game = 0
+        if len(session_data.keys()) > 1:
+            for key in session_data.keys():
+                if "game_" in key: # All keys in session should contain "game_", but just in case i add more later
+                    split_key = key.split("_")
+                    game_num = int(split_key[1]) # convert the number after the "_" into an int
+                    # If no game_name specified, just use int
+                    if game_name == "" or game_name == None:
+                        if game_num > lastest_game:
+                            lastest_game = game_num
+                    else:
+                        # otherwise, only compare if they're the same game type
+                        if session_data[key]["game_name"] == game_name:
+                            if game_num > lastest_game:
+                                lastest_game = game_num
+        # if no level data, or no specific game data return None
+        if lastest_game == 0:
+            return None
+        level_name = "game_" + str(lastest_game)
+        level_data = self.user_data["game_data"][session_name][level_name]
+        return level_data
+
     def QTPreamble(self, user):
         name = user["name"]
 
         # If this is a new user act differently
-        if len(user["game_data"]) < 1:
+        if self.session_name == "session_1":
             s_1 = "Hi {}! It's so nice to meet you!... My name is QT robot.".format(name)
             s_2 = "Unfortunately. I can not understand human language..."
             s_3 = "If you want to interact with me, you will need to use the screen."
@@ -486,15 +584,89 @@ class GameManager():
                                          gesture="wave")
 
         # Ask user how they are, save to data
+        #TODO  RANDOMISED WAYS TO ASK HOW ARE YOU
         mood_score = 5 # TODO HOW ARE YOU SCREEN
-        self.session_data["mood_pre"] = mood_score
+        self.user_data["game_data"][self.session_name]["mood_pre"] = mood_score
 
         # QT should comment based on their mood e.g: "Oh, hopefully these games cheer you up"
         self.mood_comment(mood_score)
 
         # introduce the start of the games
 
+    def QTPostamble(self, user = None):
+        """
+        Handle QT behaviour post session
+        """
+        if user is None:
+            user = self.user_data
+        name = user["name"]
 
+        # Use a randomised greeting
+        # TODO randomised sayings of "that was so fun, im so excited for next week."
+        self.Levels.QTSpeakingScreen(self.behaviours_manager.get_greetings(), self.run, self.background_colour, should_gesture=True,
+                                     gesture="wave")
+
+        # Ask user how they are, save to data
+        #TODO  RANDOMISED WAYS TO ASK HOW ARE YOU
+        mood_score = 7 # TODO HOW ARE YOU SCREEN
+        self.user_data["game_data"][self.session_name]["mood_post"] = mood_score
+
+        # QT should comment based on their mood e.g: "Oh, hopefully these games cheer you up"
+        # TODO RANDOMISED, I'm HAPPY THAT YOUR MOOD WENT UP / THATS A SHAME THAT YOU STILL FEEL DOWN etc
+        self.mood_comment(mood_score)
+
+
+    def choose_game(self):
+        games = ["GTM"] # TEMP, LATER ON USE
+        # Should play random game until session time finish
+
+
+    def play_game(self, game_name, difficulty, play_tut):
+        """
+        Method to load and launch specified game at specified difficulty
+        game_name = string, GTM, FTS, CTB, SSC
+        difficulty = string, tut, easy, medium, hard
+        play_tut = bool, whether or not the game should ask if tut should be shown
+        """
+        performance = {}
+
+        # Play GTM
+        if game_name == "GTM":
+            # Init game
+            game = GTM(debug=self.debug)
+
+            # Load all game data
+            song_data = self.general_functions.Load_Song_Data("GTM")
+
+            # Choose random song from database, depending on difficulty specified
+            levels = song_data[difficulty] # load all songs and store relevant difficulty
+            # if they've played this game in this same session, pop the previous song from this list, to prevent repetition
+            prev_level = self.get_latest_data(game_name)
+            if prev_level is not None:
+                if prev_level["difficulty"] == difficulty: # prevents key error (dont pop an easy song from the med list)
+                    levels.pop(prev_level["song_title"])
+
+            i = random.randint(0, len(levels) - 1) # choose random one
+            song_title = list(levels.keys())[i]  # There's only 1 key, and it's the songs title
+            # Keep randomising til we play a non-blacklisted song
+            while song_title in self.user_data["blacklist"]:
+                i = random.randint(0, len(levels.keys()) - 1)  # choose random one
+                song_title = list(levels.keys())[i]  # There's only 1 key, and it's the songs title
+                levels.pop(i)  # remove song from level data, and re randomise
+                # If we've popped out all songs, just use the last 1 left
+                if len(levels) < 1:
+                    break
+
+            # Get out the required information to play game
+            level_data = levels[song_title]
+            mood = level_data["mood"]
+            file_name = level_data["file_name"]
+
+            # Play game
+            self.run, performance = game.Main(mood, file_name, play_tut)
+            performance["song_title"] = song_title
+
+        return performance
 
 
     # Create GUI to control which level to play
@@ -505,6 +677,7 @@ class GameManager():
 
         # use name and surname to get user data
         user = game_manager.LogInScreen()
+        self.user_data["game_data"][self.session_name] = {} # init session
 
         # What QT should say to the returning or new user
         #self.QTPreamble(user)
@@ -513,27 +686,26 @@ class GameManager():
         session_start = rospy.get_time()
 
         # Play levels
+        for x in range(0, 2):
+            game_num = self.count_games()
 
-        ### BELOW IS ALL TEMP, WILL GO INTO OWN METHOD LATER
+            game_name = "GTM"
+            difficulty = "easy"
+            play_tut = False
+            if difficulty == "easy":
+                play_tut = True
 
-        # Init game
-        game = GTM(debug=self.debug)
+            performance = self.play_game(game_name, difficulty, play_tut)
 
-        # Load game data
-        levels = self.general_functions.Load_Song_Data("GTM")
-
-        # Choose random from correct difficulty
-        easy_lvls = levels["easy"]
-        ind = random.randint(0, len(easy_lvls) - 1)
-        level_dict = easy_lvls[ind]
-        song_title = list(level_dict.keys())[0] # There's only 1 key, and it's the songs title
-        level_data = level_dict[song_title]
-        game.Main(level_data["mood"], track_name=level_data["file_name"])
-
-        ### ABOVE IS ALL TEMP, WILL GO INTO OWN METHOD LATER
+            # Add performance to data and save
+            self.user_data["game_data"][self.session_name][game_num] = performance
+            self.SaveExistingUserData()
 
         session_time = rospy.get_time() - session_start
         print(session_time)
+        print(self.user_data)
+
+        self.QTPostamble()
 
         # Close up shop
         self.OnExit()
