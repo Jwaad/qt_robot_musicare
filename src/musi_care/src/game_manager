@@ -14,6 +14,11 @@ from musicare_lib import AnimationManager
 from musicare_lib import InputBox
 from musicare_lib import StandardLevels
 from musicare_lib import Behaviours
+from musicare_lib import General
+from guess_mood import Guess_The_Mood_Game as GTM
+from fix_song import Fix_The_Song_Game as FTS
+from clap_beat import Clap_To_Beat_Game as CTB
+from simon_says_clap import Simon_Says_Clap_Game as SSC
 import time
 import glob
 
@@ -21,11 +26,23 @@ class GameManager():
 
     # On start: check if we are connected to robot and decide which nodes to run
     def __init__(self):
+        # Init vars
+        self.debug = True
+        self.run = True
+        self.path_to_music = "game_assets/music/"
+        this_file_path = os.path.dirname(__file__)
+        self.path_to_userdata = os.path.join(this_file_path, 'game_assets/data/user_data/')
+        self.session_time = 15  # Time in minutes that sessions should last for. (this is the Min time)
+        self.session_data = {}
+
+        # Init ros side
         rospy.init_node('GameManager', anonymous=False)
         self.PingNode = "/qt_motor"
         self.musicarePkgName = "musi_care"
         self.jwaadTestPkgName = "jwaad_test"
         self.ActiveNodes =[] # Store reference to all nodes that we start
+
+        # Check robot connected
         robot_connected = self.CheckRobotRunning()
         rospy.set_param('/activity_status', 1) # Tell ros this node is starting
         if robot_connected:
@@ -33,16 +50,18 @@ class GameManager():
         else:
             self.StartSimulatedRobotNodes()
         self.StartLaptopNodes()
+
+        # Init libraries / tool boxes
         self.InitPygame()
-        self.run = True
-        self.path_to_music = "game_assets/music/"
         self.animation_manager = AnimationManager(self.pygame)
         self.behaviours_manager = Behaviours(self.pygame, self.path_to_music)
-        self.Levels = StandardLevels(self.window, self.window_center, self.pygame, self.path_to_music)
-        this_file_path = os.path.dirname(__file__)
-        self.path_to_userdata = os.path.join(this_file_path, 'game_assets/data/user_data/')
-        self.session_time = 15 # Time in minutes that sessions should last for. (this is the Min time)
-        self.session_data = {}
+        self.general_functions = General()
+        self.Levels = StandardLevels(self.window, self.window_center, self.pygame, self.path_to_music, debug=self.debug)
+        self.renderer = Renderer(self.window, self.window_center)
+
+        # Hide cursor
+        if not self.debug:
+            self.pygame.mouse.set_visible(False)  # set to false when not testing
 
 
     def InitPygame(self):
@@ -52,18 +71,18 @@ class GameManager():
         self.pygame.freetype.init()
         self.FPS = 30
         self.clock = self.pygame.time.Clock()
-        res = pygame.display.Info()  # get our screen resolution
+        os.environ['SDL_VIDEO_WINDOW_POS'] = '%d,%d' % (150, 0)  # move screen to account for toolbar
         self.window_x = 2850
         self.window_y = 2000
-        #self.window_x = res.current_w - 150  # Width of window -150 to account for the linux toolbar
-        #self.window_y = res.current_h  # Height of window
+        # res = pygame.display.Info()  # get our screen resolution
+        # self.window_x = res.current_w - 150  # Width of window -150 to account for the linux toolbar
+        # self.window_y = res.current_h  # Height of window
         self.window_center = (int(self.window_x / 2), int(self.window_y / 2))
         self.cen_x = self.window_center[0]
         self.cen_y = self.window_center[1]
         self.window = pygame.display.set_mode((self.window_x, self.window_y))  # Create window and set size
         self.background_colour = (100, 100, 100)  # background Gray by default
-        self.pygame.display.set_caption("Game Selector")  # Label window
-        self.renderer = Renderer(self.window, self.window_center)
+        self.pygame.display.set_caption("MusiCare Cognitive Games with QT robot")  # Label window
 
     def create_button(self, file_name, location, return_info=None, scale=1.0, unique_id="", text="",
                       on_click=None, on_release=None):
@@ -130,8 +149,9 @@ class GameManager():
         for node in self.ActiveNodes:
             node.stop()
 
-        # END ROSCORE HERE, maybe?
+        rospy.set_param('/activity_status', 0)  # Tell ros this node is ended
 
+        # END ROSCORE HERE, maybe?
         print("Ending...")
 
 
@@ -411,7 +431,7 @@ class GameManager():
                        ]
             ind = random.randint(0, len(sayings) - 1)
             message = sayings[ind]
-            gesture = "congratulation" #TODO check if this is real gesture
+            gesture = "arms_up"
         # Negative rating
         elif mood_rating < neutral_rating:
             # "That's too bad" type message
@@ -452,9 +472,8 @@ class GameManager():
             s_4 = "Anyways!"
 
             dialogue = [s_1, s_2, s_3, s_4]
-            gestures = ["wave", "shake_head", "show_right", "" ]
+            gestures = ["wave", "shake_head", "explain_right", "" ]
             for i in range(0, len(dialogue)):
-                print(dialogue[i], gestures[i])
                 if gestures[i] == "":
                     self.Levels.QTSpeakingScreen(dialogue[i], self.run, self.background_colour)
                 else:
@@ -473,8 +492,8 @@ class GameManager():
         # QT should comment based on their mood e.g: "Oh, hopefully these games cheer you up"
         self.mood_comment(mood_score)
 
-
         # introduce the start of the games
+
 
 
 
@@ -488,13 +507,33 @@ class GameManager():
         user = game_manager.LogInScreen()
 
         # What QT should say to the returning or new user
-        self.QTPreamble(user)
+        #self.QTPreamble(user)
 
         # use session time to gauge how long to play for
         session_start = rospy.get_time()
 
         # Play levels
-        pass
+
+        ### BELOW IS ALL TEMP, WILL GO INTO OWN METHOD LATER
+
+        # Init game
+        game = GTM(debug=self.debug)
+
+        # Load game data
+        levels = self.general_functions.Load_Song_Data("GTM")
+
+        # Choose random from correct difficulty
+        easy_lvls = levels["easy"]
+        ind = random.randint(0, len(easy_lvls) - 1)
+        level_dict = easy_lvls[ind]
+        song_title = list(level_dict.keys())[0] # There's only 1 key, and it's the songs title
+        level_data = level_dict[song_title]
+        game.Main(level_data["mood"], track_name=level_data["file_name"])
+
+        ### ABOVE IS ALL TEMP, WILL GO INTO OWN METHOD LATER
+
+        session_time = rospy.get_time() - session_start
+        print(session_time)
 
         # Close up shop
         self.OnExit()
@@ -503,3 +542,24 @@ class GameManager():
 if __name__ == '__main__':
     game_manager = GameManager()
     game_manager.Main()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
