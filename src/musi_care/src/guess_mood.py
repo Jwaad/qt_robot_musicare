@@ -544,11 +544,6 @@ class Guess_The_Mood_Game():
                 # Start event handling
                 events = self.pygame.event.get()
 
-                # If the user has listened to the whole song once, start checking if they're stuck
-                if full_listen:
-                    # TODO, check if QT is busy or not, before doing this.
-                    self.behaviours_manager.qt_reminder(events, music_playing=music_playing)
-
                 for event in events:
                     # reset / init variables
                     option_chosen = ""
@@ -558,6 +553,11 @@ class Guess_The_Mood_Game():
                         self.animation_manager.StartTouchAnimation(mouse_pos)
                     # Events for pause button this will also return if we're paused or not :
                     music_playing = (self.play_button.get_event(event, mouse_pos))
+
+                    # start checking if they're stuck after user has listened to the whole song once,
+                    if full_listen:
+                        # TODO, check if QT is busy or not, before doing this.
+                        self.behaviours_manager.qt_reminder(event, music_playing=music_playing)
 
                     # Check which button is pressed, if any.
                     for button in self.buttons[:-1]:  # For all buttons except the play_button

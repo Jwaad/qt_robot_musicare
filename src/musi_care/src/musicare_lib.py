@@ -105,7 +105,7 @@ class Behaviours():
         self.paused = False
         self.speaking_timer_id = ""
 
-    def qt_reminder(self, events, music_playing=True, timeout_message=None):
+    def qt_reminder(self, event, music_playing=True, timeout_message=None):
         """If x seconds of no inputs pass, qt should pause music and say something"""
         if timeout_message == None:
             timeout_message = self.get_refocus()
@@ -122,12 +122,12 @@ class Behaviours():
                 self.talking = True
             self.speaking_timer_id = self.command_manager.qt_say(timeout_message)
         else:
-            for event in events:
-                if event.type == self.pygame.MOUSEBUTTONDOWN:
-                    print("starting timer")
-                    self.timer.CreateTimer(timer_id, timeout_time, verbose=False)  # restart timer
-                    self.talking = False
-
+            if event.type == self.pygame.MOUSEBUTTONDOWN:
+                print("starting timer")
+                self.timer.CreateTimer(timer_id, timeout_time, verbose=False)  # restart timer
+                self.talking = False
+                # TODO change this so instead of new timer each click, we save time at click.
+                #       and check if time from last click > timeout_time
         # check if we're still paused and if QT is still speaking
         if self.talking and music_playing:
             if self.command_manager.robo_timer.CheckTimer(self.speaking_timer_id):
