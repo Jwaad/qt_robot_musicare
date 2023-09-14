@@ -86,6 +86,7 @@ class Guess_The_Mood_Game():
         # self.sound_manager.volume_change(self.music_vol) # Set a default volume
         # self.set_robot_volume(qt_voice_vol) #TODO add this functionality
         self.t1 = 0  # t1 for FPS tracking
+        self.e_clear_time = 4 # amount of time after track ends, where you're still considered fast.
         if not self.debug:
             self.pygame.mouse.set_visible(False)  # set to false when not testing
 
@@ -285,6 +286,7 @@ class Guess_The_Mood_Game():
         if self.debug:
             self.renderer.DrawText(fps, (70, 50), font_size=30)  # draw fps
 
+
     def compute_clear_type(self, time_taken, correct_ans, hints_needed):
         """
         Compute clear type from performance
@@ -296,7 +298,7 @@ class Guess_The_Mood_Game():
         correct_ans = if they got the correct mood (boolean)
         hints_needed = how many times they hit the help button (integer)
         """
-        e_time = self.total_track_secs + 4 # Total track time + 4 seconds
+        e_time = self.total_track_secs + self.e_clear_time # Total track time + 4 seconds
         if time_taken < e_time and correct_ans == True and hints_needed < 1:
             return "e_clear"
         elif correct_ans == False or hints_needed >= 2 :
@@ -362,6 +364,9 @@ class Guess_The_Mood_Game():
             sayings = happy_sayings
         elif mood == "sad":
             sayings = sad_sayings
+        else:
+            sayings = happy_sayings
+            print("TODO ADD THE OTHER EMOTIONS SAYINGS")
         ind = random.randint(0, len(sayings) - 1)
         saying = sayings[ind]
         # If saying is the same, as the one previously used, re-randomise
@@ -528,6 +533,7 @@ class Guess_The_Mood_Game():
             correct_answer = False  # If the answer they gave was correct or not
             hints_given = 0  # How many hints they needed
             full_listen = False  # Tracks if user has heard full song
+            clear_type = "fail"
 
             # Main game loop
             while self.level_complete == False and not rospy.is_shutdown() and self.run:
@@ -612,8 +618,6 @@ class Guess_The_Mood_Game():
                                 self.sound_manager.unpause()
                                 song_interrupt = False
 
-
-
                     # Check if the user clicks the X
                     if event.type == self.pygame.QUIT:
                         self.run = False  # Stops the program entirely
@@ -643,13 +647,28 @@ class Guess_The_Mood_Game():
                 print("You completed the level.")
 
             self.sound_manager.stop_track()
-
-            return self.run, play_time, correct_answer, hints_given
+            mood_selected = button_pressed_id
+            e_clear_req = {"time_taken": self.total_track_secs + self.e_clear_time, "mood":track_mood}
+            performance ={"time_taken": play_time, "mood":mood_selected, "num_hints":hints_given}
+            level_data = {"game_name":"GTM", "clear_type":clear_type, "performance":performance, "e_clear_req": e_clear_req}
+            return self.run, level_data
 
     #################################################################Main####################################################################
 
     def Main(self, track_mood, track_name, ask_tut = True):  # input what level and difficulty to play, the program will handle the rest
+        """
+        Main loop of guess the mood.
+        Runs relevant build up screens, aswell as handles all the in game logic
+        track_mood = string, mood of the song that will be played in this level
+        track_name = string, file name of the song that will be played
+        ask_tut = bool, whether to ask if the tut should be played.
 
+        Returns:
+            self.run = bool, whether we tried to quit or not during the game
+            level_data, = {"performance":performance, "e_clear_req": e_clear_req}, dict, performamce = time taken,
+                mood chosen, hints needed. e_clear_req
+
+        """
         # Show starting screen
         self.run = self.level_loader.QTSpeakingScreen("Lets play Guess the mood!", self.run, self.background_colour)
 
@@ -667,9 +686,7 @@ class Guess_The_Mood_Game():
         self.run = self.level_loader.countdown(3, self.run, self.background_colour, prelim_msg="Get ready to play!")
 
         # Run game code
-        self.run, play_time, correct_answer, hints_given = self.play_level(self.run, track_mood, track_name)
-
-        level_data = {"time_taken":play_time, }
+        self.run, level_data = self.play_level(self.run, track_mood, track_name)
 
         # Save user data
         return self.run, level_data
