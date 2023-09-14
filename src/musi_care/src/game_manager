@@ -5,6 +5,7 @@ import rospy
 import roslaunch
 import rosnode
 import pickle
+import random
 import pygame
 import os
 from musicare_lib import Renderer
@@ -12,6 +13,7 @@ from musicare_lib import Button
 from musicare_lib import AnimationManager
 from musicare_lib import InputBox
 from musicare_lib import StandardLevels
+from musicare_lib import Behaviours
 import time
 import glob
 
@@ -33,11 +35,14 @@ class GameManager():
         self.StartLaptopNodes()
         self.InitPygame()
         self.run = True
-        self.animation_manager = AnimationManager(self.pygame)
         self.path_to_music = "game_assets/music/"
+        self.animation_manager = AnimationManager(self.pygame)
+        self.behaviours_manager = Behaviours(self.pygame, self.path_to_music)
         self.Levels = StandardLevels(self.window, self.window_center, self.pygame, self.path_to_music)
         this_file_path = os.path.dirname(__file__)
         self.path_to_userdata = os.path.join(this_file_path, 'game_assets/data/user_data/')
+        self.session_time = 15 # Time in minutes that sessions should last for. (this is the Min time)
+        self.session_data = {}
 
 
     def InitPygame(self):
@@ -391,6 +396,51 @@ class GameManager():
 
         return self.user_data
 
+    def mood_comment(self, mood_rating):
+        """ Using the mood of the user, robot should say something"""
+        # max_mood = 7 # the highest and happiest score possible.
+        neutral_rating = 3
+
+        # Positive rating
+        if mood_rating > neutral_rating:
+            # "Thats good" type message
+            sayings = ["Thats great news! Then lets get straight into playing!",
+                       "I'm so happy to hear that! Then.. lets play some games and have some fun!",
+                       "Thats perfect! Then we will enjoy the games even more!",
+                       "That makes me happy too! We're going to have so much fun playing these games!"
+                       ]
+            ind = random.randint(0, len(sayings) - 1)
+            message = sayings[ind]
+            gesture = "congratulation" #TODO check if this is real gesture
+        # Negative rating
+        elif mood_rating < neutral_rating:
+            # "That's too bad" type message
+            sayings = ["Oh... Thats too bad. Hopefully playing games will cheer you up!",
+                       "Oh... Thats too bad. Maybe playing with me can help a bit!",
+                       "I'm sorry to hear. Lets play some games! maybe that will make you feel happier",
+                       "Maybe playing these games will make you feel more cheerful!",
+                       "Oh no! Then, in that case. Hopefully i can cheer you up with the games we'll play!"
+                       ]
+            ind = random.randint(0, len(sayings) - 1)
+            message = sayings[ind]
+            gesture = "shake_head"
+        # Neutral rating
+        else:
+            # "oh? lets fix that" type message
+            sayings = ["Hmm, okay maybe playing games will make you feel livelier!",
+                       "Oh, okay. Then lets play games. Maybe you'll feel more cheerful after!",
+                       "okay. Then... Lets play some games. It might make you feel happier!"
+                       ]
+            ind = random.randint(0, len(sayings) - 1)
+            message = sayings[ind]
+            gesture = ""
+
+        if gesture == "":
+            self.Levels.QTSpeakingScreen(message, self.run, self.background_colour)
+        else:
+            self.Levels.QTSpeakingScreen(message, self.run, self.background_colour, should_gesture=True,
+                                     gesture=gesture)
+
     def QTPreamble(self, user):
         name = user["name"]
 
@@ -399,10 +449,10 @@ class GameManager():
             s_1 = "Hi {}! It's so nice to meet you!... My name is QT robot.".format(name)
             s_2 = "Unfortunately. I can not understand human language..."
             s_3 = "If you want to interact with me, you will need to use the screen."
-            s_4 = "Anyways! How are you?"
+            s_4 = "Anyways!"
 
             dialogue = [s_1, s_2, s_3, s_4]
-            gestures = ["wave", "shake_head", "", "" ]
+            gestures = ["wave", "shake_head", "show_right", "" ]
             for i in range(0, len(dialogue)):
                 print(dialogue[i], gestures[i])
                 if gestures[i] == "":
@@ -411,22 +461,22 @@ class GameManager():
                     self.Levels.QTSpeakingScreen(dialogue[i], self.run, self.background_colour, should_gesture = True,
                                                  gesture = gestures[i])
                 time.sleep(1) # Add 1s delay between sentences
-
-            # HOW ARE YOU SCREEN
         else:
-            pass
-            # Randomised welcome back sayings, "i missed you", "hello again, it's been too long" etc
-            # Then how are you screen
+            # Use a randomised greeting
+            self.Levels.QTSpeakingScreen(self.behaviours_manager.get_greetings(), self.run, self.background_colour, should_gesture=True,
+                                         gesture="wave")
+
+        # Ask user how they are, save to data
+        mood_score = 5 # TODO HOW ARE YOU SCREEN
+        self.session_data["mood_pre"] = mood_score
+
+        # QT should comment based on their mood e.g: "Oh, hopefully these games cheer you up"
+        self.mood_comment(mood_score)
 
 
+        # introduce the start of the games
 
-        """
-        self.command_manager.send_qt_command(emote="talking", gesture="explain_right")
-        qt_message = self.behaviours_manager.get_help() + self.get_GTM_phasetwo_help(track_mood)
-        self.command_manager.send_qt_command(gesture="nod")
-        self.level_loader.QTSpeakingPopupScreen(qt_message, self.rendered_graphics, self.run,
-                                                self.background_colour)  # This is blocking
-        """
+
 
     # Create GUI to control which level to play
     def Main(self):
@@ -437,12 +487,16 @@ class GameManager():
         # use name and surname to get user data
         user = game_manager.LogInScreen()
 
-        # Wat QT should say to the returning or new user
+        # What QT should say to the returning or new user
         self.QTPreamble(user)
+
+        # use session time to gauge how long to play for
+        session_start = rospy.get_time()
 
         # Play levels
         pass
 
+        # Close up shop
         self.OnExit()
 
 
