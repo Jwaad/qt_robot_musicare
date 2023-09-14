@@ -285,6 +285,26 @@ class Behaviours():
             ind = random.randint(0, len(sayings) - 1)
             saying = sayings[ind]
         return saying
+
+    def get_greetings(self, previous_saying=""):
+        """ This QT should say at the start of sessions 2 - n """
+        sayings = ["It's been so long... Hello again!",
+                   "Hey! I've missed you.",
+                   "It has been too long since I've seen you!",
+                   "Hello again, it feels like it's been forever since i've seen you.",
+                   "Hello again, lets have fun this week too!",
+                   "Are you ready to have fun? I am!",
+                   "Can you believe it's been so long since i have seen you?",
+                   "I am so happy to see you again!"
+                   ]
+        ind = random.randint(0, len(sayings) - 1)
+        saying = sayings[ind]
+        # If saying is the same, as the one previously used, re-randomise
+        while saying == previous_saying:
+            ind = random.randint(0, len(sayings) - 1)
+            saying = sayings[ind]
+        return saying
+
     
 #####################################################General Levels##################################################################
 
@@ -356,7 +376,7 @@ class StandardLevels():
                 qt_say)  # says text we give it, and starts an internal timer that we can check on
 
             qt_speaking = True  # used to tell us when to stop blocking
-            if should_gesture:
+            if should_gesture and not (gesture == "" or gesture == None):
                 self.command_manager.qt_gesture(gesture)
 
             while qt_speaking and not rospy.is_shutdown() and run:
