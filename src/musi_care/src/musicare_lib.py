@@ -105,7 +105,7 @@ class Behaviours():
         self.paused = False
         self.speaking_timer_id = ""
 
-    def qt_reminder(self, event, music_playing=True, timeout_message=None):
+    def qt_reminder(self, events, music_playing=True, timeout_message=None):
         """If x seconds of no inputs pass, qt should pause music and say something"""
         if timeout_message == None:
             timeout_message = self.get_refocus()
@@ -122,12 +122,13 @@ class Behaviours():
                 self.talking = True
             self.speaking_timer_id = self.command_manager.qt_say(timeout_message)
         else:
-            if event.type == self.pygame.MOUSEBUTTONDOWN:
-                print("starting timer")
-                self.timer.CreateTimer(timer_id, timeout_time, verbose=False)  # restart timer
-                self.talking = False
-                # TODO change this so instead of new timer each click, we save time at click.
-                #       and check if time from last click > timeout_time
+            for event in events:
+                if event.type == self.pygame.MOUSEBUTTONDOWN:
+                    print("starting timer")
+                    self.timer.CreateTimer(timer_id, timeout_time, verbose=False)  # restart timer
+                    self.talking = False
+                    # TODO change this so instead of new timer each click, we save time at click.
+                    #       and check if time from last click > timeout_time
         # check if we're still paused and if QT is still speaking
         if self.talking and music_playing:
             if self.command_manager.robo_timer.CheckTimer(self.speaking_timer_id):
@@ -311,13 +312,13 @@ class Behaviours():
 class StandardLevels():
     """Class to draw basic screens multiple games use, such as yes or no screen """
 
-    def __init__(self, window, window_center, pygame, path_to_music):
+    def __init__(self, window, window_center, pygame, path_to_music, debug = False):
         self.window = window
         self.window_center = window_center
         self.pygame = pygame
         self.renderer = Renderer(window, window_center)
         self.animation_manager = AnimationManager(pygame)
-        self.command_manager = QTManager()
+        self.command_manager = QTManager(debug = debug)
         self.sound_manager = SoundManager(path_to_music)
         self.timer = TimeFunctions()
 
@@ -760,12 +761,12 @@ class TextObject():
 
         # Get screen width
         res = pygame.display.Info()
-        screen_width = res.current_w - 150
+        screen_width = res.current_w - 150 # HARD CODED = BAD!!
         font = pygame.font.Font('freesansbold.ttf', self.font_size)
 
         # Loop through woods and wrap them
         lines = []
-        words = self.text.split()
+        words = self.text.split() # split string into words
         while len(words) > 0:
             # Get as many words as will fit within allowed_width
             line_words = []
@@ -1130,7 +1131,7 @@ class QTManager():
     def qt_say_blocking(self, text, black_screen = False):
         """Makes QT say something, then makes you wait until the speaking is done"""
         if self.debug:
-            print("QT: {}".format(text))
+            print("QT Say: {}".format(text))
         timer_len = len(text) * self.time_per_char
         self.qt_emote("talking") # Show talking face
         # Set timers
@@ -1152,7 +1153,7 @@ class QTManager():
         """Makes QT say something, then makes starts a timer until the speaking is done"""
         # TODO add threading here, to keep repeating the emote, until the speach timer ends.
         if self.debug:
-            print("QT: {}".format(text))
+            print("QT Say: {}".format(text))
         timer_len = len(text) * self.time_per_char
         timer_id = "QT_SAY"
         self.robo_timer.CreateTimer(timer_id, timer_len)  # Creates timer with ID QT_SAY
@@ -1162,13 +1163,13 @@ class QTManager():
     def qt_gesture(self, req_gesture):
         """Make QT do gesture, non-blocking """
         if self.debug:
-            print("QT will do gesture {}".format(req_gesture))
+            print("QT gesture: {}".format(req_gesture))
         self.send_qt_command(gesture=req_gesture)
 
     def qt_emote(self, req_emote):
         """Make QT emote, non-blocking"""
         if self.debug:
-            print("QT will do emote {}".format(req_emote))
+            print("QT emote: {}".format(req_emote))
         self.send_qt_command(emote=req_emote)
 
     def qt_actuate(self, motors_pos, command_blocking = False):
