@@ -630,6 +630,8 @@ class GameManager():
 
         # Get the data of the previous game played, in this session
         prev_game = self.get_latest_data(game_name = game_name)
+        if prev_game is None:
+            return
         prev_clear = prev_game["clear_type"]
 
         # If the clear type of this level and the previous are the same, increase or decrease or ignore
@@ -643,7 +645,10 @@ class GameManager():
                     self.user_data["game_data"]["difficulty"][game_name] = "hard"
                 elif current_difficulty == "easy":
                     self.user_data["game_data"]["difficulty"][game_name] = "medium"
-                # TODO QT SHOULD SAY SOMETHING HERE (get_next_difficulty)
+                # QT congratulatory message
+                self.Levels.QTSpeakingScreen(self.behaviours_manager.get_next_difficulty(), self.run, self.background_colour,
+                                             should_gesture=True,
+                                             gesture="arms_up")
                 return
             elif clear_type == "fail":
                 print("decreasing difficulty")
@@ -653,7 +658,6 @@ class GameManager():
                     self.user_data["game_data"]["difficulty"][game_name] = "easy"
                 elif current_difficulty == "hard":
                     self.user_data["game_data"]["difficulty"][game_name] = "medium"
-                # i dont think QT needs to say anything here
                 return
 
 
@@ -752,6 +756,27 @@ class GameManager():
 
         return performance
 
+    def data_printout(self, user):
+        """
+        Print out the data of the user in a nice formatted string
+        Recursively loops through dicts in the dict, and adds indentation
+        """
+        def add_data_to_string(mydict, string_data, loop_num):
+            indent = (loop_num * "    ")
+            for key in mydict.keys():
+                if type(mydict[key]) == dict:
+                    string_data += indent + str(key) + ":\n"
+                    string_data = add_data_to_string(mydict[key], string_data, loop_num + 1)
+                elif type(mydict[key]) == list:
+                    string_data += indent + str(key) + ": " + str(mydict[key]) + "\n"
+                else:
+                    string_data += indent + str(key) + ": " +  str(mydict[key]) + "\n"
+            return string_data
+
+        data = ""
+        print()
+        data = add_data_to_string(user, data, 0)
+        print(data)
 
     # Create GUI to control which level to play
     def Main(self):
@@ -761,7 +786,6 @@ class GameManager():
 
         # use name and surname to get user data
         self.LogInScreen()
-
         # Init the session
         self.user_data["game_data"][self.session_name] = {}
 
@@ -770,13 +794,14 @@ class GameManager():
 
         # uses user profile to select which games to play
         self.choose_game()
-        #print(self.user_data)
 
         # QT outro
         #self.QTPostamble()
 
         # Close up shop
         self.OnExit()
+
+        self.data_printout(self.user_data)
 
 
 if __name__ == '__main__':
