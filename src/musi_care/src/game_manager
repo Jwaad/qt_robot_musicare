@@ -621,12 +621,40 @@ class GameManager():
         to check if user should move up or down in difficulty or that game type
         2 E_clears in a row = move up
         2 fails in a row = move down
+        2 clears in a row = do nothing
         This must be called before the latest game data was saved
 
         game_name = string, GTM, FTS, CTB, SSC
         clear_type = string, e_clear, clear, fail
         """
 
+        # Get the data of the previous game played, in this session
+        prev_game = self.get_latest_data(game_name = game_name)
+        prev_clear = prev_game["clear_type"]
+
+        # If the clear type of this level and the previous are the same, increase or decrease or ignore
+        current_difficulty = self.user_data["game_data"]["difficulty"][game_name]
+        if prev_clear == clear_type:
+            if clear_type == "e_clear":
+                print("increasing difficulty")
+                if current_difficulty == "hard":
+                    return # if we cant get any harder, just return
+                elif current_difficulty == "medium":
+                    self.user_data["game_data"]["difficulty"][game_name] = "hard"
+                elif current_difficulty == "easy":
+                    self.user_data["game_data"]["difficulty"][game_name] = "medium"
+                # TODO QT SHOULD SAY SOMETHING HERE (get_next_difficulty)
+                return
+            elif clear_type == "fail":
+                print("decreasing difficulty")
+                if current_difficulty == "easy":
+                    return # if we cant get any easier, just return
+                if current_difficulty == "medium":
+                    self.user_data["game_data"]["difficulty"][game_name] = "easy"
+                elif current_difficulty == "hard":
+                    self.user_data["game_data"]["difficulty"][game_name] = "medium"
+                # i dont think QT needs to say anything here
+                return
 
 
     def choose_game(self):
@@ -642,10 +670,9 @@ class GameManager():
             # Keep track of what how many games we've played.
             game_num += 1
 
-            # Randomly select which game to play
+            # Populate new list of the games which have been played the least, and randomly select from that list
             min_value = min(this_session)
             selectable_games = []
-            # populate new list of the games which have been played the least, and randomly select from that list
             for i, x in enumerate(this_session):
                 if x == min_value:
                     selectable_games.append(i)
@@ -653,8 +680,6 @@ class GameManager():
                 selected_game_ind =  selectable_games[0]
             else:
                 selected_game_ind = random.choice(selectable_games)
-
-            print(selected_game_ind)
             game_name = self.games[selected_game_ind]
             this_session[selected_game_ind] += 1
 
