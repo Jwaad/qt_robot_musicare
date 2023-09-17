@@ -100,17 +100,6 @@ class GameManager():
                         text=text, on_click=on_click, on_release=on_release)
         return button
 
-    def CreateGameButtons(self):
-        """Archived"""
-        def temp():
-            print("text")
-
-        blank_button = "blank_button.png"
-        guess_mood_button = self.create_button(blank_button, (100, 200), return_info={}, text="Guess The Mood",
-                                               on_click=temp)
-        fix_song_button = self.create_button(blank_button, (100, 600), return_info={}, text="Fix The Song")
-        return [guess_mood_button, fix_song_button]
-
     # Check if the robot is connected, by calling nodes and seeing if we get a response
     def CheckRobotRunning(self):
         rospy.loginfo("Checking if robot is connected to laptop")
@@ -728,7 +717,6 @@ class GameManager():
 
             # Check if difficulty should increase or decrease
             clear_type = performance["clear_type"]
-            print("clear_type:", clear_type)  # TODO TEMP
             self.change_difficulty(game_name, clear_type)
 
             # Add performance to data and save
