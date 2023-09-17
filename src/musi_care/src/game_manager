@@ -32,11 +32,10 @@ class GameManager():
         self.path_to_music = "game_assets/music/"
         this_file_path = os.path.dirname(__file__)
         self.path_to_userdata = os.path.join(this_file_path, 'game_assets/data/user_data/')
-        self.session_time = 15  # Time in minutes that sessions should last for. (this is the Min time)
+        self.session_time = 1 * 60 # 15 * 60  # Time in seconds that sessions should last for. (Minimum time)
         self.session_name = "session_" # this should be appended with a number e.g: session_3
         self.session_data = {}
         self.game_names = ["GTM", "FTS", "CTB", "SSC"]
-        self.this_session = [0, 0, 0, 0] # Keep record of which games have been played, and how many times (see above)
 
         # Init ros side
         rospy.init_node('GameManager', anonymous=False)
@@ -616,9 +615,69 @@ class GameManager():
         self.mood_comment(mood_score)
 
 
+    def change_difficulty(self, game_name, clear_type):
+        """
+        Takes in game name and clear type, then checks through current user data,
+        to check if user should move up or down in difficulty or that game type
+        2 E_clears in a row = move up
+        2 fails in a row = move down
+        This must be called before the latest game data was saved
+
+        game_name = string, GTM, FTS, CTB, SSC
+        clear_type = string, e_clear, clear, fail
+        """
+
+
+
     def choose_game(self):
-        games = ["GTM"] # TEMP, LATER ON USE
-        # Should play random game until session time finish
+
+        this_session = [0, 0, 0, 0]  # Keep record of which games have been played, and how many times (see above)
+        self.games = ["GTM", "GTM", "GTM", "GTM" ] # TEMP, REMOVE LATER
+
+        play_time = 0
+        time_start = rospy.get_time()
+        game_num = 0
+        # Keep selecting games to be played until full time has passed
+        while play_time < (self.session_time):
+            # Keep track of what how many games we've played.
+            game_num += 1
+
+            # Randomly select which game to play
+            min_value = min(this_session)
+            selectable_games = []
+            # populate new list of the games which have been played the least, and randomly select from that list
+            for i, x in enumerate(this_session):
+                if x == min_value:
+                    selectable_games.append(i)
+            if len(selectable_games) == 1:
+                selected_game_ind =  selectable_games[0]
+            else:
+                selected_game_ind = random.choice(selectable_games)
+
+            print(selected_game_ind)
+            game_name = self.games[selected_game_ind]
+            this_session[selected_game_ind] += 1
+
+            # Get difficulty from user profile
+            difficulty = self.user_data["game_data"]["difficulty"][game_name]
+            play_tut = False
+            if difficulty == "easy":
+                play_tut = True
+
+            # Play game
+            performance = self.play_game(game_name, difficulty, play_tut)
+
+            # Check if difficulty should increase or decrease
+            clear_type = performance["clear_type"]
+            self.change_difficulty(game_name, clear_type)
+
+            # Add performance to data and save
+            game_save_name = "games_" + str(game_num)
+            self.user_data["game_data"][self.session_name][game_save_name] = performance
+            self.SaveExistingUserData()
+
+            # update play time
+            play_time = rospy.get_time() - time_start
 
 
     def play_game(self, game_name, difficulty, play_tut):
@@ -676,36 +735,20 @@ class GameManager():
         self.LoadUserDatabase()
 
         # use name and surname to get user data
-        user = game_manager.LogInScreen()
-        self.user_data["game_data"][self.session_name] = {} # init session
+        self.LogInScreen()
+
+        # Init the session
+        self.user_data["game_data"][self.session_name] = {}
 
         # What QT should say to the returning or new user
         #self.QTPreamble(user)
 
-        # use session time to gauge how long to play for
-        session_start = rospy.get_time()
+        # uses user profile to select which games to play
+        self.choose_game()
+        #print(self.user_data)
 
-        # Play levels
-        for x in range(0, 2):
-            game_num = self.count_games()
-
-            game_name = "GTM"
-            difficulty = "easy"
-            play_tut = False
-            if difficulty == "easy":
-                play_tut = True
-
-            performance = self.play_game(game_name, difficulty, play_tut)
-
-            # Add performance to data and save
-            self.user_data["game_data"][self.session_name][game_num] = performance
-            self.SaveExistingUserData()
-
-        session_time = rospy.get_time() - session_start
-        print(session_time)
-        print(self.user_data)
-
-        self.QTPostamble()
+        # QT outro
+        #self.QTPostamble()
 
         # Close up shop
         self.OnExit()
