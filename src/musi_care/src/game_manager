@@ -36,6 +36,7 @@ class GameManager():
         self.session_name = "session_" # this should be appended with a number e.g: session_3
         self.session_data = {}
         self.game_names = ["GTM", "FTS", "CTB", "SSC"]
+        self.prev_game = ""
 
         # Init ros side
         rospy.init_node('GameManager', anonymous=False)
@@ -345,7 +346,10 @@ class GameManager():
             self.clock.tick(self.FPS)
 
     def LogInScreen(self):
-        """ Use database, and check if user is inputting credentials we have seen before. """
+        """
+        Use database, and check if user is inputting credentials we have seen before.
+        Once a user is logged in, this method also sets "self.session_name" to the current number.
+        """
 
         # Input / text boxes
         name_box = InputBox(200, 600, 1000, 200, "First Name")
@@ -523,7 +527,7 @@ class GameManager():
         """
         Loop through a given session, and retreive data of most recent game. Can specify a game type.
         Must be called after a user is already loaded into memory and stored in self.user_data
-        session_name = string, should be name of a previous session. if no name is given, then uses current session
+        session_name = string, should be the name of a previous session. if no name is given, then uses current session
             (self.session_name)
         game_name = string, if no game is given, returns the latest game of any type
         If no prior level data exists, then return None
@@ -532,6 +536,7 @@ class GameManager():
             session_name = self.session_name
 
         if session_name not in self.user_data["game_data"].keys():
+            print("GLD: session data not found")
             return None
 
         session_data = self.user_data["game_data"][session_name]
@@ -539,6 +544,7 @@ class GameManager():
         lastest_game = 0
         if len(session_data.keys()) > 1:
             for key in session_data.keys():
+                print(key)
                 if "game_" in key: # All keys in session should contain "game_", but just in case i add more later
                     split_key = key.split("_")
                     game_num = int(split_key[1]) # convert the number after the "_" into an int
@@ -549,10 +555,12 @@ class GameManager():
                     else:
                         # otherwise, only compare if they're the same game type
                         if session_data[key]["game_name"] == game_name:
+                            print("Prev game found")
                             if game_num > lastest_game:
                                 lastest_game = game_num
         # if no level data, or no specific game data return None
         if lastest_game == 0:
+            print("GLD: No previous games found in session")
             return None
         level_name = "game_" + str(lastest_game)
         level_data = self.user_data["game_data"][session_name][level_name]
@@ -631,6 +639,7 @@ class GameManager():
         # Get the data of the previous game played, in this session
         prev_game = self.get_latest_data(game_name = game_name)
         if prev_game is None:
+            print("no previous game data, skipping")
             return
         prev_clear = prev_game["clear_type"]
 
@@ -694,6 +703,7 @@ class GameManager():
             else:
                 selected_game_ind = random.choice(selectable_games)
             game_name = self.games[selected_game_ind]
+            self.prev_game = game_name
             this_session[selected_game_ind] += 1
 
             # Get difficulty from user profile
@@ -710,7 +720,7 @@ class GameManager():
             self.change_difficulty(game_name, clear_type)
 
             # Add performance to data and save
-            game_save_name = "games_" + str(game_num)
+            game_save_name = "game_" + str(game_num)
             self.user_data["game_data"][self.session_name][game_save_name] = performance
             self.SaveExistingUserData()
 
@@ -738,7 +748,7 @@ class GameManager():
             # Choose random song from database, depending on difficulty specified
             levels = song_data[difficulty] # load all songs and store relevant difficulty
             # if they've played this game in this same session, pop the previous song from this list, to prevent repetition
-            prev_level = self.get_latest_data(game_name)
+            prev_level = self.get_latest_data(game_name = game_name)
             if prev_level is not None:
                 if prev_level["difficulty"] == difficulty: # prevents key error (dont pop an easy song from the med list)
                     levels.pop(prev_level["song_title"])
