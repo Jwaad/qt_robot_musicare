@@ -32,7 +32,7 @@ class GameManager():
         self.path_to_music = "game_assets/music/"
         this_file_path = os.path.dirname(__file__)
         self.path_to_userdata = os.path.join(this_file_path, 'game_assets/data/user_data/')
-        self.session_time = 1 * 60 # 15 * 60  # Time in seconds that sessions should last for. (Minimum time)
+        self.session_time = 0.1 * 60 # 15 * 60  # Time in seconds that sessions should last for. (Minimum time)
         self.session_name = "session_" # this should be appended with a number e.g: session_3
         self.session_data = {}
         self.game_names = ["GTM", "FTS", "CTB", "SSC"]
@@ -723,6 +723,16 @@ class GameManager():
             game_save_name = "game_" + str(game_num)
             self.user_data["game_data"][self.session_name][game_save_name] = performance
             self.SaveExistingUserData()
+
+            # Ask if they liked the song (if we haven't asked about this song before)
+            song_title = performance["song_title"]
+            if song_title not in self.user_data["song_preference"]:
+                self.run, song_rating = self.Levels.did_you_like_song(run = self.run, background_colour= self.background_colour)
+                self.user_data["song_preference"][song_title] = song_rating
+                # If negative score, black_list song
+                if song_rating < 3 :
+                    self.user_data["blacklist"].append(song_title)
+                self.SaveExistingUserData()
 
             # update play time
             play_time = rospy.get_time() - time_start
