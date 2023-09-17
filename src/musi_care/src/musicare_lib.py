@@ -276,7 +276,7 @@ class Behaviours():
 
     def get_next_difficulty(self, previous_saying=""):
         """ Sentences QT can say, before increasing difficulty """
-        sayings = ["You have done so well on those last games! I am going to mark it harder now, hehe",
+        sayings = ["You have done so well on those last games! I am going to make it harder now, hehe",
                    "Wow! I'm so impressed, you made such short work of those levels, the next level will have to be harder!"
                    ]
         ind = random.randint(0, len(sayings) - 1)
