@@ -662,9 +662,18 @@ class GameManager():
 
 
     def choose_game(self):
+        """
+        semi-randomly selects a game to play, from those added into "self.games"
+        randomly selects from the games that have been played least.
+        Also increases or decreases difficulty as needed and saves user data after each level
+        """
 
-        this_session = [0, 0, 0, 0]  # Keep record of which games have been played, and how many times (see above)
         self.games = ["GTM", "GTM", "GTM", "GTM" ] # TEMP, REMOVE LATER
+
+        # Populate a list of counters for each game type
+        this_session = []
+        for game in self.games:
+            this_session.append(0) # [0,0,0,0]
 
         play_time = 0
         time_start = rospy.get_time()
@@ -756,7 +765,7 @@ class GameManager():
 
         return performance
 
-    def data_printout(self, user):
+    def data_printout(self, user, save_to_file = False):
         """
         Print out the data of the user in a nice formatted string
         Recursively loops through dicts in the dict, and adds indentation
@@ -766,7 +775,7 @@ class GameManager():
             for key in mydict.keys():
                 if type(mydict[key]) == dict:
                     string_data += indent + str(key) + ":\n"
-                    string_data = add_data_to_string(mydict[key], string_data, loop_num + 1)
+                    string_data = add_data_to_string(mydict[key], string_data, loop_num + 1) # ITS REWIND TIME
                 elif type(mydict[key]) == list:
                     string_data += indent + str(key) + ": " + str(mydict[key]) + "\n"
                 else:
@@ -774,9 +783,18 @@ class GameManager():
             return string_data
 
         data = ""
-        print()
         data = add_data_to_string(user, data, 0)
-        print(data)
+
+        if save_to_file:
+            file_name = user["name"][0] + user["surname"][0] + user["dob"] + "_Readout.txt"
+            file_path = os.path.join(self.path_to_userdata, file_name)
+
+            with open(file_path, "w") as text_file:
+                text_file.write(data)
+            rospy.loginfo("Formatted readout, saved to {0}".format(file_path))
+        else:
+            print()
+            print(data)
 
     # Create GUI to control which level to play
     def Main(self):
@@ -801,7 +819,8 @@ class GameManager():
         # Close up shop
         self.OnExit()
 
-        self.data_printout(self.user_data)
+        # Save a copy of data, that's much easier to read for humes
+        self.data_printout(self.user_data, save_to_file = True)
 
 
 if __name__ == '__main__':

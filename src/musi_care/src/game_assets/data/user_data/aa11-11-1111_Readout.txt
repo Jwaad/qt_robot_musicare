@@ -1,0 +1,171 @@
+name: asd
+surname: asd
+dob: 11-11-1111
+blacklist: []
+song_preference:
+game_data:
+    difficulty:
+        GTM: easy
+        FTS: easy
+        CTB: easy
+        SSC: easy
+    session_1:
+        game_1:
+            game_name: GTM
+            clear_type: e_clear
+            performance:
+                time_taken: 1.4999799728393555
+                mood: sad
+                num_hints: 0
+            e_clear_req:
+                time_taken: 81.0
+                mood: sad
+            song_title: Don't let me down long
+        game_2:
+            game_name: GTM
+            clear_type: e_clear
+            performance:
+                time_taken: 2.8235764503479004
+                mood: sad
+                num_hints: 0
+            e_clear_req:
+                time_taken: 22.0
+                mood: sad
+            song_title: Don't let me down short
+    session_2:
+        game_1:
+            game_name: GTM
+            clear_type: fail
+            performance:
+                time_taken: 26.599432468414307
+                mood: happy
+                num_hints: 1
+            e_clear_req:
+                time_taken: 31.0
+                mood: sad
+            song_title: Could you be loved short
+        game_2:
+            game_name: GTM
+            clear_type: fail
+            performance:
+                time_taken: 2.9705560207366943
+                mood: happy
+                num_hints: 0
+            e_clear_req:
+                time_taken: 81.0
+                mood: sad
+            song_title: Don't let me down long
+    session_3:
+        games_1:
+            game_name: GTM
+            clear_type: e_clear
+            performance:
+                time_taken: 1.3327300548553467
+                mood: sad
+                num_hints: 0
+            e_clear_req:
+                time_taken: 24.015600204467773
+                mood: sad
+            song_title: Sad instrumental 1
+        games_2:
+            game_name: GTM
+            clear_type: e_clear
+            performance:
+                time_taken: 11.488806247711182
+                mood: happy
+                num_hints: 0
+            e_clear_req:
+                time_taken: 19.81278896331787
+                mood: happy
+            song_title: Happy instrumental 3
+        games_3:
+            game_name: GTM
+            clear_type: e_clear
+            performance:
+                time_taken: 21.888610124588013
+                mood: sad
+                num_hints: 0
+            e_clear_req:
+                time_taken: 22.0
+                mood: sad
+            song_title: Don't let me down short
+        games_4:
+            game_name: GTM
+            clear_type: fail
+            performance:
+                time_taken: 44.52799201011658
+                mood: happy
+                num_hints: 0
+            e_clear_req:
+                time_taken: 19.00009059906006
+                mood: sad
+            song_title: Happy instrumental 4
+    session_4:
+        games_1:
+            game_name: GTM
+            clear_type: e_clear
+            performance:
+                time_taken: 1.3645975589752197
+                mood: sad
+                num_hints: 0
+            e_clear_req:
+                time_taken: 22.0
+                mood: sad
+            song_title: Don't let me down short
+        games_2:
+            game_name: GTM
+            clear_type: e_clear
+            performance:
+                time_taken: 17.146944761276245
+                mood: sad
+                num_hints: 0
+            e_clear_req:
+                time_taken: 24.015600204467773
+                mood: sad
+            song_title: Sad instrumental 1
+    session_5:
+        games_1:
+            game_name: GTM
+            clear_type: e_clear
+            performance:
+                time_taken: 1.5124790668487549
+                mood: sad
+                num_hints: 0
+            e_clear_req:
+                time_taken: 22.0
+                mood: sad
+            song_title: Don't let me down short
+        games_2:
+            game_name: GTM
+            clear_type: e_clear
+            performance:
+                time_taken: 2.151294231414795
+                mood: happy
+                num_hints: 0
+            e_clear_req:
+                time_taken: 19.0
+                mood: happy
+            song_title: Happy instrumental 1
+        games_3:
+            game_name: GTM
+            clear_type: e_clear
+            performance:
+                time_taken: 1.1233694553375244
+                mood: sad
+                num_hints: 0
+            e_clear_req:
+                time_taken: 24.015600204467773
+                mood: sad
+            song_title: Sad instrumental 1
+    session_6:
+        games_1:
+            game_name: GTM
+            clear_type: fail
+            performance:
+                time_taken: 54.62606334686279
+                mood: happy
+                num_hints: 0
+            e_clear_req:
+                time_taken: 19.00009059906006
+                mood: sad
+            song_title: Happy instrumental 4
