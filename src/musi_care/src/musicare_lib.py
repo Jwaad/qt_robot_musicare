@@ -308,7 +308,24 @@ class Behaviours():
             saying = sayings[ind]
         return saying
 
-    
+    def get_how_was_song(self, previous_saying):
+        """ Different ways QT can ask if you liked the song """
+        sayings = ["Did you like the song?",
+                   "How much did you like that song?",
+                   "What do you think of the song you just heard?",
+                   "Did you enjoy that song?",
+                   "Tell me how much you liked that song",
+                   "Did you enjoy listening to that song?"
+                   ]
+        ind = random.randint(0, len(sayings) - 1)
+        saying = sayings[ind]
+        # If saying is the same, as the one previously used, re-randomise
+        while saying == previous_saying:
+            ind = random.randint(0, len(sayings) - 1)
+            saying = sayings[ind]
+        return saying
+
+
 #####################################################General Levels##################################################################
 
 class StandardLevels():
@@ -322,13 +339,77 @@ class StandardLevels():
         self.animation_manager = AnimationManager(pygame)
         self.command_manager = QTManager(debug = debug)
         self.sound_manager = SoundManager(path_to_music)
+        self.behaviour_manager = Behaviours(pygame, path_to_music)
         self.timer = TimeFunctions()
+        self.path_to_imgs = 'game_assets/graphics'
+        self.this_file_path = os.path.dirname(__file__)
+
+    def did_you_like_song(self, run = True, on_screen_text = "Did you like the song?", prev_dialogue = "", background_colour = (200, 200, 200)):
+        """ 
+            Displays 5 point emoji scale. EAch emoji is a clickable button, which has text underneath it,
+            aswell as a main question hovering at the top
+            returns "run", and a single number, 5 = loved it, 1 = hated it. 3 = neutral.
+        """
+
+        if run:  # Don't start this screen if the previous screen wanted to close out the game
+
+            # Ask how was the song
+            question = self.behaviour_manager.get_how_was_song(previous_saying=prev_dialogue)
+            self.command_manager.qt_emote("talking")  # show mouth moving
+            self.command_manager.qt_say(question)  # says text we give it, and starts an internal timer that we can check on
+            self.command_manager.qt_gesture("explain_right")
+
+            # Create emoji scale buttons
+            blank_button = os.path.join(self.this_file_path, self.path_to_imgs, "blank_button.png") # todo temp
+            loved_it_button = Button(blank_button, (0, 1000), self.pygame, scale=1, return_info=5)
+            liked_it_button = Button(blank_button, (250, 1000), self.pygame, scale=1, return_info=4)
+            neutral_button = Button(blank_button, (500, 1000), self.pygame, scale=1, return_info=3)
+            disliked_it_button = Button(blank_button, (750, 1000), self.pygame, scale=1, return_info=2)
+            hated_it_button = Button(blank_button, (1000, 1000), self.pygame, scale=1, return_info=1)
+            buttons = [loved_it_button, liked_it_button, neutral_button, disliked_it_button, hated_it_button]
+            
+            # Create labels for emotions
+            loved_it_text = TextObject(self.window,self.window_center, "Hated it", location= (0, 1300))
+            liked_it_text = TextObject(self.window,self.window_center, "Hated it", location= (250, 1300))
+            neutral_text = TextObject(self.window,self.window_center, "Hated it", location= (500, 1300))
+            disliked_it_text = TextObject(self.window,self.window_center, "Hated it", location= (750, 1300))
+            hated_it_text = TextObject(self.window,self.window_center, "Hated it", location= (1000, 1300))
+            text_objs = [loved_it_text, liked_it_text, neutral_text, disliked_it_text, hated_it_text]
+
+            chosen_emoji = False
+            # While loop until they click an emoji
+            while not chosen_emoji and not rospy.is_shutdown() and run:
+                # check for quit
+                for event in self.pygame.event.get():
+                    # Check if the user clicks the X
+                    if event.type == self.pygame.QUIT:
+                        run = False
+                        return run, -1
+                    mouse_pos = self.pygame.mouse.get_pos()
+                    self.animation_manager.StartTouchAnimation(mouse_pos)  # tell system to play animation when drawing
+                    # if any button is pressed, return it's value
+                    for button in buttons:
+                        pressed = button.get_event(event, mouse_pos)
+                        if pressed:
+                            chosen_emoji = True
+                            return run, button.get_info()
+
+                # Draw background and objects
+                self.renderer.DrawBackground(background_colour)
+                self.renderer.DrawTextCentered(on_screen_text, font_size=70,y=50)
+                for button in buttons:
+                    button.render(self.window)
+                for text in text_objs:
+                    text.render(self.window)
+                self.animation_manager.DrawTouchAnimation(self.window)  # Also draw touches
+                self.pygame.display.update()  # Update all drawn objects
+
 
     def yes_or_no_screen(self, text, run, background_colour, silent = False):
         """Screen for Yes or No questions"""
         # Variables
-        this_file_path = os.path.dirname(__file__)
-        path_to_imgs = 'game_assets/graphics'
+        this_file_path = self.this_file_path
+        path_to_imgs = self.path_to_imgs
         yes_img_path = os.path.join(this_file_path, path_to_imgs, "Yes_button.png")
         no_img_path = os.path.join(this_file_path, path_to_imgs, "No_button.png")
 
@@ -1370,7 +1451,7 @@ class Button():
     def set_info(self, info):
         self.return_info = info
 
-    def get_info(self, info):
+    def get_info(self):
         return self.return_info
 
     def get_rect(self):
