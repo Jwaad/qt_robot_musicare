@@ -545,7 +545,7 @@ class GameManager():
         session_data = self.user_data["game_data"][session_name]
 
         lastest_game = -10
-        if len(session_data.keys()) > 1:
+        if len(session_data.keys()) > 0:
             for key in session_data.keys():
                 if "game_" in key: # All keys in session should contain "game_", but just in case i add more later
                     split_key = key.split("_")
@@ -560,8 +560,6 @@ class GameManager():
                             #print("Prev game found")
                             if game_num > lastest_game:
                                 lastest_game = game_num
-                        else: # TODO TEMP
-                            print("made it here:", session_data[key]["game_name"], game_name, )
         # if no level data, or no specific game data return None
         if lastest_game < 1:
             print("GLD: No previous games found in session")
@@ -634,7 +632,7 @@ class GameManager():
         2 E_clears in a row = move up
         2 fails in a row = move down
         2 clears in a row = do nothing
-        This must be called before the latest game data was saved
+        This must be called before the latest game data was saved, or it will compare itself to itself
 
         game_name = string, GTM, FTS, CTB, SSC
         clear_type = string, e_clear, clear, fail
@@ -642,40 +640,45 @@ class GameManager():
 
         # Get the data of the previous game played, in this session
         prev_game = self.get_latest_data(game_name = game_name)
+
+        # Guard statement #1
         if prev_game is None:
             #print("no previous game data, skipping")
             return
-        prev_clear = prev_game["clear_type"]
 
-        # If the clear type of this level and the previous are the same, increase or decrease or ignore
+        # Guard statement #2
+        prev_clear = prev_game["clear_type"]
+        if prev_clear != clear_type:
+            return
+
+        # Increase or decrease difficulty
         current_difficulty = self.user_data["game_data"]["difficulty"][game_name]
-        if prev_clear == clear_type:
-            if clear_type == "clear":
-                return
-            elif clear_type == "fail":
-                if current_difficulty == "easy":
-                    print("difficulty already at lowest")
-                    return # if we cant get any easier, just return
-                print("decreasing difficulty")
-                if current_difficulty == "medium":
-                    self.user_data["game_data"]["difficulty"][game_name] = "easy"
-                elif current_difficulty == "hard":
-                    self.user_data["game_data"]["difficulty"][game_name] = "medium"
-                return
-            elif clear_type == "e_clear":
-                if current_difficulty == "hard":
-                    print("difficulty already at highest")
-                    return # if we cant get any harder, just return
-                print("increasing difficulty")
-                if current_difficulty == "medium":
-                    self.user_data["game_data"]["difficulty"][game_name] = "hard"
-                elif current_difficulty == "easy":
-                    self.user_data["game_data"]["difficulty"][game_name] = "medium"
-                # QT congratulatory message
-                self.Levels.QTSpeakingScreen(self.behaviours_manager.get_next_difficulty(), self.run, self.background_colour,
-                                             should_gesture=True,
-                                             gesture="arms_up")
-                return
+        if clear_type == "clear":
+            return
+        elif clear_type == "fail":
+            if current_difficulty == "easy":
+                print("difficulty already at lowest")
+                return # if we cant get any easier, just return
+            print("decreasing difficulty")
+            if current_difficulty == "medium":
+                self.user_data["game_data"]["difficulty"][game_name] = "easy"
+            elif current_difficulty == "hard":
+                self.user_data["game_data"]["difficulty"][game_name] = "medium"
+            return
+        elif clear_type == "e_clear":
+            if current_difficulty == "hard":
+                print("difficulty already at highest")
+                return # if we cant get any harder, just return
+            print("increasing difficulty")
+            if current_difficulty == "medium":
+                self.user_data["game_data"]["difficulty"][game_name] = "hard"
+            elif current_difficulty == "easy":
+                self.user_data["game_data"]["difficulty"][game_name] = "medium"
+            # QT congratulatory message
+            self.Levels.QTSpeakingScreen(self.behaviours_manager.get_next_difficulty(), self.run, self.background_colour,
+                                         should_gesture=True,
+                                         gesture="arms_up")
+            return
 
 
     def play_games(self):
@@ -725,6 +728,7 @@ class GameManager():
 
             # Check if difficulty should increase or decrease
             clear_type = performance["clear_type"]
+            print("clear_type:", clear_type)  # TODO TEMP
             self.change_difficulty(game_name, clear_type)
 
             # Add performance to data and save
