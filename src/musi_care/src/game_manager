@@ -144,6 +144,9 @@ class GameManager():
 
     # Run some code before we close out of this node (Ros does this automatically, but we do it again anyways, just incase)
     def OnExit(self):
+        # Save user data
+        self.SaveExistingUserData()
+
         # End pygame
         self.pygame.quit()
 
@@ -541,10 +544,9 @@ class GameManager():
 
         session_data = self.user_data["game_data"][session_name]
 
-        lastest_game = 0
+        lastest_game = -10
         if len(session_data.keys()) > 1:
             for key in session_data.keys():
-                print(key)
                 if "game_" in key: # All keys in session should contain "game_", but just in case i add more later
                     split_key = key.split("_")
                     game_num = int(split_key[1]) # convert the number after the "_" into an int
@@ -555,11 +557,13 @@ class GameManager():
                     else:
                         # otherwise, only compare if they're the same game type
                         if session_data[key]["game_name"] == game_name:
-                            print("Prev game found")
+                            #print("Prev game found")
                             if game_num > lastest_game:
                                 lastest_game = game_num
+                        else: # TODO TEMP
+                            print("made it here:", session_data[key]["game_name"], game_name, )
         # if no level data, or no specific game data return None
-        if lastest_game == 0:
+        if lastest_game < 1:
             print("GLD: No previous games found in session")
             return None
         level_name = "game_" + str(lastest_game)
@@ -639,18 +643,31 @@ class GameManager():
         # Get the data of the previous game played, in this session
         prev_game = self.get_latest_data(game_name = game_name)
         if prev_game is None:
-            print("no previous game data, skipping")
+            #print("no previous game data, skipping")
             return
         prev_clear = prev_game["clear_type"]
 
         # If the clear type of this level and the previous are the same, increase or decrease or ignore
         current_difficulty = self.user_data["game_data"]["difficulty"][game_name]
         if prev_clear == clear_type:
-            if clear_type == "e_clear":
-                print("increasing difficulty")
+            if clear_type == "clear":
+                return
+            elif clear_type == "fail":
+                if current_difficulty == "easy":
+                    print("difficulty already at lowest")
+                    return # if we cant get any easier, just return
+                print("decreasing difficulty")
+                if current_difficulty == "medium":
+                    self.user_data["game_data"]["difficulty"][game_name] = "easy"
+                elif current_difficulty == "hard":
+                    self.user_data["game_data"]["difficulty"][game_name] = "medium"
+                return
+            elif clear_type == "e_clear":
                 if current_difficulty == "hard":
+                    print("difficulty already at highest")
                     return # if we cant get any harder, just return
-                elif current_difficulty == "medium":
+                print("increasing difficulty")
+                if current_difficulty == "medium":
                     self.user_data["game_data"]["difficulty"][game_name] = "hard"
                 elif current_difficulty == "easy":
                     self.user_data["game_data"]["difficulty"][game_name] = "medium"
@@ -659,25 +676,16 @@ class GameManager():
                                              should_gesture=True,
                                              gesture="arms_up")
                 return
-            elif clear_type == "fail":
-                print("decreasing difficulty")
-                if current_difficulty == "easy":
-                    return # if we cant get any easier, just return
-                if current_difficulty == "medium":
-                    self.user_data["game_data"]["difficulty"][game_name] = "easy"
-                elif current_difficulty == "hard":
-                    self.user_data["game_data"]["difficulty"][game_name] = "medium"
-                return
 
 
-    def choose_game(self):
+    def play_games(self):
         """
         semi-randomly selects a game to play, from those added into "self.games"
         randomly selects from the games that have been played least.
         Also increases or decreases difficulty as needed and saves user data after each level
         """
 
-        self.games = ["GTM", "GTM", "GTM", "GTM" ] # TEMP, REMOVE LATER
+        self.games = ["GTM", "GTM", "GTM", "GTM" ] # TEMP, REMOVE LATER TODO
 
         # Populate a list of counters for each game type
         this_session = []
@@ -747,7 +755,7 @@ class GameManager():
 
             # Choose random song from database, depending on difficulty specified
             levels = song_data[difficulty] # load all songs and store relevant difficulty
-            # if they've played this game in this same session, pop the previous song from this list, to prevent repetition
+            # pop the previous song from this list, to prevent repetition
             prev_level = self.get_latest_data(game_name = game_name)
             if prev_level is not None:
                 if prev_level["difficulty"] == difficulty: # prevents key error (dont pop an easy song from the med list)
@@ -772,6 +780,7 @@ class GameManager():
             # Play game
             self.run, performance = game.Main(mood, file_name, play_tut)
             performance["song_title"] = song_title
+            performance["difficulty"] = difficulty
 
         return performance
 
@@ -821,7 +830,7 @@ class GameManager():
         #self.QTPreamble(user)
 
         # uses user profile to select which games to play
-        self.choose_game()
+        self.play_games()
 
         # QT outro
         #self.QTPostamble()
