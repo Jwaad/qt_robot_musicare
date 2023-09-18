@@ -671,7 +671,7 @@ class GameManager():
         run = self.Levels.QTSpeakingScreen(self.behaviours_manager.get_closing_remark(), self.run, self.background_colour, should_gesture=True,
                                      gesture="arms_up")
         # Say something like "i know i asked before, but"
-        run = self.Levels.QTSpeakingScreen(self.behaviours_manager.get_transition_to_question, self.run, self.background_colour)
+        run = self.Levels.QTSpeakingScreen(self.behaviours_manager.get_transition_to_question(), self.run, self.background_colour)
 
         # Ask user how they are, save to data
         run, mood_score = self.Levels.how_are_you(run=run, background_colour=self.background_colour)
@@ -830,12 +830,13 @@ class GameManager():
                 song_data = self.general_functions.Load_Song_Data("GTM")
 
                 # Choose random song from database, depending on difficulty specified
-                levels = song_data[difficulty] # load all songs and store relevant difficulty
+                levels = song_data[difficulty].copy() # load all songs and store relevant difficulty
                 # pop the previous song from this list, to prevent repetition
                 prev_level = self.get_latest_data(game_name = game_name)
                 if prev_level is not None:
                     if prev_level["difficulty"] == difficulty: # prevents key error (dont pop an easy song from the med list)
-                        levels.pop(prev_level["song_title"])
+                        if len(levels.keys()) > 1:
+                            levels.pop(prev_level["song_title"])
 
                 i = random.randint(0, len(levels) - 1) # choose random one
                 song_title = list(levels.keys())[i]  # There's only 1 key, and it's the songs title
@@ -843,13 +844,14 @@ class GameManager():
                 while song_title in self.user_data["blacklist"]:
                     i = random.randint(0, len(levels.keys()) - 1)  # choose random one
                     song_title = list(levels.keys())[i]  # There's only 1 key, and it's the songs title
-                    levels.pop(i)  # remove song from level data, and re randomise
+                    levels.pop(song_title)  # remove song from level data, and re randomise
                     # If we've popped out all songs, just use the last 1 left
                     if len(levels) < 1:
+                        print("All {} {} songs are black listed, using random one".format(difficulty, game_name))
                         break
 
                 # Get out the required information to play game
-                level_data = levels[song_title]
+                level_data = song_data[difficulty][song_title]
                 mood = level_data["mood"]
                 file_name = level_data["file_name"]
 

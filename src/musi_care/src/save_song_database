@@ -84,7 +84,7 @@ def SaveDatabase():
                     "first_beat": 0.0,
                     "mood": "sad",
                     "GTM": "easy",
-                    "FTS": "easy",
+                    "FTS": "medium",
                     "CTB": "hard",
                     "SSC": "hard"
                 },
@@ -131,7 +131,7 @@ def SaveDatabase():
                     "bpm": 76,
                     "first_beat": 0.0,
                     "mood": "sad",
-                    "GTM": "easy",
+                    "GTM": "hard",
                     "FTS": "easy",
                     "CTB": "easy",
                     "SSC": "easy"
