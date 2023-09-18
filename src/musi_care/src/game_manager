@@ -160,30 +160,31 @@ class GameManager():
         nodeRef = launch.launch(node)
         return nodeRef
 
-    def LoadUserDatabase(self):
+    def LoadUserDatabase(self, run = True):
         """ Load all users into memory, so we can  """
-        self.user_database = []
-        
-        users = []
-        # Get list of all users
-        users = glob.glob(self.path_to_userdata + "/*.p")
-        if users == []:
-            return self.user_database
-        for path in users:
-            user_data = {}
-            with open(path, "rb") as f:
-                print("attempting to open {0}".format(path))
-                user_data = pickle.load(f)
-            self.user_database.append(user_data)
+        if run:
+            self.user_database = []
 
-        # Also extract / update names, for log in screen
-        self.first_names = []
-        self.surnames = []
-        for user in self.user_database:
-            self.first_names.append(user["name"])
-            self.surnames.append(user["surname"])
+            users = []
+            # Get list of all users
+            users = glob.glob(self.path_to_userdata + "/*.p")
+            if users == []:
+                return self.user_database
+            for path in users:
+                user_data = {}
+                with open(path, "rb") as f:
+                    print("attempting to open {0}".format(path))
+                    user_data = pickle.load(f)
+                self.user_database.append(user_data)
 
-        return self.user_database
+            # Also extract / update names, for log in screen
+            self.first_names = []
+            self.surnames = []
+            for user in self.user_database:
+                self.first_names.append(user["name"])
+                self.surnames.append(user["surname"])
+
+        return run, self.user_database
 
     def SaveNewUser(self, name, surname, DoB):
         """
@@ -337,7 +338,7 @@ class GameManager():
             # Cap FPS (save resources)
             self.clock.tick(self.FPS)
 
-    def LogInScreen(self):
+    def LogInScreen(self, run = True):
         """
         Use database, and check if user is inputting credentials we have seen before.
         Once a user is logged in, this method also sets "self.session_name" to the current number.
@@ -358,7 +359,7 @@ class GameManager():
         log_in = False
         user_recognised = False
         correct_surname = "#}$"
-        while (not rospy.is_shutdown()) and (self.run) and not log_in:
+        while (not rospy.is_shutdown()) and run and not log_in:
 
             # Handle events
             mouse_pos = self.pygame.mouse.get_pos()
@@ -413,7 +414,7 @@ class GameManager():
 
                 # Check quit
                 if event.type == pygame.QUIT:
-                    self.run = False
+                    run = False
                     print("Quitting...")
 
             # Draw background
@@ -436,7 +437,7 @@ class GameManager():
         # Get what session this is
         self.count_session()
 
-        return self.user_data
+        return run, self.user_data
 
     def mood_comment(self, mood_rating):
         """ Using the mood of the user, robot should say something"""
@@ -557,39 +558,40 @@ class GameManager():
         level_data = self.user_data["game_data"][session_name][level_name]
         return level_data
 
-    def QTPreamble(self, user):
-        name = user["name"]
+    def QTPreamble(self, user, run = True):
+        if run:
+            name = user["name"]
 
-        # If this is a new user act differently
-        if self.session_name == "session_1":
-            s_1 = "Hi {}! It's so nice to meet you!... My name is QT robot.".format(name)
-            s_2 = "Unfortunately. I can not understand human language..."
-            s_3 = "If you want to interact with me, you will need to use the screen."
-            s_4 = "Anyways!"
+            # If this is a new user act differently
+            if self.session_name == "session_1":
+                s_1 = "Hi {}! It's so nice to meet you!... My name is QT robot.".format(name)
+                s_2 = "Unfortunately. I can not understand human language..."
+                s_3 = "If you want to interact with me, you will need to use the screen."
+                s_4 = "Anyways!"
 
-            dialogue = [s_1, s_2, s_3, s_4]
-            gestures = ["wave", "shake_head", "explain_right", "" ]
-            for i in range(0, len(dialogue)):
-                if gestures[i] == "":
-                    self.Levels.QTSpeakingScreen(dialogue[i], self.run, self.background_colour)
-                else:
-                    self.Levels.QTSpeakingScreen(dialogue[i], self.run, self.background_colour, should_gesture = True,
-                                                 gesture = gestures[i])
-                time.sleep(1) # Add 1s delay between sentences
-        else:
-            # Use a randomised greeting
-            self.Levels.QTSpeakingScreen(self.behaviours_manager.get_greetings(), self.run, self.background_colour, should_gesture=True,
-                                         gesture="wave")
+                dialogue = [s_1, s_2, s_3, s_4]
+                gestures = ["wave", "shake_head", "explain_right", "" ]
+                for i in range(0, len(dialogue)):
+                    if gestures[i] == "":
+                        self.Levels.QTSpeakingScreen(dialogue[i], self.run, self.background_colour)
+                    else:
+                        self.Levels.QTSpeakingScreen(dialogue[i], self.run, self.background_colour, should_gesture = True,
+                                                     gesture = gestures[i])
+                    time.sleep(1) # Add 1s delay between sentences
+            else:
+                # Use a randomised greeting
+                self.Levels.QTSpeakingScreen(self.behaviours_manager.get_greetings(), self.run, self.background_colour, should_gesture=True,
+                                             gesture="wave")
 
-        # Ask user how they are, save to data
-        #TODO  RANDOMISED WAYS TO ASK HOW ARE YOU
-        mood_score = 5 # TODO HOW ARE YOU SCREEN
-        self.user_data["game_data"][self.session_name]["mood_pre"] = mood_score
+            # Ask user how they are, save to data
+            #TODO  RANDOMISED WAYS TO ASK HOW ARE YOU
+            mood_score = 5 # TODO HOW ARE YOU SCREEN
+            self.user_data["game_data"][self.session_name]["mood_pre"] = mood_score
 
-        # QT should comment based on their mood e.g: "Oh, hopefully these games cheer you up"
-        self.mood_comment(mood_score)
+            # QT should comment based on their mood e.g: "Oh, hopefully these games cheer you up"
+            self.mood_comment(mood_score)
 
-        # introduce the start of the games
+            # introduce the start of the games
 
     def QTPostamble(self, user = None):
         """
@@ -670,7 +672,7 @@ class GameManager():
             return
 
 
-    def play_games(self):
+    def play_games(self, run = True):
         """
         semi-randomly selects a game to play, from those added into "self.games"
         randomly selects from the games that have been played least.
@@ -688,7 +690,7 @@ class GameManager():
         time_start = rospy.get_time()
         game_num = 0
         # Keep selecting games to be played until full time has passed
-        while play_time < (self.session_time):
+        while play_time < (self.session_time) and run:
             # Keep track of what how many games we've played.
             game_num += 1
 
@@ -713,7 +715,7 @@ class GameManager():
                 play_tut = True
 
             # Play game
-            performance = self.play_game(game_name, difficulty, play_tut)
+            run, performance = self.play_game(game_name, difficulty, play_tut)
 
             # Check if difficulty should increase or decrease
             clear_type = performance["clear_type"]
@@ -737,8 +739,10 @@ class GameManager():
             # update play time
             play_time = rospy.get_time() - time_start
 
+        return run
 
-    def play_game(self, game_name, difficulty, play_tut):
+
+    def play_game(self, game_name, difficulty, play_tut, run = True):
         """
         Method to load and launch specified game at specified difficulty
         game_name = string, GTM, FTS, CTB, SSC
@@ -746,45 +750,46 @@ class GameManager():
         play_tut = bool, whether or not the game should ask if tut should be shown
         """
         performance = {}
+        if run:
 
-        # Play GTM
-        if game_name == "GTM":
-            # Init game
-            game = GTM(debug=self.debug)
+            # Play GTM
+            if game_name == "GTM":
+                # Init game
+                game = GTM(debug=self.debug)
 
-            # Load all game data
-            song_data = self.general_functions.Load_Song_Data("GTM")
+                # Load all game data
+                song_data = self.general_functions.Load_Song_Data("GTM")
 
-            # Choose random song from database, depending on difficulty specified
-            levels = song_data[difficulty] # load all songs and store relevant difficulty
-            # pop the previous song from this list, to prevent repetition
-            prev_level = self.get_latest_data(game_name = game_name)
-            if prev_level is not None:
-                if prev_level["difficulty"] == difficulty: # prevents key error (dont pop an easy song from the med list)
-                    levels.pop(prev_level["song_title"])
+                # Choose random song from database, depending on difficulty specified
+                levels = song_data[difficulty] # load all songs and store relevant difficulty
+                # pop the previous song from this list, to prevent repetition
+                prev_level = self.get_latest_data(game_name = game_name)
+                if prev_level is not None:
+                    if prev_level["difficulty"] == difficulty: # prevents key error (dont pop an easy song from the med list)
+                        levels.pop(prev_level["song_title"])
 
-            i = random.randint(0, len(levels) - 1) # choose random one
-            song_title = list(levels.keys())[i]  # There's only 1 key, and it's the songs title
-            # Keep randomising til we play a non-blacklisted song
-            while song_title in self.user_data["blacklist"]:
-                i = random.randint(0, len(levels.keys()) - 1)  # choose random one
+                i = random.randint(0, len(levels) - 1) # choose random one
                 song_title = list(levels.keys())[i]  # There's only 1 key, and it's the songs title
-                levels.pop(i)  # remove song from level data, and re randomise
-                # If we've popped out all songs, just use the last 1 left
-                if len(levels) < 1:
-                    break
+                # Keep randomising til we play a non-blacklisted song
+                while song_title in self.user_data["blacklist"]:
+                    i = random.randint(0, len(levels.keys()) - 1)  # choose random one
+                    song_title = list(levels.keys())[i]  # There's only 1 key, and it's the songs title
+                    levels.pop(i)  # remove song from level data, and re randomise
+                    # If we've popped out all songs, just use the last 1 left
+                    if len(levels) < 1:
+                        break
 
-            # Get out the required information to play game
-            level_data = levels[song_title]
-            mood = level_data["mood"]
-            file_name = level_data["file_name"]
+                # Get out the required information to play game
+                level_data = levels[song_title]
+                mood = level_data["mood"]
+                file_name = level_data["file_name"]
 
-            # Play game
-            self.run, performance = game.Main(mood, file_name, play_tut)
-            performance["song_title"] = song_title
-            performance["difficulty"] = difficulty
+                # Play game
+                self.run, performance = game.Main(mood, file_name, play_tut)
+                performance["song_title"] = song_title
+                performance["difficulty"] = difficulty
 
-        return performance
+        return self.run, performance
 
     def data_printout(self, user, save_to_file = False):
         """
@@ -819,23 +824,26 @@ class GameManager():
 
     # Create GUI to control which level to play
     def Main(self):
+        self.run, song_rating = self.Levels.did_you_like_song(run=self.run, background_colour=self.background_colour)
 
         # Load all users into memory
-        self.LoadUserDatabase()
+        self.run = self.LoadUserDatabase()
 
         # use name and surname to get user data
-        self.LogInScreen()
+        self.run = self.LogInScreen()
+
         # Init the session
-        self.user_data["game_data"][self.session_name] = {}
+        if self.run:
+            self.user_data["game_data"][self.session_name] = {}
 
         # What QT should say to the returning or new user
-        #self.QTPreamble(user)
+        #self.run = self.QTPreamble(self.user_data)
 
         # uses user profile to select which games to play
-        self.play_games()
+        self.run = self.play_games()
 
         # QT outro
-        #self.QTPostamble()
+        #self.run = self.QTPostamble()
 
         # Close up shop
         self.OnExit()
