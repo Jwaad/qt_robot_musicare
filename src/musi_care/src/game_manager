@@ -35,7 +35,8 @@ class GameManager():
         self.session_time = 10 * 60 # 15 * 60  # Time in seconds that sessions should last for. (Minimum time)
         self.session_name = "session_" # this should be appended with a number e.g: session_3
         self.session_data = {}
-        self.games = ["GTM", "FTS", "CTB", "SSC"]
+        #self.games = ["GTM", "FTS", "CTB", "SSC"]
+        self.games = ["FTS"]
         self.prev_game = ""
 
         # Init ros side
@@ -809,7 +810,7 @@ class GameManager():
 
         return run
 
-    def get_random_song(self,game_name, difficulty ,run = True, prev_song = None):
+    def get_random_song(self,game_name, difficulty ,run = True, song_to_skip = None):
         """
         Gets random song from database depending on designated song name and difficulty inputted.
         Checks user black lists and the previous song, and keeps randomising until a applicable song is selected.
@@ -826,11 +827,13 @@ class GameManager():
             # make copy of databse so we can pop it
             levels = song_data[difficulty].copy()
 
-            # If prev song was not specified, find out what it was
-            if prev_song == "" or prev_song is None:
-                prev_level = self.get_latest_data(game_name=game_name)
+            # Pop a specific song out of our dict
+            if song_to_skip is not None:
+                if len(levels.keys()) > 1:
+                    levels.pop(song_to_skip)
 
-            # pop the previous song from this list, to prevent repetition
+            # Pop the previous song from this list, to prevent repetition
+            prev_level = self.get_latest_data(game_name=game_name)
             if prev_level is not None:
                 if prev_level["difficulty"] == difficulty:  # prevents key error (dont pop an easy song from the med list)
                     if len(levels.keys()) > 1:
@@ -892,12 +895,12 @@ class GameManager():
                     slices = 2 # cut song into 2 parts
                 elif difficulty == "medium":
                     # get another random song, that isn't the current one
-                    self.run, distract_song_data = self.get_random_song(game_name, difficulty, prev_song = song_title)
+                    self.run, distract_song_data, song_title = self.get_random_song(game_name, difficulty, song_to_skip = song_title)
                     distract_song = distract_song_data["file_name"]
                     slices = 2
                 else:
                     # get another random song, that isn't the current one
-                    self.run, distract_song_data = self.get_random_song(game_name, difficulty, prev_song=song_title)
+                    self.run, distract_song_data, song_title = self.get_random_song(game_name, difficulty, song_to_skip=song_title)
                     distract_song = distract_song_data["file_name"]
                     slices = 3  # cut song into 3 parts
                     # TODO add 4 slices here. Currently game isn't compatible with 4 slices
