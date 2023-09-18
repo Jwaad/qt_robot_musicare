@@ -355,7 +355,7 @@ class Behaviours():
             saying = sayings[ind]
         return saying
 
-    def get_how_was_song(self, previous_saying):
+    def get_how_was_song(self, previous_saying= ""):
         """ Different ways QT can ask if you liked the song """
         sayings = ["Did you like the song?",
                    "How much did you like that song?",
@@ -372,7 +372,7 @@ class Behaviours():
             saying = sayings[ind]
         return saying
     
-    def get_transition_to_question(self, previous_saying):
+    def get_transition_to_question(self, previous_saying= ""):
         """ Different ways QT can ask how are you"""
         sayings = ["I am really curious though...",
                    "I think i already asked, but,",
@@ -386,7 +386,7 @@ class Behaviours():
             ind = random.randint(0, len(sayings) - 1)
             saying = sayings[ind]
         return saying
-    def get_how_are_you(self, previous_saying):
+    def get_how_are_you(self, previous_saying= ""):
         """ Different ways QT can ask how are you"""
         sayings = ["How are you today?",
                    "How are you?",
@@ -513,15 +513,15 @@ class StandardLevels():
             title_text = TextObject(self.window, self.window_center, on_screen_text, location=(0, 400), font_size=150,
                                     cen_x=True)
 
-            loved_it_text = TextObject(self.window, self.window_center, "Great", location=(115, 1350),
+            loved_it_text = TextObject(self.window, self.window_center, "Great", location=(165, 1350),
                                        font_size=70)
-            liked_it_text = TextObject(self.window, self.window_center, "Good", location=(695, 1350),
+            liked_it_text = TextObject(self.window, self.window_center, "Good", location=(745, 1350),
                                        font_size=70)
-            neutral_text = TextObject(self.window, self.window_center, "Okay", location=(1230, 1350),
+            neutral_text = TextObject(self.window, self.window_center, "Okay", location=(1350, 1350),
                                       font_size=70)
-            disliked_it_text = TextObject(self.window, self.window_center, "Not Good", location=(1765, 1350),
+            disliked_it_text = TextObject(self.window, self.window_center, "Not Good", location=(1840, 1350),
                                           font_size=70)
-            hated_it_text = TextObject(self.window, self.window_center, "Terrible", location=(2450, 1350),
+            hated_it_text = TextObject(self.window, self.window_center, "Terrible", location=(2475, 1350),
                                        font_size=70)
             text_objs = [title_text, loved_it_text, liked_it_text, neutral_text, disliked_it_text, hated_it_text]
 
