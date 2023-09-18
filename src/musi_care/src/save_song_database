@@ -36,7 +36,7 @@ def SaveDatabase():
                     "first_beat": 0.1,
                     "mood": "sad",
                     "GTM": "medium",
-                    "FTS": "easy",
+                    "FTS": "medium",
                     "CTB": "easy",
                     "SSC": "easy"
                 },
@@ -47,8 +47,8 @@ def SaveDatabase():
                     "bpm": 95.0,
                     "first_beat": 2.8,
                     "mood": "happy",
-                    "GTM": "easy",
-                    "FTS": "easy",
+                    "GTM": "medium",
+                    "FTS": "medium",
                     "CTB": "easy",
                     "SSC": "easy"
                 },
@@ -59,7 +59,7 @@ def SaveDatabase():
                     "bpm": 60.0,
                     "first_beat": 0.1,
                     "mood": "happy",
-                    "GTM": "easy",
+                    "GTM": "hard",
                     "FTS": "hard",
                     "CTB": "easy",
                     "SSC": "easy"
@@ -107,7 +107,7 @@ def SaveDatabase():
                     "bpm": 100.0,
                     "first_beat": 0.0,
                     "mood": "sad",
-                    "GTM": "easy",
+                    "GTM": "hard",
                     "FTS": "hard",
                     "CTB": "easy",
                     "SSC": "easy"
