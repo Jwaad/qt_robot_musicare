@@ -422,7 +422,78 @@ class StandardLevels():
         self.path_to_imgs = 'game_assets/graphics'
         self.this_file_path = os.path.dirname(__file__)
 
-    def get_drum(self):
+    def get_drum(self, run = True, background_colour = (100,100,100)):
+        """ 
+        QT needs help putting his drum under him.
+        This method QT asks for assitsacnec and waits or you to but the drum under him
+        """
+        # init vars
+        arm_up_right = [20, -59.599998474121094, -40.70000076293945]  # motor pos for right arm to be in air
+        arm_up_left = [-20, -59.599998474121094, -40.70000076293945]  # motor pos for right arm to be in air
+        arm_right_msg = Float64MultiArray()
+        arm_left_msg = Float64MultiArray()
+        arm_right_msg.data = arm_up_right
+        arm_left_msg.data = arm_up_left
+        arms_up = '[["right_arm", "left_arm"], [{}, {}]]'.format(arm_up_right, arm_up_left)
+
+        sayings = ["Can you please help me reach my drum?",
+                   "Can you put my drum under me please.",
+                   "I need help. Please put my drum in my reach",
+                   "Help me grab my drum please!",
+                   "Can you please grab my drum", 
+                   "please, put my drum in my reach so we can keep playing!"
+                   ]
+        ind = random.randint(0, len(sayings) - 1)
+        saying = sayings[ind]
+
+        # QT say msg
+        self.command_manager.qt_say(saying)
+        self.command_manager.qt_emote("talking")
+        
+        # Have QT lift it's arms
+        self.command_manager.qt_actuate(arms_up)
+
+        # Ask i drums in place
+        self.yes_or_no_screen("Is QT's drum in place?", run, background_colour=background_colour, silent = True)
+
+    def put_away_drum(self, run=True, background_colour=(100, 100, 100)):
+        """
+        QT needs help putting his drum under him.
+        This method QT asks for assitsacnec and waits or you to but the drum under him
+        """
+        # init vars
+        arm_up_right = [20, -59.599998474121094, -40.70000076293945]  # motor pos for right arm to be in air
+        arm_up_left = [-20, -59.599998474121094, -40.70000076293945]  # motor pos for right arm to be in air
+        arm_right_msg = Float64MultiArray()
+        arm_left_msg = Float64MultiArray()
+        arm_right_msg.data = arm_up_right
+        arm_left_msg.data = arm_up_left
+        arms_up = '[["right_arm", "left_arm"], [{}, {}]]'.format(arm_up_right, arm_up_left)
+
+        sayings = ["Can you please help me put away my drum?",
+                   "Can you please put my drum away",
+                   "Please put my drum out of my reach",
+                   "Help me put away my drum please!",
+                   "Can you please remove my drum",
+                   "please, put my drum away so we can keep playing!",
+                   "My arms arent long enough to move my drum... Can you please help me"
+                   ]
+        ind = random.randint(0, len(sayings) - 1)
+        saying = sayings[ind]
+
+        # QT say msg
+        self.command_manager.qt_say(saying)
+        self.command_manager.qt_emote("talking")
+
+        # Have QT lift it's arms
+        self.command_manager.qt_actuate(arms_up)
+
+        # Ask i drums in place
+        self.yes_or_no_screen("Is QT's drum out of the way??", run, background_colour=background_colour, silent=True)
+
+        self.command_manager.qt_say("Thank you very much!")
+        self.command_manager.qt_emote("talking")
+        self.command_manager.qt_gesture("arms_up")
 
     def did_you_like_song(self, run = True, on_screen_text = "Did you like the song?", prev_dialogue = "", background_colour = (200, 200, 200)):
         """ 
