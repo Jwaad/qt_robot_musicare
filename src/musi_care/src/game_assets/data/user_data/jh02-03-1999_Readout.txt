@@ -1,0 +1,78 @@
+name: jwaad
+surname: hussain
+dob: 02-03-1999
+blacklist: ['Happy instrumental 3']
+song_preference:
+    Happy instrumental 3: 1
+    Happy instrumental 1: 5
+game_data:
+    difficulty:
+        GTM: easy
+        FTS: easy
+        CTB: easy
+        SSC: easy
+    session_1:
+        game_1:
+            game_name: GTM
+            clear_type: e_clear
+            performance:
+                time_taken: 2.18458890914917
+                mood: sad
+                num_hints: 0
+            e_clear_req:
+                time_taken: 81.0
+                mood: sad
+            song_title: Don't let me down long
+            difficulty: easy
+    session_2:
+        game_1:
+            game_name: GTM
+            clear_type: e_clear
+            performance:
+                time_taken: 7.98660945892334
+                mood: sad
+                num_hints: 0
+            e_clear_req:
+                time_taken: 31.0
+                mood: sad
+            song_title: Could you be loved short
+            difficulty: easy
+    session_3:
+        game_1:
+            game_name: GTM
+            clear_type: e_clear
+            performance:
+                time_taken: 2.439232587814331
+                mood: happy
+                num_hints: 0
+            e_clear_req:
+                time_taken: 19.0
+                mood: happy
+            song_title: Happy instrumental 1
+            difficulty: easy
+    session_4:
+        game_1:
+            game_name: GTM
+            clear_type: e_clear
+            performance:
+                time_taken: 1.9470815658569336
+                mood: happy
+                num_hints: 0
+            e_clear_req:
+                time_taken: 19.81278896331787
+                mood: happy
+            song_title: Happy instrumental 3
+            difficulty: easy
+    session_5:
+        game_1:
+            game_name: GTM
+            clear_type: e_clear
+            performance:
+                time_taken: 2.158513307571411
+                mood: happy
+                num_hints: 0
+            e_clear_req:
+                time_taken: 19.0
+                mood: happy
+            song_title: Happy instrumental 1
+            difficulty: easy
