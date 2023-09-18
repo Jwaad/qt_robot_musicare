@@ -861,7 +861,7 @@ class Fix_The_Song_Game():
         self.run = self.level_loader.tap_to_continue(self.run, self.background_colour)
         
         # Play the track and block
-        #self.play_music_blocking(correct_song)
+        self.play_music_blocking(correct_song)
         self.track_total_time = 15
 
         # Count into level to slow pacing
