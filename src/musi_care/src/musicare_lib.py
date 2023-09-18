@@ -261,6 +261,53 @@ class Behaviours():
             saying = sayings[ind]
         return saying
 
+    def get_start_games(self, previous_saying=""):
+        """ Different ways to move onto the next task"""
+        sayings = ["Then! Lets start playing some games!",
+                   "I can't wait anymore, lets start playing!",
+                   "Lets start playing. I hope you're ready!",
+                   "Okay. Now.. lets play!",
+                   "Get ready, i am going to start the games now!"
+                   ]
+        ind = random.randint(0, len(sayings) - 1)
+        saying = sayings[ind]
+        # If saying is the same, as the one previously used, re-randomise
+        while saying == previous_saying:
+            ind = random.randint(0, len(sayings) - 1)
+            saying = sayings[ind]
+        return saying
+
+    def get_closing_remark(self, previous_saying=""):
+        """ Sentences QT can say, before giving a hint """
+        sayings = ["We are all done with the games today. That was fun!",
+                   "Phew, We're done for today. That was so much fun",
+                   "We have finished... I had a great time playing today.",
+                   "That was really fun. We're all out of games for today",
+                   "We're done for the day. I enjoyed myself so much!"]
+        ind = random.randint(0, len(sayings) - 1)
+        saying = sayings[ind]
+        # If saying is the same, as the one previously used, re-randomise
+        while saying == previous_saying:
+            ind = random.randint(0, len(sayings) - 1)
+            saying = sayings[ind]
+        return saying
+
+    def get_goodbye(self, previous_saying=""):
+        """ Sentences QT can say, before giving a hint """
+        sayings = ["I had so much fun today! I look forward to next week",
+                   "I wish we could play forever, but i have to rest now. See you next week !",
+                   "I really enjoyed hanging out with you! I can wait to see you next week!",
+                   "Bye Bye. I'm really excited to see you next week",
+                   "Goodbye for now! See you next week!"
+                   ]
+        ind = random.randint(0, len(sayings) - 1)
+        saying = sayings[ind]
+        # If saying is the same, as the one previously used, re-randomise
+        while saying == previous_saying:
+            ind = random.randint(0, len(sayings) - 1)
+            saying = sayings[ind]
+        return saying
+
     def get_help(self, previous_saying=""):
         """ Sentences QT can say, before giving a hint """
         sayings = ["Okay! I will try my best to help!",
@@ -324,7 +371,38 @@ class Behaviours():
             ind = random.randint(0, len(sayings) - 1)
             saying = sayings[ind]
         return saying
-
+    
+    def get_transition_to_question(self, previous_saying):
+        """ Different ways QT can ask how are you"""
+        sayings = ["I am really curious though...",
+                   "I think i already asked, but,",
+                   "I know i've asked this before, but...",
+                   "I really want to know",
+                   ]
+        ind = random.randint(0, len(sayings) - 1)
+        saying = sayings[ind]
+        # If saying is the same, as the one previously used, re-randomise
+        while saying == previous_saying:
+            ind = random.randint(0, len(sayings) - 1)
+            saying = sayings[ind]
+        return saying
+    def get_how_are_you(self, previous_saying):
+        """ Different ways QT can ask how are you"""
+        sayings = ["How are you today?",
+                   "How are you?",
+                   "How are you doing today?",
+                   "How have you been?",
+                   "How do you feel today",
+                   "Please tell me how you are feeling today",
+                   "Tell me how you feel today"
+                   ]
+        ind = random.randint(0, len(sayings) - 1)
+        saying = sayings[ind]
+        # If saying is the same, as the one previously used, re-randomise
+        while saying == previous_saying:
+            ind = random.randint(0, len(sayings) - 1)
+            saying = sayings[ind]
+        return saying
 
 #####################################################General Levels##################################################################
 
@@ -405,7 +483,76 @@ class StandardLevels():
                 self.pygame.display.update()  # Update all drawn objects
             return False, -1 # impossible to reach here
 
+    def how_are_you(self, run=True, on_screen_text="How are you today?", prev_dialogue="",
+                          background_colour=(200, 200, 200)):
+        """
+            Displays 5 point emoji scale. EAch emoji is a clickable button, which has text underneath it,
+            aswell as a main question hovering at the top
+            returns "run", and a single number, 5 = loved it, 1 = hated it. 3 = neutral.
+        """
 
+        if run:  # Don't start this screen if the previous screen wanted to close out the game
+
+            # Ask how was the song
+            question = self.behaviour_manager.get_how_are_you(previous_saying=prev_dialogue)
+            self.command_manager.qt_emote("talking")  # show mouth moving
+            self.command_manager.qt_say(question)  # says text we give it, and starts an internal timer that we can check on
+            #self.command_manager.qt_gesture("explain_right")
+
+            # Create emoji scale buttons
+            path_to_png = os.path.join(self.this_file_path, self.path_to_imgs)
+            loved_it_button = Button(path_to_png + "/emoji_5.png", (15, 800), self.pygame, scale=0.9, return_info=5)
+            liked_it_button = Button(path_to_png + "/emoji_4.png", (595, 800), self.pygame, scale=0.9, return_info=4)
+            neutral_button = Button(path_to_png + "/emoji_3.png", (1180, 800), self.pygame, scale=0.9, return_info=3)
+            disliked_it_button = Button(path_to_png + "/emoji_2.png", (1755, 800), self.pygame, scale=0.9,
+                                        return_info=2)
+            hated_it_button = Button(path_to_png + "/emoji_1.png", (2350, 800), self.pygame, scale=0.9, return_info=1)
+            buttons = [loved_it_button, liked_it_button, neutral_button, disliked_it_button, hated_it_button]
+
+            # Create title and labels for emotions
+            title_text = TextObject(self.window, self.window_center, on_screen_text, location=(0, 400), font_size=150,
+                                    cen_x=True)
+
+            loved_it_text = TextObject(self.window, self.window_center, "Great", location=(115, 1350),
+                                       font_size=70)
+            liked_it_text = TextObject(self.window, self.window_center, "Good", location=(695, 1350),
+                                       font_size=70)
+            neutral_text = TextObject(self.window, self.window_center, "Okay", location=(1230, 1350),
+                                      font_size=70)
+            disliked_it_text = TextObject(self.window, self.window_center, "Not Good", location=(1765, 1350),
+                                          font_size=70)
+            hated_it_text = TextObject(self.window, self.window_center, "Terrible", location=(2450, 1350),
+                                       font_size=70)
+            text_objs = [title_text, loved_it_text, liked_it_text, neutral_text, disliked_it_text, hated_it_text]
+
+            chosen_emoji = False
+            # While loop until they click an emoji
+            while not chosen_emoji and not rospy.is_shutdown() and run:
+                # check for quit
+                for event in self.pygame.event.get():
+                    # Check if the user clicks the X
+                    if event.type == self.pygame.QUIT:
+                        return False, -1
+                    mouse_pos = self.pygame.mouse.get_pos()
+                    if event.type == self.pygame.MOUSEBUTTONUP:
+                        self.animation_manager.StartTouchAnimation(
+                            mouse_pos)  # tell system to play animation when drawing
+                    # if any button is pressed, return it's value
+                    for button in buttons:
+                        pressed = button.get_event(event, mouse_pos)
+                        if pressed:
+                            return True, button.get_info()
+
+                # Draw background and objects
+                self.renderer.DrawBackground(background_colour)
+                for button in buttons:
+                    button.render(self.window)
+                for text in text_objs:
+                    text.render(self.window)
+                self.animation_manager.DrawTouchAnimation(self.window)  # Also draw touches
+                self.pygame.display.update()  # Update all drawn objects
+            return False, -1  # impossible to reach here
+        
     def yes_or_no_screen(self, text, run, background_colour, silent = False):
         """Screen for Yes or No questions"""
         # Variables

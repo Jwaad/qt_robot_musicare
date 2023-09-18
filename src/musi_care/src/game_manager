@@ -440,9 +440,74 @@ class GameManager():
 
         return run, self.user_data
 
-    def mood_comment(self, mood_rating):
+    def mood_comment_post(self, mood_rating, prev_mood):
         """ Using the mood of the user, robot should say something"""
-        # max_mood = 7 # the highest and happiest score possible.
+        # max_mood = 5 # the highest and happiest score possible.
+        neutral_rating = 3
+
+        # Positive rating, pre and post. (mood stayed same positive)
+        if mood_rating > neutral_rating and prev_mood > neutral_rating:
+            # "Thats good" type message
+            sayings = ["I'm very happy that you're still happy",
+                       "Thats great news!",
+                       "That's so good to hear!",
+                       "Wonderful!",
+                       "That makes me happy too"
+                       ]
+            ind = random.randint(0, len(sayings) - 1)
+            message = sayings[ind]
+            gesture = "arms_up"
+        # Positive rating post, but not pre. (mood went up)
+        elif mood_rating > neutral_rating and prev_mood < neutral_rating:
+            # "Thats good" type message
+            sayings = ["Really? Thats such good news !",
+                       "Wow, so you're happier than before? then im happy too !"
+                       "Yay! You feel a bit more cheerful than earlier. Thats so good!",
+                       "Hurray, im so happy to hear you're not feeling down"
+                       ]
+            ind = random.randint(0, len(sayings) - 1)
+            message = sayings[ind]
+            gesture = "arms_up"
+        # Negative rating post, but not pre. (Mood went down)
+        elif mood_rating < neutral_rating and prev_mood > neutral_rating:
+            # "That's too bad" type message
+            sayings = ["Oh... Thats too bad. I'm sorry about that... Maybe next time will be more fun",
+                       "Aww, maybe next time will be a bit more fun...",
+                       "Thats a shame, i hope you feel more cheerful."
+                       ]
+            ind = random.randint(0, len(sayings) - 1)
+            message = sayings[ind]
+            gesture = "shake_head"
+        # negative rating, pre and post. (mood stayed same negative)
+        if mood_rating < neutral_rating and prev_mood < neutral_rating:
+            # "Thats good" type message
+            sayings = ["Hopefully your mood improves throughout the day.",
+                       "I wish i could chat longer, to make you feel more cheerful...",
+                       "Thats a shame, i hope you feel more cheerful later on."
+                       ]
+            ind = random.randint(0, len(sayings) - 1)
+            message = sayings[ind]
+            gesture = "shake_head"
+        # Neutral rating pre and post, + (other circumstance i missed in the logic)
+        else:
+            # "oh? lets fix that" type message
+            sayings = ["I see, well atleast thats better than being sad!",
+                       "I was hoping to make you smile more. But it's okay haha",
+                       "Hope you feel more cheeful later!"
+                       ]
+            ind = random.randint(0, len(sayings) - 1)
+            message = sayings[ind]
+            gesture = ""
+
+        if gesture == "":
+            self.Levels.QTSpeakingScreen(message, self.run, self.background_colour)
+        else:
+            self.Levels.QTSpeakingScreen(message, self.run, self.background_colour, should_gesture=True,
+                                         gesture=gesture)
+
+    def mood_comment_pre(self, mood_rating):
+        """ Using the mood of the user, robot should say something"""
+        # max_mood = 5 # the highest and happiest score possible.
         neutral_rating = 3
 
         # Positive rating
@@ -471,9 +536,9 @@ class GameManager():
         # Neutral rating
         else:
             # "oh? lets fix that" type message
-            sayings = ["Hmm, okay maybe playing games will make you feel livelier!",
-                       "Oh, okay. Then lets play games. Maybe you'll feel more cheerful after!",
-                       "okay. Then... Lets play some games. It might make you feel happier!"
+            sayings = ["Hmm, okay maybe playing games will make you feel livey!",
+                       "Oh, okay. Then lets play games. Maybe you'll feel cheerful after!",
+                       "okay. Then... Lets play some games. It might make you feel happy!"
                        ]
             ind = random.randint(0, len(sayings) - 1)
             message = sayings[ind]
@@ -559,7 +624,7 @@ class GameManager():
         level_data = self.user_data["game_data"][session_name][level_name]
         return level_data
 
-    def QTPreamble(self, user, run = True):
+    def QTPreamble(self, user = None, run = True):
         if run:
             name = user["name"]
 
@@ -585,18 +650,16 @@ class GameManager():
                                              gesture="wave")
 
             # Ask user how they are, save to data
-            #TODO  RANDOMISED WAYS TO ASK HOW ARE YOU
-            mood_score = 5 # TODO HOW ARE YOU SCREEN
+            run, mood_score = self.Levels.how_are_you(run = run, background_colour= self.background_colour)
             self.user_data["game_data"][self.session_name]["mood_pre"] = mood_score
-
-            # QT should comment based on their mood e.g: "Oh, hopefully these games cheer you up"
-            self.mood_comment(mood_score)
+            self.SaveExistingUserData()
+            self.mood_comment_pre(mood_score) # QT should comment based on their mood e.g: "Oh, hopefully these games cheer you up"
 
             # introduce the start of the games
-
+            run = self.Levels.QTSpeakingScreen(self.behaviours_manager.get_start_games(), run, self.background_colour)
             return run
 
-    def QTPostamble(self, user = None):
+    def QTPostamble(self, user = None, run = True):
         """
         Handle QT behaviour post session
         """
@@ -604,19 +667,22 @@ class GameManager():
             user = self.user_data
         name = user["name"]
 
-        # Use a randomised greeting
-        # TODO randomised sayings of "that was so fun, im so excited for next week."
-        self.Levels.QTSpeakingScreen(self.behaviours_manager.get_greetings(), self.run, self.background_colour, should_gesture=True,
-                                     gesture="wave")
+        # Say something like "this was fun"
+        run = self.Levels.QTSpeakingScreen(self.behaviours_manager.get_closing_remark(), self.run, self.background_colour, should_gesture=True,
+                                     gesture="arms_up")
+        # Say something like "i know i asked before, but"
+        run = self.Levels.QTSpeakingScreen(self.behaviours_manager.get_transition_to_question, self.run, self.background_colour)
 
         # Ask user how they are, save to data
-        #TODO  RANDOMISED WAYS TO ASK HOW ARE YOU
-        mood_score = 7 # TODO HOW ARE YOU SCREEN
+        run, mood_score = self.Levels.how_are_you(run=run, background_colour=self.background_colour)
         self.user_data["game_data"][self.session_name]["mood_post"] = mood_score
+        self.SaveExistingUserData()
+        prev_mood = self.user_data["game_data"][self.session_name]["mood_pre"]
+        self.mood_comment_post(mood_score, prev_mood) # comment based on mood change
 
-        # QT should comment based on their mood e.g: "Oh, hopefully these games cheer you up"
-        # TODO RANDOMISED, I'm HAPPY THAT YOUR MOOD WENT UP / THATS A SHAME THAT YOU STILL FEEL DOWN etc
-        self.mood_comment(mood_score)
+        # Use a randomised greeting
+        self.Levels.QTSpeakingScreen(self.behaviours_manager.get_goodbye(), self.run, self.background_colour,
+                                     should_gesture=True, gesture="wave")
 
 
     def change_difficulty(self, game_name, clear_type):
@@ -827,7 +893,6 @@ class GameManager():
 
     # Create GUI to control which level to play
     def Main(self):
-        self.run, song_rating= self.Levels.did_you_like_song(run=self.run, background_colour=self.background_colour)
 
         # Load all users into memory
         self.run, self.user_database = self.LoadUserDatabase(run = self.run)
@@ -840,13 +905,13 @@ class GameManager():
             self.user_data["game_data"][self.session_name] = {}
 
         # What QT should say to the returning or new user
-        #self.run = self.QTPreamble(self.user_data)
+        self.run = self.QTPreamble(user = self.user_data)
 
         # uses user profile to select which games to play
         self.run = self.play_games(run = self.run)
 
         # QT outro
-        #self.run = self.QTPostamble(run = self.run)
+        self.run = self.QTPostamble(user = self.user_data, run = self.run)
 
         # Close up shop
         self.OnExit()
