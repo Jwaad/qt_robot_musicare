@@ -36,9 +36,8 @@ import threading
 class Simon_Says_Clap_Game():
     """ Class to generate and handle guess the mood game """
 
-    def __init__(self, user_id, reduce_screen = True, screen = None, my_pygame = None):
+    def __init__(self, reduce_screen=False, debug=False, screen = None, my_pygame = None):
         """Initialise and take user_id, user_id helps us save the data to the specific profiles"""
-        self.user_id = user_id
         x = 145  # x pos of screen
         y = 0  # y pos of screen
         os.environ['SDL_VIDEO_WINDOW_POS'] = '%d,%d' % (x, y)  # move screen to x and y pos
@@ -62,31 +61,28 @@ class Simon_Says_Clap_Game():
         else:
             self.window = screen
         self.background_colour = (100, 100, 100)  # background black by default
-        self.pygame.display.set_caption("Simon says clap!")  # Label window
+        self.pygame.display.set_caption("Clap to the beat!")  # Label window
         self.run = True
         self.quit = False  # Check to see if the game ended or it was quit
         self.track_playing = False
         self.previous_track_data = None
         self.difficulty = "easy"  # Default difficulty to play
-        self.current_level = 1  # Default level to play
-        self.music_data = self.get_song_database()  # From save file load all of the level data
-        # print(self.music_data)
         self.music_filepath = "/game_assets/music/"  # relative path to songs # "/home/qtrobot/catkin_ws/src/musi_care/src/game_assets/music/"
         self.timer_manager = TimeFunctions()
         self.animation_manager = AnimationManager(self.pygame)
         self.sound_manager = SoundManager(self.music_filepath)  # load soundplayer with sound file path
-        self.command_manager = QTManager()
+        self.command_manager = QTManager(debug = debug)
         self.renderer = Renderer(self.window, self.window_center)
-        self.level_loader = StandardLevels(self.window, self.window_center, self.pygame, self.music_filepath)
+        self.level_loader = StandardLevels(self.window, self.window_center, self.pygame, self.music_filepath, debug = debug)
         self.segment_x_y = {0: (610, 850), 1: (1260, 850), 2: (1910, 850), 3: (610, 1400), 4: (1260, 1400),
                             5: (1910, 1400)}  # hard coded num locations of each segment
         self.behaviours_manager = Behaviours(self.pygame, self.music_filepath)
         self.t1 = 0  # t1 for FPS tracking
-        self.debug = True
+        self.debug = debug
         if not self.debug:
             self.pygame.mouse.set_visible(False)  # set to false when not testing
         self.command_manager.set_arm_vel(100) # Set robot arm speed to max for this game
-        self.diy_box = True
+        self.diy_box = False
         # self.music_vol = 1 # change volume of laptop
         # self.qt_voice_vol
         # self.sound_manager.volume_change(self.music_vol) # Set a default volume
@@ -94,75 +90,6 @@ class Simon_Says_Clap_Game():
 
     ########################################################Low level methods################################################################
 
-    def get_song_database(self):
-        """Read the database file and get the levels data"""
-
-        # data_filepath = ("/home/qtrobot/catkin_ws/src/musi_care/src/game_assets/music/music_data.txt")
-        data_filepath = ("/game_assets/data/ssc_level_data.txt")  # gtm = guess the mood
-        this_file_path = os.path.dirname(__file__)
-        full_path = this_file_path + data_filepath
-        music_data = []
-
-        with open(full_path, "r") as database:
-            difficulty_labels = ["tut", "easy", "medium", "hard"]
-            music_data = {"tut": {1: {""}}, "easy": {1: {""}}, "medium": {1: {""}},
-                          "hard": {1: {""}}}  # Reset data to overwrite it thouroughly
-
-            # sort data into their difficulty tiers
-            data = database.read().splitlines()  # read data and load into raw into "data"
-            for difficulty in difficulty_labels:  # extract for each difficulty seperately
-                open_bracket_line_num = 0
-                open_bracket_found = False
-                close_bracket_line_num = 0
-                close_bracket_found = False
-                line_num = 0
-
-                # Look for brackets and get the data between them
-                for line in data:
-                    if line == "{":
-                        open_bracket_line_num = line_num
-                        open_bracket_found = True
-                    elif line == "}":
-                        close_bracket_line_num = line_num
-                        close_bracket_found = True
-                    # We have found the brackets, save the information and delete it from data
-                    if open_bracket_found and close_bracket_found:
-                        # Organise data and put it into a new dict
-                        difficulty_data = data[open_bracket_line_num + 1:close_bracket_line_num]
-                        new_song = False
-                        level = 1
-                        music_data[difficulty][level] = dict()  # init 1st level
-                        for attribute in difficulty_data:
-                            if attribute == "£#":
-                                new_song = True
-                            if not new_song:  # if all the atrributes describe the same song, add them to the same dict
-                                split_attribute = attribute.split("=")  # split line by the =
-                                attribute_label = split_attribute[0].replace(" ", "")  # get rid of any spaces now
-                                if attribute_label == "distract_song":  # parse differently
-                                    if split_attribute[1].replace(" ",
-                                                                  "") == "none":  # if there's no distract songs, just return none
-                                        attribute_value = None
-                                    else:
-                                        split_attribute.pop(0)
-                                        split_attribute  # get rid of the label, the rest are songs
-                                        songs = split_attribute[0].split(",")
-                                        attribute_value = []
-                                        for song in songs:
-                                            distract_song = song.replace(" ", "")  # remove spaces
-                                            attribute_value.append(distract_song)
-                                else:
-                                    attribute_value = split_attribute[1].replace(" ",
-                                                                                 "")  # Get rid of the space at the start
-                                music_data[difficulty][level][attribute_label] = attribute_value
-                            else:
-                                new_song = False
-                                level += 1
-                                music_data[difficulty][
-                                    level] = dict()  # Create new song entry labeled as the correct level
-                        data = data[close_bracket_line_num + 1:]
-                        break
-                    line_num += 1
-            return music_data
 
     def get_track_info(self, formatted_output=False):
         """Subscribe to sound_player publisher and get elapsed track time"""
@@ -387,22 +314,19 @@ class Simon_Says_Clap_Game():
 
     #######################################################Level / screen code###############################################################
 
-    def record_claps(self, level_data ):
+    def record_claps(self ):
         """ Multithreaded function that records claps"""
         # TODO add functionality that records audio and claps until a timer ends (timer is the song duration)
-        while self.run:
+        while self.run and not self.Finished:
             print("Pretending to record clapping")
             time.sleep(2) # TEMP
         print("Ended clap recording thread")
 
-    def get_beat_timing(self, level_data, track_total_time):
+    def get_beat_timing(self, first_beat, bpm, track_total_time):
         """
         Use level data and return a list of the timings of each beat
         track_total_time should be in seconds
         """
-        print("Track time: ",track_total_time)
-        first_beat = float(level_data["first_beat"])
-        bpm = int(level_data["bpm"])
         beat = first_beat
         beat_timings = []
         while beat < track_total_time:
@@ -455,17 +379,16 @@ class Simon_Says_Clap_Game():
         numerical_accuracy = 0.9 #90%
         return temporal_accuracy, numerical_accuracy
 
-    def play_level(self, difficulty, level):
+    def play_level(self, file_name, first_beat, bpm):
         """Have QT clap to beat and record user clapping"""
 
         if self.run:
 
             # Get the level's data
-            level_data = self.music_data[difficulty][level]  # {"song_name":"title", "mood":"happy", "hint":"some text"}
-            self.track_name = level_data["song_name"]
+            self.track_name = file_name
 
             # Start parallel thread to record claps simultaneously
-            clap_recorder = threading.Thread(target=self.record_claps, args=(level_data,), daemon=True)
+            clap_recorder = threading.Thread(target=self.record_claps, args=(), daemon=True)
             clap_recorder.start()  # Start multi_threaded function
 
             # Define some parameters and vars
@@ -476,7 +399,7 @@ class Simon_Says_Clap_Game():
             time_left = time_of_darkness - rospy.get_time()
             prev_arm = "left"
             track_total_time = self.get_track_info()[2]
-            beat_timings = self.get_beat_timing(level_data, track_total_time)
+            beat_timings = self.get_beat_timing(first_beat, bpm, track_total_time)
             new_random = True
             freeze = False
             self.sound_manager.unpause()
@@ -484,13 +407,14 @@ class Simon_Says_Clap_Game():
                 # Get elapsed time
                 elapsed_time = self.get_track_info()[1]
 
-                # Stop beat every 5 - 12 seconds
+                # Stop beat every 8 - 15 seconds
                 if new_random:
                     freeze_time = self.timer_manager.CreateTimer("freeze", random.randint(8, 15))
                     new_random = False
                 if len(self.timer_manager.timers) > 0:
                     if self.timer_manager.CheckTimer(freeze_time):
                         self.command_manager.send_qt_command(speech="Stop!")
+                        # freeze for 2 - 4 seconds
                         time_unfreeze = self.timer_manager.CreateTimer("unfreeze",random.randint(2, 4))
                         freeze = True
                         self.sound_manager.pause()
@@ -514,7 +438,7 @@ class Simon_Says_Clap_Game():
                     if self.timer_manager.CheckTimer(time_unfreeze):
                         freeze = False
                         new_random = True
-                        self.command_manager.send_qt_command(speech="Go!", gesture="grin")
+                        self.command_manager.send_qt_command(speech="Go!", emote="grin")
                         self.sound_manager.unpause()
 
             # Stop recording clapping and log the user's score
@@ -522,34 +446,40 @@ class Simon_Says_Clap_Game():
 
             # QT should praise user based on performance
             message = self.qt_reward(temporal_accuracy, numerical_accuracy)
-            self.command_manager.send_qt_command(speech=message, gesture="arms_up", emote="Happy")
+            self.command_manager.send_qt_command(speech=message, gesture="arms_up", emote="happy")
 
-            return temporal_accuracy, numerical_accuracy
+            clear_type = "clear"
+            e_clear_req = {"expected_num_claps": 100, "average_error": "0.05", "forbidden_claps": 5, "missed_claps": 5}
+            performance = {"num_claps": 95, "average_error": "0.1",  "forbidden_claps": 10, "missed_claps": 10}
+            level_data = {"game_name": "SSC", "clear_type": clear_type, "performance": performance,
+                          "e_clear_req": e_clear_req}
+
+            return self.run, level_data
 
 
 
     #################################################################Main####################################################################
 
-    def Main(self, difficulty="easy",
-             level=1):  # input what level and difficulty to play, the program will handle the rest
+    def Main(self,file_name, first_beat, bpm, ask_tut = True):  # input what level and difficulty to play, the program will handle the rest
         """Main Func"""
         # Introduce game
         self.run = self.level_loader.QTSpeakingScreen("Lets play Simon Says Clap!", self.run, self.background_colour)
 
-        # Ask if they want to play tutorial
-        self.run, tut = self.level_loader.yes_or_no_screen('Should I explain how to play "Simon Says Clap" ?', self.run,
-                                                           self.background_colour)
-        if tut:
-            tut_msg = """ I will drum along to the beat... You need to watch what I am doing,,, and clap along with me...
-            At times,, i will stop drumming and yell. Stop!... When that happens, you need to stop clapping as well.. Then
-            When i say. Go! you will need to start clapping with me again."""
-            
-            repeat = True
-            while repeat:
-                self.run = self.level_loader.QTSpeakingScreen(tut_msg, self.run, self.background_colour)
-                self.run, repeat = self.level_loader.yes_or_no_screen('Should I repeat that explanation ?',
-                                                                   self.run,
-                                                                   self.background_colour)
+        if ask_tut:
+            # Ask if they want to play tutorial
+            self.run, tut = self.level_loader.yes_or_no_screen('Should I explain how to play "Simon Says Clap" ?', self.run,
+                                                               self.background_colour)
+            if tut:
+                tut_msg = """ I will drum along to the beat... You need to watch what I am doing,,, and clap along with me...
+                At times,, i will stop drumming and yell. Stop!... When that happens, you need to stop clapping as well.. Then
+                When i say. Go! you will need to start clapping with me again."""
+
+                repeat = True
+                while repeat:
+                    self.run = self.level_loader.QTSpeakingScreen(tut_msg, self.run, self.background_colour)
+                    self.run, repeat = self.level_loader.yes_or_no_screen('Should I repeat that explanation ?',
+                                                                       self.run,
+                                                                       self.background_colour)
 
         # Count in to the start of the game
         self.run = self.level_loader.tap_to_continue(self.run, self.background_colour)
@@ -558,10 +488,9 @@ class Simon_Says_Clap_Game():
         self.run = self.level_loader.countdown(3, self.run, self.background_colour,
                                                prelim_msg="Get ready to clap along!")
         # Play main level
-        temporal_accuracy, numerical_accuracy = self.play_level(difficulty, level)
+        self.run, level_data = self.play_level(file_name, first_beat, bpm)
 
-        # Save user data
-        #print(temporal_accuracy, numerical_accuracy)
+        return self.run, level_data
 
 
 

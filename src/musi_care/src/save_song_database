@@ -49,8 +49,8 @@ def SaveDatabase():
                     "mood": "happy",
                     "GTM": "easy",
                     "FTS": "easy",
-                    "CTB": "hard",
-                    "SSC": "hard"
+                    "CTB": "easy",
+                    "SSC": "easy"
                 },
 
             "Happy instrumental 3":
@@ -61,20 +61,20 @@ def SaveDatabase():
                     "mood": "happy",
                     "GTM": "easy",
                     "FTS": "hard",
-                    "CTB": "medium",
-                    "SSC": "medium"
+                    "CTB": "easy",
+                    "SSC": "easy"
                 },
 
             "Happy instrumental 1":
                 {
                     "file_name": "happy_1.wav",
-                    "bpm": 0.0,
+                    "bpm": 100.0,
                     "first_beat": 0.0,
                     "mood": "happy",
                     "GTM": "easy",
                     "FTS": "hard",
-                    "CTB": "hard",
-                    "SSC": "hard"
+                    "CTB": "easy",
+                    "SSC": "easy"
                 },
 
             "Don't let me down short":
@@ -85,32 +85,32 @@ def SaveDatabase():
                     "mood": "sad",
                     "GTM": "easy",
                     "FTS": "medium",
-                    "CTB": "hard",
-                    "SSC": "hard"
+                    "CTB": "easy",
+                    "SSC": "easy"
                 },
 
             "Sad instrumental 1":
                 {
                     "file_name": "sad_1.wav",
-                    "bpm": 0.0,
+                    "bpm": 100.0,
                     "first_beat": 0.0,
                     "mood": "sad",
                     "GTM": "easy",
                     "FTS": "easy",
-                    "CTB": "hard",
-                    "SSC": "hard"
+                    "CTB": "easy",
+                    "SSC": "easy"
                 },
 
             "Happy instrumental 4":
                 {
                     "file_name": "happy_4.wav",
-                    "bpm": 0.0,
+                    "bpm": 100.0,
                     "first_beat": 0.0,
                     "mood": "sad",
                     "GTM": "easy",
                     "FTS": "hard",
-                    "CTB": "medium",
-                    "SSC": "medium"
+                    "CTB": "easy",
+                    "SSC": "easy"
                 },
 
             "Don't let me down long":
@@ -121,8 +121,8 @@ def SaveDatabase():
                     "mood": "sad",
                     "GTM": "easy",
                     "FTS": "easy",
-                    "CTB": "hard",
-                    "SSC": "hard"
+                    "CTB": "easy",
+                    "SSC": "easy"
                 },
 
             "Could you be loved short":

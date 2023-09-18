@@ -422,6 +422,8 @@ class StandardLevels():
         self.path_to_imgs = 'game_assets/graphics'
         self.this_file_path = os.path.dirname(__file__)
 
+    def get_drum(self):
+
     def did_you_like_song(self, run = True, on_screen_text = "Did you like the song?", prev_dialogue = "", background_colour = (200, 200, 200)):
         """ 
             Displays 5 point emoji scale. EAch emoji is a clickable button, which has text underneath it,
@@ -1421,7 +1423,7 @@ class QTManager():
     def move_right_arm(self, joint_angles, command_blocking = False):
         """ Move just right arm """
         if self.debug:
-            print("Moving QT's right arm joint to ".format(joint_angles))
+            print("Moving QT's right arm joint to {}".format(joint_angles))
         rospy.wait_for_service('/qt_command_service')
         command_controller = rospy.ServiceProxy('/qt_command_service', qt_command)
         motor_pos = str( [["right_arm"], [joint_angles] ] )
@@ -1431,7 +1433,7 @@ class QTManager():
     def move_left_arm(self, joint_angles, command_blocking = False):
         """ Move left arm, but using coordinates for right arm, and flip them automatically"""
         if self.debug:
-            print("Moving QT's left arm joint to ".format(joint_angles))
+            print("Moving QT's left arm joint to {}".format(joint_angles))
         rospy.wait_for_service('/qt_command_service')
         command_controller = rospy.ServiceProxy('/qt_command_service', qt_command)
         joint_angles[0] = -joint_angles[0]
