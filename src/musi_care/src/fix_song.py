@@ -70,9 +70,9 @@ class Fix_The_Song_Game():
         self.timer_manager = TimeFunctions()
         self.animation_manager = AnimationManager(self.pygame)
         self.sound_manager = SoundManager(self.music_filepath)  # load soundplayer with sound file path
-        self.command_manager = QTManager()
+        self.command_manager = QTManager(debug = debug)
         self.renderer = Renderer(self.window, self.window_center)
-        self.level_loader = StandardLevels(self.window, self.window_center, self.pygame, self.music_filepath)
+        self.level_loader = StandardLevels(self.window, self.window_center, self.pygame, self.music_filepath, debug=debug)
         self.segment_x_y = {0: (610, 850), 1: (1260, 850), 2: (1910, 850), 3: (610, 1400), 4: (1260, 1400),
                             5: (1910, 1400)}  # hard coded num locations of each segment
         self.behaviours_manager = Behaviours(self.pygame, self.music_filepath)

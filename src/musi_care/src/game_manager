@@ -749,10 +749,7 @@ class GameManager():
         randomly selects from the games that have been played least.
         Also increases or decreases difficulty as needed and saves user data after each level
         """
-        #self.games = ["GTM", "GTM", "GTM", "GTM"]  # TEMP, REMOVE LATER TODO
-        self.games = ["FTS", "FTS", "FTS", "FTS"]  # TEMP, REMOVE LATER TODO
-        #self.games = ["CTB", "CTB", "CTB", "CTB"]  # TEMP, REMOVE LATER TODO
-        #self.games = ["SSC", "SSC", "SSC", "SSC" ] # TEMP, REMOVE LATER TODO
+        self.games = ["SSC", "SSC", "SSC", "SSC" ] # TEMP, REMOVE LATER TODO
 
         # Populate a list of counters for each game type
         this_session = []
@@ -881,7 +878,7 @@ class GameManager():
                 mood = level_data["mood"]
 
                 # Play game
-                self.run, user_level_data = game.Main(mood, file_name, play_tut)
+                self.run, user_level_data = game.Main(mood, file_name, ask_tut = play_tut)
             # Play FTS
             elif game_name == "FTS":
                 # Init game
@@ -890,15 +887,42 @@ class GameManager():
                 if difficulty == "easy":
                     distract_song = None
                     slices = 2 # cut song into 2 parts
-                else:
+                elif difficulty == "medium":
                     # get another random song, that isn't the current one
                     self.run, distract_song_data = self.get_random_song(game_name, difficulty, prev_song = song_title)
+                    distract_song = distract_song_data["file_name"]
+                    slices = 2
+                else:
+                    # get another random song, that isn't the current one
+                    self.run, distract_song_data = self.get_random_song(game_name, difficulty, prev_song=song_title)
                     distract_song = distract_song_data["file_name"]
                     slices = 3  # cut song into 3 parts
                     # TODO add 4 slices here. Currently game isn't compatible with 4 slices
 
                 # Play game
-                self.run, user_level_data = game.Main(file_name, distract_song, slices, play_tut)
+                self.run, user_level_data = game.Main(file_name, distract_song, slices, ask_tut = play_tut)
+            # Play CTB and SSC
+            else:
+                # Put arms up and wait for drum
+                if self.prev_game == "GTM" or self.prev_game == "FTS":
+                    self.Levels.get_drum()
+
+                # Shared vars between SSC and CTB
+                first_beat = level_data["first_beat"]
+                bpm = level_data["bpm"]
+
+                if game_name == "CTB" :
+                    # Init game
+                    game = CTB(debug=self.debug)
+
+                    # Play game
+                    self.run, user_level_data = game.Main(file_name, first_beat, bpm, ask_tut = play_tut)
+                else:
+                    # Init game
+                    game = SSC(debug=self.debug)
+
+                    # Play game
+                    self.run, user_level_data = game.Main(file_name, first_beat, bpm, ask_tut = play_tut)
 
             # Append data with title and difficulty
             user_level_data["song_title"] = song_title

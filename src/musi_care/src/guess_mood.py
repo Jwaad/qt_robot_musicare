@@ -74,7 +74,7 @@ class Guess_The_Mood_Game():
         self.command_manager = QTManager(debug = self.debug)
         self.renderer = Renderer(self.window, self.window_center)
         self.behaviours_manager = Behaviours(self.pygame, self.music_filepath)
-        self.level_loader = StandardLevels(self.window, self.window_center, self.pygame, self.music_filepath)
+        self.level_loader = StandardLevels(self.window, self.window_center, self.pygame, self.music_filepath, debug)
         self.gm = General()  # gm = general methods
         self.track_playing = False
         self.previous_track_data = None
