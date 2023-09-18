@@ -479,7 +479,7 @@ class GameManager():
             message = sayings[ind]
             gesture = "shake_head"
         # negative rating, pre and post. (mood stayed same negative)
-        if mood_rating < neutral_rating and prev_mood < neutral_rating:
+        elif mood_rating < neutral_rating and prev_mood < neutral_rating:
             # "Thats good" type message
             sayings = ["Hopefully your mood improves throughout the day.",
                        "I wish i could chat longer, to make you feel more cheerful...",
@@ -488,12 +488,14 @@ class GameManager():
             ind = random.randint(0, len(sayings) - 1)
             message = sayings[ind]
             gesture = "shake_head"
+        # todo:add (neutral -> positive), (neutral -> negative), (neutral -> neutral), (positive -> neutral), (negative -> neutral)
+        # todo: or just change it to (if mood_rating > prev_rating)
         # Neutral rating pre and post, + (other circumstance i missed in the logic)
         else:
             # "oh? lets fix that" type message
             sayings = ["I see, well atleast thats better than being sad!",
                        "I was hoping to make you smile more. But it's okay haha",
-                       "Hope you feel more cheeful later!"
+                       "Hope you feel more cheerful later!"
                        ]
             ind = random.randint(0, len(sayings) - 1)
             message = sayings[ind]
@@ -747,8 +749,10 @@ class GameManager():
         randomly selects from the games that have been played least.
         Also increases or decreases difficulty as needed and saves user data after each level
         """
-
-        self.games = ["GTM", "GTM", "GTM", "GTM" ] # TEMP, REMOVE LATER TODO
+        #self.games = ["GTM", "GTM", "GTM", "GTM"]  # TEMP, REMOVE LATER TODO
+        self.games = ["FTS", "FTS", "FTS", "FTS"]  # TEMP, REMOVE LATER TODO
+        #self.games = ["CTB", "CTB", "CTB", "CTB"]  # TEMP, REMOVE LATER TODO
+        #self.games = ["SSC", "SSC", "SSC", "SSC" ] # TEMP, REMOVE LATER TODO
 
         # Populate a list of counters for each game type
         this_session = []
@@ -784,19 +788,19 @@ class GameManager():
                 play_tut = True
 
             # Play game
-            run, performance = self.play_game(game_name, difficulty, play_tut)
+            run, user_level_data = self.play_game(game_name, difficulty, play_tut)
 
             # Check if difficulty should increase or decrease
-            clear_type = performance["clear_type"]
+            clear_type = user_level_data["clear_type"]
             self.change_difficulty(game_name, clear_type)
 
-            # Add performance to data and save
+            # Add user_level_data to data and save
             game_save_name = "game_" + str(game_num)
-            self.user_data["game_data"][self.session_name][game_save_name] = performance
+            self.user_data["game_data"][self.session_name][game_save_name] = user_level_data
             self.SaveExistingUserData()
 
             # Ask if they liked the song (if we haven't asked about this song before)
-            song_title = performance["song_title"]
+            song_title = user_level_data["song_title"]
             if song_title not in self.user_data["song_preference"]:
                 self.run, song_rating = self.Levels.did_you_like_song(run = self.run, background_colour= self.background_colour)
                 self.user_data["song_preference"][song_title] = song_rating
@@ -810,6 +814,48 @@ class GameManager():
 
         return run
 
+    def get_random_song(self,game_name, difficulty ,run = True, prev_song = None):
+        """
+        Gets random song from database depending on designated song name and difficulty inputted.
+        Checks user black lists and the previous song, and keeps randomising until a applicable song is selected.
+        If there is not applicable one, a random one is returned.
+
+        game_name = string, GTM, FTS, CTB, SSC
+        difficulty = string, easy, medium, hard
+        run = bool, entering false will skip the entire method. Allows quiting mid game
+        """
+        if run :
+            # Load data for selected game
+            song_data = self.general_functions.Load_Song_Data(game_name)
+
+            # make copy of databse so we can pop it
+            levels = song_data[difficulty].copy()
+
+            # If prev song was not specified, find out what it was
+            if prev_song == "" or prev_song is None:
+                prev_level = self.get_latest_data(game_name=game_name)
+
+            # pop the previous song from this list, to prevent repetition
+            if prev_level is not None:
+                if prev_level["difficulty"] == difficulty:  # prevents key error (dont pop an easy song from the med list)
+                    if len(levels.keys()) > 1:
+                        levels.pop(prev_level["song_title"])
+
+            # Choose random song from selected difficulty
+            i = random.randint(0, len(levels) - 1)  # choose random one
+            song_title = list(levels.keys())[i]  # There's only 1 key, and it's the songs title
+            # Keep randomising til we play a non-blacklisted song
+            while song_title in self.user_data["blacklist"]:
+                i = random.randint(0, len(levels.keys()) - 1)  # choose random one
+                song_title = list(levels.keys())[i]  # There's only 1 key, and it's the songs title
+                levels.pop(song_title)  # remove song from level data, and re randomise
+                # If we've popped out all songs, just use the last 1 left
+                if len(levels) < 1:
+                    print("All {} {} songs are black listed, using random one".format(difficulty, game_name))
+                    break
+
+            level_data = song_data[difficulty][song_title]
+            return run, level_data, song_title
 
     def play_game(self, game_name, difficulty, play_tut, run = True):
         """
@@ -818,49 +864,47 @@ class GameManager():
         difficulty = string, tut, easy, medium, hard
         play_tut = bool, whether or not the game should ask if tut should be shown
         """
-        performance = {}
-        if run:
+        user_level_data = {}
+        self.run = run
+        if self.run:
+
+            # Choose random song
+            self.run, level_data, song_title = self.get_random_song(game_name, difficulty)
+            file_name = level_data["file_name"]
 
             # Play GTM
             if game_name == "GTM":
                 # Init game
                 game = GTM(debug=self.debug)
 
-                # Load all game data
-                song_data = self.general_functions.Load_Song_Data("GTM")
-
-                # Choose random song from database, depending on difficulty specified
-                levels = song_data[difficulty].copy() # load all songs and store relevant difficulty
-                # pop the previous song from this list, to prevent repetition
-                prev_level = self.get_latest_data(game_name = game_name)
-                if prev_level is not None:
-                    if prev_level["difficulty"] == difficulty: # prevents key error (dont pop an easy song from the med list)
-                        if len(levels.keys()) > 1:
-                            levels.pop(prev_level["song_title"])
-
-                i = random.randint(0, len(levels) - 1) # choose random one
-                song_title = list(levels.keys())[i]  # There's only 1 key, and it's the songs title
-                # Keep randomising til we play a non-blacklisted song
-                while song_title in self.user_data["blacklist"]:
-                    i = random.randint(0, len(levels.keys()) - 1)  # choose random one
-                    song_title = list(levels.keys())[i]  # There's only 1 key, and it's the songs title
-                    levels.pop(song_title)  # remove song from level data, and re randomise
-                    # If we've popped out all songs, just use the last 1 left
-                    if len(levels) < 1:
-                        print("All {} {} songs are black listed, using random one".format(difficulty, game_name))
-                        break
-
-                # Get out the required information to play game
-                level_data = song_data[difficulty][song_title]
+                # get game specific parameters
                 mood = level_data["mood"]
-                file_name = level_data["file_name"]
 
                 # Play game
-                self.run, performance = game.Main(mood, file_name, play_tut)
-                performance["song_title"] = song_title
-                performance["difficulty"] = difficulty
+                self.run, user_level_data = game.Main(mood, file_name, play_tut)
+            # Play FTS
+            elif game_name == "FTS":
+                # Init game
+                game = FTS(debug=self.debug)
 
-        return self.run, performance
+                if difficulty == "easy":
+                    distract_song = None
+                    slices = 2 # cut song into 2 parts
+                else:
+                    # get another random song, that isn't the current one
+                    self.run, distract_song_data = self.get_random_song(game_name, difficulty, prev_song = song_title)
+                    distract_song = distract_song_data["file_name"]
+                    slices = 3  # cut song into 3 parts
+                    # TODO add 4 slices here. Currently game isn't compatible with 4 slices
+
+                # Play game
+                self.run, user_level_data = game.Main(file_name, distract_song, slices, play_tut)
+
+            # Append data with title and difficulty
+            user_level_data["song_title"] = song_title
+            user_level_data["difficulty"] = difficulty
+
+        return self.run, user_level_data
 
     def data_printout(self, user, save_to_file = False):
         """
@@ -893,14 +937,25 @@ class GameManager():
             print()
             print(data)
 
+    def bypass_login(self):
+        """For debugging, load straight into games"""
+        self.user_data = self.user_database[0]
+        self.count_session()
+        if self.run:
+            self.user_data["game_data"][self.session_name] = {}
+
+
     # Create GUI to control which level to play
     def Main(self):
 
         # Load all users into memory
         self.run, self.user_database = self.LoadUserDatabase(run = self.run)
 
+        self.bypass_login() # temp TODO
+
+        """
         # use name and surname to get user data
-        self.run, self.user = self.LogInScreen(run = self.run)
+        self.run, self.user_data = self.LogInScreen(run = self.run)
 
         # Init the session
         if self.run:
@@ -908,12 +963,12 @@ class GameManager():
 
         # What QT should say to the returning or new user
         self.run = self.QTPreamble(user = self.user_data)
-
+        """
         # uses user profile to select which games to play
         self.run = self.play_games(run = self.run)
 
         # QT outro
-        self.run = self.QTPostamble(user = self.user_data, run = self.run)
+        #self.run = self.QTPostamble(user = self.user_data, run = self.run)
 
         # Close up shop
         self.OnExit()
