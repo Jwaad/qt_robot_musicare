@@ -32,7 +32,7 @@ from musicare_lib import General
 class Guess_The_Mood_Game():
     """ Class to generate and handle guess the mood game """
 
-    def __init__(self, reduce_screen=True, debug=False, screen = None, my_pygame = None):
+    def __init__(self, reduce_screen=False, debug=False, screen = None, my_pygame = None):
         """
         reduce_screen = bool, whether or not to reduce borders to account for linux toolbar
         debug = bool, whether or not to display things like FPS and minor helpful tools.
