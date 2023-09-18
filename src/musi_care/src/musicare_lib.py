@@ -1330,6 +1330,8 @@ class SoundManager():
             rospy.loginfo("Temp file saved")
 
         # handle distracting song
+        if type(distracting_songs) != list:
+            distracting_songs = [distracting_songs]
         if distracting_songs != None:
             for song in distracting_songs:  # so we can use multiple distracting songs
                 song_path = this_path + music_filepath + song
