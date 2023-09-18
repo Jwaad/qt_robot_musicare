@@ -296,7 +296,7 @@ class Behaviours():
         """ Sentences QT can say, before giving a hint """
         sayings = ["I had so much fun today! I look forward to next week",
                    "I wish we could play forever, but i have to rest now. See you next week !",
-                   "I really enjoyed hanging out with you! I can wait to see you next week!",
+                   "I really enjoyed hanging out with you! I can't wait to see you next week!",
                    "Bye Bye. I'm really excited to see you next week",
                    "Goodbye for now! See you next week!"
                    ]
