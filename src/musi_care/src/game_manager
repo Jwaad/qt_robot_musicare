@@ -184,7 +184,7 @@ class GameManager():
                 self.first_names.append(user["name"])
                 self.surnames.append(user["surname"])
 
-        return run, self.user_database
+            return run, self.user_database
 
     def SaveNewUser(self, name, surname, DoB):
         """
@@ -573,14 +573,14 @@ class GameManager():
                 gestures = ["wave", "shake_head", "explain_right", "" ]
                 for i in range(0, len(dialogue)):
                     if gestures[i] == "":
-                        self.Levels.QTSpeakingScreen(dialogue[i], self.run, self.background_colour)
+                        run = self.Levels.QTSpeakingScreen(dialogue[i], run, self.background_colour)
                     else:
-                        self.Levels.QTSpeakingScreen(dialogue[i], self.run, self.background_colour, should_gesture = True,
+                        run = self.Levels.QTSpeakingScreen(dialogue[i], run, self.background_colour, should_gesture = True,
                                                      gesture = gestures[i])
                     time.sleep(1) # Add 1s delay between sentences
             else:
                 # Use a randomised greeting
-                self.Levels.QTSpeakingScreen(self.behaviours_manager.get_greetings(), self.run, self.background_colour, should_gesture=True,
+                run = self.Levels.QTSpeakingScreen(self.behaviours_manager.get_greetings(), self.run, self.background_colour, should_gesture=True,
                                              gesture="wave")
 
             # Ask user how they are, save to data
@@ -592,6 +592,8 @@ class GameManager():
             self.mood_comment(mood_score)
 
             # introduce the start of the games
+
+            return run
 
     def QTPostamble(self, user = None):
         """
@@ -824,13 +826,13 @@ class GameManager():
 
     # Create GUI to control which level to play
     def Main(self):
-        self.run, song_rating = self.Levels.did_you_like_song(run=self.run, background_colour=self.background_colour)
+        self.run, _ = self.Levels.did_you_like_song(run=self.run, background_colour=self.background_colour)
 
         # Load all users into memory
-        self.run = self.LoadUserDatabase()
+        self.run, _ = self.LoadUserDatabase(run = self.run)
 
         # use name and surname to get user data
-        self.run = self.LogInScreen()
+        self.run, _ = self.LogInScreen(run = self.run)
 
         # Init the session
         if self.run:
@@ -840,10 +842,10 @@ class GameManager():
         #self.run = self.QTPreamble(self.user_data)
 
         # uses user profile to select which games to play
-        self.run = self.play_games()
+        self.run = self.play_games(run = self.run)
 
         # QT outro
-        #self.run = self.QTPostamble()
+        #self.run = self.QTPostamble(run = self.run)
 
         # Close up shop
         self.OnExit()
