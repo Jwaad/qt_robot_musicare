@@ -33,9 +33,8 @@ from musicare_lib import TextObject
 class Fix_The_Song_Game():
     """ Class to generate and handle guess the mood game """
 
-    def __init__(self, user_id, reduce_screen = True, screen = None, my_pygame = None):
+    def __init__(self, reduce_screen=False, debug=False, screen = None, my_pygame = None):
         """Initialise and take user_id, user_id helps us save the data to the specific profiles"""
-        self.user_id = user_id
         x = 145  # x pos of screen
         y = 0  # y pos of screen
         os.environ['SDL_VIDEO_WINDOW_POS'] = '%d,%d' % (x, y)  # move screen to x and y pos
@@ -67,8 +66,6 @@ class Fix_The_Song_Game():
         self.previous_track_data = None
         self.difficulty = "easy"  # Default difficulty to play
         self.current_level = 1  # Default level to play
-        self.music_data = self.get_song_database()  # From save file load all of the level data
-        # print(self.music_data)
         self.music_filepath = "/game_assets/music/"  # relative path to songs # "/home/qtrobot/catkin_ws/src/musi_care/src/game_assets/music/"
         self.timer_manager = TimeFunctions()
         self.animation_manager = AnimationManager(self.pygame)
@@ -80,7 +77,7 @@ class Fix_The_Song_Game():
                             5: (1910, 1400)}  # hard coded num locations of each segment
         self.behaviours_manager = Behaviours(self.pygame, self.music_filepath)
         self.t1 = 0  # t1 for FPS tracking
-        self.debug = True
+        self.debug = debug
         if not self.debug:
             self.pygame.mouse.set_visible(False) #set to false when not testing
         # self.music_vol = 1 # change volume of laptop
@@ -95,78 +92,9 @@ class Fix_The_Song_Game():
             4: ("music_segment_play_green.png", "music_segment_pause_green.png"),
             5: ("music_segment_play_pink.png", "music_segment_pause_pink.png")
         }
+        self.e_clear_multiplier = 1.5 # track total time * this  = e_clear req time
 
     ########################################################Low level methods################################################################
-
-    def get_song_database(self):
-        """Read the database file and get the levels data"""
-
-        # data_filepath = ("/home/qtrobot/catkin_ws/src/musi_care/src/game_assets/music/music_data.txt")
-        data_filepath = ("/game_assets/data/fsg_level_data.txt")  # gtm = guess the mood
-        this_file_path = os.path.dirname(__file__)
-        full_path = this_file_path + data_filepath
-        music_data = []
-
-        with open(full_path, "r") as database:
-            difficulty_labels = ["tut", "easy", "medium", "hard"]
-            music_data = {"tut": {1: {""}}, "easy": {1: {""}}, "medium": {1: {""}},
-                          "hard": {1: {""}}}  # Reset data to overwrite it thouroughly
-
-            # sort data into their difficulty tiers
-            data = database.read().splitlines()  # read data and load into raw into "data"
-            for difficulty in difficulty_labels:  # extract for each difficulty seperately
-                open_bracket_line_num = 0
-                open_bracket_found = False
-                close_bracket_line_num = 0
-                close_bracket_found = False
-                line_num = 0
-
-                # Look for brackets and get the data between them
-                for line in data:
-                    if line == "{":
-                        open_bracket_line_num = line_num
-                        open_bracket_found = True
-                    elif line == "}":
-                        close_bracket_line_num = line_num
-                        close_bracket_found = True
-                    # We have found the brackets, save the information and delete it from data
-                    if open_bracket_found and close_bracket_found:
-                        # Organise data and put it into a new dict
-                        difficulty_data = data[open_bracket_line_num + 1:close_bracket_line_num]
-                        new_song = False
-                        level = 1
-                        music_data[difficulty][level] = dict()  # init 1st level
-                        for attribute in difficulty_data:
-                            if attribute == "£#":
-                                new_song = True
-                            if not new_song:  # if all the atrributes describe the same song, add them to the same dict
-                                split_attribute = attribute.split("=")  # split line by the =
-                                attribute_label = split_attribute[0].replace(" ", "")  # get rid of any spaces now
-                                if attribute_label == "distract_song":  # parse differently
-                                    if split_attribute[1].replace(" ",
-                                                                  "") == "none":  # if there's no distract songs, just return none
-                                        attribute_value = None
-                                    else:
-                                        split_attribute.pop(0)
-                                        split_attribute  # get rid of the label, the rest are songs
-                                        songs = split_attribute[0].split(",")
-                                        attribute_value = []
-                                        for song in songs:
-                                            distract_song = song.replace(" ", "")  # remove spaces
-                                            attribute_value.append(distract_song)
-                                else:
-                                    attribute_value = split_attribute[1].replace(" ",
-                                                                                 "")  # Get rid of the space at the start
-                                music_data[difficulty][level][attribute_label] = attribute_value
-                            else:
-                                new_song = False
-                                level += 1
-                                music_data[difficulty][
-                                    level] = dict()  # Create new song entry labeled as the correct level
-                        data = data[close_bracket_line_num + 1:]
-                        break
-                    line_num += 1
-            return music_data
 
     def empty_temp_dir(self, segments):
         """Takes a list of segments / dragable objects and deletes the sound file they play"""
@@ -203,8 +131,8 @@ class Fix_The_Song_Game():
         else:
             return self.track_title, self.elapsed_time_secs, self.total_track_secs
 
-    def get_song_info(self, prev_track_time="", prev_total_time=""):
-        """Get variables that we will draw onto screen"""
+    def get_song_info(self):
+        """ Talks to the music player and gets the data / information of the currently playing song"""
         formatted_data = self.get_track_info(formatted_output=True)
         self.current_track_time = formatted_data[0]  # Time gotten from sound_player node
         self.track_total_time = formatted_data[1]  # Total track time
@@ -529,7 +457,7 @@ class Fix_The_Song_Game():
 
     #######################################################Level / screen code###############################################################
 
-    def guided_tut(self):
+    def guided_tut(self, correct_song, distract_song, slices):
         """Code to play tut sequence for fix the song"""
 
         # String of our keys so i can remember them
@@ -564,10 +492,9 @@ class Fix_The_Song_Game():
         }
 
         # Get the level's data
-        level_data = self.music_data["tut"][1]  # load tut song data
-        self.track_name = level_data["song_name"]
-        self.distract_song = level_data["distract_song"]  # will be None or a list of songs
-        self.segment_num = int(level_data["seg_num"])  # split song into this many segs
+        self.track_name = correct_song
+        self.distract_song = distract_song
+        self.segment_num = slices
 
         # Create graphics and buttons
         segments, num_correct_segs = self.create_segments(self.segment_num, self.track_name, self.distract_song)
@@ -652,15 +579,15 @@ class Fix_The_Song_Game():
                 #If they wanted to repeat it, run the same loop again, otherwise move on
                 if not repeat_instruction:
                     key+=1
+            return self.run
 
 
-    def play_music_blocking(self, difficulty, level):
+    def play_music_blocking(self, song_name):
         """Level with just music player"""
         if self.run:
 
             # Get the level's data
-            level_data = self.music_data[difficulty][level]  # {"song_name":"title", "mood":"happy", "hint":"some text"}
-            self.track_name = level_data["song_name"]
+            self.track_name = song_name
 
             # Create buttons
             self.next_button = self.create_button("next_button.png", (self.cen_x - 300, 1200),
@@ -677,8 +604,7 @@ class Fix_The_Song_Game():
             self.current_track_time = 0
             self.track_total_time = 100
             self.progress = 0
-            self.current_track_time, self.track_total_time, self.progress, self.song_ended = self.get_song_info(
-                self.current_track_time, self.track_total_time)
+            self.current_track_time, self.track_total_time, self.progress, self.song_ended = self.get_song_info()
 
             self.sound_manager.unpause()
             music_ended = False
@@ -688,8 +614,7 @@ class Fix_The_Song_Game():
                 time = rospy.get_time()
 
                 # get song data
-                self.current_track_time, self.track_total_time, self.progress, self.song_ended = self.get_song_info(
-                    self.current_track_time, self.track_total_time)
+                self.current_track_time, self.track_total_time, self.progress, self.song_ended = self.get_song_info()
 
                 if self.song_ended:
                     self.sound_manager.load_track(self.track_name)  # reload the track at the start
@@ -725,18 +650,27 @@ class Fix_The_Song_Game():
                             next_pressed = True
                             self.sound_manager.stop_track()
                         self.play_button.get_event(event, mouse_pos)  # only check for button press on music end
-
                 # print(rospy.get_time() - time)
+            return self.run
 
-    def play_level(self, difficulty, level_num):
+    def compute_clear_type(self, time_taken, wrong_answers, hints_needed):
+        e_time = self.track_total_time * self.e_clear_multiplier  # Total track time * 1.5
+        if time_taken < e_time and wrong_answers < 1 and hints_needed < 1:
+            return "e_clear"
+        elif wrong_answers >= 2 or hints_needed >= 2:
+            return "fail"
+        else:
+            return "clear"
+
+
+    def play_level(self, correct_song, distract_song, slices):
         """Sequence plays the levels"""
         if self.run:  # Dont start this screen if the previous screen wanted to close out the game
 
             # Get the level's data
-            level_data = self.music_data[difficulty][level_num]
-            self.track_name = level_data["song_name"]
-            self.distract_song = level_data["distract_song"]  # will be None or a list of songs
-            self.segment_num = int(level_data["seg_num"])  # split song into this many segs
+            self.track_name = correct_song
+            self.distract_song = distract_song
+            self.segment_num = slices
             fps = "0"  # for debug info
 
             # Create graphics and buttons
@@ -899,12 +833,18 @@ class Fix_The_Song_Game():
             self.command_manager.send_qt_command(gesture="clap",
                                                  emote="talking")
             self.empty_temp_dir(randomised_segments)
-            return time_taken, wrong_answers, hints_needed
+
+            clear_type = self.compute_clear_type(time_taken, wrong_answers, hints_needed)
+            e_clear_req = {"time_taken": self.track_total_time * self.e_clear_multiplier, "mistakes":0, "num_hints":0}
+            performance = {"time_taken": time_taken, "mistakes": wrong_answers, "num_hints": hints_needed}
+            level_data = {"game_name": "FTS", "clear_type": clear_type, "performance": performance,
+                          "e_clear_req": e_clear_req}
+            return self.run , level_data
 
 
     #################################################################Main####################################################################
 
-    def Main(self, difficulty="easy",level=1):
+    def Main(self, correct_song, distract_song, slices, ask_tut = True):
         # input what level and difficulty to play, the program will handle the rest
         """Main Func"""
 
@@ -912,25 +852,27 @@ class Fix_The_Song_Game():
         self.run = self.level_loader.QTSpeakingScreen("Lets play Fix The Song!", self.run, self.background_colour)
 
         # Ask if they want to play tutorial
-        self.run, tut = self.level_loader.yes_or_no_screen('Should I explain how to play "Fix The Song" ?', self.run, self.background_colour)
-        if tut:
-            self.guided_tut()
+        if ask_tut:
+            self.run, tut = self.level_loader.yes_or_no_screen('Should I explain how to play "Fix The Song" ?', self.run, self.background_colour)
+            if tut:
+                self.guided_tut(correct_song, distract_song, slices)
         
         # Count in to the start of the game
         self.run = self.level_loader.tap_to_continue(self.run, self.background_colour)
         
         # Play the track and block
-        self.play_music_blocking(difficulty, level)
+        #self.play_music_blocking(correct_song)
+        self.track_total_time = 15
 
         # Count into level to slow pacing
         self.run = self.level_loader.countdown(3, self.run, self.background_colour,
                                                prelim_msg="Lets Fix The Song!")
 
         # Play main level
-        time_taken, wrong_answers, hints_needed = self.play_level("medium", 1)
+        self.run, level_data = self.play_level(correct_song, distract_song, slices)
 
         # Save user data
-        print(time_taken, wrong_answers, hints_needed)
+        return self.run, level_data
 
 ######################################################On execution#######################################################################
 
