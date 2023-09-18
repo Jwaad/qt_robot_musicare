@@ -22,7 +22,7 @@ arm_up_left = [-20, -59.599998474121094, -40.70000076293945] #motor pos for righ
 arms_up = '[["right_arm", "left_arm"], [{}, {}]]'.format(arm_up_right,arm_up_left)
 arm_right_msg = Float64MultiArray()
 arm_left_msg = Float64MultiArray()
-arm_left_msg.data = arm_up_right
+arm_right_msg.data = arm_up_right
 arm_left_msg.data = arm_up_left
 
 #init games
