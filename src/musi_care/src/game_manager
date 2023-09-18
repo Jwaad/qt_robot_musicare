@@ -749,8 +749,6 @@ class GameManager():
         randomly selects from the games that have been played least.
         Also increases or decreases difficulty as needed and saves user data after each level
         """
-        self.games = ["SSC", "SSC", "SSC", "SSC" ] # TEMP, REMOVE LATER TODO
-
         # Populate a list of counters for each game type
         this_session = []
         for game in self.games:
@@ -871,6 +869,9 @@ class GameManager():
 
             # Play GTM
             if game_name == "GTM":
+                if self.prev_game == "SSC" or self.prev_game == "CTB":
+                    self.Levels.put_away_drum(run = self.run,background_colour=self.background_colour)
+
                 # Init game
                 game = GTM(debug=self.debug)
 
@@ -881,6 +882,8 @@ class GameManager():
                 self.run, user_level_data = game.Main(mood, file_name, ask_tut = play_tut)
             # Play FTS
             elif game_name == "FTS":
+                if self.prev_game == "SSC" or self.prev_game == "CTB":
+                    self.Levels.put_away_drum(run = self.run,background_colour=self.background_colour)
                 # Init game
                 game = FTS(debug=self.debug)
 
@@ -905,7 +908,7 @@ class GameManager():
             else:
                 # Put arms up and wait for drum
                 if self.prev_game == "GTM" or self.prev_game == "FTS":
-                    self.Levels.get_drum()
+                    self.Levels.get_drum(run = self.run,background_colour=self.background_colour)
 
                 # Shared vars between SSC and CTB
                 first_beat = level_data["first_beat"]
