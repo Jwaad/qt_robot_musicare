@@ -162,8 +162,9 @@ class GameManager():
 
     def LoadUserDatabase(self, run = True):
         """ Load all users into memory, so we can  """
+        self.user_database = []
+
         if run:
-            self.user_database = []
 
             users = []
             # Get list of all users
@@ -826,13 +827,13 @@ class GameManager():
 
     # Create GUI to control which level to play
     def Main(self):
-        self.run, _ = self.Levels.did_you_like_song(run=self.run, background_colour=self.background_colour)
+        self.run, song_rating= self.Levels.did_you_like_song(run=self.run, background_colour=self.background_colour)
 
         # Load all users into memory
-        self.run, _ = self.LoadUserDatabase(run = self.run)
+        self.run, self.user_database = self.LoadUserDatabase(run = self.run)
 
         # use name and surname to get user data
-        self.run, _ = self.LogInScreen(run = self.run)
+        self.run, self.user = self.LogInScreen(run = self.run)
 
         # Init the session
         if self.run:
