@@ -360,21 +360,23 @@ class StandardLevels():
             self.command_manager.qt_gesture("explain_right")
 
             # Create emoji scale buttons
-            blank_button = os.path.join(self.this_file_path, self.path_to_imgs, "blank_button.png") # todo temp
-            loved_it_button = Button(blank_button, (0, 1000), self.pygame, scale=1, return_info=5)
-            liked_it_button = Button(blank_button, (250, 1000), self.pygame, scale=1, return_info=4)
-            neutral_button = Button(blank_button, (500, 1000), self.pygame, scale=1, return_info=3)
-            disliked_it_button = Button(blank_button, (750, 1000), self.pygame, scale=1, return_info=2)
-            hated_it_button = Button(blank_button, (1000, 1000), self.pygame, scale=1, return_info=1)
+            path_to_png = os.path.join(self.this_file_path, self.path_to_imgs)
+            loved_it_button = Button(path_to_png + "/emoji_5.png", (15, 800), self.pygame, scale=0.9, return_info=5)
+            liked_it_button = Button(path_to_png + "/emoji_4.png", (595, 800), self.pygame, scale=0.9, return_info=4)
+            neutral_button = Button(path_to_png + "/emoji_3.png", (1180, 800), self.pygame, scale=0.9, return_info=3)
+            disliked_it_button = Button(path_to_png + "/emoji_2.png", (1755, 800), self.pygame, scale=0.9, return_info=2)
+            hated_it_button = Button(path_to_png + "/emoji_1.png", (2350, 800), self.pygame, scale=0.9, return_info=1)
             buttons = [loved_it_button, liked_it_button, neutral_button, disliked_it_button, hated_it_button]
             
-            # Create labels for emotions
-            loved_it_text = TextObject(self.window,self.window_center, "Hated it", location= (0, 1300))
-            liked_it_text = TextObject(self.window,self.window_center, "Hated it", location= (250, 1300))
-            neutral_text = TextObject(self.window,self.window_center, "Hated it", location= (500, 1300))
-            disliked_it_text = TextObject(self.window,self.window_center, "Hated it", location= (750, 1300))
-            hated_it_text = TextObject(self.window,self.window_center, "Hated it", location= (1000, 1300))
-            text_objs = [loved_it_text, liked_it_text, neutral_text, disliked_it_text, hated_it_text]
+            # Create title and labels for emotions
+            title_text =  TextObject(self.window,self.window_center,on_screen_text, location = (0,400), font_size=150, cen_x=True)
+            
+            loved_it_text = TextObject(self.window,self.window_center, "I Loved it", location= (115, 1350), font_size= 70)
+            liked_it_text = TextObject(self.window,self.window_center, "I Liked it", location= (695, 1350), font_size= 70)
+            neutral_text = TextObject(self.window,self.window_center, "It was Okay", location= (1230, 1350), font_size= 70)
+            disliked_it_text = TextObject(self.window,self.window_center, "I did not like it", location= (1765, 1350),font_size= 70)
+            hated_it_text = TextObject(self.window,self.window_center, "I Hated it", location= (2450, 1350), font_size= 70)
+            text_objs = [title_text, loved_it_text, liked_it_text, neutral_text, disliked_it_text, hated_it_text]
 
             chosen_emoji = False
             # While loop until they click an emoji
@@ -383,26 +385,25 @@ class StandardLevels():
                 for event in self.pygame.event.get():
                     # Check if the user clicks the X
                     if event.type == self.pygame.QUIT:
-                        run = False
-                        return run, -1
+                        return False, -1
                     mouse_pos = self.pygame.mouse.get_pos()
-                    self.animation_manager.StartTouchAnimation(mouse_pos)  # tell system to play animation when drawing
+                    if event.type == self.pygame.MOUSEBUTTONUP:
+                        self.animation_manager.StartTouchAnimation(mouse_pos)  # tell system to play animation when drawing
                     # if any button is pressed, return it's value
                     for button in buttons:
                         pressed = button.get_event(event, mouse_pos)
                         if pressed:
-                            chosen_emoji = True
-                            return run, button.get_info()
+                            return True, button.get_info()
 
                 # Draw background and objects
                 self.renderer.DrawBackground(background_colour)
-                self.renderer.DrawTextCentered(on_screen_text, font_size=70,y=50)
                 for button in buttons:
                     button.render(self.window)
                 for text in text_objs:
                     text.render(self.window)
                 self.animation_manager.DrawTouchAnimation(self.window)  # Also draw touches
                 self.pygame.display.update()  # Update all drawn objects
+            return False, -1 # impossible to reach here
 
 
     def yes_or_no_screen(self, text, run, background_colour, silent = False):
