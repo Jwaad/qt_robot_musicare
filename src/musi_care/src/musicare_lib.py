@@ -38,7 +38,7 @@ class General():
         image_grey = pygame.transform.grayscale(image)  # .convert_alpha()
         return image_grey
 
-    def Load_Song_Data(self, game):
+    def Load_Song_Data(self, game, verbose = False):
         """
         game = string of the game name options: gtm, fts, ctb, ssc
         """
@@ -48,7 +48,8 @@ class General():
         save_path = os.path.join(this_path, 'game_assets/data/', save_name)
         song_data = {}
         with open(save_path, "rb") as f:
-            print("attempting to open {0}".format(save_path))
+            if verbose:
+                print("attempting to open {0}".format(save_path))
             song_data = pickle.load(f)
 
         easy = {}
@@ -422,6 +423,88 @@ class StandardLevels():
         self.path_to_imgs = 'game_assets/graphics'
         self.this_file_path = os.path.dirname(__file__)
 
+    def MeasureBPM(self, song_database, run=True, background_colour=(100, 100, 100)):
+        """
+        Method that plays the song and then measures the sound of user clapping.
+        A BPM is calculated from the 5 second recording.
+        You can then slide the BPM left and right, to get the first beat.
+        Clicking Save will directly overwrite the data in the song_database
+        You can also scroll left and right, to move from one song_entry to another
+        """
+
+        if run:  # Don't start this screen if the previous screen wanted to close out the game
+
+            # List of song_titles
+            song_titles = list(song_database.copy().keys())
+
+            # Create emoji scale buttons
+            path_to_png = os.path.join(self.this_file_path, self.path_to_imgs)
+            prev_song_button = Button(path_to_png + "/tut_back.png", (925, 100), self.pygame, scale=1, return_info="prev")
+            next_song_button = Button(path_to_png + "/tut_next.png", (1625, 100), self.pygame, scale=1, return_info="next")
+            record_button = Button(path_to_png + "/play_button.png", (1300, 100), self.pygame, scale=1, return_info="record")
+            buttons = [next_song_button, prev_song_button, record_button]
+
+            i = 0
+            # Keep looping through all the data, when they click a button
+            while not rospy.is_shutdown() and run:
+
+                # Get song title and data
+                song_title = song_titles[i]
+                song_data = song_database[song_title]
+
+                # Create title and labels for emotions
+                title_text = TextObject(self.window, self.window_center, song_title, location=(0, 500), font_size=150,
+                                        cen_x=True)
+                text_objs = [title_text]
+
+                # Reset vars for loop
+                change_song = False
+                recording = False
+
+                # While loop until they click next or prev
+                while not change_song and not rospy.is_shutdown() and run:
+
+                    # check for quit
+                    for event in self.pygame.event.get():
+                        # Check if the user clicks the X
+                        if event.type == self.pygame.QUIT:
+                            run = False
+                        mouse_pos = self.pygame.mouse.get_pos()
+                        if event.type == self.pygame.MOUSEBUTTONUP:
+                            self.animation_manager.StartTouchAnimation(mouse_pos)
+                        # if any button is pressed, return it's value
+                        for button in buttons:
+                            pressed = button.get_event(event, mouse_pos)
+                            if pressed:
+                                # Ignore all button presses when recording, just in case
+                                if not recording :
+                                    if button.get_info() == "next":
+                                        change_song = True
+                                        i += 1
+                                        # Wrap to end
+                                        if i >= len(song_titles):
+                                            i = 0
+                                    elif button.get_info() == "prev":
+                                        change_song = True
+                                        i -= 1
+                                        # Wrap to start
+                                        if i < 0 :
+                                            i = len(song_titles) - 1
+                                    elif button.get_info() == "record":
+                                        recording = True
+                                        print("now recording") # temp todo
+
+                    # Draw background and objects
+                    self.renderer.DrawBackground(background_colour)
+                    for button in buttons:
+                        button.render(self.window)
+                    for text in text_objs:
+                        text.render(self.window)
+                    self.animation_manager.DrawTouchAnimation(self.window)  # Also draw touches
+                    self.pygame.display.update()  # Update all drawn objects
+
+            return song_data
+
     def get_drum(self, run = True, background_colour = (100,100,100)):
         """ 
         QT needs help putting his drum under him.
@@ -539,7 +622,7 @@ class StandardLevels():
                         return False, -1
                     mouse_pos = self.pygame.mouse.get_pos()
                     if event.type == self.pygame.MOUSEBUTTONUP:
-                        self.animation_manager.StartTouchAnimation(mouse_pos)  # tell system to play animation when drawing
+                        self.animation_manager.StartTouchAnimation(mouse_pos)  # Tell system to play animation when drawing
                     # if any button is pressed, return it's value
                     for button in buttons:
                         pressed = button.get_event(event, mouse_pos)
@@ -1330,7 +1413,7 @@ class SoundManager():
             rospy.loginfo("Temp file saved")
 
         # handle distracting song
-        if type(distracting_songs) != list:
+        if type(distracting_songs) != list and distracting_songs != None:
             distracting_songs = [distracting_songs]
         if distracting_songs != None:
             for song in distracting_songs:  # so we can use multiple distracting songs

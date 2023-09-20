@@ -32,11 +32,11 @@ class GameManager():
         self.path_to_music = "game_assets/music/"
         this_file_path = os.path.dirname(__file__)
         self.path_to_userdata = os.path.join(this_file_path, 'game_assets/data/user_data/')
-        self.session_time = 10 * 60 # 15 * 60  # Time in seconds that sessions should last for. (Minimum time)
+        self.session_time = 30 * 60 # 15 * 60  # Time in seconds that sessions should last for. (Minimum time)
         self.session_name = "session_" # this should be appended with a number e.g: session_3
         self.session_data = {}
-        #self.games = ["GTM", "FTS", "CTB", "SSC"]
-        self.games = ["FTS"]
+        self.games = ["GTM", "FTS", "CTB", "SSC"]
+        #self.games = ["FTS"]
         self.prev_game = ""
 
         # Init ros side

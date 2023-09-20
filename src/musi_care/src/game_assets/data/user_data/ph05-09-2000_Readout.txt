@@ -1,0 +1,111 @@
+name: prince
+surname: hussain
+dob: 05-09-2000
+blacklist: ["Don't fence me in", "Don't let me down short"]
+song_preference:
+    Happy instrumental 4: 3
+    Don't let me down long: 4
+    Don't fence me in: 2
+    Don't let me down short: 2
+    Happy instrumental 3: 3
+    Sad instrumental 1: 4
+    Jingle bells: 4
+game_data:
+    difficulty:
+        GTM: easy
+        FTS: easy
+        CTB: easy
+        SSC: easy
+    session_1:
+        mood_pre: 5
+        game_1:
+            game_name: SSC
+            clear_type: clear
+            performance:
+                num_claps: 95
+                average_error: 0.1
+                forbidden_claps: 10
+                missed_claps: 10
+            e_clear_req:
+                expected_num_claps: 100
+                average_error: 0.05
+                forbidden_claps: 5
+                missed_claps: 5
+            song_title: Happy instrumental 4
+            difficulty: easy
+        game_2:
+            game_name: FTS
+            clear_type: clear
+            performance:
+                time_taken: 68.34358358383179
+                mistakes: 1
+                num_hints: 0
+            e_clear_req:
+                time_taken: 22.5
+                mistakes: 0
+                num_hints: 0
+            song_title: Don't let me down long
+            difficulty: easy
+        game_3:
+            game_name: CTB
+            clear_type: clear
+            performance:
+                num_claps: 95
+                average_error: 0.1
+            e_clear_req:
+                expected_num_claps: 100
+                average_error: 0.05
+            song_title: Don't fence me in
+            difficulty: easy
+        game_4:
+            game_name: GTM
+            clear_type: fail
+            performance:
+                time_taken: 65.49771308898926
+                mood: sad
+                num_hints: 2
+            e_clear_req:
+                time_taken: 22.0
+                mood: sad
+            song_title: Don't let me down short
+            difficulty: easy
+        game_5:
+            game_name: CTB
+            clear_type: clear
+            performance:
+                num_claps: 95
+                average_error: 0.1
+            e_clear_req:
+                expected_num_claps: 100
+                average_error: 0.05
+            song_title: Happy instrumental 3
+            difficulty: easy
+        game_6:
+            game_name: FTS
+            clear_type: clear
+            performance:
+                time_taken: 39.805363178253174
+                mistakes: 0
+                num_hints: 1
+            e_clear_req:
+                time_taken: 22.5
+                mistakes: 0
+                num_hints: 0
+            song_title: Sad instrumental 1
+            difficulty: easy
+        game_7:
+            game_name: SSC
+            clear_type: clear
+            performance:
+                num_claps: 95
+                average_error: 0.1
+                forbidden_claps: 10
+                missed_claps: 10
+            e_clear_req:
+                expected_num_claps: 100
+                average_error: 0.05
+                forbidden_claps: 5
+                missed_claps: 5
+            song_title: Jingle bells
+            difficulty: easy
+        mood_post: 5
