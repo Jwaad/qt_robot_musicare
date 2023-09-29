@@ -6,6 +6,7 @@ import os
 import rospy
 import pygame
 import pygame.freetype
+import functools
 from musicare_lib import General
 from musicare_lib import StandardLevels
 
@@ -154,7 +155,7 @@ def measureBPM(data):
     """
         Use musicare lib and pygame to measure BPM of songs in the database
     """
-    rospy.init_node('MeasureBPM', anonymous=False)
+    rospy.init_node('Measure_BPM', anonymous=False)
     pygame.init()  # start py engine
     pygame.freetype.init()
     window = pygame.display.set_mode((2850,2000))
@@ -162,7 +163,8 @@ def measureBPM(data):
     win_center = (2850 / 2, 2000 / 2)
     path_to_music = "/home/jwaad/catkin_ws/src/musi_care/src/game_assets/music/"
     SL = StandardLevels(window, win_center, pygame, path_to_music)
-    SL.MeasureBPM(data)
+    save_func = SaveDatabase
+    SL.MeasureBPM(data, save_func)
 
 
 if __name__ == '__main__':
