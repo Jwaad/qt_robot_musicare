@@ -14,6 +14,7 @@ import wave
 import contextlib
 import pickle
 from pydub import AudioSegment
+import numpy as np
 from musi_care.msg import SongData
 from musi_care.srv import sound_player_srv
 from musi_care.srv import qt_command
@@ -422,27 +423,62 @@ class StandardLevels():
         self.timer = TimeFunctions()
         self.path_to_imgs = 'game_assets/graphics'
         self.this_file_path = os.path.dirname(__file__)
+        self.path_to_music = path_to_music
+        rospy.wait_for_service('/sound_player_service')
+        self.sound_player = rospy.ServiceProxy('/sound_player_service', sound_player_srv, persistent=True)
 
-    def MeasureBPM(self, song_database, run=True, background_colour=(100, 100, 100)):
+    def MeasureBPM(self, song_database, save_function, run=True, background_colour=(100, 100, 100)):
         """
         Method that plays the song and then measures the sound of user clapping.
         A BPM is calculated from the 5 second recording.
         You can then slide the BPM left and right, to get the first beat.
         Clicking Save will directly overwrite the data in the song_database
         You can also scroll left and right, to move from one song_entry to another
+        song_data = dict, database in format {song_title: {"file_name":"filename", bpm:bpm, etc:etc }}
+        save_function = func, pass in what function to run, when clicking the save button
         """
+
+        def generateBeatMarkers(rect, bpm, first_beat, track_total_time):
+            """
+            function for method measure BPM.
+            Function takes in a rect, bpm and the time of first beat, then evenly distributes
+            lines based on the BPM and first beat.
+            returns a list of each line pygame element
+            """
+            # Get measure of the space to draw lines onto
+            x, y, w, h = rect
+            rect_left = x
+            rect_right = x + w
+
+            # Generate beats as a percentage of the track time
+            bps = 60 / bpm
+            total_beats = int((track_total_time - first_beat) / bps) + 1# +1 to include first beat
+            beat_timings = np.zeros([total_beats],dtype=float)
+
+            beat_time = first_beat # time between each beat in secs
+            for i in range(0, beat_timings.size):
+                beat_percent = beat_time / track_total_time
+                beat_timings[i] = beat_percent
+                beat_time += bps # time between each beat in secs
+            #print("printing beat times", beat_timings)
+            print("This song at bpm of {}, is {}s long, and has {} beats".format(bpm, track_total_time, beat_timings.size ))
+            return beat_timings
+
 
         if run:  # Don't start this screen if the previous screen wanted to close out the game
 
             # List of song_titles
             song_titles = list(song_database.copy().keys())
 
-            # Create emoji scale buttons
+            # Create buttons
             path_to_png = os.path.join(self.this_file_path, self.path_to_imgs)
-            prev_song_button = Button(path_to_png + "/tut_back.png", (925, 100), self.pygame, scale=1, return_info="prev")
-            next_song_button = Button(path_to_png + "/tut_next.png", (1625, 100), self.pygame, scale=1, return_info="next")
+            prev_song_button = Button(path_to_png + "/tut_back.png", (925, 150), self.pygame, scale=1, return_info="prev")
+            next_song_button = Button(path_to_png + "/tut_next.png", (1625, 150), self.pygame, scale=1, return_info="next")
             record_button = Button(path_to_png + "/play_button.png", (1300, 100), self.pygame, scale=1, return_info="record")
-            buttons = [next_song_button, prev_song_button, record_button]
+            save_button = Button(path_to_png + "/blank_button.png", (1150, 1550), self.pygame, scale=0.5, text="save",
+                                 return_info="save")
+
+            buttons = [next_song_button, prev_song_button, record_button, save_button]
 
             i = 0
             # Keep looping through all the data, when they click a button
@@ -451,13 +487,24 @@ class StandardLevels():
                 # Get song title and data
                 song_title = song_titles[i]
                 song_data = song_database[song_title]
+                track_stats = self.sound_player("load_track", ("/game_assets/music/" + song_data["file_name"]), 0.0)
+                track_len = track_stats.track_total_time
 
                 # Create title and labels for emotions
                 title_text = TextObject(self.window, self.window_center, song_title, location=(0, 500), font_size=150,
                                         cen_x=True)
                 text_objs = [title_text]
 
-                # Reset vars for loop
+                # Generate wav_image todo
+                song_waveform = Button(path_to_png + "/blank_button.png", (625, 800), self.pygame, scale=1.5)
+
+                #Generate beat markers based off of data
+                bpm = float(song_data["bpm"]) # Calculated with (t2 - t1) / claps
+                first_beat = float(song_data["first_beat"])  # time that the user started clapping
+                wav_rect = song_waveform.get_rect()
+                markers = generateBeatMarkers(wav_rect, bpm, first_beat, track_total_time=track_len)
+
+                # Reset vars for the loop
                 change_song = False
                 recording = False
 
@@ -491,8 +538,11 @@ class StandardLevels():
                                         if i < 0 :
                                             i = len(song_titles) - 1
                                     elif button.get_info() == "record":
-                                        recording = True
-                                        print("now recording") # temp todo
+                                        #recording = True
+                                        pass
+
+                                    elif button.get_info() == "save":
+                                        save_function(song_database)
 
                     # Draw background and objects
                     self.renderer.DrawBackground(background_colour)
@@ -500,10 +550,13 @@ class StandardLevels():
                         button.render(self.window)
                     for text in text_objs:
                         text.render(self.window)
+                    song_waveform.render(self.window)
                     self.animation_manager.DrawTouchAnimation(self.window)  # Also draw touches
                     self.pygame.display.update()  # Update all drawn objects
 
             return song_data
+
+
 
     def get_drum(self, run = True, background_colour = (100,100,100)):
         """ 
