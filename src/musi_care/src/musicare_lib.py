@@ -408,6 +408,7 @@ class Behaviours():
 
 #####################################################General Levels##################################################################
 
+
 class StandardLevels():
     """Class to draw basic screens multiple games use, such as yes or no screen """
 
@@ -461,8 +462,14 @@ class StandardLevels():
                 beat_timings[i] = beat_percent
                 beat_time += bps # time between each beat in secs
             #print("printing beat times", beat_timings)
+
+            lines = []
+            for beat in beat_timings:
+                line = LineObject((w * beat, y), (w * beat, y + h), colour=(255, 0, 0) )
+                lines.append(line)
+
             print("This song at bpm of {}, is {}s long, and has {} beats".format(bpm, track_total_time, beat_timings.size ))
-            return beat_timings
+            return lines
 
 
         if run:  # Don't start this screen if the previous screen wanted to close out the game
@@ -479,6 +486,9 @@ class StandardLevels():
                                  return_info="save")
 
             buttons = [next_song_button, prev_song_button, record_button, save_button]
+
+            lines = []
+
 
             i = 0
             # Keep looping through all the data, when they click a button
@@ -502,7 +512,7 @@ class StandardLevels():
                 bpm = float(song_data["bpm"]) # Calculated with (t2 - t1) / claps
                 first_beat = float(song_data["first_beat"])  # time that the user started clapping
                 wav_rect = song_waveform.get_rect()
-                markers = generateBeatMarkers(wav_rect, bpm, first_beat, track_total_time=track_len)
+                lines = generateBeatMarkers(wav_rect, bpm, first_beat, track_total_time=track_len)
 
                 # Reset vars for the loop
                 change_song = False
@@ -551,6 +561,8 @@ class StandardLevels():
                     for text in text_objs:
                         text.render(self.window)
                     song_waveform.render(self.window)
+                    for line in lines:
+                        line.render(self.window)
                     self.animation_manager.DrawTouchAnimation(self.window)  # Also draw touches
                     self.pygame.display.update()  # Update all drawn objects
 
@@ -2349,5 +2361,18 @@ class HorizontalSlider():
                 self.bar_overwrite = 0.0  # Don't let cursor move past slider bar
 
         return self.slider_being_held
+
+class LineObject():
+    """Create object oritentated lines tat we can store and draw later, for screen order """
+
+    def __init__(self, start_pos, end_pos, colour = (0,0,0), width = 3):
+
+        self.start_pos = start_pos
+        self.end_pos = end_pos
+        self.colour = colour
+        self.width = width
+
+    def render(self, screen):
+        pygame.draw.line(screen, self.colour, self.start_pos, self.end_pos, self.width)
 
 ###########################################################END OF LIBRARY############################################################
