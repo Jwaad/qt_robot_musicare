@@ -444,16 +444,14 @@ class StandardLevels():
             function for method measure BPM.
             Function takes in a rect, bpm and the time of first beat, then evenly distributes
             lines based on the BPM and first beat.
-            returns a list of each line pygame element
+            returns a list of line objects
             """
             # Get measure of the space to draw lines onto
             x, y, w, h = rect
-            rect_left = x
-            rect_right = x + w
 
             # Generate beats as a percentage of the track time
             bps = 60 / bpm
-            total_beats = int((track_total_time - first_beat) / bps) + 1# +1 to include first beat
+            total_beats = int((track_total_time - first_beat) / bps) + 1 # +1 to include first beat
             beat_timings = np.zeros([total_beats],dtype=float)
 
             beat_time = first_beat # time between each beat in secs
@@ -465,7 +463,7 @@ class StandardLevels():
 
             lines = []
             for beat in beat_timings:
-                line = LineObject((w * beat, y), (w * beat, y + h), colour=(255, 0, 0) )
+                line = LineObject((x + (w * beat), y), (x + (w * beat), y + h), width = 5 )
                 lines.append(line)
 
             print("This song at bpm of {}, is {}s long, and has {} beats".format(bpm, track_total_time, beat_timings.size ))
@@ -2362,6 +2360,7 @@ class HorizontalSlider():
 
         return self.slider_being_held
 
+
 class LineObject():
     """Create object oritentated lines tat we can store and draw later, for screen order """
 
@@ -2374,5 +2373,6 @@ class LineObject():
 
     def render(self, screen):
         pygame.draw.line(screen, self.colour, self.start_pos, self.end_pos, self.width)
+
 
 ###########################################################END OF LIBRARY############################################################
