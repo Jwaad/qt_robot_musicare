@@ -487,6 +487,7 @@ class StandardLevels():
 
             # List of song_titles
             song_titles = list(song_database.copy().keys())
+            print(song_titles)
 
             # Create buttons
             path_to_png = os.path.join(self.this_file_path, self.path_to_imgs)
@@ -500,12 +501,12 @@ class StandardLevels():
 
             lines = []
 
-            i = 0
+            song_ind = 0
             # Keep looping through all the data, when they click a button
             while not rospy.is_shutdown() and run:
-
+                print(song_ind)
                 # Get song title and data
-                song_title = song_titles[i]
+                song_title = song_titles[song_ind]
                 song_data = song_database[song_title]
 
                 # Try to read track data up to 3 times, if we got a bad read
@@ -571,16 +572,16 @@ class StandardLevels():
                                     if not self.recording:
                                         if button.get_info() == "next":
                                             change_song = True
-                                            i += 1
+                                            song_ind += 1
                                             # Wrap to end
-                                            if i >= len(song_titles):
-                                                i = 0
+                                            if song_ind >= len(song_titles):
+                                                song_ind = 0
                                         elif button.get_info() == "prev":
                                             change_song = True
-                                            i -= 1
+                                            song_ind -= 1
                                             # Wrap to start
-                                            if i < 0 :
-                                                i = len(song_titles) - 1
+                                            if song_ind < 0 :
+                                                song_ind = len(song_titles) - 1
                                         elif button.get_info() == "record":
                                             self.sound_manager.unpause()
                                             self.recording = True
