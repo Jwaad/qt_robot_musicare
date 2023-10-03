@@ -22,6 +22,7 @@ import threading
 from qt_motors_controller.srv import set_control_mode, set_velocity
 from std_msgs.msg import Float64MultiArray
 import cv2
+import time
 
 # rospy.init_node('musicare_lib', anonymous=False)
 # rospy.loginfo("musicare_lib launched successfully")
@@ -438,6 +439,19 @@ class StandardLevels():
         song_data = dict, database in format {song_title: {"file_name":"filename", bpm:bpm, etc:etc }}
         save_function = func, pass in what function to run, when clicking the save button
         """
+        def BPMFromHits(hits):
+            """ Using times of each beat, calculate the bpm"""
+            #Generate a new list of time differences per beat
+            time_gaps = []
+            for i in range(0, len(hits) - 2): # -2 since we dont want to loop at len
+                time_gap = hits[i+1] - hits[i]
+                time_gaps.append(time_gap)
+            if len(time_gaps) < 2:
+                return 999
+            avg_time_gap = np.mean(time_gaps)
+            bpm = 60 / avg_time_gap
+            bpm = int(round(bpm,0))
+            return bpm
 
         def generateBeatMarkers(rect, bpm, first_beat, track_total_time):
             """
@@ -469,7 +483,6 @@ class StandardLevels():
             print("This song at bpm of {}, is {}s long, and has {} beats".format(bpm, track_total_time, beat_timings.size ))
             return lines
 
-
         if run:  # Don't start this screen if the previous screen wanted to close out the game
 
             # List of song_titles
@@ -487,7 +500,6 @@ class StandardLevels():
 
             lines = []
 
-
             i = 0
             # Keep looping through all the data, when they click a button
             while not rospy.is_shutdown() and run:
@@ -495,8 +507,14 @@ class StandardLevels():
                 # Get song title and data
                 song_title = song_titles[i]
                 song_data = song_database[song_title]
-                track_stats = self.sound_player("load_track", ("/game_assets/music/" + song_data["file_name"]), 0.0)
-                track_len = track_stats.track_total_time
+
+                # Try to read track data up to 3 times, if we got a bad read
+                i = 0
+                track_len = 999
+                while track_len > 900 and i < 3:
+                    track_stats = self.sound_manager.load_track(("/game_assets/music/" + song_data["file_name"]), 0.0)
+                    track_len = track_stats.track_total_time
+                    i += 1
 
                 # Create title and labels for emotions
                 title_text = TextObject(self.window, self.window_center, song_title, location=(0, 500), font_size=150,
@@ -510,47 +528,66 @@ class StandardLevels():
                 bpm = float(song_data["bpm"]) # Calculated with (t2 - t1) / claps
                 first_beat = float(song_data["first_beat"])  # time that the user started clapping
                 wav_rect = song_waveform.get_rect()
+                time.sleep(0.3)
                 lines = generateBeatMarkers(wav_rect, bpm, first_beat, track_total_time=track_len)
 
                 # Reset vars for the loop
                 change_song = False
-                recording = False
+
+                # Vars for recording claps / space hits
+                self.recording = False
+                hits = []
+                t0 = 0
+                song_snippet_time = 5 # how long the song should play for
 
                 # While loop until they click next or prev
                 while not change_song and not rospy.is_shutdown() and run:
-
-                    # check for quit
-                    for event in self.pygame.event.get():
-                        # Check if the user clicks the X
-                        if event.type == self.pygame.QUIT:
-                            run = False
-                        mouse_pos = self.pygame.mouse.get_pos()
-                        if event.type == self.pygame.MOUSEBUTTONUP:
-                            self.animation_manager.StartTouchAnimation(mouse_pos)
-                        # if any button is pressed, return it's value
-                        for button in buttons:
-                            pressed = button.get_event(event, mouse_pos)
-                            if pressed:
-                                # Ignore all button presses when recording, just in case
-                                if not recording :
-                                    if button.get_info() == "next":
-                                        change_song = True
-                                        i += 1
-                                        # Wrap to end
-                                        if i >= len(song_titles):
-                                            i = 0
-                                    elif button.get_info() == "prev":
-                                        change_song = True
-                                        i -= 1
-                                        # Wrap to start
-                                        if i < 0 :
-                                            i = len(song_titles) - 1
-                                    elif button.get_info() == "record":
-                                        #recording = True
-                                        pass
-
-                                    elif button.get_info() == "save":
-                                        save_function(song_database)
+                    if self.recording:
+                        # Record claps
+                        for event in self.pygame.event.get():
+                            if event.type == pygame.KEYDOWN:
+                                if event.key == pygame.K_SPACE:
+                                    hits.append(rospy.get_time() - t0)
+                        # check if time up
+                        if (rospy.get_time() - t0) > song_snippet_time:
+                            self.recording = False
+                            self.sound_manager.stop_track()  # Stop the music
+                            bpm = BPMFromHits(hits)
+                            lines = generateBeatMarkers(wav_rect, bpm, first_beat, track_total_time=track_len)
+                    else:
+                        # Handle events
+                        for event in self.pygame.event.get():
+                            # Check if the user clicks the X
+                            if event.type == self.pygame.QUIT:
+                                run = False
+                            mouse_pos = self.pygame.mouse.get_pos()
+                            if event.type == self.pygame.MOUSEBUTTONUP:
+                                self.animation_manager.StartTouchAnimation(mouse_pos)
+                            # if any button is pressed, return it's value
+                            for button in buttons:
+                                pressed = button.get_event(event, mouse_pos)
+                                if pressed:
+                                    # Ignore all button presses when recording, just in case
+                                    if not self.recording:
+                                        if button.get_info() == "next":
+                                            change_song = True
+                                            i += 1
+                                            # Wrap to end
+                                            if i >= len(song_titles):
+                                                i = 0
+                                        elif button.get_info() == "prev":
+                                            change_song = True
+                                            i -= 1
+                                            # Wrap to start
+                                            if i < 0 :
+                                                i = len(song_titles) - 1
+                                        elif button.get_info() == "record":
+                                            self.sound_manager.unpause()
+                                            self.recording = True
+                                            hits = []
+                                            t0 = rospy.get_time()
+                                        elif button.get_info() == "save":
+                                            save_function(song_database)
 
                     # Draw background and objects
                     self.renderer.DrawBackground(background_colour)
@@ -564,8 +601,7 @@ class StandardLevels():
                     self.animation_manager.DrawTouchAnimation(self.window)  # Also draw touches
                     self.pygame.display.update()  # Update all drawn objects
 
-            return song_data
-
+            return song_database
 
 
     def get_drum(self, run = True, background_colour = (100,100,100)):
