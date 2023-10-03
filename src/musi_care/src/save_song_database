@@ -167,14 +167,7 @@ def measureBPM(data):
     SL.MeasureBPM(data, save_func)
 
 
-if __name__ == '__main__':
-
-    # Save hard coded database to file
-    data = SaveDatabase()
-
-    # Measure BPM of songs and save them to memory
-    measureBPM(data)
-
+def PrintLevelDistribution(data):
     # Give distribution of levels for each difficulty for each game
     games = ["GTM", "FTS", "CTB", "SSC"]
     diff = ["easy", "medium", "hard"]
@@ -185,3 +178,15 @@ if __name__ == '__main__':
         for d in diff:
             print("{} {} levels:".format(len(data[d]), d))
             #print(data[d])
+
+
+if __name__ == '__main__':
+
+    # Save hard coded database to file
+    data = SaveDatabase()
+
+    # Measure BPM of songs and save them to memory
+    measureBPM(data)
+
+    # Nice readout telling us the distribution of game levels
+    #PrintLevelDistribution(data)
