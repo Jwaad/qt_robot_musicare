@@ -1549,7 +1549,7 @@ class QTManager():
         qt_say_blocking with a blank screen
         """
         self.robo_timer = TimeFunctions()
-        self.time_per_char = 0.14
+        self.time_per_char = 0.11
         self.right_arm_pos_pub = rospy.Publisher('/qt_robot/right_arm_position/command', Float64MultiArray,
                                                  queue_size=10)
         self.left_arm_pos_pub = rospy.Publisher('/qt_robot/left_arm_position/command', Float64MultiArray,
@@ -2397,11 +2397,87 @@ class HorizontalSlider():
 
         return self.slider_being_held
 
+class VolumeSlider():
+    """ Class that generates a slider object using pygame."""
+
+    def __init__(self, pygame, location, default_vol = 0,  scale = 1, min_max = (0,100), on_release=None):
+        """ Create the slider object at given location with given scale.
+            pygame = pygame, pass in initialised pygame, so we don reinitialise
+            location = list or tuple, x and y pos
+            default_vol = float or int, the volume the slider should start at in percentage. default = 0
+            scale = float or int, default is 1
+            min_max = list / tuple, values for min and max percentage. so that you can have custom ranges
+                (e.g (70, 90) would have the max return of the slider be 90, and the minimum be 70)
+                default = (0,100)
+            on_release = func, this should be a function / method that runs on release of the mouse
+        """
+
+        self.pygame = pygame
+
+        # Load images
+        path_to_graphics = os.path.join(os.path.dirname(__file__), "game_assets/graphics/")
+
+        # Slider box
+        slider_box_path = path_to_graphics + "volume_slider_box.png"
+        slider_box_image = self.pygame.image.load(slider_box_path).convert_alpha()
+        slider_box_grey = General().convert_to_grey(slider_box_image)
+
+        # Scale and get rect of slider box
+        slider_box_x = location[0]
+        slider_box_y = location[1]
+        self.slider_box_w = int(slider_box_image.get_width() * scale)
+        self.slider_box_h = int(slider_box_image.get_height() * scale)
+
+        scaled_size = (self.slider_box_w, self.slider_box_h)
+        self.slider_box = self.pygame.transform.scale(slider_box_image, scaled_size)
+        self.slider_box_grey = self.pygame.transform.scale(slider_box_grey, scaled_size)
+        self.slider_box_rect = self.pygame.Rect(slider_box_x, slider_box_y, self.slider_box_w, self.slider_box_h)
+
+        # Load and scale slider
+        slider_path = path_to_graphics + "volume_slider_slider.png"
+        slider_image = self.pygame.image.load(slider_path).convert_alpha()
+        slider_grey = General().convert_to_grey(slider_image)
+
+        self.slider_x, self.slider_y = self.CalculateSliderPos(default_vol)
+        self.slider_w = int(slider_image.get_width() * scale)
+        self.slider_h = int(slider_image.get_height() * scale)
+
+        scaled_size = (self.slider_w, self.slider_h)
+        self.slider = self.pygame.transform.scale(slider_image, scaled_size)
+        self.slider_grey = self.pygame.transform.scale(slider_grey, scaled_size)
+        self.slider_rect = self.pygame.Rect(self.slider_x, self.slider_y - (self.slider_h /2), self.slider_w, self.slider_h)
+
+        # Init vars
+        self.held = False
+        self.on_release = on_release
+        self.type = "VolumeSlider"
+
+    def CalculateSliderPos(self, percentage):
+        """ Use the percentage passed in, as well as slider box rect to set the slider
+        to where it should be along the box"""
+        x,y,w,h = self.slider_box_rect
+        slider_x = x
+        slider_y = y + (h - (h * percentage)) # such that 0% = bottom, 100% = top
+        return slider_x, slider_y
+
+    def handle_event(self, event):
+        pass
+
+    def render(self, screen, grey = False):
+        if grey:
+            # Draw grey graphics onto screen
+            screen.blit(self.slider_box_grey, self.slider_box_rect)
+            screen.blit(self.slider_grey, self.slider_rect)
+
+        else:
+            # Draw onto screen
+            screen.blit(self.slider_box, self.slider_box_rect)
+            screen.blit(self.slider, self.slider_rect)
 
 class LineObject():
     """Create object oritentated lines tat we can store and draw later, for screen order """
 
-    def __init__(self, start_pos, end_pos, colour = (0,0,0), width = 3):
+    def __init__(self, start_pos, end_pos, colour = (255,100,100), width = 3):
 
         self.start_pos = start_pos
         self.end_pos = end_pos

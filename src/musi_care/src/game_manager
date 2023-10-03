@@ -15,6 +15,7 @@ from musicare_lib import InputBox
 from musicare_lib import StandardLevels
 from musicare_lib import Behaviours
 from musicare_lib import General
+from musicare_lib import VolumeSlider
 from guess_mood import Guess_The_Mood_Game as GTM
 from fix_song import Fix_The_Song_Game as FTS
 from clap_beat import Clap_To_Beat_Game as CTB
@@ -357,6 +358,8 @@ class GameManager():
         # Buttons
         next_button = self.create_button("next_button.png", (1100, 1200))
         signup_button = self.create_button("blank_button.png", (2300, 20), text="New User", scale=0.5)
+        # Volume Slider
+        voice_slider = VolumeSlider(self.pygame,(2000,1000), scale = 1.1)
 
         log_in = False
         user_recognised = False
@@ -430,6 +433,7 @@ class GameManager():
                     tick.render(self.window)
             next_button.render(self.window)
             signup_button.render(self.window)
+            voice_slider.render(self.window)
             self.animation_manager.DrawTouchAnimation(self.window)
             self.pygame.display.update()  # Update all drawn objects
 
