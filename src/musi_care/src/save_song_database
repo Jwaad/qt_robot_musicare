@@ -185,8 +185,8 @@ if __name__ == '__main__':
     # Save hard coded database to file
     data = SaveDatabase()
 
+    # Nice readout telling us the distribution of game levels
+    PrintLevelDistribution(data)
+
     # Measure BPM of songs and save them to memory
     measureBPM(data)
-
-    # Nice readout telling us the distribution of game levels
-    #PrintLevelDistribution(data)
