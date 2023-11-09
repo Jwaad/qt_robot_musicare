@@ -447,11 +447,24 @@ class StandardLevels():
                 time_gap = hits[i+1] - hits[i]
                 time_gaps.append(time_gap)
             if len(time_gaps) < 2:
-                return 999
+                return 0.0, 999
             avg_time_gap = np.mean(time_gaps)
             bpm = 60 / avg_time_gap
             bpm = int(round(bpm,0))
-            return bpm
+            first_beat = hits[0]
+            return first_beat, bpm
+
+        def get_beats_list(bpm, track_len, first_beat):
+            bps = float(60 / bpm)
+            total_beats = math.floor(((track_len - first_beat) / bps) + 1)  # +1 to include first beat
+            beat_timings = np.zeros([total_beats], dtype=float)
+            beat_timings[0] = float(first_beat)
+            # loop through and populate list of beat timings, skipping the first
+            for i in range(beat_timings.shape[0]-1):
+                beat_timings[i + 1] = beat_timings[i] + (1 / bps)
+
+            print(beat_timings)
+            return beat_timings
 
         def generateBeatMarkers(rect, bpm, first_beat, track_total_time):
             """
@@ -480,7 +493,7 @@ class StandardLevels():
                 line = LineObject((x + (w * beat), y), (x + (w * beat), y + h), width = 5 )
                 lines.append(line)
 
-            print("This song at bpm of {}, is {}s long, and has {} beats".format(bpm, track_total_time, beat_timings.size ))
+            print("This song has a bpm of {}, is {}s long, and has {} beats. First beat is at {}s".format(bpm, track_total_time, beat_timings.size , round(first_beat,3) ))
             return lines
 
         if run:  # Don't start this screen if the previous screen wanted to close out the game
@@ -493,11 +506,12 @@ class StandardLevels():
             path_to_png = os.path.join(self.this_file_path, self.path_to_imgs)
             prev_song_button = Button(path_to_png + "/tut_back.png", (925, 150), self.pygame, scale=1, return_info="prev")
             next_song_button = Button(path_to_png + "/tut_next.png", (1625, 150), self.pygame, scale=1, return_info="next")
-            record_button = Button(path_to_png + "/play_button.png", (1300, 100), self.pygame, scale=1, return_info="record")
+            record_button = Button(path_to_png + "/record_button.png", (1300, 100), self.pygame, scale=1, return_info="record")
+            play_button = ToggleButton(path_to_png + "/play_button.png", path_to_png + "/pause_button.png", (300, 950), self.pygame, scale=1, return_info="play")
             save_button = Button(path_to_png + "/blank_button.png", (1150, 1550), self.pygame, scale=0.5, text="save",
                                  return_info="save")
 
-            buttons = [next_song_button, prev_song_button, record_button, save_button]
+            buttons = [next_song_button, prev_song_button, record_button, save_button, play_button]
 
             lines = []
 
@@ -526,7 +540,7 @@ class StandardLevels():
                 song_waveform = Button(path_to_png + "/blank_button.png", (625, 800), self.pygame, scale=1.5)
 
                 #Generate beat markers based off of data
-                bpm = float(song_data["bpm"]) # Calculated with (t2 - t1) / claps
+                bpm = float(song_data["bpm"]) # Calculated as avg time between claps
                 first_beat = float(song_data["first_beat"])  # time that the user started clapping
                 wav_rect = song_waveform.get_rect()
                 time.sleep(0.3)
@@ -537,9 +551,11 @@ class StandardLevels():
 
                 # Vars for recording claps / space hits
                 self.recording = False
+                self.playing_track = False
+                song_beats = []# generate beats list
                 hits = []
                 t0 = 0
-                song_snippet_time = 5 # how long the song should play for
+                song_snippet_time = 7 # how long the song should play for
 
                 # While loop until they click next or prev
                 while not change_song and not rospy.is_shutdown() and run:
@@ -547,6 +563,7 @@ class StandardLevels():
                     # So we can use events twice seperately
                     events = self.pygame.event.get()
 
+                    # handle GUI when recording
                     if self.recording:
                         # Record claps
                         for event in events:
@@ -557,8 +574,24 @@ class StandardLevels():
                         if (rospy.get_time() - t0) > song_snippet_time:
                             self.recording = False
                             self.sound_manager.stop_track()  # Stop the music
-                            bpm = BPMFromHits(hits)
+                            first_beat, bpm = BPMFromHits(hits)
+                            song_data["first_beat"] = first_beat
+                            song_data["bpm"] = bpm
                             lines = generateBeatMarkers(wav_rect, bpm, first_beat, track_total_time=track_len)
+                            song_database[song_title] = song_data
+
+                    # Metronome playing logic
+                    if self.playing_track:
+                        next_beat = song_beats[0]
+                        if (rospy.get_time() - t0) > next_beat:
+                            song_beats = np.delete(song_beats, 0)
+                            print("muzzard on the beat")
+                            # TODO
+                            # Play metronome sound on each beat
+                        if song_beats.shape[0] == 0:
+                            self.playing_track = False
+                            play_button.toggle_toggle() # Toggle back off
+
 
                     # Handle events
                     for event in events:
@@ -574,17 +607,33 @@ class StandardLevels():
                             if pressed:
                                 if button.get_info() == "record":
                                     if not self.recording:
-                                        self.sound_manager.unpause()
+                                        if self.playing_track:
+                                            self.sound_manager.stop_track()
+                                            self.playing_track = False
+                                            play_button.toggle_toggle()
+                                        self.sound_manager.start_track(("/game_assets/music/" + song_data["file_name"]),
+                                                                      0.0)
                                         self.recording = True
                                         hits = []
                                         t0 = rospy.get_time()
                                     else:
                                         self.sound_manager.stop_track()
-                                        self.sound_manager.load_track(("/game_assets/music/" + song_data["file_name"]),
-                                                                      0.0)
                                         self.recording = False
                                 # Ignore all button presses when recording, just in case
                                 if not self.recording:
+                                    if button.get_info() == "play":
+                                        # Stop playing and reload track to 0
+                                        if self.playing_track:
+                                            self.playing_track = False
+                                            play_button.toggle_toggle()
+                                            self.sound_manager.stop_track()
+                                        else:
+                                            t0 = rospy.get_time()
+                                            self.playing_track = True
+                                            self.sound_manager.start_track(
+                                                ("/game_assets/music/" + song_data["file_name"]),
+                                                0.0)
+                                            song_beats = get_beats_list(song_data["bpm"], track_len, song_data["first_beat"])
                                     if button.get_info() == "next":
                                         change_song = True
                                         song_ind += 1
@@ -603,7 +652,10 @@ class StandardLevels():
                     # Draw background and objects
                     self.renderer.DrawBackground(background_colour)
                     for button in buttons:
-                        button.render(self.window)
+                        if self.recording:
+                            button.render(self.window, grey=True)
+                        else:
+                            button.render(self.window)
                     for text in text_objs:
                         text.render(self.window)
                     song_waveform.render(self.window)
@@ -1949,7 +2001,8 @@ class ToggleButton():
         self.toggle_state = not self.toggle_state
         return (self.toggle_state)
 
-    def get_event(self, event, mouse_pos):
+    # OLD GET EVENT
+    def old_get_event(self, event, mouse_pos):
         """Button event handle, if mouse release, then toggle"""
         mouse_on_button = self.rect.collidepoint(mouse_pos)
         if mouse_on_button:
@@ -1957,6 +2010,19 @@ class ToggleButton():
                 return self.toggle_toggle()
         return self.toggle_state
 
+    # Is a rework of get_event
+    def get_event(self, event, mouse_pos):
+        """ Toggle the button, and return true if it was clicked this loop"""
+        mouse_on_button = self.rect.collidepoint(mouse_pos)
+        if mouse_on_button:
+            if event.type == self.pygame.MOUSEBUTTONUP:
+                self.toggle_toggle()
+                return True
+        return False
+
+    def get_info(self):
+        return self.return_info
+    
     def get_rect(self):
         return self.rect
 

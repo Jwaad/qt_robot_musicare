@@ -151,6 +151,19 @@ def SaveDatabase(song_database = None):
 
     return song_database
 
+
+def LoadData():
+    this_path = os.path.dirname(__file__)
+    save_name = "song_database.p"
+    save_path = os.path.join(this_path, 'game_assets/data/', save_name)
+
+    # Get path and save
+    open(save_path, "rb").close()  # Close it if it's in use ? maybe
+    with open(save_path, "rb") as f:
+        data = pickle.load(f)
+    return data
+
+
 def measureBPM(data):
     """
         Use musicare lib and pygame to measure BPM of songs in the database
@@ -179,14 +192,14 @@ def PrintLevelDistribution(data):
             print("{} {} levels:".format(len(data[d]), d))
             #print(data[d])
 
-
 if __name__ == '__main__':
 
     # Save hard coded database to file
-    data = SaveDatabase()
+    #data = SaveDatabase()
 
     # Nice readout telling us the distribution of game levels
-    PrintLevelDistribution(data)
+    #PrintLevelDistribution(data)
 
     # Measure BPM of songs and save them to memory
+    data = LoadData()
     measureBPM(data)
