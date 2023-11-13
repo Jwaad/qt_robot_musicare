@@ -10,138 +10,145 @@ import functools
 from musicare_lib import General
 from musicare_lib import StandardLevels
 
+def SaveDefaultDatabase():
+    """ Func returns a manually saved default database to use in a pinch"""
+    song_database = \
+        {
+            "Follow the van":
+                {
+                    "file_name": "follow_the_van.wav",
+                    "bpm": 57.0,
+                    "first_beat": 2.8,
+                    "mood": "happy",
+                    "GTM": "medium",
+                    "FTS": "easy",
+                    "CTB": "easy",
+                    "SSC": "easy"
+                },
+
+            "Don't fence me in":
+                {
+                    "file_name": "dont_fence_me_in_long.wav",
+                    "bpm": 40.0,
+                    "first_beat": 0.1,
+                    "mood": "sad",
+                    "GTM": "medium",
+                    "FTS": "medium",
+                    "CTB": "easy",
+                    "SSC": "easy"
+                },
+
+            "Jingle bells":
+                {
+                    "file_name": "jingle_bells.wav",
+                    "bpm": 95.0,
+                    "first_beat": 2.8,
+                    "mood": "happy",
+                    "GTM": "medium",
+                    "FTS": "medium",
+                    "CTB": "easy",
+                    "SSC": "easy"
+                },
+
+            "Happy instrumental 3":
+                {
+                    "file_name": "happy_3.wav",
+                    "bpm": 60.0,
+                    "first_beat": 0.1,
+                    "mood": "happy",
+                    "GTM": "hard",
+                    "FTS": "hard",
+                    "CTB": "easy",
+                    "SSC": "easy"
+                },
+
+            "Happy instrumental 1":
+                {
+                    "file_name": "happy_1.wav",
+                    "bpm": 100.0,
+                    "first_beat": 0.0,
+                    "mood": "happy",
+                    "GTM": "easy",
+                    "FTS": "hard",
+                    "CTB": "easy",
+                    "SSC": "easy"
+                },
+
+            "Don't let me down short":
+                {
+                    "file_name": "beetles_dont_let_me_down_short.wav",
+                    "bpm": 76,
+                    "first_beat": 0.0,
+                    "mood": "sad",
+                    "GTM": "easy",
+                    "FTS": "medium",
+                    "CTB": "easy",
+                    "SSC": "easy"
+                },
+
+            "Sad instrumental 1":
+                {
+                    "file_name": "sad_1.wav",
+                    "bpm": 100.0,
+                    "first_beat": 0.0,
+                    "mood": "sad",
+                    "GTM": "easy",
+                    "FTS": "easy",
+                    "CTB": "easy",
+                    "SSC": "easy"
+                },
+
+            "Happy instrumental 4":
+                {
+                    "file_name": "happy_4.wav",
+                    "bpm": 100.0,
+                    "first_beat": 0.0,
+                    "mood": "sad",
+                    "GTM": "hard",
+                    "FTS": "hard",
+                    "CTB": "easy",
+                    "SSC": "easy"
+                },
+
+            "Don't let me down long":
+                {
+                    "file_name": "beetles_dont_let_me_down_long.wav",
+                    "bpm": 76,
+                    "first_beat": 0.0,
+                    "mood": "sad",
+                    "GTM": "easy",
+                    "FTS": "easy",
+                    "CTB": "easy",
+                    "SSC": "easy"
+                },
+
+            "Could you be loved short":
+                {
+                    "file_name": "bob_marl_could_you_be_loved_short.wav",
+                    "bpm": 76,
+                    "first_beat": 0.0,
+                    "mood": "sad",
+                    "GTM": "hard",
+                    "FTS": "easy",
+                    "CTB": "easy",
+                    "SSC": "easy"
+                }
+        }
+    return song_database
+
+
 def SaveDatabase(song_database = None):
     """
     Manually written database, saves it in pickle format for other code to read from it easily
     """
+
+    # Song data
+    if song_database is None or song_database == {}:
+        return
+
     this_path = os.path.dirname(__file__)
     save_name = "song_database.p"
     save_path = os.path.join(this_path, 'game_assets/data/', save_name)
-
-    # Song data
-    if song_database is None:
-        song_database = \
-            {
-                "Follow the van":
-                    {
-                        "file_name": "follow_the_van.wav",
-                        "bpm": 57.0,
-                        "first_beat": 2.8,
-                        "mood": "happy",
-                        "GTM": "medium",
-                        "FTS": "easy",
-                        "CTB": "easy",
-                        "SSC": "easy"
-                    },
-
-                "Don't fence me in":
-                    {
-                        "file_name": "dont_fence_me_in_long.wav",
-                        "bpm": 40.0,
-                        "first_beat": 0.1,
-                        "mood": "sad",
-                        "GTM": "medium",
-                        "FTS": "medium",
-                        "CTB": "easy",
-                        "SSC": "easy"
-                    },
-
-                "Jingle bells":
-                    {
-                        "file_name": "jingle_bells.wav",
-                        "bpm": 95.0,
-                        "first_beat": 2.8,
-                        "mood": "happy",
-                        "GTM": "medium",
-                        "FTS": "medium",
-                        "CTB": "easy",
-                        "SSC": "easy"
-                    },
-
-                "Happy instrumental 3":
-                    {
-                        "file_name": "happy_3.wav",
-                        "bpm": 60.0,
-                        "first_beat": 0.1,
-                        "mood": "happy",
-                        "GTM": "hard",
-                        "FTS": "hard",
-                        "CTB": "easy",
-                        "SSC": "easy"
-                    },
-
-                "Happy instrumental 1":
-                    {
-                        "file_name": "happy_1.wav",
-                        "bpm": 100.0,
-                        "first_beat": 0.0,
-                        "mood": "happy",
-                        "GTM": "easy",
-                        "FTS": "hard",
-                        "CTB": "easy",
-                        "SSC": "easy"
-                    },
-
-                "Don't let me down short":
-                    {
-                        "file_name": "beetles_dont_let_me_down_short.wav",
-                        "bpm": 76,
-                        "first_beat": 0.0,
-                        "mood": "sad",
-                        "GTM": "easy",
-                        "FTS": "medium",
-                        "CTB": "easy",
-                        "SSC": "easy"
-                    },
-
-                "Sad instrumental 1":
-                    {
-                        "file_name": "sad_1.wav",
-                        "bpm": 100.0,
-                        "first_beat": 0.0,
-                        "mood": "sad",
-                        "GTM": "easy",
-                        "FTS": "easy",
-                        "CTB": "easy",
-                        "SSC": "easy"
-                    },
-
-                "Happy instrumental 4":
-                    {
-                        "file_name": "happy_4.wav",
-                        "bpm": 100.0,
-                        "first_beat": 0.0,
-                        "mood": "sad",
-                        "GTM": "hard",
-                        "FTS": "hard",
-                        "CTB": "easy",
-                        "SSC": "easy"
-                    },
-
-                "Don't let me down long":
-                    {
-                        "file_name": "beetles_dont_let_me_down_long.wav",
-                        "bpm": 76,
-                        "first_beat": 0.0,
-                        "mood": "sad",
-                        "GTM": "easy",
-                        "FTS": "easy",
-                        "CTB": "easy",
-                        "SSC": "easy"
-                    },
-
-                "Could you be loved short":
-                    {
-                        "file_name": "bob_marl_could_you_be_loved_short.wav",
-                        "bpm": 76,
-                        "first_beat": 0.0,
-                        "mood": "sad",
-                        "GTM": "hard",
-                        "FTS": "easy",
-                        "CTB": "easy",
-                        "SSC": "easy"
-                    }
-            }
 
     # Get path and save
     open(save_path, "w").close()  # Close it if it's in use ? maybe
@@ -176,8 +183,7 @@ def measureBPM(data):
     win_center = (2850 / 2, 2000 / 2)
     path_to_music = "/home/jwaad/catkin_ws/src/musi_care/src/game_assets/music/"
     SL = StandardLevels(window, win_center, pygame, path_to_music)
-    save_func = SaveDatabase
-    SL.MeasureBPM(data, save_func)
+    SL.MeasureBPM(data, SaveDatabase)
 
 
 def PrintLevelDistribution(data):
