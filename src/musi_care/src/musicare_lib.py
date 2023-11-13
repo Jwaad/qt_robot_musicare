@@ -463,7 +463,7 @@ class StandardLevels():
             for i in range(beat_timings.shape[0]-1):
                 beat_timings[i + 1] = beat_timings[i] + (1 / bps)
 
-            print(beat_timings)
+            #print(beat_timings)
             return beat_timings
 
         def generateBeatMarkers(rect, bpm, first_beat, track_total_time):
@@ -500,7 +500,7 @@ class StandardLevels():
 
             # List of song_titles
             song_titles = list(song_database.copy().keys())
-            print(song_titles)
+            #print(song_titles)
 
             # Create buttons
             path_to_png = os.path.join(self.this_file_path, self.path_to_imgs)
@@ -518,7 +518,7 @@ class StandardLevels():
             song_ind = 0
             # Keep looping through all the data, when they click a button
             while not rospy.is_shutdown() and run:
-                print(song_ind)
+                #print(song_ind)
                 # Get song title and data
                 song_title = song_titles[song_ind]
                 song_data = song_database[song_title]
@@ -592,7 +592,6 @@ class StandardLevels():
                             self.playing_track = False
                             play_button.toggle_toggle() # Toggle back off
 
-
                     # Handle events
                     for event in events:
                         # Check if the user clicks the X
@@ -607,10 +606,6 @@ class StandardLevels():
                             if pressed:
                                 if button.get_info() == "record":
                                     if not self.recording:
-                                        if self.playing_track:
-                                            self.sound_manager.stop_track()
-                                            self.playing_track = False
-                                            play_button.toggle_toggle()
                                         self.sound_manager.start_track(("/game_assets/music/" + song_data["file_name"]),
                                                                       0.0)
                                         self.recording = True
@@ -625,15 +620,23 @@ class StandardLevels():
                                         # Stop playing and reload track to 0
                                         if self.playing_track:
                                             self.playing_track = False
-                                            play_button.toggle_toggle()
+                                            play_button.toggle_off() # Toggle off
                                             self.sound_manager.stop_track()
                                         else:
-                                            t0 = rospy.get_time()
+                                            # If not already playing, then start the song and get the beats ready for metronome
+                                            song_beats = get_beats_list(song_data["bpm"], track_len,
+                                                                        song_data["first_beat"])
                                             self.playing_track = True
                                             self.sound_manager.start_track(
                                                 ("/game_assets/music/" + song_data["file_name"]),
                                                 0.0)
-                                            song_beats = get_beats_list(song_data["bpm"], track_len, song_data["first_beat"])
+                                            t0 = rospy.get_time()
+                                    else:
+                                        # If any other button is pressed, stop the track playing
+                                        if self.playing_track:
+                                            self.sound_manager.stop_track()
+                                            self.playing_track = False
+                                            play_button.toggle_off()
                                     if button.get_info() == "next":
                                         change_song = True
                                         song_ind += 1
@@ -653,7 +656,11 @@ class StandardLevels():
                     self.renderer.DrawBackground(background_colour)
                     for button in buttons:
                         if self.recording:
-                            button.render(self.window, grey=True)
+                            #Grey all except record button
+                            if button.get_info() == "record":
+                                button.render(self.window)
+                            else:
+                                button.render(self.window, grey=True)
                         else:
                             button.render(self.window)
                     for text in text_objs:
@@ -1995,6 +2002,20 @@ class ToggleButton():
             self.when_toggle_off()
 
         return (self.toggle_state)
+
+    def toggle_off(self):
+        """ Toggle to off from either state.
+        If already toggled off, do nothing otherwise perform on toggle off func"""
+        if self.toggle_state:
+            self.when_toggle_off()
+            self.toggle_state = False
+
+    def toggle_on(self):
+        """ Toggle to on from either state.
+        If already toggled on, do nothing otherwise perform on toggle on func"""
+        if not self.toggle_state:
+            self.when_toggle_on()
+            self.toggle_state = True
 
     def toggle_img(self):
         """Toggle but only the img to render """
