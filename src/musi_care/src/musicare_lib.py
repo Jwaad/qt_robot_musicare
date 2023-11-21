@@ -2358,6 +2358,9 @@ class InputBox():
                     self.text = self.text[:-1]
                 else:
                     char = event.unicode
+                    # Skip keys such as shift etc
+                    if char == "" or char == " ":
+                        return
                     # convert upper case chars into lower case and continue
                     if self.force_lowercase:
                         if char in self.uppercase:
