@@ -2295,7 +2295,7 @@ class DraggableButton():
 class InputBox():
     """ rect that you can click on and write text in. Text can be read by method get_text"""
 
-    def __init__(self, x, y, w, h, default_text='', allowed_chars="", fontsize = -1, max_chars = -1):
+    def __init__(self, x, y, w, h, default_text='', allowed_chars="", fontsize = -1, max_chars = -1, force_lowercase = True, force_uppercase= False):
         """
         Creates input box, with some grey text in it, that disappears when typing
         x = horizontal placement of text box (bottom left origin)
@@ -2321,13 +2321,18 @@ class InputBox():
         self.txt_surface = self.FONT.render(self.text, True, self.color)
         self.active = False
         self.returnInput = None
-        # uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        lower_case = "abcdefghijklmnopqrstuvwxyz"
-        integers = "0123456789"
+        self.force_lowercase = force_lowercase
+        self.force_uppercase = force_uppercase
+        # Prefer lowercase to upper case
+        if self.force_lowercase and self.force_uppercase:
+            self.force_uppercase = False
+        self.uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        self.lowercase = "abcdefghijklmnopqrstuvwxyz"
+        self.integers = "0123456789"
         # other_chars = ".-"
         self.allowed_chars = allowed_chars
         if allowed_chars == "" or type(allowed_chars) != str:
-            self.allowed_chars = lower_case + integers
+            self.allowed_chars = self.uppercase + self.lowercase + self.integers
 
     def handle_event(self, event):
         event_triggered = None
@@ -2353,6 +2358,16 @@ class InputBox():
                     self.text = self.text[:-1]
                 else:
                     char = event.unicode
+                    # convert upper case chars into lower case and continue
+                    if self.force_lowercase:
+                        if char in self.uppercase:
+                            char_index = self.uppercase.index(char)
+                            char = self.lowercase[char_index]
+                    elif self.force_uppercase:
+                        if char in self.lowercase:
+                            char_index = self.lowercase.index(char)
+                            char = self.uppercase[char_index]
+                    # Check if char is allowed
                     if char in self.allowed_chars:
                         # impose char limit
                         if self.max_chars > 0:
