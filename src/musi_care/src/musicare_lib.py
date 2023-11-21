@@ -2578,20 +2578,57 @@ class VolumeSlider():
         self.slider_rect = self.pygame.Rect(self.slider_x, self.slider_y - (self.slider_h /2), self.slider_w, self.slider_h)
 
         # Init vars
-        self.held = False
+        self.drag = False
         self.on_release = on_release
         self.type = "VolumeSlider"
 
+
+
     def CalculateSliderPos(self, percentage):
-        """ Use the percentage passed in, as well as slider box rect to set the slider
+        """ Move the slider along the box according to the percentage passed in
+        Use the percentage passed in, as well as slider box rect to set the slider
         to where it should be along the box"""
         x,y,w,h = self.slider_box_rect
         slider_x = x
         slider_y = y + (h - (h * percentage)) # such that 0% = bottom, 100% = top
         return slider_x, slider_y
 
-    def handle_event(self, event):
-        pass
+    def CalculateVolumePercent(self):
+        """ Use pos of slider box and slider to get equivalent percentage"""
+        slider_percent = 0 # percentage from bottom to top the slider is at. i.e slider at top == 1
+        #self.slider_rect.y
+        return 1
+
+    def handle_event(self, event, mouse_pos):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if self.slider_rect.collidepoint(mouse_pos):
+                self.drag = True
+        elif event.type == pygame.MOUSEBUTTONUP:
+            self.drag = False
+            #self.on_release(self.CalculateVolumePercent())
+        elif event.type == pygame.MOUSEMOTION:
+            if self.drag:
+                slider_max = (self.slider_box_rect.top + self.slider_box_rect.height)
+                slider_min = self.slider_box_rect.top
+
+                print(slider_min, slider_max, mouse_pos)
+
+                if slider_min < mouse_pos[1] < slider_max:
+                    self.slider_rect.y = mouse_pos[1]
+                elif slider_max < mouse_pos[1]:
+                    self.slider_rect.y = slider_max - (self.slider_h/2) # Place center at mouse
+                    #self.drag = False
+                elif mouse_pos[1] < slider_min:
+                    self.slider_rect.y = slider_min - (self.slider_h/2)
+                    #self.drag = False
+
+    def drawCurrentPercent(self, percent):
+        print(percent)
+
+    def drawBoundsPercent(self):
+        # TEMP, TODO
+        min_maxPercent = 0
+        print(min_maxPercent)
 
     def render(self, screen, grey = False):
         if grey:
@@ -2604,8 +2641,9 @@ class VolumeSlider():
             screen.blit(self.slider_box, self.slider_box_rect)
             screen.blit(self.slider, self.slider_rect)
 
+
 class LineObject():
-    """Create object oritentated lines tat we can store and draw later, for screen order """
+    """Create object orientated lines that we can store and draw later, for screen order """
 
     def __init__(self, start_pos, end_pos, colour = (255,100,100), width = 3):
 

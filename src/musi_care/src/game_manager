@@ -412,6 +412,9 @@ class GameManager():
                         #TODO add flash or simple animation, to show wrong user here.
                         print("Animation just played, did you see it?")
 
+                # Handle event for volume sliders
+                voice_slider.handle_event(event, mouse_pos)
+
                 # Handle event for new user
                 signup = signup_button.get_event(event, mouse_pos)
                 if signup:
