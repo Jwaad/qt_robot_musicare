@@ -516,6 +516,11 @@ class StandardLevels():
             lines = []
 
             song_ind = 0
+
+            # Init metronome sound
+            pygame.mixer.init()
+            metronome = pygame.mixer.Sound(self.path_to_music + "metronome.wav")
+
             # Keep looping through all the data, when they click a button
             while not rospy.is_shutdown() and run:
                 #print(song_ind)
@@ -555,6 +560,8 @@ class StandardLevels():
                 song_beats = []# generate beats list
                 hits = []
                 t0 = 0
+                tx = 0
+                temp = []
                 song_snippet_time = 7 # how long the song should play for
 
                 # While loop until they click next or prev
@@ -580,15 +587,21 @@ class StandardLevels():
                             lines = generateBeatMarkers(wav_rect, bpm, first_beat, track_total_time=track_len)
                             song_database[song_title] = song_data
 
+
                     # Metronome playing logic
                     if self.playing_track:
+                        # TODO TEMP
+                        print("fps =", 1 / (rospy.get_time() - tx))
+                        tx = rospy.get_time()
+                        # TODO TEMP
                         next_beat = song_beats[0]
                         if (rospy.get_time() - t0) > next_beat:
-                            song_beats = np.delete(song_beats, 0)
-                            print("muzzard on the beat")
-                            # TODO
                             # Play metronome sound on each beat
+                            metronome.play()
+                            temp.append(rospy.get_time())
+                            song_beats = np.delete(song_beats, 0)
                         if song_beats.shape[0] == 0:
+                            print(temp, temp2)
                             self.playing_track = False
                             play_button.toggle_toggle() # Toggle back off
 
@@ -631,6 +644,8 @@ class StandardLevels():
                                                 ("/game_assets/music/" + song_data["file_name"]),
                                                 0.0)
                                             t0 = rospy.get_time()
+                                            # todo temp
+                                            temp2 = song_beats.copy()
                                     else:
                                         # If any other button is pressed, stop the track playing
                                         if self.playing_track:
