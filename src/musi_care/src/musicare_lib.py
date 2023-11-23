@@ -20,6 +20,7 @@ from musi_care.srv import sound_player_srv
 from musi_care.srv import qt_command
 import threading
 from qt_motors_controller.srv import set_control_mode, set_velocity
+from qt_robot_interface.srv import setting_setVolume
 from std_msgs.msg import Float64MultiArray
 import cv2
 import time
@@ -1657,6 +1658,7 @@ class QTManager():
         self.talking_anim_time = 4 # How long the talking animation plays for (seconds)
         self.debug = debug
 
+
     def init_robot(self, arm_vel):
         """Method to init robot parameters"""
         # Set control mode, incase they were changed beforehand
@@ -1685,7 +1687,6 @@ class QTManager():
         command_controller = rospy.ServiceProxy('/qt_command_service', qt_command)
         command_complete = command_controller("velocity", str(arm_vel), command_blocking)
         return command_complete
-
 
     def send_qt_command(self, speech=None, gesture=None, emote=None, command_blocking=False):
         """Neatens and simplifies sending commands to QT
@@ -1796,6 +1797,26 @@ class QTManager():
         command_complete = command_controller("actuation", motor_pos, command_blocking)
         return command_complete
 
+    def set_voice_vol(self, volume, int_percent = True):
+        """ Set volume using float between 0.0 - 1.0 or int between 0 and 100
+            Volume = either an integer between 0 and 100, or float between 0.0 and 1.0
+            int_percent = specifies to use 0-100 range or not. set true to use integers between 0-100
+        """
+        if int_percent and (0 <= volume <= 100):
+            newVolume = int(volume)
+        elif not int_percent and (0 <= volume <= 1):
+            newVolume = int(volume * 100) # convert to 0-100 range for service
+        else:
+            print("Invalid volume given when setting robot voice: {}".format(volume))
+            return
+
+        service = "/qt_robot/setting/setVolume"
+        rospy.wait_for_service(service)
+        set_voice_proxy = rospy.ServiceProxy(service, setting_setVolume)
+        set_voice_proxy(newVolume)
+        if self.debug:
+            print("Robot volume changed to {}".format(newVolume))
+
 
 #####################################################AnimationManager##################################################################
 
@@ -1897,7 +1918,8 @@ class Button():
         self.return_info = return_info
         self.type = "Button"
         self.should_grey = should_grey
-        self.on_click = on_click
+        self.on_click = on_click # TODO, THIS TRIGERS ON RELEASE INSTEAD OF ON CLICK...
+        self.on_release = on_release
 
         self.text = text
         self.init_text()
@@ -2549,7 +2571,7 @@ class VolumeSlider():
         """ Create the slider object at given location with given scale.
             pygame = pygame, pass in initialised pygame, so we don't reinitialise
             location = list or tuple, x and y pos
-            default_vol = float or int, the volume the slider should start at in percentage. default = 0
+            default_vol = float or int, the volume the slider should start at in percentage. default = 0, range 0 - 1
             scale = float or int, default is 1
             min_max = list / tuple, values for min and max percentage. so that you can have custom ranges
                 (e.g (70, 90) would have the max return of the slider be 90, and the minimum be 70)
@@ -2593,6 +2615,7 @@ class VolumeSlider():
         self.slider_rect = self.pygame.Rect(self.slider_x, self.slider_y - (self.slider_h /2), self.slider_w, self.slider_h)
 
         # Init vars
+        self.scale = scale
         self.drag = False
         self.on_release = on_release
         self.type = "VolumeSlider"
@@ -2607,9 +2630,10 @@ class VolumeSlider():
         """ Move the slider along the box according to the percentage passed in
         Use the percentage passed in, as well as slider box rect to set the slider
         to where it should be along the box"""
+        # TODO this is inaccurate as it doesnt places via top left corner, while rest of code uses center
         x,y,w,h = self.slider_box_rect
         slider_x = x
-        slider_y = y + (h - (h * percentage)) # such that 0% = bottom, 100% = top
+        slider_y = y + (h - (h * percentage/100))# such that 0% = bottom, 100% = top
         return slider_x, slider_y
 
     def CalculateVolumePercent(self):
@@ -2668,13 +2692,14 @@ class VolumeSlider():
             self.draw_text(screen, grey)
 
     def init_text(self):
+        font_size = int(24 * self.scale)
         # Create objects
-        self.max_vol_obj = TextObject(None, None, str(self.max_value), location=(0, 0), font_size=24)
-        self.min_vol_obj = TextObject(None, None, str(self.min_value), location=(0, 0), font_size=24)
-        self.current_vol_obj = TextObject(None, None, str(self.current_vol), location=(0, 0), font_size=24)
+        self.max_vol_obj = TextObject(None, None, str(self.max_value), location=(0, 0), font_size=font_size)
+        self.min_vol_obj = TextObject(None, None, str(self.min_value), location=(0, 0), font_size=font_size)
+        self.current_vol_obj = TextObject(None, None, str(self.current_vol), location=(0, 0), font_size=font_size)
         #Move objects to start positions
         self.max_vol_obj.set_pos(
-            (self.slider_box_rect[0] + (self.max_vol_obj.textRect.w / 2),
+            (self.slider_box_rect[0],
              self.slider_box_rect[1] - (self.max_vol_obj.textRect.h)))
         self.min_vol_obj.set_pos(
             (self.slider_box_rect[0] + (self.min_vol_obj.textRect.w / 2),

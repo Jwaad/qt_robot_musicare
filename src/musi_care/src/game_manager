@@ -15,6 +15,7 @@ from musicare_lib import InputBox
 from musicare_lib import StandardLevels
 from musicare_lib import Behaviours
 from musicare_lib import General
+from musicare_lib import QTManager
 from musicare_lib import VolumeSlider
 from guess_mood import Guess_The_Mood_Game as GTM
 from fix_song import Fix_The_Song_Game as FTS
@@ -22,6 +23,7 @@ from clap_beat import Clap_To_Beat_Game as CTB
 from simon_says_clap import Simon_Says_Clap_Game as SSC
 import time
 import glob
+
 
 class GameManager():
 
@@ -48,6 +50,8 @@ class GameManager():
         self.ActiveNodes =[] # Store reference to all nodes that we start
 
         # Check robot connected
+        self.command_manager = QTManager(debug=self.debug) # this should happen before startrobotnodes
+        self.default_voice_vol = 70
         robot_connected = self.CheckRobotRunning()
         rospy.set_param('/activity_status', 1) # Tell ros this node is starting
         if robot_connected:
@@ -63,6 +67,7 @@ class GameManager():
         self.general_functions = General()
         self.Levels = StandardLevels(self.window, self.window_center, self.pygame, self.path_to_music, debug=self.debug)
         self.renderer = Renderer(self.window, self.window_center)
+
 
         # Hide cursor
         if not self.debug:
@@ -117,6 +122,7 @@ class GameManager():
         nodeName = 'qt_command_node'
         node = self.StartNode(self.musicarePkgName, nodeName)
         time.sleep(1)
+        self.command_manager.set_voice_vol(self.default_voice_vol)
         self.ActiveNodes.append(node)
 
     # Start the laptop side fake node that just takes in the commands and prints them
@@ -341,6 +347,18 @@ class GameManager():
             # Cap FPS (save resources)
             self.clock.tick(self.FPS)
 
+    def voice_test(self):
+        print("Playing voice")
+        sayings = ["Hello, can you hear me?",
+                   "Can you hear me now?",
+                   "Hi! Is this volume okay?",
+                   "Mike test 1, 2. 1, 2."
+                   ]
+        ind = random.randint(0, len(sayings) - 1)
+        message = sayings[ind]
+
+        self.command_manager.qt_say(message)
+
     def LogInScreen(self, run = True):
         """
         Use database, and check if user is inputting credentials we have seen before.
@@ -355,11 +373,17 @@ class GameManager():
         name_tick = self.create_button("check_mark.png", (650, 800))
         surname_tick = self.create_button("check_mark.png", (2050, 800))
         ticks = {}
+
+        # Volume Slider
+        voice_slider = VolumeSlider(self.pygame, (50, 75), scale=1.5, min_val=50,
+                                    default_vol=self.default_voice_vol,
+                                    on_release=self.command_manager.set_voice_vol)
+
         # Buttons
         next_button = self.create_button("next_button.png", (1100, 1200))
         signup_button = self.create_button("blank_button.png", (2300, 20), text="New User", scale=0.5)
-        # Volume Slider
-        voice_slider = VolumeSlider(self.pygame,(2000,1000), scale = 1.1, min_val=60, on_release=print)
+        text_voice_button = self.create_button("QT_volume_icon.png", (45, voice_slider.slider_box_rect[1] + voice_slider.slider_box_rect[3] + 50  ),
+                                               scale=1.2, on_click=self.voice_test)
 
         log_in = False
         user_recognised = False
@@ -414,6 +438,7 @@ class GameManager():
 
                 # Handle event for volume sliders
                 voice_slider.handle_event(event, mouse_pos)
+                text_voice_button.get_event(event, mouse_pos)
 
                 # Handle event for new user
                 signup = signup_button.get_event(event, mouse_pos)
@@ -437,6 +462,7 @@ class GameManager():
             next_button.render(self.window)
             signup_button.render(self.window)
             voice_slider.render(self.window)
+            text_voice_button.render(self.window)
             self.animation_manager.DrawTouchAnimation(self.window)
             self.pygame.display.update()  # Update all drawn objects
 
