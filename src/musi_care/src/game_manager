@@ -279,11 +279,12 @@ class GameManager():
         while (not rospy.is_shutdown()) and (self.run) and not back:
 
             # Handle events
-            mouse_pos = self.pygame.mouse.get_pos()
             for event in self.pygame.event.get():
 
+                mouse_pos = self.pygame.mouse.get_pos()
+
                 # Handle events for name box
-                event_triggered = name_box.handle_event(event)
+                event_triggered = name_box.handle_event(event, mouse_pos)
                 if event_triggered == "KEYDOWN":
                     if (name_box.get_text() is not None) and (name_box.get_text() != ""):
                         ticks["name"] = name_tick
@@ -293,7 +294,7 @@ class GameManager():
                             del ticks["name"]
 
                 # Handle events for surname box
-                event_triggered = surname_box.handle_event(event)
+                event_triggered = surname_box.handle_event(event, mouse_pos)
                 if event_triggered == "KEYDOWN":
                     if (surname_box.get_text() is not None) and (surname_box.get_text() != ""):
                         ticks["surname"] = surname_tick
@@ -302,7 +303,7 @@ class GameManager():
                             del ticks["surname"]
 
                 # Handle events for dob box
-                event_triggered = dob_box.handle_event(event)
+                event_triggered = dob_box.handle_event(event, mouse_pos)
                 if event_triggered == "KEYDOWN":
                     # Add the - at set intervals
                     if event.key != pygame.K_BACKSPACE:
@@ -400,16 +401,18 @@ class GameManager():
         correct_surname = "#}$"
         while (not rospy.is_shutdown()) and run and not log_in:
 
-            # Handle events
-            mouse_pos = self.pygame.mouse.get_pos()
+
             for event in self.pygame.event.get():
+                # Handle events
+                mouse_pos = self.pygame.mouse.get_pos()
+                print("event")
 
                 # Handle on click animation
                 if event.type == self.inputUp:  # On mouse release play animation to show where cursor is
                     self.animation_manager.StartTouchAnimation(mouse_pos)  # Play animation
 
                 # Handle events for name box
-                event_triggered = name_box.handle_event(event)
+                event_triggered = name_box.handle_event(event, mouse_pos)
                 if event_triggered == "KEYDOWN":
                     if name_box.get_text() in self.first_names:
                         ticks["name"] = name_tick
@@ -424,7 +427,7 @@ class GameManager():
                             correct_surname = "#}$"
 
                 # Handle events for surname box
-                event_triggered = surname_box.handle_event(event)
+                event_triggered = surname_box.handle_event(event, mouse_pos)
                 if event_triggered == "KEYDOWN":
                     if surname_box.get_text() == correct_surname:
                         ticks["surname"] = surname_tick
@@ -442,11 +445,8 @@ class GameManager():
                     if user_recognised:
                         self.user_data = self.user_database[self.surnames.index(surname_box.get_text())]
                         log_in = True
-                    else:
-                        #TODO add flash or simple animation, to show wrong user here.
-                        print("Animation just played, did you see it?")
 
-                # Handle event for volume sliders
+                # Handle event for volume slider
                 voice_slider.handle_event(event, mouse_pos)
                 text_voice_button.get_event(event, mouse_pos)
 
