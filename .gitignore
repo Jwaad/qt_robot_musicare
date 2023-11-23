@@ -1,9 +1,9 @@
+*.pyc
 .catkin_tools/*
 build/*
 devel/*
+/.idea/*
 src/tutorial_qt_motors/*
 src/musi_care/src/game_assets/music/temp/*
-/.idea/*
-*.pyc
 src/musi_care/src/__pycache__/*
 src/musi_care/src/game_assets/data/user_data/*
