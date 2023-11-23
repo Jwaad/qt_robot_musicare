@@ -1297,11 +1297,17 @@ class TextObject():
                 if re_render:
                     obj_data[0] = self.font.render(self.text, False, self.font_colour)
                     obj = obj_data[0]
-                self.window.blit(obj, obj_rect)
+                if self.window is None:
+                    window.blit(obj, obj_rect)
+                else:
+                    self.window.blit(obj, obj_rect)
         else:
             if re_render:
                 self.text_obj = self.font.render(self.text, False, self.font_colour)
-            self.window.blit(self.text_obj, self.textRect)
+            if self.window is None:
+                window.blit(self.text_obj, self.textRect)
+            else:
+                self.window.blit(self.text_obj, self.textRect)
 
     def set_colour(self, font_col):
         """Set new colour and re render obj"""
@@ -1317,6 +1323,15 @@ class TextObject():
         if self.wrap_text:
             print("THIS FEATURE IS NOT MADE YET")
 
+    def set_x(self, x):
+        self.textRect[0] = x
+        if self.wrap_text:
+            print("THIS FEATURE IS NOT MADE YET")
+
+    def set_y(self, y):
+        self.textRect[1] = y
+        if self.wrap_text:
+            print("THIS FEATURE IS NOT MADE YET")
 
     def set_text(self, text):
         self.text = text
@@ -2583,6 +2598,10 @@ class VolumeSlider():
         self.type = "VolumeSlider"
         self.min_value = min_val
         self.max_value = max_val
+        self.current_vol = 0
+
+        # initialise text
+        self.init_text()
 
     def CalculateSliderPos(self, percentage):
         """ Move the slider along the box according to the percentage passed in
@@ -2615,7 +2634,9 @@ class VolumeSlider():
                 return
             # If they're dragging, let them trigger on release
             if self.on_release != None:
-                self.on_release(self.CalculateVolumePercent())
+                self.current_vol = self.CalculateVolumePercent()
+                self.on_release(self.current_vol)
+                self.current_vol_obj.set_text(str(self.current_vol))
             self.drag = False
         elif event.type == pygame.MOUSEMOTION:
             # Skip if never clicked on vol slider
@@ -2625,22 +2646,47 @@ class VolumeSlider():
             slider_max = (self.slider_box_rect.top + self.slider_box_rect.height)
             slider_min = self.slider_box_rect.top
             if slider_min < mouse_pos[1] < slider_max:
-                self.slider_rect.y = mouse_pos[1]       # Place center at mouse
+                self.slider_rect.y = mouse_pos[1] # Place center at mouse
             elif slider_max < mouse_pos[1]:
                 self.slider_rect.y = slider_max - (self.slider_h/2)
             elif mouse_pos[1] < slider_min:
                 self.slider_rect.y = slider_min - (self.slider_h/2)
+            # update slider text to match
+            self.current_vol_obj.set_y(self.slider_rect.y + (self.current_vol_obj.textRect.h / 2))
+            self.current_vol_obj.set_text(" ")
 
     def render(self, screen, grey = False):
         if grey:
             # Draw grey graphics onto screen
             screen.blit(self.slider_box_grey, self.slider_box_rect)
             screen.blit(self.slider_grey, self.slider_rect)
+            self.draw_text(screen, grey)
         else:
             # Draw onto screen
             screen.blit(self.slider_box, self.slider_box_rect)
             screen.blit(self.slider, self.slider_rect)
+            self.draw_text(screen, grey)
 
+    def init_text(self):
+        # Create objects
+        self.max_vol_obj = TextObject(None, None, str(self.max_value), location=(0, 0), font_size=24)
+        self.min_vol_obj = TextObject(None, None, str(self.min_value), location=(0, 0), font_size=24)
+        self.current_vol_obj = TextObject(None, None, str(self.current_vol), location=(0, 0), font_size=24)
+        #Move objects to start positions
+        self.max_vol_obj.set_pos(
+            (self.slider_box_rect[0] + (self.max_vol_obj.textRect.w / 2),
+             self.slider_box_rect[1] - (self.max_vol_obj.textRect.h)))
+        self.min_vol_obj.set_pos(
+            (self.slider_box_rect[0] + (self.min_vol_obj.textRect.w / 2),
+             self.slider_box_rect[1] + self.slider_box_rect.height))
+        self.current_vol_obj.set_pos(
+            (self.slider_box_rect[0] + self.slider_box_rect[2]  + self.current_vol_obj.textRect.w + 10,
+             self.slider_rect.center[1]))
+
+    def draw_text(self, screen, window, re_render = False):
+        self.max_vol_obj.render(screen, window, re_render)
+        self.min_vol_obj.render(screen, window, re_render)
+        self.current_vol_obj.render(screen, window, re_render)
 
 class LineObject():
     """Create object orientated lines that we can store and draw later, for screen order """
