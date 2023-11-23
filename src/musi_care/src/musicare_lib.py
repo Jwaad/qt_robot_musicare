@@ -2581,8 +2581,8 @@ class VolumeSlider():
         self.drag = False
         self.on_release = on_release
         self.type = "VolumeSlider"
-
-
+        self.min_value = min_max[0]
+        self.max_value = min_max[1]
 
     def CalculateSliderPos(self, percentage):
         """ Move the slider along the box according to the percentage passed in
@@ -2594,48 +2594,42 @@ class VolumeSlider():
         return slider_x, slider_y
 
     def CalculateVolumePercent(self):
-        """ Use pos of slider box and slider to get equivalent percentage"""
-        slider_percent = 0 # percentage from bottom to top the slider is at. i.e slider at top == 1
-        #self.slider_rect.y
-        return 1
+        """ Use pos of slider box and slider to get equivalent percentage.
+         percentage from bottom to top the slider is at. i.e slider at top == 1"""
+        slider_min = self.slider_box_rect.top
+        my_slider_y = self.slider_rect.center[1] - slider_min # slider pos - min to get slider in respect of slider box
+        slider_percent =  1 - (my_slider_y / self.slider_box_rect.height) # flip percent, so sliding upwards increases %
+        volume_percent = int(round(slider_percent * (self.max_value - self.min_value), 0)) # get percentage of min and max bounds
+
+        return volume_percent
 
     def handle_event(self, event, mouse_pos):
+        # Handle on click
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.slider_rect.collidepoint(mouse_pos):
                 self.drag = True
+        # Handle mouse release
         elif event.type == pygame.MOUSEBUTTONUP:
             self.drag = False
-            #self.on_release(self.CalculateVolumePercent())
+            if self.on_release != None:
+                self.on_release(self.CalculateVolumePercent())
         elif event.type == pygame.MOUSEMOTION:
             if self.drag:
                 slider_max = (self.slider_box_rect.top + self.slider_box_rect.height)
                 slider_min = self.slider_box_rect.top
-
-                print(slider_min, slider_max, mouse_pos)
-
+                # Move slider within it's bounds if mouse was held on it
                 if slider_min < mouse_pos[1] < slider_max:
-                    self.slider_rect.y = mouse_pos[1]
+                    self.slider_rect.y = mouse_pos[1]       # Place center at mouse
                 elif slider_max < mouse_pos[1]:
-                    self.slider_rect.y = slider_max - (self.slider_h/2) # Place center at mouse
-                    #self.drag = False
+                    self.slider_rect.y = slider_max - (self.slider_h/2)
                 elif mouse_pos[1] < slider_min:
                     self.slider_rect.y = slider_min - (self.slider_h/2)
-                    #self.drag = False
-
-    def drawCurrentPercent(self, percent):
-        print(percent)
-
-    def drawBoundsPercent(self):
-        # TEMP, TODO
-        min_maxPercent = 0
-        print(min_maxPercent)
 
     def render(self, screen, grey = False):
         if grey:
             # Draw grey graphics onto screen
             screen.blit(self.slider_box_grey, self.slider_box_rect)
             screen.blit(self.slider_grey, self.slider_rect)
-
         else:
             # Draw onto screen
             screen.blit(self.slider_box, self.slider_box_rect)
