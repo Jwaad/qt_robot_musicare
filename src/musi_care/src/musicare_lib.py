@@ -2610,20 +2610,26 @@ class VolumeSlider():
                 self.drag = True
         # Handle mouse release
         elif event.type == pygame.MOUSEBUTTONUP:
-            self.drag = False
+            # Skip if never clicked on vol slider
+            if not self.drag:
+                return
+            # If they're dragging, let them trigger on release
             if self.on_release != None:
                 self.on_release(self.CalculateVolumePercent())
+            self.drag = False
         elif event.type == pygame.MOUSEMOTION:
-            if self.drag:
-                slider_max = (self.slider_box_rect.top + self.slider_box_rect.height)
-                slider_min = self.slider_box_rect.top
-                # Move slider within it's bounds if mouse was held on it
-                if slider_min < mouse_pos[1] < slider_max:
-                    self.slider_rect.y = mouse_pos[1]       # Place center at mouse
-                elif slider_max < mouse_pos[1]:
-                    self.slider_rect.y = slider_max - (self.slider_h/2)
-                elif mouse_pos[1] < slider_min:
-                    self.slider_rect.y = slider_min - (self.slider_h/2)
+            # Skip if never clicked on vol slider
+            if not self.drag:
+                return
+            # Move slider within it's bounds if mouse was held on it
+            slider_max = (self.slider_box_rect.top + self.slider_box_rect.height)
+            slider_min = self.slider_box_rect.top
+            if slider_min < mouse_pos[1] < slider_max:
+                self.slider_rect.y = mouse_pos[1]       # Place center at mouse
+            elif slider_max < mouse_pos[1]:
+                self.slider_rect.y = slider_max - (self.slider_h/2)
+            elif mouse_pos[1] < slider_min:
+                self.slider_rect.y = slider_min - (self.slider_h/2)
 
     def render(self, screen, grey = False):
         if grey:
