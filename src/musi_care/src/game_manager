@@ -807,7 +807,6 @@ class GameManager():
             else:
                 selected_game_ind = random.choice(selectable_games)
             game_name = self.games[selected_game_ind]
-            self.prev_game = game_name
             this_session[selected_game_ind] += 1
 
             # Get difficulty from user profile
@@ -905,8 +904,6 @@ class GameManager():
 
             # Play GTM
             if game_name == "GTM":
-                if self.prev_game == "SSC" or self.prev_game == "CTB":
-                    self.Levels.put_away_drum(run = self.run,background_colour=self.background_colour)
 
                 # Init game
                 game = GTM(debug=self.debug)
@@ -918,8 +915,6 @@ class GameManager():
                 self.run, user_level_data = game.Main(mood, file_name, ask_tut = play_tut)
             # Play FTS
             elif game_name == "FTS":
-                if self.prev_game == "SSC" or self.prev_game == "CTB":
-                    self.Levels.put_away_drum(run = self.run,background_colour=self.background_colour)
                 # Init game
                 game = FTS(debug=self.debug)
 
@@ -943,8 +938,7 @@ class GameManager():
             # Play CTB and SSC
             else:
                 # Put arms up and wait for drum
-                if self.prev_game == "GTM" or self.prev_game == "FTS":
-                    self.Levels.get_drum(run = self.run,background_colour=self.background_colour)
+                self.Levels.get_drum(run = self.run,background_colour=self.background_colour)
 
                 # Shared vars between SSC and CTB
                 first_beat = level_data["first_beat"]
@@ -963,10 +957,13 @@ class GameManager():
                     # Play game
                     self.run, user_level_data = game.Main(file_name, first_beat, bpm, ask_tut = play_tut)
 
+                # After game finishes, remove drum, even if we're bout to play ctb from ssc
+                self.Levels.put_away_drum(run=self.run, background_colour=self.background_colour)
+
             # Append data with title and difficulty
             user_level_data["song_title"] = song_title
             user_level_data["difficulty"] = difficulty
-
+            self.prev_game = game_name
         return self.run, user_level_data
 
     def data_printout(self, user, save_to_file = False):
