@@ -462,12 +462,11 @@ class Fix_The_Song_Game():
 
         # String of our keys so i can remember them
         """
-        1 = basket
-        2 - 3 = song slots
-        4 = Top text
-        5 = Middle text
-        6 = help button
-        7 - 8 = song segs
+        1 = intro
+        2 = song slots
+        3 = unknown slots
+        4 = help
+        5 = outro
         """
 
         tut_graphics = {
@@ -499,6 +498,7 @@ class Fix_The_Song_Game():
         graphics = self.create_graphics(segments, num_correct_segs, single_out=True)
         self.tut_next = self.create_button("tut_next.png", (0, 0), scale=1.5, unique_id="next", should_grey = False)
         self.tut_repeat = self.create_button("tut_repeat.png", (0, 0), scale=1.5, unique_id="repeat", should_grey = False)
+        self.tut_skip = self.create_button("tut_skip.png", (2600, 0), scale=1, unique_id="skip", should_grey=False)
 
         # Group graphics for easier processing
         tut_buttons = [self.tut_next, self.tut_repeat]
@@ -541,6 +541,8 @@ class Fix_The_Song_Game():
                         self.tut_repeat.set_pos((840, 1200))
                         for button in tut_buttons:
                             button.render(self.window)
+                    #Render skip button
+                    self.tut_skip.render(self.window)
 
                     # Handle events
                     events = self.pygame.event.get()
@@ -558,6 +560,11 @@ class Fix_The_Song_Game():
                                 qt_finished_talking = True
                             elif event.key == pygame.K_LEFT:
                                 qt_finished_talking = False
+                        # Handle skip button
+                        skip = self.tut_skip.get_event(event, mouse_pos)
+                        if skip:
+                            return self.run
+
                         #Detect button presses from buttons only after qt finishes speaking
                         if qt_finished_talking:
                             for button in tut_buttons:

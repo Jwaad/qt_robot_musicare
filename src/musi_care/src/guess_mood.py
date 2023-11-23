@@ -382,11 +382,11 @@ class Guess_The_Mood_Game():
 
         # String of our keys so i can remember them
         """
-        1 = top text
-        2 = sad button
-        3 = happy button
-        4 = unsure button
-        5 = play/pause button
+        1 = Intro
+        2 = options (sad happy)
+        3 = hint
+        4 = play button
+        5 = outro
         """
 
         # Create rect to highlight and text for QT to say
@@ -394,21 +394,20 @@ class Guess_The_Mood_Game():
         tut_graphics = {
             1: {"rect": None, "keys": [1, 2, 3, 4, 5],
                 "speech": "In this game, you will hear some music, and you need to select, whether it was happy, or sad! When you are ready for the next step,, tap the. Next.. button."},
-            2: {"rect": (560, 30, 1790, 135), "keys": [1],
-                "speech": "This text at the top, will remind you of what you have to do."},
-            3: {"rect": (615, 600, 1675, 800), "keys": [2, 3],
+            2: {"rect": (615, 600, 1675, 800), "keys": [2, 3],
                 "speech": "These are your options.. Tap happy, if you think the song is happy, or sad if you think the song is sad."},
-            4: {"rect": (800, 1400, 2050 - 800, 1850 - 1500), "keys": [4],
+            3: {"rect": (800, 1400, 2050 - 800, 1850 - 1500), "keys": [4],
                 "speech": "If you need a hint, click this button... I will help you out!"},
-            5: {"rect": (1235, 180, 400, 400), "keys": [5],
+            4: {"rect": (1235, 180, 400, 400), "keys": [5],
                 "speech": "This is the play button.. Use this to stop and start the song..."},
-            6: {"rect": None, "keys": [1, 2, 3, 4, 5], "speech": "That is all for guess the mood, have fun!"}
+            5: {"rect": None, "keys": [1, 2, 3, 4, 5], "speech": "That is all for guess the mood, have fun!"}
         }
 
         if self.run:
 
             # Create buttons and slider
             self.create_graphics()
+            self.tut_skip = self.create_button("tut_skip.png", (2600, 0), scale=1, unique_id="skip", should_grey=False)
             self.tut_next = self.create_button("tut_next.png", (0, 0), scale=1.5, unique_id="next", should_grey=False)
             self.tut_repeat = self.create_button("tut_repeat.png", (0, 0), scale=1.5, unique_id="repeat",
                                                  should_grey=False)
@@ -462,6 +461,7 @@ class Guess_The_Mood_Game():
                         self.tut_repeat.set_pos((700, 250))
                         for button in tut_buttons:
                             button.render(self.window)
+                    self.tut_skip.render(self.window)
 
                     # Handle events
                     events = self.pygame.event.get()
@@ -472,6 +472,9 @@ class Guess_The_Mood_Game():
                             self.quit = True  # Tells us that the game was quit out of, and it didn't end organically
                         if event.type == self.pygame.MOUSEBUTTONUP:  # on mouse release play animation to show where cursor is
                             self.animation_manager.StartTouchAnimation(mouse_pos)  # play animation
+                        skip = self.tut_skip.get_event(event, mouse_pos)
+                        if skip:
+                            return self.run
                         # handle tut button events
                         if qt_finished_talking:  # only handle events if buttons being rendered
                             for button in tut_buttons:
