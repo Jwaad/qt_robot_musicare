@@ -475,20 +475,18 @@ class Fix_The_Song_Game():
                 "speech": "To play this game, first you will hear music... I will let you listen to it in full..."
                 " After that I will split the song into parts... Then you will need to find the correct "
                 "pieces and put them back together..."},
-            2: {"rect": (800, 0, 1235, 100), "keys": [4],
-                "speech": "This is a reminder of what you have to do."},
-            3: {"rect": (1075, 125, 700, 350), "keys": [2, 3],
-                "speech": "These are the slots where the pieces of the songs need to go..."
-                          " Find the correct segments and drag them here... In the right order to"
-                          " complete the level...."},
-            4: {"rect": (770, 670, 1310, 110), "keys": [5],
-                "speech": "This is another reminder of what you have to do."},
-            5: {"rect": (550, 830, 1050, 350), "keys": [7, 8],
-                "speech": "These are the segments... Click on them once to listen to them. I might put some in there "
-                          "to confuse you... so make sure to listen to them all!"},
-            6: {"rect": (2150, 50, 500, 475), "keys": [6], "speech": "This is the help button... Click this if you dont"
+            2:  {"rect": (550, 830, 1050, 350), "keys": [7, 8],
+                "speech": "These are the segments... Hold down a segment to hear what it sounds like..."
+                          " Then tap on it to select it... Once you have selected it. You will need to put it"
+                          " into the right place..."},
+            3:   {"rect": (1075, 125, 700, 350), "keys": [2, 3],
+                "speech": "These are the slots where the pieces of the songs need to go... Once you have selected a song"
+                          "segment... Click on one of these slots to place it in... Once you place all pieces where they"
+                          "belong, you will have completed the level."},
+            4: {"rect": (2150, 50, 500, 475), "keys": [6], "speech": "This is the help button... Click this if you dont"
                                                                       "know which song piece is the right one."},
-            7: {"rect": None, "keys": [1, 2, 3, 4, 5, 6, 7, 8], "speech": "That is everything for Fix the song! Have fun!"}
+            5: {"rect": None, "keys": [1, 2, 3, 4, 5, 6, 7, 8], "speech": "That is everything for Fix the song! "
+                                                                          "Click next and we will start the first level!"}
         }
 
         # Get the level's data
@@ -863,10 +861,6 @@ class Fix_The_Song_Game():
         # Play the track and block
         self.play_music_blocking(correct_song)
         self.track_total_time = 15
-
-        # Count into level to slow pacing
-        self.run = self.level_loader.countdown(3, self.run, self.background_colour,
-                                               prelim_msg="Lets Fix The Song!")
 
         # Play main level
         self.run, level_data = self.play_level(correct_song, distract_song, slices)
