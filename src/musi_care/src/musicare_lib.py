@@ -1281,7 +1281,8 @@ class StandardLevels():
 
 class TextObject():
 
-    def __init__(self ,window, window_center, text, wrap_text = False, location=None, cen_x = False, cen_y=False, font_size=30, font_colour=(255 ,255 ,255), inputMode = 1):
+    def __init__(self ,window, window_center, text, wrap_text = False, location=None, cen_x = False, cen_y=False,
+                 font_size=30, font_colour=(255 ,255 ,255), inputMode = 1):
         """
         Create object that we can manipulate, ie move it's position and change it's parameters
         Also allows text wrapping to screen. This will cause text to be a list instead of a single object internally
@@ -1315,13 +1316,13 @@ class TextObject():
         # Set inputs to either touch or mouse
         self.input_mode = inputMode  # input mode 1 for touch, 2 for mouse
         if self.input_mode == 2:
-            self.inputUp = self.pygame.MOUSEBUTTONUP
-            self.inputDown = self.pygame.MOUSEBUTTONDOWN
-            self.inputMotion = self.pygame.MOUSEMOTION
+            self.inputUp = pygame.MOUSEBUTTONUP
+            self.inputDown = pygame.MOUSEBUTTONDOWN
+            self.inputMotion = pygame.MOUSEMOTION
         else:
-            self.inputUp = self.pygame.FINGERUP
-            self.inputDown = self.pygame.FINGERDOWN
-            self.inputMotion = self.pygame.FINGERMOTION
+            self.inputUp = pygame.FINGERUP
+            self.inputDown = pygame.FINGERDOWN
+            self.inputMotion = pygame.FINGERMOTION
 
     def render(self, window, grey=False, re_render = False):
         """handle drawing text"""
@@ -1438,20 +1439,9 @@ class TextObject():
 class Renderer():
     """Class to render common things, such as background """
 
-    def __init__(self, window, window_center, inputMode = 1):
+    def __init__(self, window, window_center):
         self.window = window
         self.window_center = window_center
-
-        # Set inputs to either touch or mouse
-        self.input_mode = inputMode  # input mode 1 for touch, 2 for mouse
-        if self.input_mode == 2:
-            self.inputUp = self.pygame.MOUSEBUTTONUP
-            self.inputDown = self.pygame.MOUSEBUTTONDOWN
-            self.inputMotion = self.pygame.MOUSEMOTION
-        else:
-            self.inputUp = self.pygame.FINGERUP
-            self.inputDown = self.pygame.FINGERDOWN
-            self.inputMotion = self.pygame.FINGERMOTION
 
 
     def DrawBackground(self, colour):
@@ -2013,7 +2003,7 @@ class Button():
     def get_event(self, event, mouse_pos):
         """returns if button was pressed"""
         # If the mouse clicked this button
-        if event.type == self.inputUp and event.button == 1:
+        if event.type == self.inputUp:
             if self.rect.collidepoint(mouse_pos):
                 if self.on_click is not None:
                     self.on_click()
@@ -2479,11 +2469,11 @@ class InputBox():
             self.inputMotion = pygame.FINGERMOTION
 
 
-    def handle_event(self, event):
+    def handle_event(self, event, mouse_pos):
         event_triggered = None
         if event.type == self.inputDown:
             # If the user clicked on the input_box rect.
-            if self.rect.collidepoint(event.pos):
+            if self.rect.collidepoint(mouse_pos):
                 event_triggered = "MOUSEBUTTONDOWN"
                 # Set to active, if deault text in there, remove it
                 if self.text == self.default_text:
@@ -2741,7 +2731,7 @@ class VolumeSlider():
         self.type = "VolumeSlider"
         self.min_value = min_val
         self.max_value = max_val
-        self.current_vol = 0
+        self.current_vol = default_vol
 
         # Set inputs to either touch or mouse
         self.input_mode = inputMode  # input mode 1 for touch, 2 for mouse
