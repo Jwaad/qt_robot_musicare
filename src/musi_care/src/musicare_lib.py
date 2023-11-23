@@ -2530,7 +2530,7 @@ class HorizontalSlider():
 class VolumeSlider():
     """ Class that generates a slider object using pygame."""
 
-    def __init__(self, pygame, location, default_vol = 0,  scale = 1, min_Val = 0, max_Val=100, on_release=None):
+    def __init__(self, pygame, location, default_vol = 0,  scale = 1, min_val = 0, max_val=100, on_release=None):
         """ Create the slider object at given location with given scale.
             pygame = pygame, pass in initialised pygame, so we don't reinitialise
             location = list or tuple, x and y pos
@@ -2581,8 +2581,8 @@ class VolumeSlider():
         self.drag = False
         self.on_release = on_release
         self.type = "VolumeSlider"
-        self.min_value = min_Val
-        self.max_value = max_Val
+        self.min_value = min_val
+        self.max_value = max_val
 
     def CalculateSliderPos(self, percentage):
         """ Move the slider along the box according to the percentage passed in
