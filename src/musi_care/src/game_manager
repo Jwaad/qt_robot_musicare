@@ -359,7 +359,7 @@ class GameManager():
         next_button = self.create_button("next_button.png", (1100, 1200))
         signup_button = self.create_button("blank_button.png", (2300, 20), text="New User", scale=0.5)
         # Volume Slider
-        voice_slider = VolumeSlider(self.pygame,(2000,1000), scale = 1.1)
+        voice_slider = VolumeSlider(self.pygame,(2000,1000), scale = 1.1, min_val=60, on_release=print)
 
         log_in = False
         user_recognised = False

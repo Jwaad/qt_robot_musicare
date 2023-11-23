@@ -2530,9 +2530,9 @@ class HorizontalSlider():
 class VolumeSlider():
     """ Class that generates a slider object using pygame."""
 
-    def __init__(self, pygame, location, default_vol = 0,  scale = 1, min_max = (0,100), on_release=None):
+    def __init__(self, pygame, location, default_vol = 0,  scale = 1, min_Val = 0, max_Val=100, on_release=None):
         """ Create the slider object at given location with given scale.
-            pygame = pygame, pass in initialised pygame, so we don reinitialise
+            pygame = pygame, pass in initialised pygame, so we don't reinitialise
             location = list or tuple, x and y pos
             default_vol = float or int, the volume the slider should start at in percentage. default = 0
             scale = float or int, default is 1
@@ -2581,8 +2581,8 @@ class VolumeSlider():
         self.drag = False
         self.on_release = on_release
         self.type = "VolumeSlider"
-        self.min_value = min_max[0]
-        self.max_value = min_max[1]
+        self.min_value = min_Val
+        self.max_value = max_Val
 
     def CalculateSliderPos(self, percentage):
         """ Move the slider along the box according to the percentage passed in
@@ -2599,7 +2599,7 @@ class VolumeSlider():
         slider_min = self.slider_box_rect.top
         my_slider_y = self.slider_rect.center[1] - slider_min # slider pos - min to get slider in respect of slider box
         slider_percent =  1 - (my_slider_y / self.slider_box_rect.height) # flip percent, so sliding upwards increases %
-        volume_percent = int(round(slider_percent * (self.max_value - self.min_value), 0)) # get percentage of min and max bounds
+        volume_percent = int( self.min_value + round(slider_percent * (self.max_value - self.min_value), 0)) # get percentage of min and max bounds
 
         return volume_percent
 
