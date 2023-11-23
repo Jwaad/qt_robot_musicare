@@ -38,8 +38,8 @@ class GameManager():
         self.session_time = 30 * 60 # 15 * 60  # Time in seconds that sessions should last for. (Minimum time)
         self.session_name = "session_" # this should be appended with a number e.g: session_3
         self.session_data = {}
-        self.games = ["GTM", "FTS", "CTB", "SSC"]
-        #self.games = ["FTS"]
+        #self.games = ["GTM", "FTS", "CTB", "SSC"]
+        self.games = ["GTM"]
         self.prev_game = ""
 
         # Init ros side
@@ -68,6 +68,16 @@ class GameManager():
         self.Levels = StandardLevels(self.window, self.window_center, self.pygame, self.path_to_music, debug=self.debug)
         self.renderer = Renderer(self.window, self.window_center)
 
+        # Set inputs to either touch or mouse
+        self.input_mode = 1  # input mode 1 for touch, 2 for mouse
+        if self.input_mode == 2:
+            self.inputUp = self.pygame.MOUSEBUTTONUP
+            self.inputDown = self.pygame.MOUSEBUTTONDOWN
+            self.inputMotion = self.pygame.MOUSEMOTION
+        else:
+            self.inputUp = self.pygame.FINGERUP
+            self.inputDown = self.pygame.FINGERDOWN
+            self.inputMotion = self.pygame.FINGERMOTION
 
         # Hide cursor
         if not self.debug:
@@ -322,7 +332,7 @@ class GameManager():
                         print(new_user)
 
                 # Handle on click animation
-                if event.type == self.pygame.MOUSEBUTTONUP:  # On mouse release play animation to show where cursor is
+                if event.type == self.inputUp:  # On mouse release play animation to show where cursor is
                     self.animation_manager.StartTouchAnimation(mouse_pos)  # Play animation
 
                 # Check quit
@@ -395,7 +405,7 @@ class GameManager():
             for event in self.pygame.event.get():
 
                 # Handle on click animation
-                if event.type == self.pygame.MOUSEBUTTONUP:  # On mouse release play animation to show where cursor is
+                if event.type == self.inputUp:  # On mouse release play animation to show where cursor is
                     self.animation_manager.StartTouchAnimation(mouse_pos)  # Play animation
 
                 # Handle events for name box

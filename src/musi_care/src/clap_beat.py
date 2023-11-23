@@ -36,7 +36,7 @@ import threading
 class Clap_To_Beat_Game():
     """ Class to generate and handle guess the mood game """
 
-    def __init__(self,reduce_screen=False, debug=False, screen = None, my_pygame = None):
+    def __init__(self,reduce_screen=False, debug=False, screen = None, my_pygame = None, inputMode = 1):
         """Initialise and take user_id, user_id helps us save the data to the specific profiles"""
         x = 145  # x pos of screen
         y = 0  # y pos of screen
@@ -47,6 +47,18 @@ class Clap_To_Beat_Game():
             self.pygame.freetype.init()
         else:
             self.pygame = my_pygame
+
+        # Set inputs to either touch or mouse
+        self.input_mode = inputMode  # input mode 1 for touch, 2 for mouse
+        if self.input_mode == 2:
+            self.inputUp = self.pygame.MOUSEBUTTONUP
+            self.inputDown = self.pygame.MOUSEBUTTONDOWN
+            self.inputMotion = self.pygame.MOUSEMOTION
+        else:
+            self.inputUp = self.pygame.FINGERUP
+            self.inputDown = self.pygame.FINGERDOWN
+            self.inputMotion = self.pygame.FINGERMOTION
+
         res = pygame.display.Info()  # get our screen resolution
         if screen == None:
             if reduce_screen:
@@ -191,7 +203,7 @@ class Clap_To_Beat_Game():
             # reset / init variables
             option_chosen = ""
             mouse_pos = self.pygame.mouse.get_pos()
-            if event.type == self.pygame.MOUSEBUTTONUP:  # on mouse release play animation to show where cursor is
+            if event.type == self.inputUp:  # on mouse release play animation to show where cursor is
                 self.animation_manager.StartTouchAnimation(mouse_pos)  # tell system to play animation when drawing
                 # return True
 

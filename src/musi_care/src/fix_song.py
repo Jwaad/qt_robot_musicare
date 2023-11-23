@@ -33,7 +33,7 @@ from musicare_lib import TextObject
 class Fix_The_Song_Game():
     """ Class to generate and handle guess the mood game """
 
-    def __init__(self, reduce_screen=False, debug=False, screen = None, my_pygame = None):
+    def __init__(self, reduce_screen=False, debug=False, screen = None, my_pygame = None, inputMode = 1):
         """Initialise and take user_id, user_id helps us save the data to the specific profiles"""
         x = 145  # x pos of screen
         y = 0  # y pos of screen
@@ -46,6 +46,18 @@ class Fix_The_Song_Game():
         else:
             self.pygame = my_pygame
         res = pygame.display.Info()  # get our screen resolution
+
+        # Set inputs to either touch or mouse
+        self.input_mode = inputMode  # input mode 1 for touch, 2 for mouse
+        if self.input_mode == 2:
+            self.inputUp = self.pygame.MOUSEBUTTONUP
+            self.inputDown = self.pygame.MOUSEBUTTONDOWN
+            self.inputMotion = self.pygame.MOUSEMOTION
+        else:
+            self.inputUp = self.pygame.FINGERUP
+            self.inputDown = self.pygame.FINGERDOWN
+            self.inputMotion = self.pygame.FINGERMOTION
+
         if screen == None:
             if reduce_screen:
                 self.window_x = res.current_w - 150  # Width of window -150 to account for the linux toolbar
@@ -246,7 +258,7 @@ class Fix_The_Song_Game():
             # reset / init variables
             option_chosen = ""
             mouse_pos = self.pygame.mouse.get_pos()
-            if event.type == self.pygame.MOUSEBUTTONUP:  # on mouse release play animation to show where cursor is
+            if event.type == self.inputUp:  # on mouse release play animation to show where cursor is
                 self.animation_manager.StartTouchAnimation(mouse_pos)  # tell system to play animation when drawing
                 # return True
 
@@ -552,7 +564,7 @@ class Fix_The_Song_Game():
                         if event.type == self.pygame.QUIT:
                             self.run = False  # Stops the program entirely
                             self.quit = True  # Tells us that the game was quit out of, and it didn't end organically
-                        if event.type == self.pygame.MOUSEBUTTONUP:  # On mouse release play animation to show where cursor is
+                        if event.type == self.inputUp:  # On mouse release play animation to show where cursor is
                             self.animation_manager.StartTouchAnimation(mouse_pos)  # Play animation
                         # Keyboard override for testing NOTE: this wont work unless you comment out the timer check
                         if event.type == pygame.KEYDOWN :
@@ -646,7 +658,7 @@ class Fix_The_Song_Game():
                         self.run = False  # Stops the program entirely
                         self.sound_manager.stop_track()
                     mouse_pos = self.pygame.mouse.get_pos()
-                    if event.type == self.pygame.MOUSEBUTTONDOWN:
+                    if event.type == self.inputDown:
                         self.animation_manager.StartTouchAnimation(mouse_pos)  # draw mouse click animation
                     # Check for button press
                     if music_ended:  # if music ended start checking for next press, otherwise ignore it
@@ -730,7 +742,7 @@ class Fix_The_Song_Game():
                         self.run = False  # Stops the program entirely
                         self.quit = True  # Tells us that the game was quit out of, and it didn't end organically
                     # On mouse release play animation to show where cursor is
-                    if event.type == self.pygame.MOUSEBUTTONUP:
+                    if event.type == self.inputUp:
                         self.animation_manager.StartTouchAnimation(mouse_pos)  # Play animation
                         reset_segs = True
                     # Dont do any event handling if we're blocking currently
@@ -769,7 +781,7 @@ class Fix_The_Song_Game():
                         for segment in randomised_segments:
                             segment.get_event(event, mouse_pos)
                             # Handle segment events on mouse release
-                            if event.type == self.pygame.MOUSEBUTTONUP:
+                            if event.type == self.inputUp:
                                 if mouse_pos == segment.initial_mouse_pos:
                                     currently_playing = segment.id
                                     reset_segs = True

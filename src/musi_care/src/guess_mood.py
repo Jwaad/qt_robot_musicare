@@ -32,7 +32,7 @@ from musicare_lib import General
 class Guess_The_Mood_Game():
     """ Class to generate and handle guess the mood game """
 
-    def __init__(self, reduce_screen=False, debug=False, screen = None, my_pygame = None):
+    def __init__(self, reduce_screen=False, debug=False, screen = None, my_pygame = None, inputMode = 1):
         """
         reduce_screen = bool, whether or not to reduce borders to account for linux toolbar
         debug = bool, whether or not to display things like FPS and minor helpful tools.
@@ -40,6 +40,7 @@ class Guess_The_Mood_Game():
             instead of making a new one
         my_pygame = pygame lib, should be initiated pygame lib. Similar to screen, can be parameter, to use a pre init
             pygame, instead of init our own
+        inputMode = Decide whether to use touch or mouse: 1 for touch, 2 for mouse
         """
         self.debug = debug
         if my_pygame == None:
@@ -48,6 +49,17 @@ class Guess_The_Mood_Game():
             self.pygame.freetype.init()
         else:
             self.pygame = my_pygame
+        # Set inputs to either touch or mouse
+        self.input_mode = inputMode # input mode 1 for touch, 2 for mouse
+        if self.input_mode == 2:
+            self.inputUp = self.pygame.MOUSEBUTTONUP
+            self.inputDown = self.pygame.MOUSEBUTTONDOWN
+            self.inputMotion = self.pygame.MOUSEMOTION
+        else:
+            self.inputUp = self.pygame.FINGERUP
+            self.inputDown = self.pygame.FINGERDOWN
+            self.inputMotion = self.pygame.FINGERMOTION
+
         if screen == None:
             x = 150  # x pos of screen
             y = 0  # y pos of screen
@@ -218,7 +230,7 @@ class Guess_The_Mood_Game():
             # reset / init variables
             option_chosen = ""
             mouse_pos = self.pygame.mouse.get_pos()
-            if event.type == self.pygame.MOUSEBUTTONUP:  # on mouse release play animation to show where cursor is
+            if event.type == self.inputUp:  # on mouse release play animation to show where cursor is
                 self.animation_manager.StartTouchAnimation(mouse_pos)  # tell system to play animation when drawing
                 return True
 
@@ -470,7 +482,7 @@ class Guess_The_Mood_Game():
                         if event.type == self.pygame.QUIT:
                             self.run = False  # Stops the program entirely
                             self.quit = True  # Tells us that the game was quit out of, and it didn't end organically
-                        if event.type == self.pygame.MOUSEBUTTONUP:  # on mouse release play animation to show where cursor is
+                        if event.type == self.inputUp:  # on mouse release play animation to show where cursor is
                             self.animation_manager.StartTouchAnimation(mouse_pos)  # play animation
                         skip = self.tut_skip.get_event(event, mouse_pos)
                         if skip:
@@ -573,7 +585,7 @@ class Guess_The_Mood_Game():
                     option_chosen = ""
                     mouse_pos = self.pygame.mouse.get_pos()
                     # on mouse release play animation to show where cursor is
-                    if event.type == self.pygame.MOUSEBUTTONUP:
+                    if event.type == self.inputUp:
                         self.animation_manager.StartTouchAnimation(mouse_pos)
                     # Events for pause button this will also return if we're paused or not :
                     music_playing = (self.play_button.get_event(event, mouse_pos))

@@ -100,7 +100,7 @@ class Behaviours():
         ensure there's no repeat.
     """
 
-    def __init__(self, pygame, path_to_music):
+    def __init__(self, pygame, path_to_music, inputMode = 1):
         self.timeout_started = False
         self.timer = TimeFunctions()
         self.sound_manager = SoundManager(path_to_music)
@@ -108,6 +108,18 @@ class Behaviours():
         self.pygame = pygame
         self.paused = False
         self.speaking_timer_id = ""
+
+        # Set inputs to either touch or mouse
+        self.input_mode = inputMode  # input mode 1 for touch, 2 for mouse
+        if self.input_mode == 2:
+            self.inputUp = self.pygame.MOUSEBUTTONUP
+            self.inputDown = self.pygame.MOUSEBUTTONDOWN
+            self.inputMotion = self.pygame.MOUSEMOTION
+        else:
+            self.inputUp = self.pygame.FINGERUP
+            self.inputDown = self.pygame.FINGERDOWN
+            self.inputMotion = self.pygame.FINGERMOTION
+
 
     def qt_reminder(self, events, music_playing=True, timeout_message=None):
         """If x seconds of no inputs pass, qt should pause music and say something"""
@@ -127,7 +139,7 @@ class Behaviours():
             self.speaking_timer_id = self.command_manager.qt_say(timeout_message)
         else:
             for event in events:
-                if event.type == self.pygame.MOUSEBUTTONDOWN:
+                if event.type == self.inputDown:
                     print("starting timer")
                     self.timer.CreateTimer(timer_id, timeout_time, verbose=False)  # restart timer
                     self.talking = False
@@ -414,7 +426,7 @@ class Behaviours():
 class StandardLevels():
     """Class to draw basic screens multiple games use, such as yes or no screen """
 
-    def __init__(self, window, window_center, pygame, path_to_music, debug = False):
+    def __init__(self, window, window_center, pygame, path_to_music, debug = False, inputMode = 1):
         self.window = window
         self.window_center = window_center
         self.pygame = pygame
@@ -429,6 +441,17 @@ class StandardLevels():
         self.path_to_music = path_to_music
         rospy.wait_for_service('/sound_player_service')
         self.sound_player = rospy.ServiceProxy('/sound_player_service', sound_player_srv, persistent=True)
+
+        # Set inputs to either touch or mouse
+        self.input_mode = inputMode  # input mode 1 for touch, 2 for mouse
+        if self.input_mode == 2:
+            self.inputUp = self.pygame.MOUSEBUTTONUP
+            self.inputDown = self.pygame.MOUSEBUTTONDOWN
+            self.inputMotion = self.pygame.MOUSEMOTION
+        else:
+            self.inputUp = self.pygame.FINGERUP
+            self.inputDown = self.pygame.FINGERDOWN
+            self.inputMotion = self.pygame.FINGERMOTION
 
     def MeasureBPM(self, song_database, save_function, run=True, background_colour=(100, 100, 100)):
         """
@@ -612,7 +635,7 @@ class StandardLevels():
                         if event.type == self.pygame.QUIT:
                             run = False
                         mouse_pos = self.pygame.mouse.get_pos()
-                        if event.type == self.pygame.MOUSEBUTTONUP:
+                        if event.type == self.inputUp:
                             self.animation_manager.StartTouchAnimation(mouse_pos)
                         # if any button is pressed, return it's value
                         for button in buttons:
@@ -806,7 +829,7 @@ class StandardLevels():
                     if event.type == self.pygame.QUIT:
                         return False, -1
                     mouse_pos = self.pygame.mouse.get_pos()
-                    if event.type == self.pygame.MOUSEBUTTONUP:
+                    if event.type == self.inputUp:
                         self.animation_manager.StartTouchAnimation(mouse_pos)  # Tell system to play animation when drawing
                     # if any button is pressed, return it's value
                     for button in buttons:
@@ -875,7 +898,7 @@ class StandardLevels():
                     if event.type == self.pygame.QUIT:
                         return False, -1
                     mouse_pos = self.pygame.mouse.get_pos()
-                    if event.type == self.pygame.MOUSEBUTTONUP:
+                    if event.type == self.inputUp:
                         self.animation_manager.StartTouchAnimation(
                             mouse_pos)  # tell system to play animation when drawing
                     # if any button is pressed, return it's value
@@ -920,7 +943,7 @@ class StandardLevels():
                 if event.type == self.pygame.QUIT:
                     return False, False
                 elif (
-                        event.type == self.pygame.MOUSEBUTTONUP):  # on mouse release play animation to show where cursor is
+                        event.type == self.inputUp):  # on mouse release play animation to show where cursor is
                     mouse_pos = self.pygame.mouse.get_pos()
                     clicked_yes = yes.get_event(event, mouse_pos)
                     if clicked_yes:
@@ -958,7 +981,7 @@ class StandardLevels():
                     # Check if the user clicks the X
                     if event.type == self.pygame.QUIT:
                         return False
-                    elif (event.type == self.pygame.MOUSEBUTTONUP):
+                    elif (event.type == self.inputUp):
                         mouse_pos = self.pygame.mouse.get_pos()
                         self.animation_manager.StartTouchAnimation(
                             mouse_pos)  # tell system to play animation when drawing
@@ -1013,7 +1036,7 @@ class StandardLevels():
                     if event.type == self.pygame.QUIT:
                         return False
                     elif (
-                            event.type == self.pygame.MOUSEBUTTONUP):  # on mouse release play animation to show where cursor is
+                            event.type == self.inputUp):  # on mouse release play animation to show where cursor is
                         mouse_pos = self.pygame.mouse.get_pos()
                         self.animation_manager.StartTouchAnimation(
                             mouse_pos)  # tell system to play animation when drawing
@@ -1065,7 +1088,7 @@ class StandardLevels():
                     if event.type == self.pygame.QUIT:
                         return False
                     # On mouse release play animation to show where cursor is
-                    elif (event.type == self.pygame.MOUSEBUTTONUP):
+                    elif (event.type == self.inputUp):
                         clicked = True
                         # Tell system to play animation when drawing
                         self.animation_manager.StartTouchAnimation(self.pygame.mouse.get_pos())
@@ -1123,7 +1146,7 @@ class StandardLevels():
                         if event.type == self.pygame.QUIT:  # Check if the user clicks the X
                             return False
                         elif (
-                                event.type == self.pygame.MOUSEBUTTONUP):  # on mouse release play animation to show where cursor is
+                                event.type == self.inputUp):  # on mouse release play animation to show where cursor is
                             self.animation_manager.StartTouchAnimation(
                                 self.pygame.mouse.get_pos())  # tell system to play animation when drawing
                     # Draw background and objects
@@ -1176,7 +1199,7 @@ class StandardLevels():
                 if event.type == self.pygame.QUIT:
                     return False
                 # On mouse release play animation to show where cursor is
-                elif (event.type == self.pygame.MOUSEBUTTONUP):
+                elif (event.type == self.inputUp):
                     # Tell system to play animation when drawing
                     self.animation_manager.StartTouchAnimation(self.pygame.mouse.get_pos())
 
@@ -1205,7 +1228,7 @@ class StandardLevels():
                 if event.type == self.pygame.QUIT:
                     return False
                 # On mouse release play animation to show where cursor is
-                elif (event.type == self.pygame.MOUSEBUTTONUP):
+                elif (event.type == self.inputUp):
                     # Tell system to play animation when drawing
                     self.animation_manager.StartTouchAnimation(self.pygame.mouse.get_pos())
 
@@ -1234,7 +1257,7 @@ class StandardLevels():
                 if event.type == self.pygame.QUIT:
                     return False
                 # On mouse release play animation to show where cursor is
-                elif (event.type == self.pygame.MOUSEBUTTONUP):
+                elif (event.type == self.inputUp):
                     # Tell system to play animation when drawing
                     self.animation_manager.StartTouchAnimation(self.pygame.mouse.get_pos())
 
@@ -1258,7 +1281,7 @@ class StandardLevels():
 
 class TextObject():
 
-    def __init__(self ,window, window_center, text, wrap_text = False, location=None, cen_x = False, cen_y=False, font_size=30, font_colour=(255 ,255 ,255)):
+    def __init__(self ,window, window_center, text, wrap_text = False, location=None, cen_x = False, cen_y=False, font_size=30, font_colour=(255 ,255 ,255), inputMode = 1):
         """
         Create object that we can manipulate, ie move it's position and change it's parameters
         Also allows text wrapping to screen. This will cause text to be a list instead of a single object internally
@@ -1288,6 +1311,17 @@ class TextObject():
                 self.textRect[0] = window_center[0] - (self.textRect[2 ] /2)
             if cen_y:
                 self.textRect[1] = window_center[1] - (self.textRect[3 ] /2)
+
+        # Set inputs to either touch or mouse
+        self.input_mode = inputMode  # input mode 1 for touch, 2 for mouse
+        if self.input_mode == 2:
+            self.inputUp = self.pygame.MOUSEBUTTONUP
+            self.inputDown = self.pygame.MOUSEBUTTONDOWN
+            self.inputMotion = self.pygame.MOUSEMOTION
+        else:
+            self.inputUp = self.pygame.FINGERUP
+            self.inputDown = self.pygame.FINGERDOWN
+            self.inputMotion = self.pygame.FINGERMOTION
 
     def render(self, window, grey=False, re_render = False):
         """handle drawing text"""
@@ -1404,9 +1438,21 @@ class TextObject():
 class Renderer():
     """Class to render common things, such as background """
 
-    def __init__(self, window, window_center):
+    def __init__(self, window, window_center, inputMode = 1):
         self.window = window
         self.window_center = window_center
+
+        # Set inputs to either touch or mouse
+        self.input_mode = inputMode  # input mode 1 for touch, 2 for mouse
+        if self.input_mode == 2:
+            self.inputUp = self.pygame.MOUSEBUTTONUP
+            self.inputDown = self.pygame.MOUSEBUTTONDOWN
+            self.inputMotion = self.pygame.MOUSEMOTION
+        else:
+            self.inputUp = self.pygame.FINGERUP
+            self.inputDown = self.pygame.FINGERDOWN
+            self.inputMotion = self.pygame.FINGERMOTION
+
 
     def DrawBackground(self, colour):
         """takes window and colour to fill in the background of the window """
@@ -1895,7 +1941,7 @@ class Button():
     """
 
     def __init__(self, image_path, x_y_locations, pygame, return_info={}, scale=1.0, unique_id="", on_click=object,
-                 on_release=object, text="", should_grey=True):
+                 on_release=object, text="", should_grey=True, inputMode = 1):
         if not os.path.exists(image_path):
             print("File does not exist. Path = ", image_path)
         #else:
@@ -1920,6 +1966,17 @@ class Button():
         self.should_grey = should_grey
         self.on_click = on_click # TODO, THIS TRIGERS ON RELEASE INSTEAD OF ON CLICK...
         self.on_release = on_release
+
+        # Set inputs to either touch or mouse
+        self.input_mode = inputMode  # input mode 1 for touch, 2 for mouse
+        if self.input_mode == 2:
+            self.inputUp = self.pygame.MOUSEBUTTONUP
+            self.inputDown = self.pygame.MOUSEBUTTONDOWN
+            self.inputMotion = self.pygame.MOUSEMOTION
+        else:
+            self.inputUp = self.pygame.FINGERUP
+            self.inputDown = self.pygame.FINGERDOWN
+            self.inputMotion = self.pygame.FINGERMOTION
 
         self.text = text
         self.init_text()
@@ -1956,7 +2013,7 @@ class Button():
     def get_event(self, event, mouse_pos):
         """returns if button was pressed"""
         # If the mouse clicked this button
-        if event.type == self.pygame.MOUSEBUTTONUP and event.button == 1:
+        if event.type == self.inputUp and event.button == 1:
             if self.rect.collidepoint(mouse_pos):
                 if self.on_click is not None:
                     self.on_click()
@@ -1992,7 +2049,8 @@ class ToggleButton():
     """Class to load images that serve as buttons """
 
     def __init__(self, default_image_path, toggled_image_path, x_y_locations,
-                 pygame, scale=1, unique_id="", return_info="", when_toggle_on=object, when_toggle_off=object, should_grey = True):
+                 pygame, scale=1, unique_id="", return_info="", when_toggle_on=object, when_toggle_off=object,
+                 should_grey = True, inputMode = 1):
         # Set vars
         self.pygame = pygame
         self.highlighted = False
@@ -2025,6 +2083,18 @@ class ToggleButton():
             self.id = unique_id
         self.type = "ToggleButton"
         self.should_grey = should_grey
+
+        # Set inputs to either touch or mouse
+        self.input_mode = inputMode  # input mode 1 for touch, 2 for mouse
+        if self.input_mode == 2:
+            self.inputUp = self.pygame.MOUSEBUTTONUP
+            self.inputDown = self.pygame.MOUSEBUTTONDOWN
+            self.inputMotion = self.pygame.MOUSEMOTION
+        else:
+            self.inputUp = self.pygame.FINGERUP
+            self.inputDown = self.pygame.FINGERDOWN
+            self.inputMotion = self.pygame.FINGERMOTION
+
 
     def render(self, screen, grey=False):
         """Draw image onto screen"""
@@ -2079,7 +2149,7 @@ class ToggleButton():
         """Button event handle, if mouse release, then toggle"""
         mouse_on_button = self.rect.collidepoint(mouse_pos)
         if mouse_on_button:
-            if event.type == self.pygame.MOUSEBUTTONUP:
+            if event.type == self.inputUp:
                 return self.toggle_toggle()
         return self.toggle_state
 
@@ -2088,7 +2158,7 @@ class ToggleButton():
         """ Toggle the button, and return true if it was clicked this loop"""
         mouse_on_button = self.rect.collidepoint(mouse_pos)
         if mouse_on_button:
-            if event.type == self.pygame.MOUSEBUTTONUP:
+            if event.type == self.inputUp:
                 self.toggle_toggle()
                 return True
         return False
@@ -2109,7 +2179,8 @@ class PausePlayButton():
     """All functionality of toggle button, but with an option to replace with a 3rd image"""
 
     def __init__(self, pause_path, play_path, rewind_path,
-                 x_y_locations, pygame, scale=1, unique_id="", on_pause=object, on_play=object, should_grey = True):
+                 x_y_locations, pygame, scale=1, unique_id="", on_pause=object, on_play=object,
+                 should_grey = True, inputMode = 1):
         # Set vars
         self.pygame = pygame
         self.highlighted = False
@@ -2145,6 +2216,17 @@ class PausePlayButton():
         else:
             self.id = unique_id
         self.type = "PausePlayButton"
+
+        # Set inputs to either touch or mouse
+        self.input_mode = inputMode  # input mode 1 for touch, 2 for mouse
+        if self.input_mode == 2:
+            self.inputUp = self.pygame.MOUSEBUTTONUP
+            self.inputDown = self.pygame.MOUSEBUTTONDOWN
+            self.inputMotion = self.pygame.MOUSEMOTION
+        else:
+            self.inputUp = self.pygame.FINGERUP
+            self.inputDown = self.pygame.FINGERDOWN
+            self.inputMotion = self.pygame.FINGERMOTION
 
     def render(self, screen, grey=False):
         """Draw image onto screen"""
@@ -2201,7 +2283,7 @@ class PausePlayButton():
         """Button event handle, if mouse release, then toggle"""
         mouse_on_button = self.rect.collidepoint(mouse_pos)
         if mouse_on_button:
-            if event.type == self.pygame.MOUSEBUTTONUP:
+            if event.type == self.inputUp:
                 return self.toggle_pause()  # flip paused and play
         return self.playing  # return the state we were in
 
@@ -2219,7 +2301,8 @@ class DraggableButton():
     """Class to load images that serve as buttons that can be dragged and dropped """
 
     def __init__(self, image_path, toggled_image_path, x_y_locations, pygame,
-                 scale=1, return_info={}, when_toggle_on=object, when_toggle_off=object, unique_id="" , should_grey = True):
+                 scale=1, return_info={}, when_toggle_on=object, when_toggle_off=object, unique_id="",
+                 should_grey = True, inputMode = 1):
 
         self.pygame = pygame
 
@@ -2261,6 +2344,18 @@ class DraggableButton():
             self.id = rospy.get_time()  # unique ID for each button based on time when made
         else:
             self.id = unique_id
+
+        # Set inputs to either touch or mouse
+        self.input_mode = inputMode  # input mode 1 for touch, 2 for mouse
+        if self.input_mode == 2:
+            self.inputUp = self.pygame.MOUSEBUTTONUP
+            self.inputDown = self.pygame.MOUSEBUTTONDOWN
+            self.inputMotion = self.pygame.MOUSEMOTION
+        else:
+            self.inputUp = self.pygame.FINGERUP
+            self.inputDown = self.pygame.FINGERDOWN
+            self.inputMotion = self.pygame.FINGERMOTION
+
 
     def render(self, screen, grey=False):
         """Draw image onto screen"""
@@ -2306,17 +2401,17 @@ class DraggableButton():
         mouse_on_button = self.rect.collidepoint(mouse_pos)
         if mouse_on_button:
             # At start of drag/ long press, save some vars
-            if event.type == self.pygame.MOUSEBUTTONDOWN and not self.mouse_is_held:
+            if event.type == self.inputDown and not self.mouse_is_held:
                 self.mouse_is_held = True  # Tells us that the mouse was clicked during this event handling
                 self.initial_mouse_pos = mouse_pos
                 self.seg_init_pos = (self.rect.x, self.rect.y) # for snapping back
             # During drag / long press
             if self.mouse_is_held:
-                if event.type == self.pygame.MOUSEBUTTONUP and mouse_pos == self.initial_mouse_pos:
+                if event.type == self.inputUp and mouse_pos == self.initial_mouse_pos:
                     self.mouse_is_held = False
                     self.set_pos(self.seg_init_pos)
                     return self.toggle_toggle(), self.rect
-                elif event.type == self.pygame.MOUSEBUTTONUP and mouse_pos != self.initial_mouse_pos:
+                elif event.type == self.inputUp and mouse_pos != self.initial_mouse_pos:
                     self.mouse_is_held = False  # mouse was released somewhere else
                     if snap_back:
                         self.set_pos(self.seg_init_pos)
@@ -2332,7 +2427,8 @@ class DraggableButton():
 class InputBox():
     """ rect that you can click on and write text in. Text can be read by method get_text"""
 
-    def __init__(self, x, y, w, h, default_text='', allowed_chars="", fontsize = -1, max_chars = -1, force_lowercase = True, force_uppercase= False):
+    def __init__(self, x, y, w, h, default_text='', allowed_chars="", fontsize = -1, max_chars = -1,
+                 force_lowercase = True, force_uppercase= False, inputMode = 1):
         """
         Creates input box, with some grey text in it, that disappears when typing
         x = horizontal placement of text box (bottom left origin)
@@ -2371,9 +2467,21 @@ class InputBox():
         if allowed_chars == "" or type(allowed_chars) != str:
             self.allowed_chars = self.uppercase + self.lowercase + self.integers
 
+        # Set inputs to either touch or mouse
+        self.input_mode = inputMode  # input mode 1 for touch, 2 for mouse
+        if self.input_mode == 2:
+            self.inputUp = pygame.MOUSEBUTTONUP
+            self.inputDown = pygame.MOUSEBUTTONDOWN
+            self.inputMotion = pygame.MOUSEMOTION
+        else:
+            self.inputUp = pygame.FINGERUP
+            self.inputDown = pygame.FINGERDOWN
+            self.inputMotion = pygame.FINGERMOTION
+
+
     def handle_event(self, event):
         event_triggered = None
-        if event.type == pygame.MOUSEBUTTONDOWN:
+        if event.type == self.inputDown:
             # If the user clicked on the input_box rect.
             if self.rect.collidepoint(event.pos):
                 event_triggered = "MOUSEBUTTONDOWN"
@@ -2417,7 +2525,7 @@ class InputBox():
                             self.text += char
 
         # Re-render the text only on certain events, to save performance
-        if event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONUP:
+        if event.type == self.inputDown or event.type == pygame.KEYDOWN or event.type == self.inputUp:
             self.txt_surface = self.FONT.render(self.text, True, self.color)
         return event_triggered
 
@@ -2433,8 +2541,8 @@ class InputBox():
 class HorizontalSlider():
     """Class to handle all functions of the horizontal sliders"""
 
-    def __init__(self, image_path_slider, image_path_cursor, x_y_locations, scale=1, on_click=object, on_release=object,
-                 music_filepath="/game_assets/music/"):
+    def __init__(self, image_path_slider, image_path_cursor, x_y_locations, scale=1, on_click=object,
+                 on_release=object, music_filepath="/game_assets/music/", inputMode = 1):
         # init slider
         raw_slider_image = pygame.image.load(image_path_slider).convert_alpha()
         self.img_x = x_y_locations[0]
@@ -2467,6 +2575,17 @@ class HorizontalSlider():
         self.on_click = on_click
         self.on_release = on_release
         self.type = "HorizontalSlider"
+
+        # Set inputs to either touch or mouse
+        self.input_mode = inputMode  # input mode 1 for touch, 2 for mouse
+        if self.input_mode == 2:
+            self.inputUp = pygame.MOUSEBUTTONUP
+            self.inputDown = pygame.MOUSEBUTTONDOWN
+            self.inputMotion = pygame.MOUSEMOTION
+        else:
+            self.inputUp = pygame.FINGERUP
+            self.inputDown = pygame.FINGERDOWN
+            self.inputMotion = pygame.FINGERMOTION
 
     def render(self, screen, progress, grey=False):
         """Draw slider, cursor and progress bar onto screen """
@@ -2534,13 +2653,13 @@ class HorizontalSlider():
         mouse_x = mouse_pos[0]
 
         # Once slider is grabbed
-        if event.type == pygame.MOUSEBUTTONDOWN and mouse_on_cursor:
+        if event.type == self.inputDown and mouse_on_cursor:
             self.on_click()
             if self.slider_range[0] < mouse_x < self.slider_range[1]:
                 self.slider_being_held = True
 
         # Once slider is released
-        if event.type == pygame.MOUSEBUTTONUP and self.slider_being_held:
+        if event.type == self.inputUp and self.slider_being_held:
             # expand track_info
             track_title = track_info[0]
             track_time = track_info[1]
@@ -2567,7 +2686,8 @@ class HorizontalSlider():
 class VolumeSlider():
     """ Class that generates a slider object using pygame."""
 
-    def __init__(self, pygame, location, default_vol = 0,  scale = 1, min_val = 0, max_val=100, on_release=None):
+    def __init__(self, pygame, location, default_vol = 0,  scale = 1, min_val = 0, max_val=100, on_release=None,
+                 inputMode = 1):
         """ Create the slider object at given location with given scale.
             pygame = pygame, pass in initialised pygame, so we don't reinitialise
             location = list or tuple, x and y pos
@@ -2623,6 +2743,17 @@ class VolumeSlider():
         self.max_value = max_val
         self.current_vol = 0
 
+        # Set inputs to either touch or mouse
+        self.input_mode = inputMode  # input mode 1 for touch, 2 for mouse
+        if self.input_mode == 2:
+            self.inputUp = pygame.MOUSEBUTTONUP
+            self.inputDown = pygame.MOUSEBUTTONDOWN
+            self.inputMotion = pygame.MOUSEMOTION
+        else:
+            self.inputUp = pygame.FINGERUP
+            self.inputDown = pygame.FINGERDOWN
+            self.inputMotion = pygame.FINGERMOTION
+
         # initialise text
         self.init_text()
 
@@ -2648,11 +2779,11 @@ class VolumeSlider():
 
     def handle_event(self, event, mouse_pos):
         # Handle on click
-        if event.type == pygame.MOUSEBUTTONDOWN:
+        if event.type == self.inputDown:
             if self.slider_rect.collidepoint(mouse_pos):
                 self.drag = True
         # Handle mouse release
-        elif event.type == pygame.MOUSEBUTTONUP:
+        elif event.type == self.inputUp:
             # Skip if never clicked on vol slider
             if not self.drag:
                 return
@@ -2662,7 +2793,7 @@ class VolumeSlider():
                 self.on_release(self.current_vol)
                 self.current_vol_obj.set_text(str(self.current_vol))
             self.drag = False
-        elif event.type == pygame.MOUSEMOTION:
+        elif event.type == self.inputMotion:
             # Skip if never clicked on vol slider
             if not self.drag:
                 return
