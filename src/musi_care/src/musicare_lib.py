@@ -100,7 +100,7 @@ class Behaviours():
         ensure there's no repeat.
     """
 
-    def __init__(self, pygame, path_to_music, inputMode = 1):
+    def __init__(self, pygame, path_to_music, inputMode = 2):
         self.timeout_started = False
         self.timer = TimeFunctions()
         self.sound_manager = SoundManager(path_to_music)
@@ -426,7 +426,7 @@ class Behaviours():
 class StandardLevels():
     """Class to draw basic screens multiple games use, such as yes or no screen """
 
-    def __init__(self, window, window_center, pygame, path_to_music, debug = False, inputMode = 1):
+    def __init__(self, window, window_center, pygame, path_to_music, debug = False, inputMode = 2):
         self.window = window
         self.window_center = window_center
         self.pygame = pygame
@@ -489,6 +489,11 @@ class StandardLevels():
 
             #print(beat_timings)
             return beat_timings
+
+        def get_first_beat(percentage, max, min):
+            """ Uses volume slider's returned percentage to get our new first beat"""
+            first_beat = (max-min) * (percentage/100)
+            return first_beat
 
         def generateBeatMarkers(rect, bpm, first_beat, track_total_time):
             """
@@ -575,6 +580,14 @@ class StandardLevels():
                 time.sleep(0.3)
                 lines = generateBeatMarkers(wav_rect, bpm, first_beat, track_total_time=track_len)
 
+                # create first_beat slider
+                slider_max = first_beat + 2 # so we can adjust first beat by 2s in either dir
+                slider_min = first_beat - 2
+                first_beat_slider = VolumeSlider(self.pygame, (2000, 1500),
+                                     default_vol=int((first_beat / slider_max)*100), max_val=slider_max,
+                                     min_val = slider_min, inputMode=2)
+
+
                 # Reset vars for the loop
                 change_song = False
 
@@ -606,8 +619,8 @@ class StandardLevels():
                             self.recording = False
                             self.sound_manager.stop_track()  # Stop the music
                             first_beat, bpm = BPMFromHits(hits)
-                            song_data["first_beat"] = first_beat
                             song_data["bpm"] = bpm
+                            song_data["first_beat"] = first_beat
                             lines = generateBeatMarkers(wav_rect, bpm, first_beat, track_total_time=track_len)
                             song_database[song_title] = song_data
 
@@ -637,6 +650,15 @@ class StandardLevels():
                         mouse_pos = self.pygame.mouse.get_pos()
                         if event.type == self.inputUp:
                             self.animation_manager.StartTouchAnimation(mouse_pos)
+
+                        if not self.recording:
+                            slider_changed = first_beat_slider.handle_event(event, mouse_pos)
+                            if slider_changed:
+                                first_beat = int(first_beat_slider.current_vol)
+                                song_data["first_beat"] = first_beat
+                                lines = generateBeatMarkers(wav_rect, bpm, first_beat, track_total_time=track_len)
+                                song_database[song_title] = song_data
+
                         # if any button is pressed, return it's value
                         for button in buttons:
                             pressed = button.get_event(event, mouse_pos)
@@ -707,6 +729,7 @@ class StandardLevels():
                     song_waveform.render(self.window)
                     for line in lines:
                         line.render(self.window)
+                    first_beat_slider.render(self.window)
                     self.animation_manager.DrawTouchAnimation(self.window)  # Also draw touches
                     self.pygame.display.update()  # Update all drawn objects
 
@@ -1282,7 +1305,7 @@ class StandardLevels():
 class TextObject():
 
     def __init__(self ,window, window_center, text, wrap_text = False, location=None, cen_x = False, cen_y=False,
-                 font_size=30, font_colour=(255 ,255 ,255), inputMode = 1):
+                 font_size=30, font_colour=(255 ,255 ,255), inputMode = 2):
         """
         Create object that we can manipulate, ie move it's position and change it's parameters
         Also allows text wrapping to screen. This will cause text to be a list instead of a single object internally
@@ -1931,7 +1954,7 @@ class Button():
     """
 
     def __init__(self, image_path, x_y_locations, pygame, return_info={}, scale=1.0, unique_id="", on_click=object,
-                 on_release=object, text="", should_grey=True, inputMode = 1):
+                 on_release=object, text="", should_grey=True, inputMode = 2):
         if not os.path.exists(image_path):
             print("File does not exist. Path = ", image_path)
         #else:
@@ -2040,7 +2063,7 @@ class ToggleButton():
 
     def __init__(self, default_image_path, toggled_image_path, x_y_locations,
                  pygame, scale=1, unique_id="", return_info="", when_toggle_on=object, when_toggle_off=object,
-                 should_grey = True, inputMode = 1):
+                 should_grey = True, inputMode = 2):
         # Set vars
         self.pygame = pygame
         self.highlighted = False
@@ -2170,7 +2193,7 @@ class PausePlayButton():
 
     def __init__(self, pause_path, play_path, rewind_path,
                  x_y_locations, pygame, scale=1, unique_id="", on_pause=object, on_play=object,
-                 should_grey = True, inputMode = 1):
+                 should_grey = True, inputMode = 2):
         # Set vars
         self.pygame = pygame
         self.highlighted = False
@@ -2292,7 +2315,7 @@ class DraggableButton():
 
     def __init__(self, image_path, toggled_image_path, x_y_locations, pygame,
                  scale=1, return_info={}, when_toggle_on=object, when_toggle_off=object, unique_id="",
-                 should_grey = True, inputMode = 1):
+                 should_grey = True, inputMode = 2):
 
         self.pygame = pygame
 
@@ -2418,7 +2441,7 @@ class InputBox():
     """ rect that you can click on and write text in. Text can be read by method get_text"""
 
     def __init__(self, x, y, w, h, default_text='', allowed_chars="", fontsize = -1, max_chars = -1,
-                 force_lowercase = True, force_uppercase= False, inputMode = 1):
+                 force_lowercase = True, force_uppercase= False, inputMode = 2):
         """
         Creates input box, with some grey text in it, that disappears when typing
         x = horizontal placement of text box (bottom left origin)
@@ -2532,7 +2555,7 @@ class HorizontalSlider():
     """Class to handle all functions of the horizontal sliders"""
 
     def __init__(self, image_path_slider, image_path_cursor, x_y_locations, scale=1, on_click=object,
-                 on_release=object, music_filepath="/game_assets/music/", inputMode = 1):
+                 on_release=object, music_filepath="/game_assets/music/", inputMode = 2):
         # init slider
         raw_slider_image = pygame.image.load(image_path_slider).convert_alpha()
         self.img_x = x_y_locations[0]
@@ -2677,7 +2700,7 @@ class VolumeSlider():
     """ Class that generates a slider object using pygame."""
 
     def __init__(self, pygame, location, default_vol = 0,  scale = 1, min_val = 0, max_val=100, on_release=None,
-                 inputMode = 1):
+                 inputMode = 2):
         """ Create the slider object at given location with given scale.
             pygame = pygame, pass in initialised pygame, so we don't reinitialise
             location = list or tuple, x and y pos
@@ -2768,6 +2791,7 @@ class VolumeSlider():
         return volume_percent
 
     def handle_event(self, event, mouse_pos):
+        """ Handle sliding and setting values, returns true on slider release"""
         # Handle on click
         if event.type == self.inputDown:
             if self.slider_rect.collidepoint(mouse_pos):
@@ -2776,17 +2800,18 @@ class VolumeSlider():
         elif event.type == self.inputUp:
             # Skip if never clicked on vol slider
             if not self.drag:
-                return
+                return False
             # If they're dragging, let them trigger on release
+            self.current_vol = self.CalculateVolumePercent()
+            self.current_vol_obj.set_text(str(round(self.current_vol,2)) + "%")
             if self.on_release != None:
-                self.current_vol = self.CalculateVolumePercent()
                 self.on_release(self.current_vol)
-                self.current_vol_obj.set_text(str(self.current_vol))
             self.drag = False
+            return True
         elif event.type == self.inputMotion:
             # Skip if never clicked on vol slider
             if not self.drag:
-                return
+                return False
             # Move slider within it's bounds if mouse was held on it
             slider_max = (self.slider_box_rect.top + self.slider_box_rect.height)
             slider_min = self.slider_box_rect.top
@@ -2799,6 +2824,8 @@ class VolumeSlider():
             # update slider text to match
             self.current_vol_obj.set_y(self.slider_rect.y + (self.current_vol_obj.textRect.h / 2))
             self.current_vol_obj.set_text(" ")
+            return False
+        return False
 
     def render(self, screen, grey = False):
         if grey:
@@ -2815,9 +2842,9 @@ class VolumeSlider():
     def init_text(self):
         font_size = int(24 * self.scale)
         # Create objects
-        self.max_vol_obj = TextObject(None, None, str(self.max_value), location=(0, 0), font_size=font_size)
-        self.min_vol_obj = TextObject(None, None, str(self.min_value), location=(0, 0), font_size=font_size)
-        self.current_vol_obj = TextObject(None, None, str(self.current_vol), location=(0, 0), font_size=font_size)
+        self.max_vol_obj = TextObject(None, None, str(round(self.max_value,2)) + "%", location=(0, 0), font_size=font_size)
+        self.min_vol_obj = TextObject(None, None, str(round(self.min_value,2)) + "%", location=(0, 0), font_size=font_size)
+        self.current_vol_obj = TextObject(None, None, str(round(self.current_vol,2)) + "%", location=(0, 0), font_size=font_size)
         #Move objects to start positions
         self.max_vol_obj.set_pos(
             (self.slider_box_rect[0],
