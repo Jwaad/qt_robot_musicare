@@ -36,7 +36,7 @@ import threading
 class Clap_To_Beat_Game():
     """ Class to generate and handle guess the mood game """
 
-    def __init__(self,reduce_screen=False, debug=False, screen = None, my_pygame = None, inputMode = 1):
+    def __init__(self,reduce_screen=False, debug=False, screen = None, my_pygame = None, inputMode = 2):
         """Initialise and take user_id, user_id helps us save the data to the specific profiles"""
         x = 145  # x pos of screen
         y = 0  # y pos of screen
