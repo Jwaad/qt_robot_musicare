@@ -479,21 +479,16 @@ class StandardLevels():
             return first_beat, bpm
 
         def get_beats_list(bpm, track_len, first_beat):
-            bps = float(60 / bpm)
-            total_beats = math.floor(((track_len - first_beat) / bps) + 1)  # +1 to include first beat
+            bps = float(60 / bpm) #how much time in seconds is between each beat
+            total_beats = math.floor(((track_len - first_beat) / bps) + 2)  # +2 to include a first beat and last
             beat_timings = np.zeros([total_beats], dtype=float)
             beat_timings[0] = float(first_beat)
             # loop through and populate list of beat timings, skipping the first
             for i in range(beat_timings.shape[0]-1):
-                beat_timings[i + 1] = beat_timings[i] + (1 / bps)
+                beat_timings[i + 1] = beat_timings[i] + bps
 
             #print(beat_timings)
             return beat_timings
-
-        def get_first_beat(percentage, max, min):
-            """ Uses volume slider's returned percentage to get our new first beat"""
-            first_beat = (max-min) * (percentage/100)
-            return first_beat
 
         def generateBeatMarkers(rect, bpm, first_beat, track_total_time):
             """
@@ -581,12 +576,14 @@ class StandardLevels():
                 lines = generateBeatMarkers(wav_rect, bpm, first_beat, track_total_time=track_len)
 
                 # create first_beat slider
-                slider_max = first_beat + 2 # so we can adjust first beat by 2s in either dir
-                slider_min = first_beat - 2
-                first_beat_slider = VolumeSlider(self.pygame, (2000, 1500),
-                                     default_vol=int((first_beat / slider_max)*100), max_val=slider_max,
-                                     min_val = slider_min, inputMode=2)
+                first_beat_minus_button = Button(path_to_png + "/minus.png", (1500, 1400), self.pygame, scale=0.5)
+                first_beat_number = TextObject(None, None, str(first_beat)[:4], location=(1625,1450), font_size=60  )
+                first_beat_plus_button = Button(path_to_png + "/plus.png", (1750, 1400), self.pygame, scale=0.5)
 
+                # Create BPM tweaking features
+                bpm_minus_button = Button(path_to_png + "/minus.png", (900, 1400), self.pygame, scale=0.5)
+                bpm_number = TextObject(None, None, str(bpm)[:4], location=(1025,1450), font_size=60  )
+                bpm_plus_button = Button(path_to_png + "/plus.png", (1150, 1400), self.pygame, scale=0.5)
 
                 # Reset vars for the loop
                 change_song = False
@@ -624,21 +621,22 @@ class StandardLevels():
                             lines = generateBeatMarkers(wav_rect, bpm, first_beat, track_total_time=track_len)
                             song_database[song_title] = song_data
 
-
                     # Metronome playing logic
                     if self.playing_track:
                         # TODO TEMP
-                        print("fps =", 1 / (rospy.get_time() - tx))
+                        #print("fps =", 1 / (rospy.get_time() - tx))
                         tx = rospy.get_time()
                         # TODO TEMP
                         next_beat = song_beats[0]
-                        if (rospy.get_time() - t0) > next_beat:
+
+                        songtime = rospy.get_time() - t0
+                        #print(songtime)
+                        if songtime >= next_beat:
                             # Play metronome sound on each beat
+                            #print("hit")
                             metronome.play()
-                            temp.append(rospy.get_time())
                             song_beats = np.delete(song_beats, 0)
                         if song_beats.shape[0] == 0:
-                            print(temp, temp2)
                             self.playing_track = False
                             play_button.toggle_toggle() # Toggle back off
 
@@ -651,13 +649,34 @@ class StandardLevels():
                         if event.type == self.inputUp:
                             self.animation_manager.StartTouchAnimation(mouse_pos)
 
+                        # Handle elements for tweaking song data
                         if not self.recording:
-                            slider_changed = first_beat_slider.handle_event(event, mouse_pos)
-                            if slider_changed:
-                                first_beat = int(first_beat_slider.current_vol)
+                            # First beat change
+                            first_beat_minus = first_beat_minus_button.get_event(event, mouse_pos)
+                            first_beat_plus = first_beat_plus_button.get_event(event, mouse_pos)
+                            if first_beat_minus:
+                                first_beat -= 0.1
+                            elif first_beat_plus:
+                                first_beat += 0.1
+                            if first_beat_plus or first_beat_minus:
+                                first_beat_number.set_text(str(first_beat))
                                 song_data["first_beat"] = first_beat
                                 lines = generateBeatMarkers(wav_rect, bpm, first_beat, track_total_time=track_len)
                                 song_database[song_title] = song_data
+
+                            # BPM change
+                            bpm_minus = bpm_minus_button.get_event(event, mouse_pos)
+                            bpm_plus = bpm_plus_button.get_event(event, mouse_pos)
+                            if bpm_minus:
+                                bpm -= 1
+                            elif bpm_plus:
+                                bpm += 1
+                            if bpm_plus or bpm_minus:
+                                bpm_number.set_text(str(bpm))
+                                song_data["bpm"] = bpm
+                                lines = generateBeatMarkers(wav_rect, bpm, first_beat, track_total_time=track_len)
+                                song_database[song_title] = song_data
+
 
                         # if any button is pressed, return it's value
                         for button in buttons:
@@ -729,7 +748,12 @@ class StandardLevels():
                     song_waveform.render(self.window)
                     for line in lines:
                         line.render(self.window)
-                    first_beat_slider.render(self.window)
+                    first_beat_plus_button.render(self.window)
+                    first_beat_minus_button.render(self.window)
+                    first_beat_number.render(self.window)
+                    bpm_plus_button.render(self.window)
+                    bpm_minus_button.render(self.window)
+                    bpm_number.render(self.window)
                     self.animation_manager.DrawTouchAnimation(self.window)  # Also draw touches
                     self.pygame.display.update()  # Update all drawn objects
 
@@ -2786,7 +2810,7 @@ class VolumeSlider():
         slider_min = self.slider_box_rect.top
         my_slider_y = self.slider_rect.center[1] - slider_min # slider pos - min to get slider in respect of slider box
         slider_percent =  1 - (my_slider_y / self.slider_box_rect.height) # flip percent, so sliding upwards increases %
-        volume_percent = int( self.min_value + round(slider_percent * (self.max_value - self.min_value), 0)) # get percentage of min and max bounds
+        volume_percent = float( self.min_value + (slider_percent * (self.max_value - self.min_value))) # get percentage of min and max bounds
 
         return volume_percent
 
@@ -2803,7 +2827,7 @@ class VolumeSlider():
                 return False
             # If they're dragging, let them trigger on release
             self.current_vol = self.CalculateVolumePercent()
-            self.current_vol_obj.set_text(str(round(self.current_vol,2)) + "%")
+            self.current_vol_obj.set_text(str(self.current_vol) + "%")
             if self.on_release != None:
                 self.on_release(self.current_vol)
             self.drag = False
@@ -2844,7 +2868,7 @@ class VolumeSlider():
         # Create objects
         self.max_vol_obj = TextObject(None, None, str(round(self.max_value,2)) + "%", location=(0, 0), font_size=font_size)
         self.min_vol_obj = TextObject(None, None, str(round(self.min_value,2)) + "%", location=(0, 0), font_size=font_size)
-        self.current_vol_obj = TextObject(None, None, str(round(self.current_vol,2)) + "%", location=(0, 0), font_size=font_size)
+        self.current_vol_obj = TextObject(None, None, str(round(self.current_vol,3)) + "%", location=(0, 0), font_size=font_size)
         #Move objects to start positions
         self.max_vol_obj.set_pos(
             (self.slider_box_rect[0],
