@@ -72,6 +72,11 @@ class Clap_To_Beat_Game():
             self.window = pygame.display.set_mode((self.window_x, self.window_y))  # Create window and set size
         else:
             self.window = screen
+            self.window_x = self.window.get_width()
+            self.window_y = self.window.get_height()
+            self.window_center = (int(self.window_x / 2), int(self.window_y / 2))
+            self.cen_x = self.window_center[0]
+            self.cen_y = self.window_center[1]
         self.background_colour = (100, 100, 100)  # background black by default
         self.pygame.display.set_caption("Clap to the beat!")  # Label window
         self.run = True

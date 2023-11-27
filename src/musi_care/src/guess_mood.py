@@ -68,13 +68,18 @@ class Guess_The_Mood_Game():
             self.window_x = res.current_w
             if reduce_screen:
                 self.window_x -= x # Width of window -150 to account for the linux toolbar
+                self.window_y -= y  # height of window - y, to account for top bar
             self.window_y = res.current_h  # Height of window
             self.window_center = (int(self.window_x / 2), int(self.window_y / 2))
             self.window = pygame.display.set_mode((self.window_x, self.window_y))  # Create window and set size
         else:
-            # TODO, this is currently dysfunctional, and throwing off scaling. fix with low priority
             self.window = screen
-            self.window_center = (self.window.get_height(), self.window.get_width())
+            self.window_x = self.window.get_width()
+            self.window_y = self.window.get_height()
+            self.window_center = (int(self.window_x / 2), int(self.window_y / 2))
+            self.cen_x = self.window_center[0]
+            self.cen_y = self.window_center[1]
+            #self.window_center = (self.window.get_height(), self.window.get_width())
         self.background_colour = (100, 100, 100)  # background grey by default
         self.pygame.display.set_caption("Guess The Mood!")  # Label window
         self.run = True
