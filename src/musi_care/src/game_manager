@@ -39,7 +39,6 @@ class GameManager():
         self.session_name = "session_" # this should be appended with a number e.g: session_3
         self.session_data = {}
         self.games = ["GTM", "FTS", "CTB", "SSC"]
-        #self.games = ["GTM"]
         self.prev_game = ""
 
         # Init ros side
@@ -260,8 +259,8 @@ class GameManager():
 
         # Input / text boxes
         name_box = InputBox(600, 300, 1000, 200, "First Name")
-        surname_box = InputBox(600, 700, 1000, 200, "Last Name")
-        dob_box = InputBox(600, 1100, 1000, 200, "dd-mm-yyyy", allowed_chars="0123456789", max_chars=10)
+        surname_box = InputBox(600, 700, 1000, 200, "ParticipantID")
+        dob_box = InputBox(600, 1100, 1000, 200, "nn-nn-nnnn", allowed_chars="0123456789", max_chars=10)
         inputboxes = [name_box, surname_box, dob_box]
         # Check marks
         name_tick = self.create_button("check_mark.png", (1750, 325))
@@ -377,8 +376,8 @@ class GameManager():
         """
 
         # Input / text boxes
-        name_box = InputBox(200, 600, 1000, 200, "First Name")
-        surname_box = InputBox(1600, 600, 1000, 200, "Last Name")
+        name_box = InputBox(200, 600, 1000, 200, "Name")
+        surname_box = InputBox(1600, 600, 1000, 200, "ParticipantID")
         inputboxes = [name_box, surname_box]
         # Check marks
         name_tick = self.create_button("check_mark.png", (650, 800))
@@ -405,7 +404,7 @@ class GameManager():
             for event in self.pygame.event.get():
                 # Handle events
                 mouse_pos = self.pygame.mouse.get_pos()
-                print("event")
+                #print("event")
 
                 # Handle on click animation
                 if event.type == self.inputUp:  # On mouse release play animation to show where cursor is
@@ -720,7 +719,8 @@ class GameManager():
         run = self.Levels.QTSpeakingScreen(self.behaviours_manager.get_transition_to_question(), self.run, self.background_colour)
 
         # Ask user how they are, save to data
-        run, mood_score = self.Levels.how_are_you(run=run, background_colour=self.background_colour)
+        run, mood_score = self.Levels.how_are_you(run=run, background_colour=self.background_colour,
+                                                  on_screen_text= "How are you feeling now")
         self.user_data["game_data"][self.session_name]["mood_post"] = mood_score
         self.SaveExistingUserData()
         prev_mood = self.user_data["game_data"][self.session_name]["mood_pre"]
@@ -916,7 +916,7 @@ class GameManager():
             if game_name == "GTM":
 
                 # Init game
-                game = GTM(debug=self.debug)
+                game = GTM(debug=self.debug, screen= self.window)
 
                 # get game specific parameters
                 mood = level_data["mood"]
@@ -926,7 +926,7 @@ class GameManager():
             # Play FTS
             elif game_name == "FTS":
                 # Init game
-                game = FTS(debug=self.debug)
+                game = FTS(debug=self.debug, screen= self.window)
 
                 if difficulty == "easy":
                     distract_song = None
@@ -956,13 +956,13 @@ class GameManager():
 
                 if game_name == "CTB" :
                     # Init game
-                    game = CTB(debug=self.debug)
+                    game = CTB(debug=self.debug, screen= self.window)
 
                     # Play game
                     self.run, user_level_data = game.Main(file_name, first_beat, bpm, ask_tut = play_tut)
                 else:
                     # Init game
-                    game = SSC(debug=self.debug)
+                    game = SSC(debug=self.debug, screen= self.window)
 
                     # Play game
                     self.run, user_level_data = game.Main(file_name, first_beat, bpm, ask_tut = play_tut)
