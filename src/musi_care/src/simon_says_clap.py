@@ -359,8 +359,8 @@ class Simon_Says_Clap_Game():
             hitting_drum = [-50.5, -84.69999694824219, -39.400001525878906]
             raised_arm = [-16.299999237060547, -85.0, -25.700000762939453]
         else:
-            raised_arm = [-26.700000762939453, -85.4000015258789, -58.29999923706055]
-            hitting_drum = [17.200000762939453, -80.0999984741211, -46.599998474121094]
+            raised_arm = [2.9000000953674316, -84.69999694824219, -49.20000076293945]
+            hitting_drum = [-27.0, -85.4000015258789, -56.29999923706055]
 
         #Check if we should hit the drum this loop
         if elapsed_time + time_to_hit > this_beat:
@@ -517,7 +517,7 @@ if __name__ == '__main__':
 
     # Run the game
     try:
-        game_object.Main()
+        game_object.Main("happy_3.wav", 0.1, 60, True)
     except(KeyboardInterrupt or rospy.exceptions.ROSInterruptException):
         game_object.pygame.quit
         SoundManager("").stop_track()

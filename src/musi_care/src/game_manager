@@ -38,8 +38,8 @@ class GameManager():
         self.session_time = 30 * 60 # 15 * 60  # Time in seconds that sessions should last for. (Minimum time)
         self.session_name = "session_" # this should be appended with a number e.g: session_3
         self.session_data = {}
-        #self.games = ["GTM", "FTS", "CTB", "SSC"]
-        self.games = ["GTM"]
+        self.games = ["GTM", "FTS", "CTB", "SSC"]
+        #self.games = ["GTM"]
         self.prev_game = ""
 
         # Init ros side

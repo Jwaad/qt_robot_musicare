@@ -897,7 +897,7 @@ if __name__ == '__main__':
     game_object = Fix_The_Song_Game("jwaad")
     # Run the game
     try:
-        game_object.Main()
+        game_object.Main("happy_3.wav", None, 2, True)
     except(KeyboardInterrupt or rospy.exceptions.ROSInterruptException):
         game_object.pygame.quit
         SoundManager("").stop_track()
