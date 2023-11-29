@@ -2021,7 +2021,7 @@ class Button():
     """
 
     def __init__(self, image_path, x_y_locations, pygame, return_info={}, scale=1.0, unique_id="", on_click=object,
-                 on_release=object, text="", should_grey=True, inputMode = 2):
+                 on_release=object, text="", should_grey=True, inputMode = 2, font_size = None):
         if not os.path.exists(image_path):
             print("File does not exist. Path = ", image_path)
         #else:
@@ -2059,19 +2059,27 @@ class Button():
             self.inputMotion = self.pygame.FINGERMOTION
 
         self.text = text
+        self.font_size = font_size
         self.init_text()
 
     def init_text(self):
-        font_scale = 80
+        """ automatically size text to fit perfectly in button center if no font size specified
+        """
+        if self.font_size != None:
+            text, self.textRect = self.create_text(self.font_size)
+            self.text = text
+            self.textRect.center = self.rect.center  # Center text in center button
+            return
+        font_scale = 80 # Starting font size, will shrink to fit text
         too_large = True
         # Keep scaling down text until it fits in the button
-        while too_large or font_scale <= 2:
-            text, textRect = self.create_text(font_scale)
-            if textRect[2] < (self.rect[2] * 0.85): # *0.9 gives a buffer on either side of the text
+        while too_large and font_scale > 2:
+            text, self.textRect = self.create_text(font_scale)
+            if self.textRect[2] < (self.rect[2] * 0.85): # *0.9 gives a buffer on either side of the text
                 too_large = False
             font_scale -= 2
         self.text = text
-        self.textRect = textRect
+        # TODO add a method to scale up the text too, instead of just scale down
         self.textRect.center = self.rect.center # Center text in center button
 
     def create_text(self, font_percent=70):
