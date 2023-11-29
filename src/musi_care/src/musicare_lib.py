@@ -959,18 +959,27 @@ class StandardLevels():
                 self.animation_manager.DrawTouchAnimation(self.window)  # Also draw touches
                 self.pygame.display.update()  # Update all drawn objects
             return False, -1  # impossible to reach here
-        
-    def yes_or_no_screen(self, text, run, background_colour, silent = False):
-        """Screen for Yes or No questions"""
+
+    def yes_or_no_screen(self, text, run, background_colour, choice_1 = "Yes", choice_2 = "No", silent = False):
+        """Screen for Yes or No questions, the 2 options can be written to, instead of yes no
+        Parameters:
+        text = top of screen text, also the question
+        run = var to tell this screen if it should run or not, useful to skip it easily
+        background_colour = rgb values for colour of background (0-255, 0-255, 0-255)
+        optional parameters:
+        choice_1 = text to display on green button (left)
+        choice_2 = text to display on yellow button (right)
+        silent = bool, if "text" parameter should be read aloud by QT or not
+        """
         # Variables
         this_file_path = self.this_file_path
         path_to_imgs = self.path_to_imgs
-        yes_img_path = os.path.join(this_file_path, path_to_imgs, "Yes_button.png")
-        no_img_path = os.path.join(this_file_path, path_to_imgs, "No_button.png")
+        blank_yes_img_path = os.path.join(this_file_path, path_to_imgs, "blank_yes_button.png")
+        blank_no_img_path = os.path.join(this_file_path, path_to_imgs, "blank_no_button.png")
 
         # Create buttons and text
-        yes = Button(yes_img_path, (225, 600), self.pygame, scale=2.2 ,should_grey=False)
-        no = Button(no_img_path, (1625, 600), self.pygame, scale=2.2 ,should_grey=False)
+        yes = Button(blank_yes_img_path, (225, 600), self.pygame, scale=2.2, text=choice_1 ,should_grey=False)
+        no = Button(blank_no_img_path, (1625, 600), self.pygame, scale=2.2, text= choice_2 ,should_grey=False)
         text_obj = TextObject(self.window, self.window_center, text, wrap_text=True, location=(0 ,200), cen_x=True,
                               cen_y=False, font_size=150, font_colour=(255, 255, 255))
 
