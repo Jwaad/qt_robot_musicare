@@ -774,20 +774,19 @@ class StandardLevels():
         arm_left_msg.data = arm_up_left
         arms_up = '[["right_arm", "left_arm"], [{}, {}]]'.format(arm_up_right, arm_up_left)
 
-        sayings = ["Can you please help me reach my drum?",
-                   "Can you put my drum under me please.",
-                   "I need help. Please put my drum in my reach",
-                   "Help me grab my drum please!",
-                   "Can you please grab my drum", 
-                   "please, put my drum in my reach so we can keep playing!"
+        sayings = ["Jah Vaad, can you please get me my drum?",
+                   "Can you put my drum under me please, JahVaad.",
+                   "I need help. JahVaad.. put my drum in my reach",
+                   "Jahvaad can you help me grab my drum please!",
+                   "Can you please grab my drum, Jahvaad",
+                   "Jahvaad... please, put my drum in my reach so we can keep playing!"
                    ]
         ind = random.randint(0, len(sayings) - 1)
         saying = sayings[ind]
 
         # QT say msg
         self.command_manager.qt_say(saying)
-        self.command_manager.qt_emote("talking")
-        
+
         # Have QT lift it's arms
         self.command_manager.qt_actuate(arms_up)
 
@@ -808,20 +807,20 @@ class StandardLevels():
         arm_left_msg.data = arm_up_left
         arms_up = '[["right_arm", "left_arm"], [{}, {}]]'.format(arm_up_right, arm_up_left)
 
-        sayings = ["Can you please help me put away my drum?",
-                   "Can you please put my drum away",
-                   "Please put my drum out of my reach",
-                   "Help me put away my drum please!",
-                   "Can you please remove my drum",
-                   "please, put my drum away so we can keep playing!",
-                   "My arms arent long enough to move my drum... Can you please help me"
+        sayings = ["Jahvaad, Can you please help me put away my drum?",
+                   "Can you please put my drum away, Jahvaad",
+                   "Jahvaad, Please put my drum out of my reach",
+                   "Help me put away my drum please, Jahvaad!",
+                   "Can you please remove my drum, Jahvaad",
+                   "Jahvaad... please, put my drum away so we can keep playing!",
+                   "Jahvaad, My arms arent long enough to move my drum... Can you please help me",
+                   "Jahvaad, i am done with this now, please remove it"
                    ]
         ind = random.randint(0, len(sayings) - 1)
         saying = sayings[ind]
 
         # QT say msg
         self.command_manager.qt_say(saying)
-        self.command_manager.qt_emote("talking")
 
         # Have QT lift it's arms
         self.command_manager.qt_actuate(arms_up)
@@ -830,7 +829,6 @@ class StandardLevels():
         self.yes_or_no_screen("Is QT's drum out of the way??", run, background_colour=background_colour, silent=True)
 
         self.command_manager.qt_say("Thank you very much!")
-        self.command_manager.qt_emote("talking")
         self.command_manager.qt_gesture("arms_up")
 
     def did_you_like_song(self, run = True, on_screen_text = "Did you like the song?", prev_dialogue = "", background_colour = (200, 200, 200)):
@@ -844,7 +842,6 @@ class StandardLevels():
 
             # Ask how was the song
             question = self.behaviour_manager.get_how_was_song(previous_saying=prev_dialogue)
-            self.command_manager.qt_emote("talking")  # show mouth moving
             self.command_manager.qt_say(question)  # says text we give it, and starts an internal timer that we can check on
             self.command_manager.qt_gesture("explain_right")
 
@@ -906,7 +903,6 @@ class StandardLevels():
 
             # Ask how was the song
             question = self.behaviour_manager.get_how_are_you(previous_saying=prev_dialogue)
-            self.command_manager.qt_emote("talking")  # show mouth moving
             self.command_manager.qt_say(question)  # says text we give it, and starts an internal timer that we can check on
             #self.command_manager.qt_gesture("explain_right")
 
@@ -980,7 +976,6 @@ class StandardLevels():
 
         # Have QT say the text out loud if not silent mode
         if not silent:
-            self.command_manager.qt_emote("talking")
             self.command_manager.qt_say(text)
 
         while not rospy.is_shutdown() and run:
@@ -1014,7 +1009,6 @@ class StandardLevels():
 
         if run:  # Don't start this screen if the previous screen wanted to close out the game
 
-            self.command_manager.qt_emote("talking")  # show mouth moving
             speaking_timer_id = self.command_manager.qt_say(
                 qt_say)  # says text we give it, and starts an internal timer that we can check on
 
@@ -1069,7 +1063,6 @@ class StandardLevels():
             popup = Button(popup_path, (700, 550), self.pygame, scale=1.5)
             popup.rect.center = self.window_center
 
-            self.command_manager.qt_emote("talking")  # show mouth moving
             speaking_timer_id = self.command_manager.qt_say(
                 qt_say)  # says text we give it, and starts an internal timer that we can check on
             qt_speaking = True  # used to tell us when to stop blocking
@@ -1117,7 +1110,6 @@ class StandardLevels():
 
             # Handle speaking
             if qt_say != None:
-                self.command_manager.qt_emote("talking")  # show mouth moving
                 speaking_timer_id = self.command_manager.qt_say(qt_say)
 
             # Handle gesturing
@@ -1221,7 +1213,6 @@ class StandardLevels():
 
             # Handle speaking
             if speak_message:
-                self.command_manager.qt_emote("talking")  # show mouth moving
                 speaking_timer_id = self.command_manager.qt_say(
                     message)  # says text we give it, and starts an internal timer that we can check on
             # Handle gesturing
