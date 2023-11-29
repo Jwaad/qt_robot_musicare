@@ -35,7 +35,7 @@ class GameManager():
         self.path_to_music = "game_assets/music/"
         this_file_path = os.path.dirname(__file__)
         self.path_to_userdata = os.path.join(this_file_path, 'game_assets/data/user_data/')
-        self.session_time = 30 * 60 # 15 * 60  # Time in seconds that sessions should last for. (Minimum time)
+        self.session_time = 25 * 60 # Time in seconds that sessions should last for. (Minimum time)
         self.session_name = "session_" # this should be appended with a number e.g: session_3
         self.session_data = {}
         self.games = ["GTM", "FTS", "CTB", "SSC"]
@@ -235,11 +235,20 @@ class GameManager():
             rospy.loginfo("User data not saved, user already exists.")
         return data
 
-    def SaveExistingUserData(self, user ={}):
+    def SaveExistingUserData(self, user = {}):
         """
         Overwrite the save data of an existing user. Can specify user.
         If user is not specified will assume there's a user in memory stored in "self.user_data"
         """
+        try:
+            # If user wasn't specified check if attribute user_data exists
+            if user == {}:
+                if len(self.user_data.keys()) < 1:
+                    return user
+        except:
+            # User is not a dict, or doesnt exist, so just return
+            return user
+        # If they dont specify a user: use the user saved as attribute
         if user == {} or user is None:
             user = self.user_data
 
@@ -458,6 +467,12 @@ class GameManager():
                 if event.type == pygame.QUIT:
                     run = False
                     print("Quitting...")
+                    # If user data doesnt exist, return empty list instead
+                    try:
+                        len(self.user_data)
+                    except:
+                        return False, {}
+                    return False, self.user_data
 
             # Draw background
             self.renderer.DrawBackground(self.background_colour)
@@ -602,6 +617,7 @@ class GameManager():
         e.g: loop through data, and find there's 4 keys with string "session" in them.
         then set session_name to session_5
         """
+        # Count how many sessions user has had, and add 1
         game_data = self.user_data["game_data"]
         session_num = 1 #start at 1, so we always 1 more than sessions total
         for key in game_data.keys():
@@ -702,34 +718,36 @@ class GameManager():
 
             # introduce the start of the games
             run = self.Levels.QTSpeakingScreen(self.behaviours_manager.get_start_games(), run, self.background_colour)
-            return run
+        return run
 
     def QTPostamble(self, user = None, run = True):
         """
         Handle QT behaviour post session
         """
-        if user is None:
-            user = self.user_data
-        name = user["name"]
 
-        # Say something like "this was fun"
-        run = self.Levels.QTSpeakingScreen(self.behaviours_manager.get_closing_remark(), self.run, self.background_colour, should_gesture=True,
-                                     gesture="arms_up")
-        # Say something like "i know i asked before, but"
-        run = self.Levels.QTSpeakingScreen(self.behaviours_manager.get_transition_to_question(), self.run, self.background_colour)
+        if run:
+            if user is None:
+                user = self.user_data
+            name = user["name"]
 
-        # Ask user how they are, save to data
-        run, mood_score = self.Levels.how_are_you(run=run, background_colour=self.background_colour,
-                                                  on_screen_text= "How are you feeling now")
-        self.user_data["game_data"][self.session_name]["mood_post"] = mood_score
-        self.SaveExistingUserData()
-        prev_mood = self.user_data["game_data"][self.session_name]["mood_pre"]
-        self.mood_comment_post(mood_score, prev_mood) # comment based on mood change
+            # Say something like "this was fun"
+            run = self.Levels.QTSpeakingScreen(self.behaviours_manager.get_closing_remark(), self.run, self.background_colour, should_gesture=True,
+                                         gesture="arms_up")
+            # Say something like "i know i asked before, but"
+            run = self.Levels.QTSpeakingScreen(self.behaviours_manager.get_transition_to_question(), self.run, self.background_colour)
 
-        # Use a randomised greeting
-        self.Levels.QTSpeakingScreen(self.behaviours_manager.get_goodbye(), self.run, self.background_colour,
-                                     should_gesture=True, gesture="wave")
+            # Ask user how they are, save to data
+            run, mood_score = self.Levels.how_are_you(run=run, background_colour=self.background_colour,
+                                                      on_screen_text= "How are you feeling now")
+            self.user_data["game_data"][self.session_name]["mood_post"] = mood_score
+            self.SaveExistingUserData()
+            prev_mood = self.user_data["game_data"][self.session_name]["mood_pre"]
+            self.mood_comment_post(mood_score, prev_mood) # comment based on mood change
 
+            # Use a randomised greeting
+            self.Levels.QTSpeakingScreen(self.behaviours_manager.get_goodbye(), self.run, self.background_colour,
+                                         should_gesture=True, gesture="wave")
+        return run
 
     def change_difficulty(self, game_name, clear_type):
         """
@@ -786,6 +804,47 @@ class GameManager():
                                          gesture="arms_up")
             return
 
+    def home_screen(self, run = True):
+        """A initial screen for the games where users can select a level to start with."""
+
+        # Create buttons for each game
+        GTM_button = self.create_button("blank_button.png", (500, 700), text="Guess The Mood", return_info="GTM")
+        FTS_button = self.create_button("blank_button.png", (1500, 700), text="Fix The Song", return_info="FTS")
+        CTB_button = self.create_button("blank_button.png", (1200, 1500), text="Clap to The Beat", return_info="CTB")
+        SSC_button = self.create_button("blank_button.png", (2200, 1500), text="Simon Says Clap", return_info="SSC")
+        buttons = [GTM_button, FTS_button, CTB_button, SSC_button]
+
+        game_selected = False
+        self.run = run
+        while self.run and not game_selected:
+
+            # Handle events
+            for event in self.pygame.event.get():
+                mouse_pos = self.pygame.mouse.get_pos()
+                # Handle game button events
+                for button in buttons:
+                    pressed = button.get_event(event, mouse_pos)
+                    if pressed:
+                        print(button.return_info)
+                        game_selected = True
+                # Handle on click animation
+                if event.type == self.inputUp:  # On mouse release play animation to show where cursor is
+                    self.animation_manager.StartTouchAnimation(mouse_pos)  # Play animation
+
+                # Check quit
+                if event.type == pygame.QUIT:
+                    self.run = False
+                    print("Quitting...")
+
+            # Render Graphics
+            self.renderer.DrawBackground(self.background_colour)
+            for button in buttons:
+                button.render(self.window)
+            self.animation_manager.DrawTouchAnimation(self.window)  # Also draw touches
+            self.pygame.display.update()  # Update all drawn objects
+
+        return self.run
+
 
     def play_games(self, run = True):
         """
@@ -796,7 +855,7 @@ class GameManager():
         # Populate a list of counters for each game type
         this_session = []
         for game in self.games:
-            this_session.append(0) # [0,0,0,0]
+            this_session.append(0)
 
         play_time = 0
         time_start = rospy.get_time()
@@ -840,7 +899,7 @@ class GameManager():
             # Ask if they liked the song (if we haven't asked about this song before)
             song_title = user_level_data["song_title"]
             if song_title not in self.user_data["song_preference"]:
-                self.run, song_rating = self.Levels.did_you_like_song(run = self.run, background_colour= self.background_colour)
+                run, song_rating = self.Levels.did_you_like_song(run = self.run, background_colour= self.background_colour)
                 self.user_data["song_preference"][song_title] = song_rating
                 # If negative score, black_list song
                 if song_rating < 3 :
@@ -852,7 +911,7 @@ class GameManager():
 
         return run
 
-    def get_random_song(self,game_name, difficulty ,run = True, song_to_skip = None):
+    def get_random_song(self,game_name, difficulty, run = True, song_to_skip = None):
         """
         Gets random song from database depending on designated song name and difficulty inputted.
         Checks user black lists and the previous song, and keeps randomising until a applicable song is selected.
@@ -981,6 +1040,15 @@ class GameManager():
         Print out the data of the user in a nice formatted string
         Recursively loops through dicts in the dict, and adds indentation
         """
+        try:
+            # If user wasn't specified check if attribute user_data exists
+            if user == {}:
+                if len(self.user_data.keys()) < 1:
+                    return user
+        except:
+            # User is not a dict, or doesnt exist, so just return
+            return user
+        
         def add_data_to_string(mydict, string_data, loop_num):
             indent = (loop_num * "    ")
             for key in mydict.keys():
@@ -1029,7 +1097,10 @@ class GameManager():
             self.user_data["game_data"][self.session_name] = {}
 
         # What QT should say to the returning or new user
-        self.run = self.QTPreamble(user = self.user_data)
+        self.run = self.QTPreamble(user = self.user_data, run = self.run)
+
+        # Choose starting game
+        self.run = self.home_screen(run = self.run)
 
         # uses user profile to select which games to play
         self.run = self.play_games(run = self.run)
