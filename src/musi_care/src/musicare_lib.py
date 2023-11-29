@@ -784,14 +784,14 @@ class StandardLevels():
         ind = random.randint(0, len(sayings) - 1)
         saying = sayings[ind]
 
-        # QT say msg
-        self.command_manager.qt_say(saying)
-
-        # Have QT lift it's arms
-        self.command_manager.qt_actuate(arms_up)
-
-        # Ask i drums in place
-        self.yes_or_no_screen("Is QT's drum in place?", run, background_colour=background_colour, silent = True)
+        # Loop until user says Yes
+        drum_in_place = False
+        while not drum_in_place:
+            # Have QT lift it's arms
+            self.command_manager.qt_actuate(arms_up)
+            # Ask user if drums are ready
+            drum_in_place = self.yes_or_no_screen("Jwaad, are my drums ready?", run, background_colour=background_colour,
+            choice_2 = "Raise your arms, QT", silent = True)
 
     def put_away_drum(self, run=True, background_colour=(100, 100, 100)):
         """
@@ -822,12 +822,17 @@ class StandardLevels():
         # QT say msg
         self.command_manager.qt_say(saying)
 
-        # Have QT lift it's arms
-        self.command_manager.qt_actuate(arms_up)
+        # Loop until user says Yes
+        drum_in_place = False
+        while not drum_in_place:
+            # Have QT lift it's arms
+            self.command_manager.qt_actuate(arms_up)
+            # Ask user if drums are ready
+            drum_in_place = self.yes_or_no_screen("Jwaad, are my drums ready?", run,
+                                                  background_colour=background_colour,
+                                                  choice_2="Not yet", silent=True)
 
-        # Ask i drums in place
-        self.yes_or_no_screen("Is QT's drum out of the way??", run, background_colour=background_colour, silent=True)
-
+        time.sleep(1) # Delay so QT is more likely to actually emote
         self.command_manager.qt_say("Thank you very much!")
         self.command_manager.qt_gesture("arms_up")
 
