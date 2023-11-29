@@ -50,7 +50,7 @@ class GameManager():
 
         # Check robot connected
         self.command_manager = QTManager(debug=self.debug) # this should happen before startrobotnodes
-        self.default_voice_vol = 70
+        self.default_voice_vol = 82
         robot_connected = self.CheckRobotRunning()
         rospy.set_param('/activity_status', 1) # Tell ros this node is starting
         if robot_connected:
