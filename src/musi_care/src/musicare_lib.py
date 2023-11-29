@@ -1745,6 +1745,7 @@ class QTManager():
         self.level_loader = levels
         self.talking_anim_time = 4 # How long the talking animation plays for (seconds)
         self.debug = debug
+        self.latest_threadID = rospy.get_time() # Use this to close current threads if a new one starts
 
 
     def init_robot(self, arm_vel):
@@ -1847,16 +1848,29 @@ class QTManager():
         return timer_id
 
     def loop_emote(self, emote, emote_dur, total_dur):
-        """ TO be used in a multi_threading operation
+        """ To be used in a multi_threading operation
         Loop an emote for a given length of seconds.
         """
+        threadID = rospy.get_time()
+        self.latest_threadID = threadID
+        if self.debug:
+            print("Starting emote loop for {}".format(emote))
         # Create timer
         self.robo_timer.CreateTimer("LOOP_UNTIL", total_dur)
         # Loop until duration timer ends
-        while not self.robo_timer.CheckTimer("LOOP_UNTIL"):
+        timer_running = True
+        while timer_running:
             # PLay emote and sleep
             self.qt_emote(emote)
             time.sleep(emote_dur)
+            timer_status = self.robo_timer.CheckTimer("LOOP_UNTIL")
+            if timer_status or timer_status == None:
+                timer_running = False
+            # Check if a new thread was started and break if so
+            if self.latest_threadID != threadID:
+                if self.debug:
+                    print("New thread started, killing ongoing one")
+                break
         # Debug log
         if self.debug:
             print("Finished looping emote")
