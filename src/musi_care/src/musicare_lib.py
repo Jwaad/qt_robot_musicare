@@ -790,7 +790,7 @@ class StandardLevels():
             # Have QT lift it's arms
             self.command_manager.qt_actuate(arms_up)
             # Ask user if drums are ready
-            drum_in_place = self.yes_or_no_screen("Jwaad, are my drums ready?", run, background_colour=background_colour,
+            _, drum_in_place = self.yes_or_no_screen("Jwaad, are my drums ready?", run, background_colour=background_colour,
             choice_2 = "Raise your arms, QT", silent = True)
 
     def put_away_drum(self, run=True, background_colour=(100, 100, 100)):
@@ -828,7 +828,7 @@ class StandardLevels():
             # Have QT lift it's arms
             self.command_manager.qt_actuate(arms_up)
             # Ask user if drums are ready
-            drum_in_place = self.yes_or_no_screen("Jwaad, are my drums ready?", run,
+            _, drum_in_place = self.yes_or_no_screen("Jwaad, are my drums ready?", run,
                                                   background_colour=background_colour,
                                                   choice_2="Not yet", silent=True)
 
