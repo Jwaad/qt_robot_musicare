@@ -16,6 +16,7 @@ def SaveDefaultDatabase():
         {
             "Follow the van":
                 {
+                    "artist": "",
                     "file_name": "follow_the_van.wav",
                     "bpm": 57.0,
                     "first_beat": 2.8,
@@ -28,6 +29,7 @@ def SaveDefaultDatabase():
 
             "Don't fence me in":
                 {
+                    "artist": "",
                     "file_name": "dont_fence_me_in_long.wav",
                     "bpm": 40.0,
                     "first_beat": 0.1,
@@ -40,6 +42,7 @@ def SaveDefaultDatabase():
 
             "Jingle bells":
                 {
+                    "artist": "",
                     "file_name": "jingle_bells.wav",
                     "bpm": 95.0,
                     "first_beat": 2.8,
@@ -52,6 +55,7 @@ def SaveDefaultDatabase():
 
             "Happy instrumental 3":
                 {
+                    "artist": "",
                     "file_name": "happy_3.wav",
                     "bpm": 60.0,
                     "first_beat": 0.1,
@@ -64,6 +68,7 @@ def SaveDefaultDatabase():
 
             "Happy instrumental 1":
                 {
+                    "artist": "",
                     "file_name": "happy_1.wav",
                     "bpm": 100.0,
                     "first_beat": 0.0,
@@ -76,6 +81,7 @@ def SaveDefaultDatabase():
 
             "Don't let me down short":
                 {
+                    "artist": "",
                     "file_name": "beetles_dont_let_me_down_short.wav",
                     "bpm": 76,
                     "first_beat": 0.0,
@@ -88,6 +94,7 @@ def SaveDefaultDatabase():
 
             "Sad instrumental 1":
                 {
+                    "artist": "",
                     "file_name": "sad_1.wav",
                     "bpm": 100.0,
                     "first_beat": 0.0,
@@ -100,6 +107,7 @@ def SaveDefaultDatabase():
 
             "Happy instrumental 4":
                 {
+                    "artist": "",
                     "file_name": "happy_4.wav",
                     "bpm": 100.0,
                     "first_beat": 0.0,
@@ -112,6 +120,7 @@ def SaveDefaultDatabase():
 
             "Don't let me down long":
                 {
+                    "artist": "",
                     "file_name": "beetles_dont_let_me_down_long.wav",
                     "bpm": 76,
                     "first_beat": 0.0,
@@ -124,6 +133,7 @@ def SaveDefaultDatabase():
 
             "Could you be loved short":
                 {
+                    "artist": "",
                     "file_name": "bob_marl_could_you_be_loved_short.wav",
                     "bpm": 76,
                     "first_beat": 0.0,
