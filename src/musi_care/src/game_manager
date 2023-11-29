@@ -104,16 +104,14 @@ class GameManager():
         self.pygame.display.set_caption("MusiCare Cognitive Games with QT robot")  # Label window
 
     def create_button(self, file_name, location, return_info=None, scale=1.0, unique_id="", text="",
-                      on_click=None, on_release=None):
+                      on_click=None, on_release=None, font_size = None):
         """code creates button using the button_image class."""
-        if return_info is None:
-            return_info = {}
         this_file_path = os.path.dirname(__file__)
         relative_path = 'game_assets/graphics'
         file_path = os.path.join(this_file_path, relative_path, file_name)
 
-        button = Button(file_path, location, self.pygame, return_info = {}, scale=scale, unique_id=unique_id,
-                        text=text, on_click=on_click, on_release=on_release)
+        button = Button(file_path, location, self.pygame, return_info = return_info, scale=scale, unique_id=unique_id,
+                        text=text, on_click=on_click, on_release=on_release,font_size = font_size)
         return button
 
     # Check if the robot is connected, by calling nodes and seeing if we get a response
@@ -235,11 +233,13 @@ class GameManager():
             rospy.loginfo("User data not saved, user already exists.")
         return data
 
-    def SaveExistingUserData(self, user = {}):
+    def SaveExistingUserData(self, user=None):
         """
         Overwrite the save data of an existing user. Can specify user.
         If user is not specified will assume there's a user in memory stored in "self.user_data"
         """
+        if user is None:
+            user = {}
         try:
             # If user wasn't specified check if attribute user_data exists
             if user == {}:
@@ -248,7 +248,7 @@ class GameManager():
         except:
             # User is not a dict, or doesnt exist, so just return
             return user
-        # If they dont specify a user: use the user saved as attribute
+        # If they don't specify a user: use the user saved as attribute
         if user == {} or user is None:
             user = self.user_data
 
@@ -808,10 +808,14 @@ class GameManager():
         """A initial screen for the games where users can select a level to start with."""
 
         # Create buttons for each game
-        GTM_button = self.create_button("blank_button.png", (500, 700), text="Guess The Mood", return_info="GTM")
-        FTS_button = self.create_button("blank_button.png", (1500, 700), text="Fix The Song", return_info="FTS")
-        CTB_button = self.create_button("blank_button.png", (1200, 1500), text="Clap to The Beat", return_info="CTB")
-        SSC_button = self.create_button("blank_button.png", (2200, 1500), text="Simon Says Clap", return_info="SSC")
+        GTM_button = self.create_button("blank_button.png", (50, 400), text="Guess The Mood",
+                                        scale=1.2, return_info="GTM", font_size=40)
+        FTS_button = self.create_button("blank_button.png", (1500, 400), text="Fix The Song",
+                                        scale=1.2, return_info="FTS", font_size=40)
+        CTB_button = self.create_button("blank_button.png", (50, 1100), text="Clap to The Beat",
+                                        scale=1.2, return_info="CTB", font_size=40)
+        SSC_button = self.create_button("blank_button.png", (1500, 1100), text="Simon Says Clap",
+                                        scale=1.2, return_info="SSC", font_size=40)
         buttons = [GTM_button, FTS_button, CTB_button, SSC_button]
 
         game_selected = False
@@ -825,7 +829,7 @@ class GameManager():
                 for button in buttons:
                     pressed = button.get_event(event, mouse_pos)
                     if pressed:
-                        print(button.return_info)
+                        print(button.get_info())
                         game_selected = True
                 # Handle on click animation
                 if event.type == self.inputUp:  # On mouse release play animation to show where cursor is
@@ -1048,7 +1052,7 @@ class GameManager():
         except:
             # User is not a dict, or doesnt exist, so just return
             return user
-        
+
         def add_data_to_string(mydict, string_data, loop_num):
             indent = (loop_num * "    ")
             for key in mydict.keys():
@@ -1117,7 +1121,8 @@ class GameManager():
 
 if __name__ == '__main__':
     game_manager = GameManager()
-    game_manager.Main()
+    #game_manager.Main()
+    game_manager.home_screen()
 
 
 
