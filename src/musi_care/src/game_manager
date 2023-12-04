@@ -1092,9 +1092,13 @@ class GameManager():
 
         # Load all users into memory
         self.run, self.user_database = self.LoadUserDatabase(run = self.run)
+        if self.debug:
+            print("Finished loading database")
 
         # use name and surname to get user data
         self.run, self.user_data = self.LogInScreen(run = self.run)
+        if self.debug:
+            print("Finished logging in")
 
         # Init the session
         if self.run:
@@ -1102,6 +1106,8 @@ class GameManager():
 
         # What QT should say to the returning or new user
         self.run = self.QTPreamble(user = self.user_data, run = self.run)
+        if self.debug:
+            print("Finished preamble screen")
 
         # Choose starting game
         self.run = self.home_screen(run = self.run)
@@ -1121,8 +1127,8 @@ class GameManager():
 
 if __name__ == '__main__':
     game_manager = GameManager()
-    #game_manager.Main()
-    game_manager.home_screen()
+    game_manager.Main()
+    #game_manager.home_screen()
 
 
 
