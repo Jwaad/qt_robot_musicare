@@ -2021,7 +2021,7 @@ class Button():
     """
 
     def __init__(self, image_path, x_y_locations, pygame, return_info={}, scale=1.0, unique_id="", on_click=object,
-                 on_release=object, text="", should_grey=True, inputMode = 2, font_size = None):
+                 on_release=object, text="", should_grey=True, inputMode = 2, font_size = None, debug = True):
         if not os.path.exists(image_path):
             print("File does not exist. Path = ", image_path)
         #else:
@@ -2058,6 +2058,9 @@ class Button():
             self.inputDown = self.pygame.FINGERDOWN
             self.inputMotion = self.pygame.FINGERMOTION
 
+        self.debug = debug
+        if text== "":
+            text = " "
         self.text = text
         self.font_size = font_size
         self.init_text()
@@ -2065,25 +2068,59 @@ class Button():
     def init_text(self):
         """ automatically size text to fit perfectly in button center if no font size specified
         """
+        # If font given, just use that
         if self.font_size != None:
             text, self.textRect = self.create_text(self.font_size)
             self.text = text
             self.textRect.center = self.rect.center  # Center text in center button
             return
-        font_scale = 80 # Starting font size, will shrink to fit text
-        too_large = True
-        # Keep scaling down text until it fits in the button
-        while too_large and font_scale > 2:
+        # Scale font down or up to fit rect
+        font_scale = 50 # Starting font size, will shrink, or grow to fit rect
+        text, self.textRect = self.create_text(font_scale)
+        too_large = False
+        too_small = False
+
+        # If text rect is larger than x % of our button rect decrease font size til fits
+        if (self.textRect[2] > (self.rect[2] * 0.85)) or (self.textRect[3] > (self.rect[3] * 0.85)):  # *0.9 gives a buffer on either side of the text
+            too_large = True
+            if self.debug:
+                print("Text too large, shrinking")
+        # If text rect is smaller than x % of our button rect increase font size til fits
+        elif self.textRect[2] < (self.rect[2] * 0.85) or (self.textRect[3] <= (self.rect[3] * 0.85)):
+            too_small = True
+            if self.debug:
+                print("Text too small, enlarging")
+
+
+
+        while too_small:
+            font_scale += 1
             text, self.textRect = self.create_text(font_scale)
-            if self.textRect[2] < (self.rect[2] * 0.85): # *0.9 gives a buffer on either side of the text
+            #print(textRect[2], font_scale, self.rect[2])
+            if self.textRect[2] >= (self.rect[2] * 0.85) and self.textRect[3] >= (self.rect[3] * 0.7):  # *0.9 gives a buffer on either side of the text
+                too_small = False
+                too_large = True # Little hack to scale text backdown slightly if it overshoots
+
+            # scale up or down
+        while too_large:
+            font_scale -= 1
+            text, self.textRect = self.create_text(font_scale)
+            if self.textRect[2] <= (self.rect[2] * 0.85) and self.textRect[3] <= (
+                    self.rect[3] * 0.7):  # *0.9 gives a buffer on either side of the text
                 too_large = False
-            font_scale -= 2
+
         self.text = text
-        # TODO add a method to scale up the text too, instead of just scale down
         self.textRect.center = self.rect.center # Center text in center button
 
     def create_text(self, font_percent=70):
         self.font_size = int(self.rect[3] * (font_percent / 100))  # 70% of button height by default
+        font = self.pygame.font.Font('freesansbold.ttf', self.font_size)
+        text = font.render(self.text, False, (0, 0, 0))
+        textRect = text.get_rect()
+        return text, textRect
+
+    def create_text_with_font(self, font_size):
+        self.font_size = font_size
         font = self.pygame.font.Font('freesansbold.ttf', self.font_size)
         text = font.render(self.text, False, (0, 0, 0))
         textRect = text.get_rect()
