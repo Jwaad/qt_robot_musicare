@@ -2091,8 +2091,7 @@ class Button():
             if self.debug:
                 print("Text too small, enlarging")
 
-
-
+        # Scale up if too small
         while too_small:
             font_scale += 1
             text, self.textRect = self.create_text(font_scale)
@@ -2101,7 +2100,7 @@ class Button():
                 too_small = False
                 too_large = True # Little hack to scale text backdown slightly if it overshoots
 
-            # scale up or down
+        # scale down if too large
         while too_large:
             font_scale -= 1
             text, self.textRect = self.create_text(font_scale)
