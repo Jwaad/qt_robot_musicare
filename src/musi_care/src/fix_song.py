@@ -688,7 +688,9 @@ class Fix_The_Song_Game():
 
     def play_level(self, correct_song, distract_song, slices):
         """Sequence plays the levels"""
-        if self.run:  # Dont start this screen if the previous screen wanted to close out the game
+
+        # Dont start this screen if the previous screen wanted to close out the game
+        if self.run:
 
             # Get the level's data
             self.track_name = correct_song
@@ -884,8 +886,8 @@ class Fix_The_Song_Game():
         self.run = self.level_loader.tap_to_continue(self.run, self.background_colour)
         
         # Play the track and block
-        self.play_music_blocking(correct_song)
-        self.track_total_time = 15
+        #self.play_music_blocking(correct_song)
+        #self.track_total_time = 15
 
         # Play main level
         self.run, level_data = self.play_level(correct_song, distract_song, slices)
