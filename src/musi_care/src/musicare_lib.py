@@ -2044,7 +2044,7 @@ class Button():
         self.return_info = return_info
         self.type = "Button"
         self.should_grey = should_grey
-        self.on_click = on_click # TODO, THIS TRIGERS ON RELEASE INSTEAD OF ON CLICK...
+        self.on_click = on_click # TODO, THIS TRIGGERS ON RELEASE INSTEAD OF ON CLICK...
         self.on_release = on_release
 
         # Set inputs to either touch or mouse
@@ -2093,7 +2093,7 @@ class Button():
 
         # Scale up if too small
         while too_small:
-            font_scale += 1
+            font_scale += 3
             text, self.textRect = self.create_text(font_scale)
             #print(textRect[2], font_scale, self.rect[2])
             if self.textRect[2] >= (self.rect[2] * 0.85) and self.textRect[3] >= (self.rect[3] * 0.7):  # *0.9 gives a buffer on either side of the text
@@ -2102,7 +2102,7 @@ class Button():
 
         # scale down if too large
         while too_large:
-            font_scale -= 1
+            font_scale -= 3
             text, self.textRect = self.create_text(font_scale)
             if self.textRect[2] <= (self.rect[2] * 0.85) and self.textRect[3] <= (
                     self.rect[3] * 0.7):  # *0.9 gives a buffer on either side of the text
