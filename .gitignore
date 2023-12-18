@@ -7,3 +7,5 @@ src/tutorial_qt_motors/*
 src/musi_care/src/game_assets/music/temp/*
 src/musi_care/src/__pycache__/*
 src/musi_care/src/game_assets/data/user_data/*
+src/musi_care/src/game_assets/music
+

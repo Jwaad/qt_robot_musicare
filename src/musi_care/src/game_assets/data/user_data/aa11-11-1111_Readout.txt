@@ -1,7 +1,7 @@
 name: asd
 surname: asd
 dob: 11-11-1111
-blacklist: ['Could you be loved short', "Don't let me down long"]
+blacklist: ['Could you be loved short', "Don't let me down long", 'Jingle bells']
 song_preference:
     Could you be loved short: 1
     file_name: 5
@@ -9,10 +9,15 @@ song_preference:
     Follow the van: 5
     Don't fence me in: 5
     Happy instrumental 3: 4
+    Happy instrumental 1: 3
+    Sad instrumental 1: 4
+    Jingle bells: 2
+    Happy instrumental 4: 4
+    Don't let me down short: 5
 game_data:
     difficulty:
         GTM: hard
-        FTS: easy
+        FTS: hard
         CTB: easy
         SSC: easy
     session_1:
@@ -576,3 +581,298 @@ game_data:
                 missed_claps: 5
             song_title: Happy instrumental 3
             difficulty: easy
+    session_33:
+        mood_pre: 5
+        game_1:
+            game_name: SSC
+            clear_type: clear
+            performance:
+                num_claps: 95
+                average_error: 0.1
+                forbidden_claps: 10
+                missed_claps: 10
+            e_clear_req:
+                expected_num_claps: 100
+                average_error: 0.05
+                forbidden_claps: 5
+                missed_claps: 5
+            song_title: Happy instrumental 3
+            difficulty: easy
+        game_2:
+            game_name: GTM
+            clear_type: e_clear
+            performance:
+                time_taken: 2.6517696380615234
+                mood: sad
+                num_hints: 0
+            e_clear_req:
+                time_taken: 31.0
+                mood: sad
+            song_title: Could you be loved short
+            difficulty: hard
+        game_3:
+            game_name: FTS
+            clear_type: e_clear
+            performance:
+                time_taken: 6.934034585952759
+                mistakes: 0
+                num_hints: 0
+            e_clear_req:
+                time_taken: 22.5
+                mistakes: 0
+                num_hints: 0
+            song_title: Don't fence me in
+            difficulty: easy
+        game_4:
+            game_name: CTB
+            clear_type: clear
+            performance:
+                num_claps: 95
+                average_error: 0.1
+            e_clear_req:
+                expected_num_claps: 100
+                average_error: 0.05
+            song_title: Happy instrumental 1
+            difficulty: easy
+        game_5:
+            game_name: CTB
+            clear_type: clear
+            performance:
+                num_claps: 95
+                average_error: 0.1
+            e_clear_req:
+                expected_num_claps: 100
+                average_error: 0.05
+            song_title: Happy instrumental 3
+            difficulty: easy
+        game_6:
+            game_name: SSC
+            clear_type: clear
+            performance:
+                num_claps: 95
+                average_error: 0.1
+                forbidden_claps: 10
+                missed_claps: 10
+            e_clear_req:
+                expected_num_claps: 100
+                average_error: 0.05
+                forbidden_claps: 5
+                missed_claps: 5
+            song_title: Sad instrumental 1
+            difficulty: easy
+        game_7:
+            game_name: GTM
+            clear_type: e_clear
+            performance:
+                time_taken: 2.7277557849884033
+                mood: sad
+                num_hints: 0
+            e_clear_req:
+                time_taken: 31.0
+                mood: sad
+            song_title: Could you be loved short
+            difficulty: hard
+        game_8:
+            game_name: FTS
+            clear_type: e_clear
+            performance:
+                time_taken: 4.608398199081421
+                mistakes: 0
+                num_hints: 0
+            e_clear_req:
+                time_taken: 22.5
+                mistakes: 0
+                num_hints: 0
+            song_title: Sad instrumental 1
+            difficulty: easy
+    session_34:
+        mood_pre: 4
+        game_1:
+            game_name: GTM
+            clear_type: e_clear
+            performance:
+                time_taken: 17.8969144821167
+                mood: sad
+                num_hints: 0
+            e_clear_req:
+                time_taken: 31.0
+                mood: sad
+            song_title: Could you be loved short
+            difficulty: hard
+        game_2:
+            game_name: CTB
+            clear_type: clear
+            performance:
+                num_claps: 95
+                average_error: 0.1
+            e_clear_req:
+                expected_num_claps: 100
+                average_error: 0.05
+            song_title: Jingle bells
+            difficulty: easy
+        game_3:
+            game_name: SSC
+            clear_type: clear
+            performance:
+                num_claps: 95
+                average_error: 0.1
+                forbidden_claps: 10
+                missed_claps: 10
+            e_clear_req:
+                expected_num_claps: 100
+                average_error: 0.05
+                forbidden_claps: 5
+                missed_claps: 5
+            song_title: Happy instrumental 1
+            difficulty: easy
+    session_35:
+        mood_pre: 5
+    session_36:
+        mood_pre: 1
+    session_37:
+        mood_pre: 1
+    session_38:
+        mood_pre: 3
+        game_1:
+            game_name: FTS
+            clear_type: clear
+            performance:
+                time_taken: 25.908557653427124
+                mistakes: 1
+                num_hints: 1
+            e_clear_req:
+                time_taken: 22.5
+                mistakes: 0
+                num_hints: 0
+            song_title: Don't let me down short
+            difficulty: medium
+    session_39:
+        mood_pre: 1
+        game_1:
+            game_name: GTM
+            clear_type: e_clear
+            performance:
+                time_taken: 1.2127950191497803
+                mood: sad
+                num_hints: 0
+            e_clear_req:
+                time_taken: 19.00009059906006
+                mood: sad
+            song_title: Happy instrumental 4
+            difficulty: hard
+    session_40:
+        mood_pre: 3
+    session_41:
+        mood_pre: 3
+        game_1:
+            game_name: FTS
+            clear_type: clear
+            performance:
+                time_taken: 36.674760818481445
+                mistakes: 0
+                num_hints: 0
+            e_clear_req:
+                time_taken: 22.5
+                mistakes: 0
+                num_hints: 0
+            song_title: Don't let me down short
+            difficulty: medium
+        game_2:
+            game_name: FTS
+            clear_type: e_clear
+            performance:
+                time_taken: 17.213366746902466
+                mistakes: 0
+                num_hints: 0
+            e_clear_req:
+                time_taken: 22.5
+                mistakes: 0
+                num_hints: 0
+            song_title: Jingle bells
+            difficulty: medium
+        game_3:
+            game_name: FTS
+            clear_type: e_clear
+            performance:
+                time_taken: 13.626131296157837
+                mistakes: 0
+                num_hints: 0
+            e_clear_req:
+                time_taken: 22.5
+                mistakes: 0
+                num_hints: 0
+            song_title: Don't let me down short
+            difficulty: medium
+        game_4:
+            game_name: FTS
+            clear_type: clear
+            performance:
+                time_taken: 73.06168723106384
+                mistakes: 1
+                num_hints: 1
+            e_clear_req:
+                time_taken: 22.5
+                mistakes: 0
+                num_hints: 0
+            song_title: Happy instrumental 4
+            difficulty: hard
+    session_42:
+        mood_pre: 5
+    session_43:
+        mood_pre: 5
+    session_44:
+        mood_pre: 3
+        game_1:
+            game_name: SSC
+            clear_type: clear
+            performance:
+                num_claps: 95
+                average_error: 0.1
+                forbidden_claps: 10
+                missed_claps: 10
+            e_clear_req:
+                expected_num_claps: 100
+                average_error: 0.05
+                forbidden_claps: 5
+                missed_claps: 5
+            song_title: Happy instrumental 3
+            difficulty: easy
+    session_45:
+        mood_pre: 5
+        game_1:
+            game_name: GTM
+            clear_type: fail
+            performance:
+                time_taken: 0.894566535949707
+                mood: happy
+                num_hints: 0
+            e_clear_req:
+                time_taken: 19.00009059906006
+                mood: sad
+            song_title: Happy instrumental 4
+            difficulty: hard
+    session_46:
+        mood_pre: 3
+    session_47:
+        mood_pre: 4
+    session_48:
+        mood_pre: 3
+    session_49:
+        mood_pre: -1
+    session_50:
+        mood_pre: 3
+    session_51:
+        mood_pre: 3
+    session_52:
+        mood_pre: 3
+    session_53:
+        mood_pre: 3
+    session_54:
+        mood_pre: 3
+    session_55:
+        mood_pre: -1
+    session_56:
+        mood_pre: 3
+    session_57:
+        mood_pre: 3
+        mood_post: 2
