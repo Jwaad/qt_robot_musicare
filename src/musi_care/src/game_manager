@@ -808,15 +808,23 @@ class GameManager():
         """A initial screen for the games where users can select a level to start with."""
 
         # Create buttons for each game
-        GTM_button = self.create_button("blank_button.png", (50, 400), text="Guess The Mood",
+        GTM_button = self.create_button("blank_button.png", (850, 200), text="Guess The Mood",
                                         scale=1.2, return_info="GTM", font_size=40)
-        FTS_button = self.create_button("blank_button.png", (1500, 400), text="Fix The Song",
+        FTS_button = self.create_button("blank_button.png", (850, 600), text="Fix The Song",
                                         scale=1.2, return_info="FTS", font_size=40)
-        CTB_button = self.create_button("blank_button.png", (50, 1100), text="Clap to The Beat",
+        CTB_button = self.create_button("blank_button.png", (850, 1000), text="Clap to The Beat",
                                         scale=1.2, return_info="CTB", font_size=40)
-        SSC_button = self.create_button("blank_button.png", (1500, 1100), text="Simon Says Clap",
+        SSC_button = self.create_button("blank_button.png", (850, 1400), text="Simon Says Clap",
                                         scale=1.2, return_info="SSC", font_size=40)
         buttons = [GTM_button, FTS_button, CTB_button, SSC_button]
+
+        # Add on display icons to each of the buttons
+        GTM_icon = self.create_button("GTM_icon.png", (550, 250), scale = 0.5)
+        CTB_icon = self.create_button("CTB_icon.png", (575, 650), scale = 1.3)
+        FTS_icon = self.create_button(""
+                                      "FTS_icon.png", (550, 1075), scale = 0.5)
+        SSC_icon = self.create_button("SSC_icon.png", (550, 1475), scale = 0.5)
+        icons =  [GTM_icon, FTS_icon, CTB_icon, SSC_icon]
 
         game_selected = False
         self.run = run
@@ -844,6 +852,8 @@ class GameManager():
             self.renderer.DrawBackground(self.background_colour)
             for button in buttons:
                 button.render(self.window)
+            for icon in icons:
+                icon.render(self.window)
             self.animation_manager.DrawTouchAnimation(self.window)  # Also draw touches
             self.pygame.display.update()  # Update all drawn objects
 
@@ -1113,7 +1123,8 @@ class GameManager():
         self.run = self.home_screen(run = self.run)
 
         # uses user profile to select which games to play
-        self.run = self.play_games(run = self.run)
+        #self.run = self.play_games(run = self.run)
+
 
         # QT outro
         self.run = self.QTPostamble(user = self.user_data, run = self.run)
@@ -1127,8 +1138,8 @@ class GameManager():
 
 if __name__ == '__main__':
     game_manager = GameManager()
-    game_manager.Main()
-    #game_manager.home_screen()
+    #game_manager.Main()
+    game_manager.home_screen()
 
 
 
