@@ -442,6 +442,11 @@ class Fix_The_Song_Game():
 
     def draw_tut_options(self, arrow_rect):
         """ Using arrow rect, decide where tut buttons should be drawn"""
+        self.tut_next.set_pos((1700, 250))
+        self.tut_repeat.set_pos((700, 250))
+
+        """
+        ARCHIVED
         arrow_x = arrow_rect[0]
         arrow_y = arrow_rect[1]
         # if arrow is too close to right edge of screen
@@ -455,6 +460,7 @@ class Fix_The_Song_Game():
         else:
             self.tut_next.set_pos((arrow_x + 450, arrow_y))
             self.tut_repeat.set_pos((arrow_x - 600, arrow_y))
+        """
 
     def create_check(self, seg):
         """Draws a check mark under the segment given"""
@@ -517,7 +523,7 @@ class Fix_The_Song_Game():
         graphics = self.create_graphics(segments, num_correct_segs, single_out=True)
         self.tut_next = self.create_button("tut_next.png", (0, 0), scale=1.5, unique_id="next", should_grey = False)
         self.tut_repeat = self.create_button("tut_repeat.png", (0, 0), scale=1.5, unique_id="repeat", should_grey = False)
-        self.tut_skip = self.create_button("tut_skip.png", (2600, 0), scale=1, unique_id="skip", should_grey=False)
+        self.tut_skip = self.create_button("tut_skip.png", (2500, 0), scale=1, unique_id="skip", should_grey=False)
 
         # Group graphics for easier processing
         tut_buttons = [self.tut_next, self.tut_repeat]

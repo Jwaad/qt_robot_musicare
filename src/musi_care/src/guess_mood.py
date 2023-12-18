@@ -342,8 +342,8 @@ class Guess_The_Mood_Game():
 
     def draw_tut_options(self, arrow_rect):
         """ Using arrow rect, decide where tut buttons should be drawn"""
-        self.tut_next.set_pos((800,200))
-        self.tut_repeat.set_pos((1200,200))
+        self.tut_next.set_pos((1700, 250))
+        self.tut_repeat.set_pos((700, 250))
 
         """
         ARCHIVED SECTION
@@ -443,7 +443,7 @@ class Guess_The_Mood_Game():
 
             # Create buttons and slider
             self.create_graphics()
-            self.tut_skip = self.create_button("tut_skip.png", (2600, 0), scale=1, unique_id="skip", should_grey=False)
+            self.tut_skip = self.create_button("tut_skip.png", (2500, 0), scale=1, unique_id="skip", should_grey=False)
             self.tut_next = self.create_button("tut_next.png", (0, 0), scale=1.5, unique_id="next", should_grey=False)
             self.tut_repeat = self.create_button("tut_repeat.png", (0, 0), scale=1.5, unique_id="repeat",
                                                  should_grey=False)
