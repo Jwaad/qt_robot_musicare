@@ -431,13 +431,14 @@ class Fix_The_Song_Game():
         if self.debug:
             self.renderer.DrawText(fps, (70, 50), font_size=30)  # draw fps
 
-    def render_target_graphics(self, window, graphics, key):
+    def render_target_graphics(self, window, graphics, key, grey_keys):
         """draw graphics if they match the key"""
         #render graphics 1 by 1, only if they match the key
-        for i in range(len(graphics)):
-            if (i+1) in key:
-                graphics[i].render(window)
-        # print(i)
+        for i in range(1, len(graphics) + 1):
+            if len(key) > 0 and (i) in key:
+                graphics[i-1].render(window) # -1 cause this list starts at 0, but some reason graphics starts at 1?
+            elif len(grey_keys) > 0 and (i) in grey_keys:
+                graphics[i-1].render(window, grey = True)
 
     def draw_tut_options(self, arrow_rect):
         """ Using arrow rect, decide where tut buttons should be drawn"""
@@ -488,22 +489,22 @@ class Fix_The_Song_Game():
         """
 
         tut_graphics = {
-            1: {"rect": None, "keys": [1, 2, 3, 4, 5, 6, 7, 8],
+            1: {"rect": None, "keys": [], "grey_keys": [1, 2, 3, 4, 5, 6, 7, 8],
                 "speech": "To play this game, first you will hear music... I will let you listen to it in full..."
                 " After that I will split the song into parts... Then you will need to find the correct "
                 "pieces and put them back together..."},
-            2:  {"rect": (550, 830, 1050, 350), "keys": [7, 8],
+            2:  {"rect": (550, 830, 1050, 350), "keys": [7, 8], "grey_keys":[],
                 "speech": "These are the segments... Hold down a segment to hear what it sounds like..."
                           " Then tap on it to select it... Once you have selected it. You will need to put it"
                           " into the right place..."},
-            3:   {"rect": (1075, 125, 700, 350), "keys": [2, 3],
+            3:   {"rect": (1075, 125, 700, 350), "keys": [2, 3], "grey_keys":[],
                 "speech": "These are the slots where the pieces of the songs need to go... Once you have selected a song"
                           "segment... Click on one of these slots to place it in... Once you place all pieces where they"
                           "belong, you will have completed the level."},
-            4: {"rect": (2150, 50, 500, 475), "keys": [6], "speech": "This is the help button... Click this if you dont"
-                                                                      "know which song piece is the right one."},
-            5: {"rect": None, "keys": [1, 2, 3, 4, 5, 6, 7, 8], "speech": "That is everything for Fix the song! "
-                                                                          "Click next and we will start the first level!"}
+            4: {"rect": (2150, 50, 500, 475), "keys": [6], "grey_keys":[],
+                "speech": "This is the help button... Click this if you dont know which song piece is the right one."},
+            5: {"rect": None, "keys": [], "grey_keys": [1, 2, 3, 4, 5, 6, 7, 8],
+                "speech": "That is everything for Fix the song! Click next and we will start the first level!"}
         }
 
         # Get the level's data
@@ -527,6 +528,7 @@ class Fix_The_Song_Game():
             while key <= len(tut_graphics.keys()) and not rospy.is_shutdown() and self.run:
                 #Get tut info for this section
                 tut_key = tut_graphics[key]["keys"]  # Draw grey graphics of everything except for our focused graphic
+                tut_grey_key = tut_graphics[key]["grey_keys"]
                 tut_speech = tut_graphics[key]["speech"]
                 tut_rect = tut_graphics[key]["rect"]
 
@@ -541,7 +543,7 @@ class Fix_The_Song_Game():
 
                     # Render graphics
                     self.renderer.DrawBackground(self.background_colour)
-                    self.render_target_graphics(self.window,graphics,tut_key)
+                    self.render_target_graphics(self.window,graphics,tut_key,tut_grey_key)
                     self.animation_manager.DrawTouchAnimation(self.window)
                     #render the arrow and get it's pos
                     if tut_rect != None:
