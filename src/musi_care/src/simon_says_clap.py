@@ -62,10 +62,10 @@ class Simon_Says_Clap_Game():
 
         if screen == None:
             if reduce_screen:
-                self.window_x = res.current_w - 150  # Width of window -150 to account for the linux toolbar
+                self.window_x = 3000 - 150  # Width of window -150 to account for the linux toolbar
             else:
-                self.window_x = res.current_w
-            self.window_y = res.current_h  # Height of window
+                self.window_x = 3000
+            self.window_y = 2000  # Height of window
             self.window_center = (int(self.window_x / 2), int(self.window_y / 2))
             self.cen_x = self.window_center[0]
             self.cen_y = self.window_center[1]
@@ -480,7 +480,7 @@ class Simon_Says_Clap_Game():
     def Main(self,file_name, first_beat, bpm, ask_tut = True):  # input what level and difficulty to play, the program will handle the rest
         """Main Func"""
         # Introduce game
-        self.run = self.level_loader.QTSpeakingScreen("Lets play Simon Says Clap!", self.run, self.background_colour)
+        #self.run = self.level_loader.QTSpeakingScreen("Lets play Simon Says Clap!", self.run, self.background_colour)
 
         if ask_tut:
             # Ask if they want to play tutorial

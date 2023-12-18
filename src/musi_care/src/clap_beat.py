@@ -462,7 +462,7 @@ class Clap_To_Beat_Game():
     def Main(self, file_name, first_beat, bpm, ask_tut = True):  # input what level and difficulty to play, the program will handle the rest
         """Main Func"""
         # Introduce game
-        self.run = self.level_loader.QTSpeakingScreen("Lets play Clap To The Beat!", self.run, self.background_colour)
+        #self.run = self.level_loader.QTSpeakingScreen("Lets play Clap To The Beat!", self.run, self.background_colour)
 
         if ask_tut:
             # Ask if they want to play tutorial

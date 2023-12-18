@@ -874,7 +874,7 @@ class Fix_The_Song_Game():
         """Main Func"""
 
         # Introduce game
-        self.run = self.level_loader.QTSpeakingScreen("Lets play Fix The Song!", self.run, self.background_colour)
+        #self.run = self.level_loader.QTSpeakingScreen("Lets play Fix The Song!", self.run, self.background_colour)
 
         # Ask if they want to play tutorial
         if ask_tut:
@@ -886,8 +886,7 @@ class Fix_The_Song_Game():
         self.run = self.level_loader.tap_to_continue(self.run, self.background_colour)
         
         # Play the track and block
-        #self.play_music_blocking(correct_song)
-        #self.track_total_time = 15
+        self.play_music_blocking(correct_song)
 
         # Play main level
         self.run, level_data = self.play_level(correct_song, distract_song, slices)
@@ -905,7 +904,8 @@ if __name__ == '__main__':
     game_object = Fix_The_Song_Game("jwaad")
     # Run the game
     try:
-        game_object.Main("happy_3.wav", None, 2, True)
+        #game_object.Main("happy_3.wav", None, 2, True)
+        game_object.guided_tut("happy_3.wav", None, 2)
     except(KeyboardInterrupt or rospy.exceptions.ROSInterruptException):
         game_object.pygame.quit
         SoundManager("").stop_track()

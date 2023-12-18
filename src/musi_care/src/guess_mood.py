@@ -65,11 +65,11 @@ class Guess_The_Mood_Game():
             y = 0  # y pos of screen
             os.environ['SDL_VIDEO_WINDOW_POS'] = '%d,%d' % (x, y)  # move screen to x and y pos
             res = pygame.display.Info()  # get our screen resolution
-            self.window_x = res.current_w
+            self.window_x = 3000
             if reduce_screen:
                 self.window_x -= x # Width of window -150 to account for the linux toolbar
                 self.window_y -= y  # height of window - y, to account for top bar
-            self.window_y = res.current_h  # Height of window
+            self.window_y = 2000  # Height of window
             self.window_center = (int(self.window_x / 2), int(self.window_y / 2))
             self.window = pygame.display.set_mode((self.window_x, self.window_y))  # Create window and set size
         else:
@@ -271,14 +271,18 @@ class Guess_The_Mood_Game():
 
     def get_target_behaviour(self, key):
         """tells our tut what to draw and what to do with events"""
+        # TODO THIS IS SO BADLY DONE, WHAT THE HECK??? I WROTE THIS? PTUI
         target_graphics = []
         target_event_handler = None
-        if key == 3:
+        # Highlight sad and happy
+        if key == 2:
             target_graphics = [functools.partial(self.sad_button.render, self.window),
                                functools.partial(self.happy_button.render, self.window)]
-        elif key == 4:
+        # highlight help button
+        elif key == 3:
             target_graphics = [functools.partial(self.unsure_button.render, self.window)]
-        elif key == 5:
+        # Highlight play button
+        elif key == 4:
             target_graphics = [functools.partial(self.play_button.render, self.window)]
 
         return target_graphics, target_event_handler  # if our logic sifts failed
@@ -338,6 +342,11 @@ class Guess_The_Mood_Game():
 
     def draw_tut_options(self, arrow_rect):
         """ Using arrow rect, decide where tut buttons should be drawn"""
+        self.tut_next.set_pos((800,200))
+        self.tut_repeat.set_pos((1200,200))
+
+        """
+        ARCHIVED SECTION
         arrow_x = arrow_rect[0]
         arrow_y = arrow_rect[1]
         # if arrow is too close to right edge of screen
@@ -351,6 +360,7 @@ class Guess_The_Mood_Game():
         else:
             self.tut_next.set_pos((arrow_x + 450, arrow_y))
             self.tut_repeat.set_pos((arrow_x - 600, arrow_y))
+        """
 
     def get_GTM_phaseone_help(self, previous_saying=""):
         """ Sentences QT will say when giving phase 1 help """
@@ -399,6 +409,15 @@ class Guess_The_Mood_Game():
 
         # String of our keys so i can remember them
         """
+        0 = title text
+        1 = sad button
+        2 = happy button
+        3 = unsure button
+        4 = play button
+        """
+
+        # String tut sequence
+        """
         1 = Intro
         2 = options (sad happy)
         3 = hint
@@ -439,6 +458,7 @@ class Guess_The_Mood_Game():
             # loop through each graphic that we care about
             key = 1  # iter var
             prev_key = key - 1  # to tell us if we've changed to next tut segment
+            # Loop through all tut pages
             while key <= len(tut_graphics.keys()):
                 # Define some variables for the tut sequence
                 tut_key = tut_graphics[key]["keys"]  # draw grey graphics of everything except for our focused graphic
@@ -691,7 +711,7 @@ class Guess_The_Mood_Game():
 
         """
         # Show starting screen
-        self.run = self.level_loader.QTSpeakingScreen("Lets play Guess the mood!", self.run, self.background_colour)
+        #self.run = self.level_loader.QTSpeakingScreen("Lets play Guess the mood!", self.run, self.background_colour, )
 
         if ask_tut:
             # Ask if they want tutorial
@@ -704,7 +724,7 @@ class Guess_The_Mood_Game():
         self.run = self.level_loader.tap_to_continue(self.run, self.background_colour)
 
         # Countdown
-        self.run = self.level_loader.countdown(3, self.run, self.background_colour, prelim_msg="Get ready to play!")
+        # self.run = self.level_loader.countdown(3, self.run, self.background_colour, prelim_msg="Get ready to play!")
 
         # Run game code
         self.run, level_data = self.play_level(self.run, track_mood, track_name)
@@ -724,7 +744,8 @@ if __name__ == '__main__':
 
     # Run the game
     try:
-        game_object.Main("happy", "happy_3.wav")
+        #game_object.Main("happy", "happy_3.wav")
+        game_object.guided_tut(True)
     except(KeyboardInterrupt or rospy.exceptions.ROSInterruptException):
         game_object.pygame.quit()
         game_object.sound_manager.stop_track()
