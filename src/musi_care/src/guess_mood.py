@@ -65,7 +65,7 @@ class Guess_The_Mood_Game():
             y = 0  # y pos of screen
             os.environ['SDL_VIDEO_WINDOW_POS'] = '%d,%d' % (x, y)  # move screen to x and y pos
             res = pygame.display.Info()  # get our screen resolution
-            self.window_x = 3000
+            self.window_x = 3000 
             if reduce_screen:
                 self.window_x -= x # Width of window -150 to account for the linux toolbar
                 self.window_y -= y  # height of window - y, to account for top bar

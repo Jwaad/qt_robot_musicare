@@ -62,7 +62,7 @@ class Simon_Says_Clap_Game():
 
         if screen == None:
             if reduce_screen:
-                self.window_x = 3000 - 150  # Width of window -150 to account for the linux toolbar
+                self.window_x = 3000 - 150   # Width of window -150 to account for the linux toolbar
             else:
                 self.window_x = 3000
             self.window_y = 2000  # Height of window
