@@ -39,6 +39,8 @@ class GameManager():
         self.session_name = "session_" # this should be appended with a number e.g: session_3
         self.session_data = {}
         self.games = ["GTM", "FTS", "CTB", "SSC"]
+        self.game_names = {"GTM": "Guess the Mood", "FTS": "Fix the Song",
+                           "CTB": "Clap to the beat", "SSC": "Simon Says Clap"}
         self.prev_game = ""
 
         # Init ros side
@@ -804,41 +806,43 @@ class GameManager():
                                          gesture="arms_up")
             return
 
-    def home_screen(self, run = True):
+    def home_screen(self, run = True, previous_game = None):
         """A initial screen for the games where users can select a level to start with."""
 
         # Create buttons for each game
-        GTM_button = self.create_button("blank_button.png", (850, 200), text="Guess The Mood",
+        GTM_button = self.create_button("blank_button.png", (850, 50), text="Guess The Mood",
                                         scale=1.2, return_info="GTM", font_size=40)
-        FTS_button = self.create_button("blank_button.png", (850, 600), text="Fix The Song",
+        FTS_button = self.create_button("blank_button.png", (850, 450), text="Fix The Song",
                                         scale=1.2, return_info="FTS", font_size=40)
-        CTB_button = self.create_button("blank_button.png", (850, 1000), text="Clap to The Beat",
+        CTB_button = self.create_button("blank_button.png", (850, 850), text="Clap to The Beat",
                                         scale=1.2, return_info="CTB", font_size=40)
-        SSC_button = self.create_button("blank_button.png", (850, 1400), text="Simon Says Clap",
+        SSC_button = self.create_button("blank_button.png", (850, 1250), text="Simon Says Clap",
                                         scale=1.2, return_info="SSC", font_size=40)
-        buttons = [GTM_button, FTS_button, CTB_button, SSC_button]
+        any_button = self.create_button("blank_button.png", (950, 1650), text="Let QT decide",
+                                        scale=1, return_info="ANY", font_size=40)
+        buttons = [GTM_button, FTS_button, CTB_button, SSC_button, any_button]
 
         # Add on display icons to each of the buttons
-        GTM_icon = self.create_button("GTM_icon.png", (550, 250), scale = 0.5)
-        CTB_icon = self.create_button("CTB_icon.png", (575, 650), scale = 1.3)
-        FTS_icon = self.create_button(""
-                                      "FTS_icon.png", (550, 1075), scale = 0.5)
-        SSC_icon = self.create_button("SSC_icon.png", (550, 1475), scale = 0.5)
+        GTM_icon = self.create_button("GTM_icon.png", (550, 100), scale = 0.5)
+        FTS_icon = self.create_button("FTS_icon.png", (550, 525), scale = 0.5)
+        CTB_icon = self.create_button("CTB_icon.png", (550, 900), scale = 1.3)
+        SSC_icon = self.create_button("SSC_icon.png", (550, 1325), scale = 0.5)
         icons =  [GTM_icon, FTS_icon, CTB_icon, SSC_icon]
 
-        game_selected = False
+        game = None
         self.run = run
-        while self.run and not game_selected:
+        while self.run and game == None:
 
             # Handle events
             for event in self.pygame.event.get():
                 mouse_pos = self.pygame.mouse.get_pos()
+
                 # Handle game button events
                 for button in buttons:
                     pressed = button.get_event(event, mouse_pos)
                     if pressed:
-                        print(button.get_info())
-                        game_selected = True
+                        game = button.get_info()
+
                 # Handle on click animation
                 if event.type == self.inputUp:  # On mouse release play animation to show where cursor is
                     self.animation_manager.StartTouchAnimation(mouse_pos)  # Play animation
@@ -857,19 +861,42 @@ class GameManager():
             self.animation_manager.DrawTouchAnimation(self.window)  # Also draw touches
             self.pygame.display.update()  # Update all drawn objects
 
-        return self.run
+        # IF QT was asked to decide
+        if game == "ANY":
+
+            # Choose a random game, other than the previous game we just played
+            games = self.games.copy()
+            if previous_game != None:
+                prev_game_ind = games.index(previous_game)
+                games.pop(prev_game_ind)
+            game = random.choice(games)
+
+            # QT should comment on the game it chose
+            sayings = ["Okay, i will pick {} then!".format(self.game_names[game]),
+                       "Hmm, i pick {}!".format(self.game_names[game]),
+                       "Sure! i think i will go for... {}!".format(self.game_names[game])]
+            ind = random.randint(0, len(sayings) - 1)
+            message = sayings[ind]
+            gesture = "arms_up"
+            self.command_manager.qt_gesture(gesture)
+            self.command_manager.qt_say_blocking(message)
+
+        if self.debug:
+            print("game selected = {}".format(game))
+
+        return self.run, game
 
 
     def play_games(self, run = True):
         """
-        semi-randomly selects a game to play, from those added into "self.games"
-        randomly selects from the games that have been played least.
+        Prompts user to select a game through interface, and presents an option to use random game.
+        Plays 3 levels of correct difficulty and prompts user once again, if they would like to continue or change game
         Also increases or decreases difficulty as needed and saves user data after each level
         """
-        # Populate a list of counters for each game type
-        this_session = []
-        for game in self.games:
-            this_session.append(0)
+
+        # TODO QT SPEAK and gesture etc "Choose a game you want to play"
+        # Choose an initial game
+        run, game_name = self.home_screen()
 
         play_time = 0
         time_start = rospy.get_time()
@@ -878,19 +905,6 @@ class GameManager():
         while play_time < (self.session_time) and run:
             # Keep track of what how many games we've played.
             game_num += 1
-
-            # Populate new list of the games which have been played the least, and randomly select from that list
-            min_value = min(this_session)
-            selectable_games = []
-            for i, x in enumerate(this_session):
-                if x == min_value:
-                    selectable_games.append(i)
-            if len(selectable_games) == 1:
-                selected_game_ind =  selectable_games[0]
-            else:
-                selected_game_ind = random.choice(selectable_games)
-            game_name = self.games[selected_game_ind]
-            this_session[selected_game_ind] += 1
 
             # Get difficulty from user profile
             difficulty = self.user_data["game_data"]["difficulty"][game_name]
@@ -920,6 +934,17 @@ class GameManager():
                     self.user_data["blacklist"].append(song_title)
                 self.SaveExistingUserData()
 
+            # If they have played 3 games, ask if they want to continue, or choose a new game
+            if (game_num % 3) == 0:
+                # TODO QT SPEAK and gesture etc "Would you like to choose another level now?"
+                new_game = self.Levels.yes_or_no_screen("Choose another game?",
+                                                        self.run, self.background_colour,
+                                                        choice_1 = "Choose a new game",
+                                                        choice_2 = "Play the same game")
+                if new_game:
+                    # TODO QT SPEAK and gesture etc "Choose another game you want to play"
+                    run, game_name  = self.home_screen(previous_game = game_name)
+
             # update play time
             play_time = rospy.get_time() - time_start
 
@@ -939,7 +964,7 @@ class GameManager():
             # Load data for selected game
             song_data = self.general_functions.Load_Song_Data(game_name)
 
-            # make copy of databse so we can pop it
+            # make copy of database so we can pop it
             levels = song_data[difficulty].copy()
 
             # Pop a specific song out of our dict
@@ -1119,12 +1144,8 @@ class GameManager():
         if self.debug:
             print("Finished preamble screen")
 
-        # Choose starting game
-        self.run = self.home_screen(run = self.run)
-
         # uses user profile to select which games to play
-        #self.run = self.play_games(run = self.run)
-
+        self.run = self.play_games(run = self.run)
 
         # QT outro
         self.run = self.QTPostamble(user = self.user_data, run = self.run)
@@ -1138,8 +1159,8 @@ class GameManager():
 
 if __name__ == '__main__':
     game_manager = GameManager()
-    #game_manager.Main()
-    game_manager.home_screen()
+    game_manager.Main()
+
 
 
 
