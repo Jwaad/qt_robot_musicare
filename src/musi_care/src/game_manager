@@ -894,7 +894,12 @@ class GameManager():
         Also increases or decreases difficulty as needed and saves user data after each level
         """
 
-        # TODO QT SPEAK and gesture etc "Choose a game you want to play"
+        # QT should transition to asking you what you want to play
+        message = "What do you feel like playing today?"
+        gesture = "show_right"
+        self.command_manager.qt_gesture(gesture)
+        self.command_manager.qt_say_blocking(message)
+
         # Choose an initial game
         run, game_name = self.home_screen()
 
@@ -936,14 +941,31 @@ class GameManager():
 
             # If they have played 3 games, ask if they want to continue, or choose a new game
             if (game_num % 3) == 0:
-                # TODO QT SPEAK and gesture etc "Would you like to choose another level now?"
+                # QT asks if you want to choose another game or continue
+                sayings = ["You have played 3 levels, would you like to choose another game?",
+                           "Do you want to change games now?",
+                           "We played a lot, how about a different game",
+                           "Want to swap games?",
+                           "How about changing to another game?"]
+                ind = random.randint(0, len(sayings) - 1)
+                message = sayings[ind]
+                gesture = "show_right"
+                self.command_manager.qt_gesture(gesture)
+                self.command_manager.qt_say(message)
                 new_game = self.Levels.yes_or_no_screen("Choose another game?",
                                                         self.run, self.background_colour,
                                                         choice_1 = "Choose a new game",
                                                         choice_2 = "Play the same game")
                 if new_game:
-                    # TODO QT SPEAK and gesture etc "Choose another game you want to play"
-                    run, game_name  = self.home_screen(previous_game = game_name)
+                    # QT should comment on the game it chose
+                    sayings = ["Great, which game?",
+                               "Okay, which game would you like to play?",
+                               "Nice, what do you feel like playing?",
+                               "Alright, which game now?"]
+                    ind = random.randint(0, len(sayings) - 1)
+                    message = sayings[ind]
+                    self.command_manager.qt_say(message)
+                    run, game_name = self.home_screen(previous_game = game_name)
 
             # update play time
             play_time = rospy.get_time() - time_start
