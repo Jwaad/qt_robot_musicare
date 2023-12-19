@@ -9,11 +9,620 @@ import pygame.freetype
 import functools
 from musicare_lib import General
 from musicare_lib import StandardLevels
+import wave
 
-def SaveDefaultDatabase():
+def DefaultDatabase():
     """ Func returns a manually saved default database to use in a pinch"""
     song_database = \
         {
+            "Follow the van":
+                {
+                    "length":"long",
+                    "artist": "Mrs Mills",
+                    "display_name": "Don't Dilly Dally on the Way",
+                    "file_name": "follow_the_van.wav",
+                    "bpm": 57.0,
+                    "first_beat": 2.8,
+                    "mood": "happy",
+                    "GTM": "n/a",
+                    "FTS": "n/a",
+                    "CTB": "easy",
+                    "SSC": "easy"
+                },
+
+            "Don't fence me in":
+                {
+                    "length":"long",
+                    "artist": "The Andrews Sisters",
+                    "display_name": "Don't fence me in",
+                    "file_name": "dont_fence_me_in_long.wav",
+                    "bpm": 40.0,
+                    "first_beat": 0.1,
+                    "mood": "sad",
+                    "GTM": "medium",
+                    "FTS": "easy",
+                    "CTB": "easy",
+                    "SSC": "easy"
+                },
+
+            "Jingle bells":
+                {
+                    "length":"long",
+                    "artist": "Christmas",
+                    "display_name": "Jingle bells",
+                    "file_name": "jingle_bells.wav",
+                    "bpm": 95.0,
+                    "first_beat": 2.8,
+                    "mood": "happy",
+                    "GTM": "medium",
+                    "FTS": "medium",
+                    "CTB": "easy",
+                    "SSC": "easy"
+                },
+
+            "Happy instrumental 3":
+                {
+                    "length":"short",
+                    "artist": "Instrumental",
+                    "display_name": "Happy instrumental 3",
+                    "file_name": "happy_3.wav",
+                    "bpm": 60.0,
+                    "first_beat": 0.1,
+                    "mood": "happy",
+                    "GTM": "easy",
+                    "FTS": "hard",
+                    "CTB": "hard",
+                    "SSC": "hard"
+                },
+
+            "Happy instrumental 1":
+                {
+                    "length":"short",
+                    "artist": "Instrumental",
+                    "display_name": "Happy instrumental 1",
+                    "file_name": "happy_1.wav",
+                    "bpm": 100.0,
+                    "first_beat": 0.0,
+                    "mood": "happy",
+                    "GTM": "easy",
+                    "FTS": "hard",
+                    "CTB": "hard",
+                    "SSC": "hard"
+                },
+
+            "Don't let me down short":
+                {
+                    "length":"short",
+                    "artist": "Beatles",
+                    "display_name": "Don't let me down",
+                    "file_name": "beetles_dont_let_me_down_short.wav",
+                    "bpm": 76,
+                    "first_beat": 0.0,
+                    "mood": "sad",
+                    "GTM": "medium",
+                    "FTS": "medium",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },
+
+            "Sad instrumental 1":
+                {
+                    "length":"long",
+                    "artist": "Instrumental",
+                    "display_name": "Sad instrumental 1",
+                    "file_name": "sad_1.wav",
+                    "bpm": 100.0,
+                    "first_beat": 0.0,
+                    "mood": "sad",
+                    "GTM": "easy",
+                    "FTS": "medium",
+                    "CTB": "hard",
+                    "SSC": "hard"
+                },
+
+            "Happy instrumental 4":
+                {
+                    "length":"short",
+                    "artist": "Instrumental",
+                    "display_name": "Happy instrumental 4",
+                    "file_name": "happy_4.wav",
+                    "bpm": 100.0,
+                    "first_beat": 0.0,
+                    "mood": "sad",
+                    "GTM": "hard",
+                    "FTS": "hard",
+                    "CTB": "hard",
+                    "SSC": "hard"
+                },
+
+            "Don't let me down long":
+                {
+                    "length":"long",
+                    "artist": "Beatles",
+                    "display_name": "Don't let me down",
+                    "file_name": "beetles_dont_let_me_down_long.wav",
+                    "bpm": 76,
+                    "first_beat": 0.0,
+                    "mood": "sad",
+                    "GTM": "n/a",
+                    "FTS": "n/a",
+                    "CTB": "medium",
+                    "SSC": "medium"
+                },
+
+            "Could you be loved short":
+                {
+
+                    "length":"short",
+                    "artist": "Bob Marley",
+                    "display_name": "Could you be loved",
+                    "file_name": "bob_marl_could_you_be_loved_short.wav",
+                    "bpm": 76,
+                    "first_beat": 0.0,
+                    "mood": "sad",
+                    "GTM": "hard",
+                    "FTS": "easy",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },
+
+
+            "I Just Dont Have The Heart Full":
+                {
+                    "length":"full",
+                    "artist": "Cliff Richard",
+                    "display_name": "I Just Don't Have The Heart",
+                    "file_name": "full_i_just_don_t_have_the_heart.wav",  # Exact file_name
+                    "bpm": 120.0,
+                    "first_beat": 3.0,
+                    "mood": "happy",  # happy / sad
+                    "GTM": "n/a",
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },
+            "I Just Dont Have The Heart Long":
+                {
+                    "length": "long",
+                    "artist": "Cliff Richard",
+                    "display_name": "I Just Don't Have The Heart",
+                    "file_name": "long_i_just_don_t_have_the_heart.wav",  # Exact file_name
+                    "bpm": 120.0,
+                    "first_beat": 3.0,
+                    "mood": "happy",  # happy / sad
+                    "GTM": "n/a",
+                    "FTS": "n/a",
+                    "CTB": "hard",
+                    "SSC": "hard"
+                },
+            "I Just Dont Have The Heart Short":
+                {
+                    "length": "short",
+                    "artist": "Cliff Richard",
+                    "display_name": "I Just Don't Have The Heart",
+                    "file_name": "short_i_just_don_t_have_the_heart.wav",  # Exact file_name
+                    "bpm": 120.0,
+                    "first_beat": 3.0,
+                    "mood": "happy",  # happy / sad
+                    "GTM": "easy",
+                    "FTS": "easy",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },
+
+
+            "going going gone full":
+                {
+                    "length": "full", # full, long, short
+                    "artist": "Bob Dylan",
+                    "display_name": "Going Going Gone",
+                    "file_name": "full_going_going_gone.wav", # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",     #easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },
+            "going going gone long":
+                {
+                    "length": "long",  # full, long, short
+                    "artist": "Bob Dylan",
+                    "display_name": "Going Going Gone",
+                    "file_name": "long_going_going_gone.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "easy",
+                    "SSC": "easy"
+                },
+            "going going gone short":
+                {
+                    "length": "short",  # full, long, short
+                    "artist": "Bob Dylan",
+                    "display_name": "Going Going Gone",
+                    "file_name": "short_going_going_gone.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "hard",  # easy medium hard
+                    "FTS": "medium",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },
+
+
+            "goodbye yellow brick road full":
+                {
+                    "length": "full",  # full, long, short
+                    "artist": "Elton John",
+                    "display_name": "Goodbye Yellow Brick Road",
+                    "file_name": "full_goodbye_yellow_brick_road.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },
+            "goodbye yellow brick road long":
+                {
+                    "length": "long",  # full, long, short
+                    "artist": "Elton John",
+                    "display_name": "Goodbye Yellow Brick Road",
+                    "file_name": "long_goodbye_yellow_brick_road.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "medium",
+                    "SSC": "medium"
+                },
+            "goodbye yellow brick road short":
+                {
+                    "length": "short",  # full, long, short
+                    "artist": "Elton John",
+                    "display_name": "Goodbye Yellow Brick Road",
+                    "file_name": "short_goodbye_yellow_brick_road.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },
+
+
+            "heroes full":
+                {
+                    "length": "full",  # full, long, short
+                    "artist": "David Bowie",
+                    "display_name": "Heroes",
+                    "file_name": "full_heroes.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },
+            "heroes long":
+                {
+                    "length": "long",  # full, long, short
+                    "artist": "David Bowie",
+                    "display_name": "Heroes",
+                    "file_name": "long_heroes.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "medium",
+                    "SSC": "medium"
+                },
+            "heroes short":
+                {
+                    "length": "short",  # full, long, short
+                    "artist": "David Bowie",
+                    "display_name": "Heroes",
+                    "file_name": "short_heroes.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "medium",  # easy medium hard
+                    "FTS": "medium",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },
+
+
+
+            "full_hound_dog":
+                {
+                    "length": "full",  # full, long, short
+                    "artist": "Elvis Presley",
+                    "display_name": "Hound Dog",
+                    "file_name": "full_hound_dog.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },
+            "long_hound_dog":
+                {
+                    "length": "long",  # full, long, short
+                    "artist": "Elvis Presley",
+                    "display_name": "Hound Dog",
+                    "file_name": "long_hound_dog.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "medium",
+                    "SSC": "medium"
+                },
+            "short_hound_dog":
+                {
+                    "length": "short",  # full, long, short
+                    "artist": "Elvis Presley",
+                    "display_name": "Hound Dog",
+                    "file_name": "short_hound_dog.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "hard",  # easy medium hard
+                    "FTS": "medium",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },
+
+
+
+            "full_i_am_the_walrus":
+                {
+                    "length": "full",  # full, long, short
+                    "artist": "The Beatles",
+                    "display_name": "I Am The Walrus",
+                    "file_name": "full_i_am_the_walrus.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },
+            "long_i_am_the_walrus":
+                {
+                    "length": "long",  # full, long, short
+                    "artist": "The Beatles",
+                    "display_name": "I Am The Walrus",
+                    "file_name": "full_i_am_the_walrus.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "hard",  # easy medium hard
+                    "FTS": "medium",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },
+            "short_i_am_the_walrus":
+                {
+                    "length": "short",  # full, long, short
+                    "artist": "The Beatles",
+                    "display_name": "I Am The Walrus",
+                    "file_name": "full_i_am_the_walrus.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "hard",  # easy medium hard
+                    "FTS": "medium",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },
+
+
+            "full_imagine":
+                {
+                    "length": "full",  # full, long, short
+                    "artist": "The Beatles",
+                    "display_name": "Imagine",
+                    "file_name": "full_imagine.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },
+            "long_imagine":
+                {
+                    "length": "long",  # full, long, short
+                    "artist": "The Beatles",
+                    "display_name": "Imagine",
+                    "file_name": "long_imagine.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "hard",
+                    "SSC": "hard"
+                },
+            "short_imagine":
+                {
+                    "length": "short",  # full, long, short
+                    "artist": "The Beatles",
+                    "display_name": "Imagine",
+                    "file_name": "short_imagine.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "easy",  # easy medium hard
+                    "FTS": "medium",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },
+
+
+            "full_im_still_standing":
+                {
+                    "length": "short",  # full, long, short
+                    "artist": "Elton John",
+                    "display_name": "I'm Still Standing",
+                    "file_name": "full_im_still_standing.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "happy",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },
+            "long_im_still_standing":
+                {
+                    "length": "long",  # full, long, short
+                    "artist": "Elton John",
+                    "display_name": "I'm Still Standing",
+                    "file_name": "long_im_still_standing.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "happy",  # happy / sad
+                    "GTM": "medium",  # easy medium hard
+                    "FTS": "hard",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },
+            "short_im_still_standing":
+                {
+                    "length": "short",  # full, long, short
+                    "artist": "Elton John",
+                    "display_name": "I'm Still Standing",
+                    "file_name": "short_im_still_standing.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "happy",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "medium",
+                    "SSC": "medium"
+                }
+        }
+
+    # remove files that dont exist, so we dont crash out of games later
+    this_path = os.path.dirname(__file__)
+    path_to_music = this_path + "/game_assets/music/"
+    songs_to_remove = []
+
+    #Check which songs exist
+    for song_key, song in song_database.items():
+        try:
+            audio = wave.open(path_to_music + song["file_name"], "r")
+            audio.close()
+        except Exception:
+            print("Couldn't open {} removing from database.".format(song["file_name"]))
+            songs_to_remove.append(song_key)
+
+    # Remove songs from database
+    for song_key in songs_to_remove:
+        del song_database[song_key]
+
+    return song_database
+
+
+def SaveDatabase(song_database = None):
+    """
+    Manually written database, saves it in pickle format for other code to read from it easily
+    """
+
+    # Song data
+    if song_database is None or song_database == {}:
+        return
+
+    this_path = os.path.dirname(__file__)
+    save_name = "song_database.p"
+    save_path = os.path.join(this_path, 'game_assets/data/', save_name)
+
+    # Get path and save
+    open(save_path, "w").close()  # Close it if it's in use ? maybe
+    with open(save_path, "wb") as f:
+        pickle.dump(song_database, f)
+    print("Song data saved to {}".format(save_path))
+
+    return song_database
+
+
+def LoadData():
+    this_path = os.path.dirname(__file__)
+    save_name = "song_database.p"
+    save_path = os.path.join(this_path, 'game_assets/data/', save_name)
+
+    # Get path and save
+    open(save_path, "rb").close()  # Close it if it's in use ? maybe
+    with open(save_path, "rb") as f:
+        data = pickle.load(f)
+    return data
+
+
+def measureBPM(data):
+    """
+        Use musicare lib and pygame to measure BPM of songs in the database
+    """
+    rospy.init_node('Measure_BPM', anonymous=False)
+    pygame.init()  # start py engine
+    pygame.freetype.init()
+    window = pygame.display.set_mode((2850,2000))
+    pygame.display.set_caption("Measure BPM")  # Label window
+    win_center = (2850 / 2, 2000 / 2)
+    path_to_music = "/home/jwaad/catkin_ws/src/musi_care/src/game_assets/music/"
+    SL = StandardLevels(window, win_center, pygame, path_to_music)
+    SL.MeasureBPM(data, SaveDatabase)
+
+
+def PrintLevelDistribution(data):
+    # Give distribution of levels for each difficulty for each game
+    games = ["GTM", "FTS", "CTB", "SSC"]
+    diff = ["easy", "medium", "hard"]
+    for game in games:
+        data = General().Load_Song_Data(game)
+
+        print("For {} there is...".format(game))
+        for d in diff:
+            print("{} {} levels:".format(len(data[d]), d))
+            #print(data[d])
+
+if __name__ == '__main__':
+
+    # Save hard coded database to file
+    #data = DefaultDatabase()
+    #SaveDatabase(data)
+
+    # Nice readout telling us the distribution of game levels
+    #PrintLevelDistribution(data)
+
+    # Measure BPM of songs and save them to memory
+    data = LoadData()
+    measureBPM(data)
+
+
+
+
+
+
+"""
+
             "Follow the van":
                 {
                     "artist": "",
@@ -143,79 +752,4 @@ def SaveDefaultDatabase():
                     "CTB": "easy",
                     "SSC": "easy"
                 }
-        }
-    return song_database
-
-
-def SaveDatabase(song_database = None):
-    """
-    Manually written database, saves it in pickle format for other code to read from it easily
-    """
-
-    # Song data
-    if song_database is None or song_database == {}:
-        return
-
-    this_path = os.path.dirname(__file__)
-    save_name = "song_database.p"
-    save_path = os.path.join(this_path, 'game_assets/data/', save_name)
-
-    # Get path and save
-    open(save_path, "w").close()  # Close it if it's in use ? maybe
-    with open(save_path, "wb") as f:
-        pickle.dump(song_database, f)
-    print("Song data saved to {}".format(save_path))
-
-    return song_database
-
-
-def LoadData():
-    this_path = os.path.dirname(__file__)
-    save_name = "song_database.p"
-    save_path = os.path.join(this_path, 'game_assets/data/', save_name)
-
-    # Get path and save
-    open(save_path, "rb").close()  # Close it if it's in use ? maybe
-    with open(save_path, "rb") as f:
-        data = pickle.load(f)
-    return data
-
-
-def measureBPM(data):
-    """
-        Use musicare lib and pygame to measure BPM of songs in the database
-    """
-    rospy.init_node('Measure_BPM', anonymous=False)
-    pygame.init()  # start py engine
-    pygame.freetype.init()
-    window = pygame.display.set_mode((2850,2000))
-    pygame.display.set_caption("Measure BPM")  # Label window
-    win_center = (2850 / 2, 2000 / 2)
-    path_to_music = "/home/jwaad/catkin_ws/src/musi_care/src/game_assets/music/"
-    SL = StandardLevels(window, win_center, pygame, path_to_music)
-    SL.MeasureBPM(data, SaveDatabase)
-
-
-def PrintLevelDistribution(data):
-    # Give distribution of levels for each difficulty for each game
-    games = ["GTM", "FTS", "CTB", "SSC"]
-    diff = ["easy", "medium", "hard"]
-    for game in games:
-        data = General().Load_Song_Data(game)
-
-        print("For {} there is...".format(game))
-        for d in diff:
-            print("{} {} levels:".format(len(data[d]), d))
-            #print(data[d])
-
-if __name__ == '__main__':
-
-    # Save hard coded database to file
-    #data = SaveDatabase()
-
-    # Nice readout telling us the distribution of game levels
-    #PrintLevelDistribution(data)
-
-    # Measure BPM of songs and save them to memory
-    data = LoadData()
-    measureBPM(data)
+"""

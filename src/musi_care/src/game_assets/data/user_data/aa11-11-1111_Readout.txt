@@ -16,7 +16,7 @@ song_preference:
     Don't let me down short: 5
 game_data:
     difficulty:
-        GTM: hard
+        GTM: medium
         FTS: hard
         CTB: easy
         SSC: easy
@@ -876,3 +876,167 @@ game_data:
     session_57:
         mood_pre: 3
         mood_post: 2
+    session_58:
+        mood_pre: 4
+    session_59:
+        mood_pre: 4
+        game_1:
+            game_name: GTM
+            clear_type: fail
+            performance:
+                time_taken: 117.85460042953491
+                mood: sad
+                num_hints: 1
+            e_clear_req:
+                time_taken: 1003.0
+                mood: happy
+            song_title: Happy instrumental 3
+            difficulty: hard
+        game_2:
+            game_name: GTM
+            clear_type: e_clear
+            performance:
+                time_taken: 8.204172134399414
+                mood: sad
+                num_hints: 0
+            e_clear_req:
+                time_taken: 1003.0
+                mood: sad
+            song_title: Happy instrumental 4
+            difficulty: hard
+        game_3:
+            game_name: GTM
+            clear_type: e_clear
+            performance:
+                time_taken: 25.58958673477173
+                mood: happy
+                num_hints: 0
+            e_clear_req:
+                time_taken: 1003.0
+                mood: happy
+            song_title: Happy instrumental 3
+            difficulty: hard
+    session_60:
+        mood_pre: 2
+    session_61:
+        mood_pre: 5
+    session_62:
+        mood_pre: 5
+        game_1:
+            game_name: GTM
+            clear_type: fail
+            performance:
+                time_taken: 3.711577892303467
+                mood: happy
+                num_hints: 0
+            e_clear_req:
+                time_taken: 19.00009059906006
+                mood: sad
+            song_title: Happy instrumental 4
+            difficulty: hard
+    session_63:
+        mood_pre: 5
+        game_1:
+            game_name: GTM
+            clear_type: fail
+            performance:
+                time_taken: 3.941943407058716
+                mood: happy
+                num_hints: 0
+            e_clear_req:
+                time_taken: 19.00009059906006
+                mood: sad
+            song_title: Happy instrumental 4
+            difficulty: hard
+    session_64:
+        mood_pre: 3
+        game_1:
+            game_name: CTB
+            clear_type: clear
+            performance:
+                num_claps: 95
+                average_error: 0.1
+            e_clear_req:
+                expected_num_claps: 100
+                average_error: 0.05
+            song_title: Don't fence me in
+            difficulty: easy
+    session_65:
+        mood_pre: 3
+        game_1:
+            game_name: GTM
+            clear_type: fail
+            performance:
+                time_taken: 20.433085203170776
+                mood: happy
+                num_hints: 0
+            e_clear_req:
+                time_taken: 19.00009059906006
+                mood: sad
+            song_title: Happy instrumental 4
+            difficulty: hard
+        game_2:
+            game_name: GTM
+            clear_type: e_clear
+            performance:
+                time_taken: 1.9549353122711182
+                mood: happy
+                num_hints: 0
+            e_clear_req:
+                time_taken: 19.81278896331787
+                mood: happy
+            song_title: Happy instrumental 3
+            difficulty: hard
+        game_3:
+            game_name: GTM
+            clear_type: e_clear
+            performance:
+                time_taken: 16.55978035926819
+                mood: sad
+                num_hints: 0
+            e_clear_req:
+                time_taken: 19.00009059906006
+                mood: sad
+            song_title: Happy instrumental 4
+            difficulty: hard
+    session_66:
+        mood_pre: 2
+    session_67:
+        mood_pre: 4
+        game_1:
+            game_name: GTM
+            clear_type: fail
+            performance:
+                time_taken: 5.575197696685791
+                mood: happy
+                num_hints: 0
+            e_clear_req:
+                time_taken: 19.00009059906006
+                mood: sad
+            song_title: Happy instrumental 4
+            difficulty: hard
+        game_2:
+            game_name: GTM
+            clear_type: fail
+            performance:
+                time_taken: 29.39772629737854
+                mood: happy
+                num_hints: 2
+            e_clear_req:
+                time_taken: 31.0
+                mood: sad
+            song_title: Could you be loved short
+            difficulty: hard
+        game_3:
+            game_name: GTM
+            clear_type: e_clear
+            performance:
+                time_taken: 2.093400716781616
+                mood: sad
+                num_hints: 0
+            e_clear_req:
+                time_taken: 22.0
+                mood: sad
+            song_title: Don't let me down short
+            difficulty: medium
+        mood_post: 4
