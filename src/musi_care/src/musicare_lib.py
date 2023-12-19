@@ -1296,6 +1296,10 @@ class StandardLevels():
         Will read events and work accordingly, but wont stick you into a while loop"""
 
         if run:
+            
+            if fade_scalar < 0:
+                fade_scalar = 0
+            
             # Convert tuple to list so to make it mutable
             background_colour = list(background_colour)
 
@@ -1406,7 +1410,7 @@ class TextObject():
             else:
                 self.text_obj = self.font.render(self.text, False, font_col)
         except:
-            print("Failed to set text colour")
+            print("Failed to set text to colour: {}".format(font_col))
 
     def set_pos(self, pos):
         self.textRect[0] = pos[0]
