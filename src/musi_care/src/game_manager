@@ -880,6 +880,17 @@ class GameManager():
             gesture = "arms_up"
             self.command_manager.qt_gesture(gesture)
             self.command_manager.qt_say_blocking(message)
+        else:
+            # QT should comment on the game player chose
+            sayings = ["Okay, then! Lets play {}".format(self.game_names[game]),
+                       "{} is one of my favorites!".format(self.game_names[game]),
+                       "Sure! Lets play {}!".format(self.game_names[game]),
+                       "{} is a great choice!".format(self.game_names[game])]
+            ind = random.randint(0, len(sayings) - 1)
+            message = sayings[ind]
+            gesture = "arms_up"
+            self.command_manager.qt_gesture(gesture)
+            self.command_manager.qt_say_blocking(message)
 
         if self.debug:
             print("game selected = {}".format(game))
@@ -896,7 +907,7 @@ class GameManager():
 
         # QT should transition to asking you what you want to play
         message = "What do you feel like playing today?"
-        gesture = "show_right"
+        gesture = "explain_right"
         self.command_manager.qt_gesture(gesture)
         self.command_manager.qt_say_blocking(message)
 
@@ -906,6 +917,7 @@ class GameManager():
         play_time = 0
         time_start = rospy.get_time()
         game_num = 0
+        next_level_text = ""
         # Keep selecting games to be played until full time has passed
         while play_time < (self.session_time) and run:
             # Keep track of what how many games we've played.
@@ -949,7 +961,7 @@ class GameManager():
                            "How about changing to another game?"]
                 ind = random.randint(0, len(sayings) - 1)
                 message = sayings[ind]
-                gesture = "show_right"
+                gesture = "explain_right"
                 self.command_manager.qt_gesture(gesture)
                 self.command_manager.qt_say(message)
                 new_game = self.Levels.yes_or_no_screen("Choose another game?",
@@ -966,6 +978,11 @@ class GameManager():
                     message = sayings[ind]
                     self.command_manager.qt_say(message)
                     run, game_name = self.home_screen(previous_game = game_name)
+            else:
+                # QT should introduce the next level slightly
+                next_level_text = self.behaviours_manager.get_next_level(previous_saying=next_level_text)
+                self.command_manager.qt_say_blocking(next_level_text)
+
 
             # update play time
             play_time = rospy.get_time() - time_start
@@ -1017,7 +1034,7 @@ class GameManager():
             level_data = song_data[difficulty][song_title]
             return run, level_data, song_title
 
-    def play_game(self, game_name, difficulty, play_tut, run = True):
+    def play_game(self, game_name, difficulty, play_tut, run = True, prev_game = ""):
         """
         Method to load and launch specified game at specified difficulty
         game_name = string, GTM, FTS, CTB, SSC
@@ -1035,6 +1052,10 @@ class GameManager():
             # Play GTM
             if game_name == "GTM":
 
+                # Get drums put away before we play
+                if prev_game == "SSC" or prev_game == "CTB":
+                    self.Levels.put_away_drum(run=self.run, background_colour=self.background_colour)
+
                 # Init game
                 game = GTM(debug=self.debug, screen= self.window)
 
@@ -1045,6 +1066,11 @@ class GameManager():
                 self.run, user_level_data = game.Main(mood, file_name, ask_tut = play_tut)
             # Play FTS
             elif game_name == "FTS":
+
+                # Get drums put away before we play
+                if prev_game == "SSC" or prev_game == "CTB":
+                    self.Levels.put_away_drum(run=self.run, background_colour=self.background_colour)
+
                 # Init game
                 game = FTS(debug=self.debug, screen= self.window)
 
@@ -1067,8 +1093,9 @@ class GameManager():
                 self.run, user_level_data = game.Main(file_name, distract_song, slices, ask_tut = play_tut)
             # Play CTB and SSC
             else:
-                # Put arms up and wait for drum
-                self.Levels.get_drum(run = self.run,background_colour=self.background_colour)
+                # Set up drums before we start
+                if prev_game == "GTM" or prev_game == "FTS" or prev_game == "":
+                    self.Levels.get_drum(run = self.run,background_colour=self.background_colour)
 
                 # Shared vars between SSC and CTB
                 first_beat = level_data["first_beat"]
@@ -1087,8 +1114,7 @@ class GameManager():
                     # Play game
                     self.run, user_level_data = game.Main(file_name, first_beat, bpm, ask_tut = play_tut)
 
-                # After game finishes, remove drum, even if we're bout to play ctb from ssc
-                self.Levels.put_away_drum(run=self.run, background_colour=self.background_colour)
+
 
             # Append data with title and difficulty
             user_level_data["song_title"] = song_title
