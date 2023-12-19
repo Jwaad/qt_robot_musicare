@@ -130,17 +130,18 @@ class Clap_To_Beat_Game():
             return self.track_title, self.elapsed_time_secs, self.total_track_secs
 
     def get_song_info(self, prev_track_time="", prev_total_time="", song_comp_only=False):
+        # Do this first, since it's more time sensitive
+        progress = self.elapsed_time_secs / self.total_track_secs  # elapsed time in percentage completion, so slider can represent that on a bar
+        song_ended = progress >= 0.99  # if progress > 99% = song is finished, otherwise false
+        if song_comp_only:
+            return song_ended
+
         # Get variables that we will draw onto screen
         formatted_data = self.get_track_info(formatted_output=True)
         current_track_time = formatted_data[0]  # Time gotten from sound_player node
         track_total_time = formatted_data[1]  # Total track time
-        progress = self.elapsed_time_secs / self.total_track_secs  # elapsed time in percentage completion, so slider can represent that on a bar
-        song_ended = progress >= 0.99  # if progress > 99% = song is finished, otherwise false
 
-        if song_comp_only:
-            return song_ended
-        else:
-            return current_track_time, track_total_time, progress, song_ended
+        return current_track_time, track_total_time, progress, song_ended
 
     def format_elapsed_display(self, time):
         "bit of code that converts secs to mins and secs"
@@ -351,15 +352,13 @@ class Clap_To_Beat_Game():
             beat += 60 / bpm
         return beat_timings
 
-    def hit_drum(self, beat_timing, elapsed_time, prev_arm,):
+    def hit_drum(self, beat_timings, start_time):
         """
         Use a list of beat times, to hit drum at the right time
         prev_arm will be either "left" or "right"
         It will then pop the list of beat_timings, so that we dont keep hitting the same beat.
         """
-        # get out just the beat timing we want, and also the hard_coded time it takes to hit the drum
-        this_beat = beat_timing[0]
-        time_to_hit = 0.3
+        # Set arm pos goals
         if self.diy_box:
             hitting_drum = [-50.5, -84.69999694824219, -39.400001525878906]
             raised_arm = [-16.299999237060547, -85.0, -25.700000762939453]
@@ -367,28 +366,29 @@ class Clap_To_Beat_Game():
             raised_arm = [2.9000000953674316, -84.69999694824219, -49.20000076293945]
             hitting_drum = [-27.0, -85.4000015258789, -56.29999923706055]
 
-        #Check if we should hit the drum this loop
-        if elapsed_time + time_to_hit > this_beat:
-            # Function that hits the drum with either the left or right hand
-            if prev_arm == "left":
-                # Move left arm back up and move right arm down
-                self.command_manager.move_right_arm(hitting_drum)
-                self.command_manager.move_left_arm(raised_arm)
+        time_to_hit = 0.3 # est travel time taken for arms to hit drum
+        i = 0
+        while i < len(beat_timings) and not rospy.is_shutdown():
+            # Update beat hit time
+            beat_time = beat_timings[i]
 
-                beat_timing.pop(0)
-                prev_arm = "right"
-                print("Right arm")
-                return beat_timing, prev_arm
-            else:
-                # Move right arm back up and move left arm down
-                self.command_manager.move_right_arm(raised_arm)
-                self.command_manager.move_left_arm(hitting_drum)
-                beat_timing.pop(0)
-                prev_arm = "left"
-                print("Left arm")
-                return beat_timing, prev_arm
-        else:
-            return beat_timing, prev_arm
+            # Update elapsed time globally
+            self.elapsed_time_secs = rospy.get_time() - start_time
+
+            # Hit the drum if it's time
+            if self.elapsed_time_secs + time_to_hit >= beat_time:
+                # On even numbers use right arm else, left
+                if i % 2 == 0 :
+                    self.command_manager.move_right_arm(hitting_drum)
+                    self.command_manager.move_left_arm(raised_arm)
+                else:
+                    self.command_manager.move_right_arm(raised_arm)
+                    self.command_manager.move_left_arm(hitting_drum)
+                # Move onto next beat
+                i += 1
+
+        print("QT has finished playing")
+
 
     def analyse_performance(self):
         """Takes the recording / data from the recording of the clapping """
@@ -405,38 +405,46 @@ class Clap_To_Beat_Game():
             # Get the level's data
             self.track_name = file_name
 
-            # Start parallel thread to record claps simultaneously
-            clap_recorder = threading.Thread(target=self.record_claps, args=(), daemon=True)
-            clap_recorder.start()  # Start multi_threaded function
-
             # Define some parameters and vars
             self.sound_manager.load_track(self.track_name)
             song_done = False
             fade_time = 5
-            time_of_darkness = rospy.get_time() + fade_time
+            time_of_darkness = rospy.get_time() + fade_time # what system time, the screen should be dark at
             time_left = time_of_darkness - rospy.get_time()
             prev_arm = "left"
             track_total_time = self.get_track_info()[2]
+
+            # Start parallel thread to record claps simultaneously
+            clap_recorder = threading.Thread(target=self.record_claps, args=(), daemon=True)
+            clap_recorder.start()  # Start multi_threaded function
+
+            # Start another parallel thread for QT to clap at right time
             beat_timings = self.get_beat_timing(first_beat, bpm, track_total_time)
+            start_time = rospy.get_time()
+            qt_clap = threading.Thread(target=self.hit_drum, args=(beat_timings, start_time), daemon=True)
+            qt_clap.start()  # Start multi_threaded function
+
+            # Start song
             self.sound_manager.unpause()
+
+            # Render screen and wait til song done.
             while not song_done and len(beat_timings) > 0 and self.run and not rospy.is_shutdown():
-                # Get elapsed time
-                elapsed_time = self.get_track_info()[1]
 
                 # Render screen, will fade to black and stay black
                 message = "Please Look At QT Robot"
                 if time_left > 0:
                     time_left = time_of_darkness - rospy.get_time()
+                    fade_scalar = (time_left / fade_time)
                 else:
-                    time_left = 0
-                fade_scalar = (time_left / fade_time)
-                self.run = self.level_loader.fade_to_black_screen(self.run, message, self.background_colour, fade_scalar )
+                    fade_scalar = 0
+                self.run = self.level_loader.fade_to_black_screen(self.run, message, self.background_colour, fade_scalar)
 
-                # Hit the drum to the beat.
-                beat_timings, prev_arm = self.hit_drum(beat_timings, elapsed_time, prev_arm)
+                # Update elapsed time
+                self.elapsed_time_secs = rospy.get_time() - start_time
 
                 # Check if song done
-                song_done = self.get_song_info(song_comp_only=True)
+                if (self.elapsed_time_secs / self.total_track_secs) > 0.99:
+                    song_done = True
 
             self.Finished = True
 
@@ -500,7 +508,7 @@ if __name__ == '__main__':
     # Initialise game
     rospy.init_node('clap_beat_game', anonymous=False)
     rospy.loginfo("Node launched successfully")
-    game_object = Clap_To_Beat_Game("jwaad")
+    game_object = Clap_To_Beat_Game(debug=True)
 
     # Run the game
     try:
