@@ -838,8 +838,8 @@ class StandardLevels():
                                                   choice_2="Not yet", silent=True)
 
         time.sleep(1) # Delay so QT is more likely to actually emote
-        self.command_manager.qt_say("Thank you very much!")
         self.command_manager.qt_gesture("arms_up")
+        self.command_manager.qt_say_blocking("Thank you very much!")
 
     def did_you_like_song(self, run = True, on_screen_text = "Did you like the song?", prev_dialogue = "", background_colour = (200, 200, 200)):
         """ 
@@ -1296,7 +1296,7 @@ class StandardLevels():
 
             return True
 
-    def fade_to_black_screen(self, run, message, background_colour, fade_scalar ):
+    def fade_to_black_screen(self, run, message, background_colour, fade_scalar , passed_in_events = None):
         """ Non-Blocking fade then stay on black screen.
         Will read events and work accordingly, but wont stick you into a while loop"""
 
@@ -1312,8 +1312,13 @@ class StandardLevels():
             text_object = TextObject(self.window, self.window_center, message, cen_x=True, cen_y=True,
                                      font_size=70, font_colour=(255, 255, 255))
 
+            if passed_in_events == None:
+                events = self.pygame.event.get()
+            else:
+                events = passed_in_events
+
             # Check for quit
-            for event in self.pygame.event.get():
+            for event in events:
                 # Check if the user clicks the X
                 if event.type == self.pygame.QUIT:
                     return False

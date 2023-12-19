@@ -106,6 +106,8 @@ class Clap_To_Beat_Game():
         # self.sound_manager.volume_change(self.music_vol) # Set a default volume
         # self.set_robot_volume(qt_voice_vol) #TODO add this functionality
 
+        self.py_events = []
+
     ########################################################Low level methods################################################################
 
     def get_track_info(self, formatted_output=False):
@@ -318,25 +320,44 @@ class Clap_To_Beat_Game():
             self.tut_next.set_pos((arrow_x + 450, arrow_y))
             self.tut_repeat.set_pos((arrow_x - 600, arrow_y))
 
-    def qt_reward(self, temporal_accuracy, numerical_accuracy, should_gesture = False):
-        """handles what QT should say and do on level end """
+    def compute_clear_type(self, temporal_accuracy, numerical_accuracy, should_gesture = False):
+        """handles what clear type the level was"""
         # "Perfect clear"
-        if temporal_accuracy > 0.8 and numerical_accuracy > 0.8:
-            qt_message = (self.behaviours_manager.get_generic_praise()) # QT reads out level's hint
+        if 1.15 > temporal_accuracy > 0.85 and 1.15 > numerical_accuracy > 0.85:
+            return "e_clear"
+        elif 1.3 > temporal_accuracy > 0.7 and 1.3 > numerical_accuracy > 0.7:
+            return "clear"
         else:
-            qt_message = (self.behaviours_manager.get_generic_light_praise())  # QT reads out level's hint
-        if should_gesture:
+            return "fail"
+
+    def qt_reward(self, clear_type):
+        """
+        Uses clear type to get what to say
+        """
+        if clear_type == "e_clear":
             self.command_manager.send_qt_command(emote="happy", gesture="nod")
+            qt_message = (self.behaviours_manager.get_praise())  # QT praises user with some oomph
+        else:
+            self.command_manager.send_qt_command(emote="happy", gesture="nod")
+            qt_message = (self.behaviours_manager.get_agreements())  # QT
         return qt_message
 
     #######################################################Level / screen code###############################################################
 
     def record_claps(self):
-        """ Multithreaded function that records claps"""
-        # TODO add functionality that records audio and claps until a timer ends (timer is the song duration)
+        """ 
+        Multithreaded function that records claps
+        Records clap with space bar or by audio.
+        """
+        #TODO add record by audio + video together
+        self.claps = []
         while self.run and not self.Finished:
-            print("Pretending to record clapping")
-            time.sleep(2) # TEMP
+            events = self.pygame.event.get()
+            for event in events:
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_SPACE:
+                        self.claps.append(rospy.get_time())
+            self.py_events += events
         print("Ended clap recording thread")
 
     def get_beat_timing(self, first_beat, bpm, track_total_time):
@@ -391,12 +412,22 @@ class Clap_To_Beat_Game():
         print("QT has finished playing")
 
 
-    def analyse_performance(self):
+    def analyse_performance(self, bpm, claps, beat_timings):
         """Takes the recording / data from the recording of the clapping """
-        #TODO complete this section
-        temporal_accuracy = 0.9 #90%
-        numerical_accuracy = 0.9 #90%
-        return temporal_accuracy, numerical_accuracy
+
+        # Calculate temporal accuracy, between player BPM and Song BPM
+        time_between_claps = []
+        for i in range(0, len(claps)-1):
+            time_between_claps.append(claps[i + 1] - claps[i])
+        player_bps = 1/ (sum(time_between_claps) / len(time_between_claps))
+        player_bpm = player_bps * 60
+
+        temporal_accuracy = player_bpm/ bpm
+
+        # numerical is just comparison between total beats and how many times you clapped
+        numerical_accuracy = len(claps) / len(beat_timings)
+
+        return temporal_accuracy, numerical_accuracy, player_bpm
 
     def play_level(self, file_name, first_beat, bpm):
         """Have QT clap to beat and record user clapping"""
@@ -416,6 +447,7 @@ class Clap_To_Beat_Game():
             track_total_time = self.get_track_info()[2]
 
             # Start parallel thread to record claps simultaneously
+            self.claps = []
             clap_recorder = threading.Thread(target=self.record_claps, args=(), daemon=True)
             clap_recorder.start()  # Start multi_threaded function
 
@@ -438,7 +470,12 @@ class Clap_To_Beat_Game():
                     fade_scalar = (time_left / fade_time)
                 else:
                     fade_scalar = 0
-                self.run = self.level_loader.fade_to_black_screen(self.run, message, self.background_colour, fade_scalar)
+                # the thread that records clapping updates the pygame events and holds them in a buffer.
+                # We use them and then clear the buffer
+                # It's not a good system at all, but will do for now.
+                self.run = self.level_loader.fade_to_black_screen(self.run, message, self.background_colour,
+                                                                  fade_scalar, passed_in_events= self.py_events )
+                self.py_events = []
 
                 # Update elapsed time
                 self.elapsed_time_secs = rospy.get_time() - start_time
@@ -448,17 +485,18 @@ class Clap_To_Beat_Game():
                     song_done = True
 
             self.Finished = True
+            time.sleep(0.5) # wait 500ms extra second for thread to finish, so self.claps will update entirely
 
             # Stop recording clapping and log the user's score
-            temporal_accuracy, numerical_accuracy = self.analyse_performance()
+            temporal_accuracy, numerical_accuracy, player_bpm = self.analyse_performance(bpm, self.claps, beat_timings)
 
             # QT should praise user based on performance
-            message = self.qt_reward(temporal_accuracy, numerical_accuracy)
-            self.command_manager.send_qt_command(speech=message, gesture="arms_up", emote="happy")
+            clear_type = self.compute_clear_type(temporal_accuracy, numerical_accuracy)
+            qt_message = self.qt_reward(clear_type)
+            self.level_loader.QTSpeakingScreen(qt_message, self.run, self.background_colour)  # this is blocking
 
-            clear_type = "clear"
-            e_clear_req = {"expected_num_claps": 100 , "average_error": "0.05"}
-            performance = {"num_claps": 95, "average_error": "0.1"}
+            e_clear_req = {"expected_num_claps": len(beat_timings) , "expected_bpm":bpm}
+            performance = {"num_claps": len(self.claps), "player_bpm": player_bpm}
             level_data = {"game_name": "CTB", "clear_type": clear_type, "performance": performance,
                           "e_clear_req": e_clear_req}
 
