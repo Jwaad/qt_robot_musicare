@@ -279,17 +279,18 @@ class GameManager():
         surname_box = InputBox(600, 700, 1000, 200, "ParticipantID")
         dob_box = InputBox(600, 1100, 1000, 200, "nn-nn-nnnn", allowed_chars="0123456789", max_chars=10)
         inputboxes = [name_box, surname_box, dob_box]
+
         # Check marks
         name_tick = self.create_button("check_mark.png", (1750, 325))
         surname_tick = self.create_button("check_mark.png", (1750, 725))
         dob_tick = self.create_button("check_mark.png", (1750, 1125))
         ticks = {}
         #ticks = {1: name_tick, 2: surname_tick, 3: dob_tick}
+
         # Buttons
         back_button = self.create_button("tut_back.png", (20, 20))
         confirm_button = self.create_button("blank_button.png", (900, 1500), text="Done")
         buttons = [back_button, confirm_button]
-
 
         back = False
         while (not rospy.is_shutdown()) and (self.run) and not back:
@@ -1163,6 +1164,9 @@ class GameManager():
 
             # If they have played 3 games, ask if they want to continue, or choose a new game
             if (game_num % 3) == 0:
+                # update play time. (only update here, so levels end neatly)
+                play_time = rospy.get_time() - time_start
+
                 # QT asks if you want to choose another game or continue
                 sayings = ["You have played 3 levels, would you like to choose another game?",
                            "Do you want to change games now?",
@@ -1174,10 +1178,10 @@ class GameManager():
                 gesture = "explain_right"
                 self.command_manager.qt_gesture(gesture)
                 self.command_manager.qt_say(message)
-                new_game = self.Levels.yes_or_no_screen("Choose another game?",
+                self.run, new_game = self.Levels.yes_or_no_screen("Choose another game?",
                                                         self.run, self.background_colour,
                                                         choice_1 = "Choose a new game",
-                                                        choice_2 = "Play the same game")
+                                                        choice_2 = "Play the same game", silent=True)
                 if new_game:
                     # QT should comment on the game it chose
                     sayings = ["Great, which game?",
@@ -1189,13 +1193,12 @@ class GameManager():
                     self.command_manager.qt_say(message)
                     run, game_name = self.home_screen(previous_game = game_name)
             else:
-                # QT should introduce the next level slightly
+                # QT should segway(?) to next level
                 next_level_text = self.behaviours_manager.get_next_level(previous_saying=next_level_text)
                 self.command_manager.qt_say_blocking(next_level_text)
 
 
-            # update play time
-            play_time = rospy.get_time() - time_start
+
 
         return run
 
