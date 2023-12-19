@@ -351,15 +351,14 @@ class Simon_Says_Clap_Game():
             beat += 60 / bpm
         return beat_timings
 
-    def hit_drum(self, beat_timing, elapsed_time, prev_arm,):
+    def hit_drum(self, beat_timings, start_time):
         """
-        Use a list of beat times, to hit drum at the right time
-        prev_arm will be either "left" or "right"
-        It will then pop the list of beat_timings, so that we dont keep hitting the same beat.
+        To be called as a multithreaded method.
+        Hits the drum with either right arm then left arm.
+        beat_timings : list of time in seconds of when each beat is. e.g: [0.1, 0.2, 0.3 ...]
+        start_time : time in seconds of the start time of the music. e.g: 14424124 (system time)
         """
-        # get out just the beat timing we want, and also the hard_coded time it takes to hit the drum
-        this_beat = beat_timing[0]
-        time_to_hit = 0.3
+        # Set arm pos goals
         if self.diy_box:
             hitting_drum = [-50.5, -84.69999694824219, -39.400001525878906]
             raised_arm = [-16.299999237060547, -85.0, -25.700000762939453]
@@ -367,27 +366,29 @@ class Simon_Says_Clap_Game():
             raised_arm = [2.9000000953674316, -84.69999694824219, -49.20000076293945]
             hitting_drum = [-27.0, -85.4000015258789, -56.29999923706055]
 
-        #Check if we should hit the drum this loop
-        if elapsed_time + time_to_hit > this_beat:
-            # Function that hits the drum with either the left or right hand
-            if prev_arm == "left":
-                # Move left arm back up and move right arm down
-                self.command_manager.move_right_arm(hitting_drum)
-                self.command_manager.move_left_arm(raised_arm)
-                beat_timing.pop(0)
-                prev_arm = "right"
-                print("Right arm")
-                return beat_timing, prev_arm
-            else:
-                # Move right arm back up and move left arm down
-                self.command_manager.move_right_arm(raised_arm)
-                self.command_manager.move_left_arm(hitting_drum)
-                beat_timing.pop(0)
-                prev_arm = "left"
-                print("Left arm")
-                return beat_timing, prev_arm
-        else:
-            return beat_timing, prev_arm
+        time_to_hit = 0.3  # est travel time taken for arms to hit drum
+        i = 0
+        elapsed_time_secs = 0
+        while i < len(beat_timings) and not rospy.is_shutdown():
+            # Update beat hit time
+            beat_time = beat_timings[i]
+
+            # calculate elapsed time, with regards to time spent frozen
+            elapsed_time_secs = rospy.get_time() - start_time - self.frozen_time
+
+            # Hit the drum if it's time, and we're not in freeze time
+            if elapsed_time_secs + time_to_hit >= beat_time and not self.freeze:
+                # On even numbers use right arm else, left
+                if i % 2 == 0:
+                    self.command_manager.move_right_arm(hitting_drum)
+                    self.command_manager.move_left_arm(raised_arm)
+                else:
+                    self.command_manager.move_right_arm(raised_arm)
+                    self.command_manager.move_left_arm(hitting_drum)
+                # Move onto next beat
+                i += 1
+
+        print("QT has finished playing")
 
     def analyse_performance(self):
         """Takes the recording / data from the recording of the clapping """
@@ -403,60 +404,100 @@ class Simon_Says_Clap_Game():
 
             # Get the level's data
             self.track_name = file_name
-
-            # Start parallel thread to record claps simultaneously
-            clap_recorder = threading.Thread(target=self.record_claps, args=(), daemon=True)
-            clap_recorder.start()  # Start multi_threaded function
+            self.sound_manager.load_track(self.track_name)
+            track_total_time = self.get_track_info()[2]
 
             # Define some parameters and vars
-            self.sound_manager.load_track(self.track_name)
             song_done = False
             fade_time = 5
             time_of_darkness = rospy.get_time() + fade_time
             time_left = time_of_darkness - rospy.get_time()
-            prev_arm = "left"
-            track_total_time = self.get_track_info()[2]
+            self.freeze = False
+            self.frozen_time = 0
+
+            # Determine how long and how often to freeze for, depending on difficulty
+            if self.difficulty == "easy":
+                freeze_range = (15, 25) # How long they can clap freely, with no pause
+                freeze_length = (5, 10) # How long each freeze should last
+            elif self.difficulty == "medium":
+                freeze_range = (4, 12)
+                freeze_length = (5, 7)
+            else:
+                freeze_range = (4, 15)
+                freeze_length = (2, 8)
+
+            # Start parallel thread to record claps simultaneously
+            self.Finished = False
+            clap_recorder = threading.Thread(target=self.record_claps, args=(), daemon=True)
+            clap_recorder.start()  # Start multi_threaded function
+
+            # Start another parallel thread for QT to clap at right time
             beat_timings = self.get_beat_timing(first_beat, bpm, track_total_time)
-            new_random = True
-            freeze = False
+            start_time = rospy.get_time()  # start song timer
+            qt_clap = threading.Thread(target=self.hit_drum, args=(beat_timings, start_time), daemon=True)
+            qt_clap.start()  # Start multi_threaded function
+
+            # Determine when the next freeze will happen
+            freeze_time = self.timer_manager.CreateTimer("freeze",
+                                 random.randint(freeze_range[0], freeze_range[1]), verbose=False)
+            freeze_duration = "freeze_duration" # Key for freeze duration timer
+
+            # Start song
             self.sound_manager.unpause()
+
+            # Update graphics, and decide freeze times, until song is finished
             while not song_done and len(beat_timings) > 0 and self.run and not rospy.is_shutdown():
-                # Get elapsed time
-                elapsed_time = self.get_track_info()[1]
-
-                # Stop beat every 8 - 15 seconds
-                if new_random:
-                    freeze_time = self.timer_manager.CreateTimer("freeze", random.randint(8, 15))
-                    new_random = False
-                if len(self.timer_manager.timers) > 0:
-                    if self.timer_manager.CheckTimer(freeze_time):
-                        self.command_manager.send_qt_command(speech="Stop!")
-                        # freeze for 2 - 4 seconds
-                        time_unfreeze = self.timer_manager.CreateTimer("unfreeze",random.randint(2, 4))
-                        freeze = True
-                        self.sound_manager.pause()
-
 
                 # Render screen, will fade to black and stay black
                 message = "Please Look At QT Robot"
                 if time_left > 0:
                     time_left = time_of_darkness - rospy.get_time()
+                    fade_scalar = (time_left / fade_time)
                 else:
-                    time_left = 0
-                fade_scalar = (time_left / fade_time)
-                self.run = self.level_loader.fade_to_black_screen(self.run, message, self.background_colour, fade_scalar )
-                if not freeze:
-                    # Hit the drum to the beat.
-                    beat_timings, prev_arm = self.hit_drum(beat_timings, elapsed_time, prev_arm)
+                    fade_scalar = 0
+                self.run = self.level_loader.fade_to_black_screen(self.run, message, self.background_colour,
+                                                                  fade_scalar)
 
-                    # Check if song done
-                    song_done = self.get_song_info(song_comp_only=True)
-                else:
-                    if self.timer_manager.CheckTimer(time_unfreeze):
-                        freeze = False
-                        new_random = True
-                        self.command_manager.send_qt_command(speech="Go!", emote="grin")
-                        self.sound_manager.unpause()
+                # Update elapsed time
+                self.elapsed_time_secs = rospy.get_time() - start_time - self.frozen_time
+
+                # Handle freeze and unfreeze
+                if len(self.timer_manager.timers) > 0:
+                    # Freeze if it's time
+                    if freeze_time in self.timer_manager.timers.keys():
+                        if self.timer_manager.CheckTimer(freeze_time):
+                            self.sound_manager.pause()
+                            self.freeze = True # This will stop our thread from clapping
+                            self.command_manager.send_qt_command(speech="Stop!")
+
+                            # Decide how long to freeze for
+                            seconds_to_freeze = random.randint(freeze_length[0], freeze_length[1])
+                            freeze_duration = self.timer_manager.CreateTimer("freeze_duration",
+                                                    seconds_to_freeze, verbose=False)
+                            self.frozen_time += seconds_to_freeze  # track how long we spent frozen
+                            #print("ITS TIME TO FREEZE, FREEZING FOR {}s".format(seconds_to_freeze))
+
+                    # Unfreeze if it's time
+                    if freeze_duration in self.timer_manager.timers.keys():
+                        if self.timer_manager.CheckTimer(freeze_duration):
+                            #print("ITS TIME TO UNFREEZE")
+                            self.sound_manager.unpause()
+                            self.freeze = False  # This will tell our thread to continue
+                            self.command_manager.send_qt_command(speech="Go!")
+
+                            # Only freeze if there's more than 4 seconds left of the song
+                            remaining_track_time = track_total_time - self.elapsed_time_secs
+                            if remaining_track_time > 4:
+                                # Determine when the next freeze will happen
+                                freeze_time = self.timer_manager.CreateTimer("freeze",
+                                                    random.randint(freeze_range[0], freeze_range[1]), verbose=False)
+
+                # Check if song done
+                if (self.elapsed_time_secs / self.total_track_secs) > 0.99:
+                    song_done = True
+
+            # Tell clap recorder to finish
+            self.Finished = True
 
             # Stop recording clapping and log the user's score
             temporal_accuracy, numerical_accuracy = self.analyse_performance()
@@ -518,11 +559,11 @@ if __name__ == '__main__':
     # Initialise game
     rospy.init_node('simon_says_clap', anonymous=False)
     rospy.loginfo("Node launched successfully")
-    game_object = Simon_Says_Clap_Game("jwaad")
+    game_object = Simon_Says_Clap_Game(debug=True)
 
     # Run the game
     try:
-        game_object.Main("happy_3.wav", 0.1, 60, True)
+        game_object.play_level("happy_3.wav", 0.1, 60)
     except(KeyboardInterrupt or rospy.exceptions.ROSInterruptException):
         game_object.pygame.quit
         SoundManager("").stop_track()
