@@ -414,6 +414,8 @@ class Clap_To_Beat_Game():
 
     def analyse_performance(self, bpm, claps, beat_timings):
         """Takes the recording / data from the recording of the clapping """
+        if claps == [] or claps is None:
+            return 0, 0, 0
 
         # Calculate temporal accuracy, between player BPM and Song BPM
         time_between_claps = []
@@ -506,10 +508,12 @@ class Clap_To_Beat_Game():
 
     #################################################################Main####################################################################
 
-    def Main(self, file_name, first_beat, bpm, ask_tut = True):  # input what level and difficulty to play, the program will handle the rest
+    def Main(self, file_name, first_beat, bpm, ask_tut = True, difficulty = "easy"):  # input what level and difficulty to play, the program will handle the rest
         """Main Func"""
         # Introduce game
         #self.run = self.level_loader.QTSpeakingScreen("Lets play Clap To The Beat!", self.run, self.background_colour)
+
+        self.difficulty = difficulty
 
         if ask_tut:
             # Ask if they want to play tutorial
@@ -551,7 +555,7 @@ if __name__ == '__main__':
 
     # Run the game
     try:
-        game_object.Main("happy_3.wav", 0.1, 60, True)
+        print(game_object.Main("happy_3.wav", 0.1, 60, True, difficulty = "hard"))
     except(KeyboardInterrupt or rospy.exceptions.ROSInterruptException):
         game_object.pygame.quit
         SoundManager("").stop_track()
