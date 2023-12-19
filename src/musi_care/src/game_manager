@@ -17,6 +17,8 @@ from musicare_lib import Behaviours
 from musicare_lib import General
 from musicare_lib import QTManager
 from musicare_lib import VolumeSlider
+from musicare_lib import SoundManager
+from musicare_lib import HorizontalSlider
 from guess_mood import Guess_The_Mood_Game as GTM
 from fix_song import Fix_The_Song_Game as FTS
 from clap_beat import Clap_To_Beat_Game as CTB
@@ -33,9 +35,9 @@ class GameManager():
         self.debug = True
         self.run = True
         self.path_to_music = "game_assets/music/"
-        this_file_path = os.path.dirname(__file__)
-        self.path_to_userdata = os.path.join(this_file_path, 'game_assets/data/user_data/')
-        self.session_time = 25 * 60 # Time in seconds that sessions should last for. (Minimum time)
+        self.this_file_path = os.path.dirname(__file__)
+        self.path_to_userdata = os.path.join(self.this_file_path, 'game_assets/data/user_data/')
+        self.session_time = 120 #23 * 60 # Time in seconds that sessions should last for. (Minimum time) # TODO CHANGE BACK
         self.session_name = "session_" # this should be appended with a number e.g: session_3
         self.session_data = {}
         self.games = ["GTM", "FTS", "CTB", "SSC"]
@@ -63,6 +65,7 @@ class GameManager():
 
         # Init libraries / tool boxes
         self.InitPygame()
+        self.sound_manager = SoundManager("/" + self.path_to_music)  # load soundplayer with sound file path
         self.animation_manager = AnimationManager(self.pygame)
         self.behaviours_manager = Behaviours(self.pygame, self.path_to_music)
         self.general_functions = General()
@@ -79,6 +82,9 @@ class GameManager():
             self.inputUp = self.pygame.FINGERUP
             self.inputDown = self.pygame.FINGERDOWN
             self.inputMotion = self.pygame.FINGERMOTION
+
+        # Load song database to memory
+        self.song_data = self.general_functions.Load_Song_Data()
 
         # Hide cursor
         if not self.debug:
@@ -169,7 +175,7 @@ class GameManager():
 
     # Start a node and store the reference to it
     def StartNode(self, nodePackage, nodeName):
-        node = roslaunch.core.Node(nodePackage, nodeName)
+        node = roslaunch.core.Node(nodePackage, nodeName, output="screen")
 
         launch = roslaunch.scriptapi.ROSLaunch()
 
@@ -718,8 +724,6 @@ class GameManager():
             self.SaveExistingUserData()
             self.mood_comment_pre(mood_score) # QT should comment based on their mood e.g: "Oh, hopefully these games cheer you up"
 
-            # introduce the start of the games
-            run = self.Levels.QTSpeakingScreen(self.behaviours_manager.get_start_games(), run, self.background_colour)
         return run
 
     def QTPostamble(self, user = None, run = True):
@@ -806,6 +810,212 @@ class GameManager():
                                          gesture="arms_up")
             return
 
+    def get_songs_by_categories(self):
+        """ returns dict of songs sorted by artist"""
+        # Loop through database and categorise each song
+        songs_by_category = {}
+        for song in self.song_data.values():
+
+            # only care about full length songs
+            # if song["length"] != "full": #TODO uncomment after database added
+            #    continue
+
+            # If we have this category already, just add to it. otherwise make it
+            if song["artist"] in songs_by_category.keys():
+                songs_by_category[song["artist"]].append(song)
+            else:
+                songs_by_category[song["artist"]] = [song]
+
+        """
+        #USEFUL READOUT
+        for category_name, category_val in songs_by_category.items():
+            print(category_name)
+            for song in category_val:
+                print("  " + song["display_name"])
+        """
+
+        return songs_by_category
+
+    def song_select_screen(self, run = True):
+        
+        # Get songs sorted by category
+        songs_by_category = self.get_songs_by_categories()
+
+        # populate buttons for first 8 categories
+        category_slots = [
+                          (200, 350),  (1500, 350),
+                          (200, 750),  (1500, 750),
+                          (200, 1150), (1500, 1150),
+                          (200, 1650), (1500, 1650)  ]
+
+        # Make a button for the first 8 categories
+        i = 0
+        buttons = []
+        # take a random 8. TODO add method to add additional pages
+        category_list = list(songs_by_category.keys())
+        random.shuffle(category_list)
+
+        for category in category_list:
+
+            if i >= 8:
+                break
+            category_button = self.create_button("blank_button.png", category_slots[i], text=category,
+                                        scale=1, return_info=category)
+            buttons.append(category_button)
+            i += 1
+
+        # Have QT introduce the song listening task.
+        sayings = ["Lets relax and listen to a song. Pick one now!",
+                   "Before we play, why dont we relax a bit? Pick a song to listen to!",
+                   "Pick a song, lets relax a bit first!",
+                   "Lets take a breather to get into the right mood! Pick a song"]
+        ind = random.randint(0, len(sayings) - 1)
+        message = sayings[ind]
+        gesture = "explain_right"
+        self.command_manager.qt_gesture(gesture)
+        self.command_manager.qt_say(message)
+
+        # Draw buttons and handle screen
+        category_chosen = None
+        while run and category_chosen == None and not rospy.is_shutdown():
+
+            # Handle events
+            for event in self.pygame.event.get():
+                mouse_pos = self.pygame.mouse.get_pos()
+
+                # Handle game button events
+                for button in buttons:
+                    pressed = button.get_event(event, mouse_pos)
+                    if pressed:
+                        category_chosen = button.get_info()
+
+                # Handle on click animation
+                if event.type == self.inputUp:  # On mouse release play animation to show where cursor is
+                    self.animation_manager.StartTouchAnimation(mouse_pos)  # Play animation
+
+                # Check quit
+                if event.type == pygame.QUIT:
+                    run = False
+                    print("Quitting...")
+
+            # Render Graphics
+            self.renderer.DrawBackground(self.background_colour)
+            self.renderer.DrawTextCentered("Choose an artist or category", y = 100, font_size=120)
+            for button in buttons:
+                button.render(self.window)
+            self.animation_manager.DrawTouchAnimation(self.window)  # Also draw touches
+            self.pygame.display.update()  # Update all drawn objects
+
+        # Shuffle songs and take first
+        random.shuffle(songs_by_category[category_chosen])
+        song_selected = songs_by_category[category_chosen][0]
+
+        # Have qt talk about the selected song
+        sayings = ["Okay great! Then I will choose {}".format(song_selected["display_name"]),
+                   "Alright, then lets listen!".format(song_selected["display_name"]),
+                   "Okay! I picked {} for us!".format(song_selected["display_name"]),
+                   "I picked {}. I love this song!".format(song_selected["display_name"])]
+        ind = random.randint(0, len(sayings) - 1)
+        message = sayings[ind]
+        gesture = "explain_right"
+        self.command_manager.qt_gesture(gesture)
+        self.command_manager.qt_say_blocking(message)
+
+        #print(song_selected)
+        return self.run, song_selected
+
+    def get_track_info(self, formatted_output=False):
+        """Subscribe to sound_player publisher and get elapsed track time"""
+
+        def format_elapsed_display(time):
+            "bit of code that converts secs to mins and secs"
+            if time < 60:
+                secs = int(time)
+                mins = str(0)
+            else:
+                secs = int(time % 60)
+                mins = str(int((time - secs) / 60))
+            if secs < 10:
+                secs = "0" + str(secs)
+            return str(mins), str(secs)
+
+        song_data = self.sound_manager.request_song_data()
+
+        track_title = song_data.track_title  # track title
+        elapsed_time_secs = song_data.track_elapsed_time  # current time in seconds
+        total_track_secs = song_data.track_total_time  # track time in seconds
+
+        # Either return the above, or format the secs to be displayed
+        if formatted_output:
+            total_mins, total_secs = format_elapsed_display(total_track_secs)
+            elapsed_mins, elapsed_secs = format_elapsed_display(elapsed_time_secs)
+
+            elapsed_time = elapsed_mins + ":" + elapsed_secs
+            total_time = total_mins + ":" + total_secs
+
+            return elapsed_time, total_time
+        else:
+            return track_title, elapsed_time_secs, total_track_secs
+
+
+    def listen_to_song_screen(self, song, run = True):
+
+        # Create slider
+        slider_x = 250
+        slider_y = 850
+        scale = 2
+        path_to_graphics = self.this_file_path + "/game_assets/graphics/"
+        song_duration_slider = HorizontalSlider(path_to_graphics + "track_duration_slider.png",
+                                                path_to_graphics +"track_cursor.png",
+                                                (slider_x, slider_y), scale=scale)
+
+        # Load track
+        self.sound_manager.load_track(song["file_name"])
+        _, _, total_track_secs = self.get_track_info()
+
+        # Play song
+        music_playing = True
+        self.sound_manager.unpause()
+        start_time = rospy.get_time()
+        while music_playing and not rospy.is_shutdown() and self.run:
+
+            # Format song time elapsed to display on screen
+            track_time_display, total_time_display = self.get_track_info(formatted_output=True)
+
+            # Check if the X was clicked
+            for event in self.pygame.event.get():
+                if event.type == self.pygame.QUIT:
+                    self.run = False  # Stops the program entirely
+                    break
+
+            # elapsed time in percentage completion, so slider can represent that on a bar
+            progress = (rospy.get_time() - start_time) / total_track_secs
+            if progress > 0.99:
+                music_playing = False
+            #print(progress, rospy.get_time() - start_time, total_track_secs)
+
+            # Draw background and objects
+            self.renderer.DrawBackground(self.background_colour)
+            self.renderer.DrawText(str(track_time_display), (165*scale, slider_y + 100*scale))  # draw current time
+            self.renderer.DrawText(str(total_time_display), (1240*scale, slider_y + 100*scale))  # draw total track time
+            self.renderer.DrawTextCentered("{} - {}".format(song["display_name"], song["artist"]), y=300, font_size=120)
+            song_duration_slider.render(self.window, progress)
+            self.pygame.display.update()  # Update all drawn objects
+
+        # Robot dance code.
+
+        return
+
+    def song_listening_task(self, run = True):
+        
+        # Have user select a song based on category
+        run, song = self.song_select_screen(run=run)
+
+        #Listen to the song they selected
+        run = self.listen_to_song_screen(song, run=run,)
+        
+        return run
+
     def home_screen(self, run = True, previous_game = None):
         """A initial screen for the games where users can select a level to start with."""
 
@@ -831,7 +1041,7 @@ class GameManager():
 
         game = None
         self.run = run
-        while self.run and game == None:
+        while self.run and game == None and not rospy.is_shutdown():
 
             # Handle events
             for event in self.pygame.event.get():
@@ -919,7 +1129,7 @@ class GameManager():
         game_num = 0
         next_level_text = ""
         # Keep selecting games to be played until full time has passed
-        while play_time < (self.session_time) and run:
+        while play_time < (self.session_time) and run and not rospy.is_shutdown():
             # Keep track of what how many games we've played.
             game_num += 1
 
@@ -993,7 +1203,7 @@ class GameManager():
         """
         Gets random song from database depending on designated song name and difficulty inputted.
         Checks user black lists and the previous song, and keeps randomising until a applicable song is selected.
-        If there is not applicable one, a random one is returned.
+        If there is no applicable one, a random one is returned.
 
         game_name = string, GTM, FTS, CTB, SSC
         difficulty = string, easy, medium, hard
@@ -1192,7 +1402,13 @@ class GameManager():
         if self.debug:
             print("Finished preamble screen")
 
-        # uses user profile to select which games to play
+        # Start sessions with a robot listening task
+        self.run = self.song_listening_task()
+
+        # introduce the start of the games
+        self.run = self.Levels.QTSpeakingScreen(self.behaviours_manager.get_start_games(), self.run, self.background_colour)
+
+        # Start playing games
         self.run = self.play_games(run = self.run)
 
         # QT outro
@@ -1208,6 +1424,7 @@ class GameManager():
 if __name__ == '__main__':
     game_manager = GameManager()
     game_manager.Main()
+    #game_manager.song_listening_task()
 
 
 

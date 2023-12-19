@@ -41,7 +41,7 @@ class General():
         image_grey = pygame.transform.grayscale(image)  # .convert_alpha()
         return image_grey
 
-    def Load_Song_Data(self, game, verbose = False):
+    def Load_Song_Data(self, game = None, verbose = False):
         """
         game = string of the game name options: gtm, fts, ctb, ssc
         """
@@ -55,9 +55,14 @@ class General():
                 print("attempting to open {0}".format(save_path))
             song_data = pickle.load(f)
 
+        if game == None:
+            return song_data
+
         easy = {}
         medium = {}
         hard = {}
+
+        #print(song_data)
 
         for song_name, song_data in song_data.items():
             if song_data[game] == "easy":
@@ -1583,7 +1588,8 @@ class Renderer():
 class SoundManager():
     """Class to manage communication with sound_player service"""
 
-    def __init__(self, music_filepath):
+    def __init__(self, music_filepath, debug = False):
+        self.debug = debug
         self.music_filepath = music_filepath
         rospy.wait_for_service('/sound_player_service')
         self.sound_player = rospy.ServiceProxy('/sound_player_service', sound_player_srv, persistent=True)
@@ -1591,7 +1597,6 @@ class SoundManager():
     def load_track(self, track_title, track_time=0.0):
         """gives the sound player the song data, has it load it up to return information about the song, this is essentially "start_track" but betteer """
         track_path = os.path.join(self.music_filepath, track_title)
-        # print(track_path)
         # Start track
         operation = "load_track"
         song_data = self.call_sound_player(operation, track_path, track_time)
@@ -1660,10 +1665,10 @@ class SoundManager():
 
     def request_song_data(self):
         """ask ros topic for data TODO method needs reworking"""
-        # time = rospy.get_time()
-        data = self.call_sound_player("request_data")
-        # data = rospy.wait_for_message("/song_data_publisher", SongData) #through the node
-        # print("time taken waiting for node ", rospy.get_time() - time)
+
+        operation = "request_data"
+        data = self.call_sound_player(operation)
+        #rospy.sleep(0.2)  # requires this to function consistently
         return data
 
     def return_wav_lenth(self, song_path):
@@ -2813,6 +2818,7 @@ class HorizontalSlider():
                 self.bar_overwrite = 0.0  # Don't let cursor move past slider bar
 
         return self.slider_being_held
+
 
 class VolumeSlider():
     """ Class that generates a slider object using pygame."""
