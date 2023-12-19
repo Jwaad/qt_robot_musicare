@@ -1399,11 +1399,14 @@ class TextObject():
 
     def set_colour(self, font_col):
         """Set new colour and re render obj"""
-        if self.wrap_text:
-            for obj_data in self.text_obj:
-                obj_data[0] = self.font.render(self.text, False, font_col)
-        else:
-            self.text_obj = self.font.render(self.text, False, font_col)
+        try:
+            if self.wrap_text:
+                for obj_data in self.text_obj:
+                    obj_data[0] = self.font.render(self.text, False, font_col)
+            else:
+                self.text_obj = self.font.render(self.text, False, font_col)
+        except:
+            print("Failed to set text colour")
 
     def set_pos(self, pos):
         self.textRect[0] = pos[0]
@@ -1887,7 +1890,7 @@ class QTManager():
             print("QT emote: {}".format(req_emote))
         self.send_qt_command(emote=req_emote)
 
-    def qt_actuate(self, motors_pos, command_blocking = False):
+    def qt_actuate(self, motor_command, command_blocking = False):
         """
         Make QT move its arms and head
         requires this data structure
@@ -1896,10 +1899,10 @@ class QTManager():
         [ ["left_arm", "right_arm", "head"], [[0,0,0], [0,0,0], [0,0]] ]
         """
         if self.debug:
-            print("Moving QT's {} joints to {}".format(motors_pos[0], motors_pos[1]))
+            print("QT ACTUATED: {}".format(motor_command))
         rospy.wait_for_service('/qt_command_service')
         command_controller = rospy.ServiceProxy('/qt_command_service', qt_command)
-        command_complete = command_controller("actuation", motors_pos, command_blocking)
+        command_complete = command_controller("actuation", motor_command, command_blocking)
         return command_complete
 
     def move_right_arm(self, joint_angles, command_blocking = False):
