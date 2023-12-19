@@ -624,6 +624,7 @@ class Guess_The_Mood_Game():
                             if music_playing:
                                 song_interrupt = True
                             track_stopped = True
+
                             # if clicked button is correct
                             if button_pressed_id == track_mood:
                                 # print("User has clicked the correct answer")
@@ -655,10 +656,6 @@ class Guess_The_Mood_Game():
                                 correct_answer = False
                                 answer_given = True
 
-                            if song_interrupt:  # if we had paused the music, resume it
-                                self.sound_manager.unpause()
-                                song_interrupt = False
-
                     # Check if the user clicks the X
                     if event.type == self.pygame.QUIT:
                         self.run = False  # Stops the program entirely
@@ -680,6 +677,10 @@ class Guess_The_Mood_Game():
                     # End level
                     self.level_complete = True
                     print("Ending level")
+                else:
+                    if song_interrupt:  # if we had paused the music, resume it
+                        self.sound_manager.unpause()
+                        song_interrupt = False
 
             # Ending sequence after while loop
             if self.quit:
@@ -744,8 +745,8 @@ if __name__ == '__main__':
 
     # Run the game
     try:
-        #game_object.Main("happy", "happy_3.wav")
-        game_object.guided_tut(True)
+        game_object.Main("happy", "happy_3.wav")
+        #game_object.guided_tut(True)
     except(KeyboardInterrupt or rospy.exceptions.ROSInterruptException):
         game_object.pygame.quit()
         game_object.sound_manager.stop_track()
