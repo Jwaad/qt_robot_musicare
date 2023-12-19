@@ -354,9 +354,10 @@ class Clap_To_Beat_Game():
 
     def hit_drum(self, beat_timings, start_time):
         """
-        Use a list of beat times, to hit drum at the right time
-        prev_arm will be either "left" or "right"
-        It will then pop the list of beat_timings, so that we dont keep hitting the same beat.
+        To be called as a multithreaded method.
+        Hits the drum with either right arm then left arm.
+        beat_timings : list of time in seconds of when each beat is. e.g: [0.1, 0.2, 0.3 ...]
+        start_time : time in seconds of the start time of the music. e.g: 14424124 (system time)
         """
         # Set arm pos goals
         if self.diy_box:
