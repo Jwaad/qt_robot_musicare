@@ -636,6 +636,7 @@ class Fix_The_Song_Game():
             self.track_total_time = 100
             self.progress = 0
             self.current_track_time, self.track_total_time, self.progress, self.song_ended = self.get_song_info()
+            _, _, self.full_song_duration = self.get_track_info(formatted_output=False)
 
             self.sound_manager.unpause()
             music_ended = False
@@ -684,8 +685,12 @@ class Fix_The_Song_Game():
                 # print(rospy.get_time() - time)
             return self.run
 
-    def compute_clear_type(self, time_taken, wrong_answers, hints_needed):
-        e_time = self.track_total_time * self.e_clear_multiplier  # Total track time * 1.5
+    def compute_clear_type(self, time_taken, wrong_answers, hints_needed, total_track_time = None):
+        if total_track_time == None:
+            track_total = int(self.total_track_secs)
+        else:
+            track_total = total_track_time
+        e_time = track_total * self.e_clear_multiplier  # Total track time * 1.5
         if time_taken < e_time and wrong_answers < 1 and hints_needed < 1:
             return "e_clear"
         elif wrong_answers >= 2 or hints_needed >= 2:
@@ -867,8 +872,8 @@ class Fix_The_Song_Game():
                                                  emote="talking")
             self.empty_temp_dir(randomised_segments)
 
-            clear_type = self.compute_clear_type(time_taken, wrong_answers, hints_needed)
-            e_clear_req = {"time_taken": self.track_total_time * self.e_clear_multiplier, "mistakes":0, "num_hints":0}
+            clear_type = self.compute_clear_type(time_taken, wrong_answers, hints_needed, total_track_time = self.full_song_duration )
+            e_clear_req = {"time_taken": self.full_song_duration * self.e_clear_multiplier, "mistakes":0, "num_hints":0}
             performance = {"time_taken": time_taken, "mistakes": wrong_answers, "num_hints": hints_needed}
             level_data = {"game_name": "FTS", "clear_type": clear_type, "performance": performance,
                           "e_clear_req": e_clear_req}
