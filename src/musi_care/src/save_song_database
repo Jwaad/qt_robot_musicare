@@ -37,7 +37,7 @@ def DefaultDatabase():
                     "display_name": "Don't fence me in",
                     "file_name": "dont_fence_me_in_long.wav",
                     "bpm": 40.0,
-                    "first_beat": 0.1,
+                    "first_beat": 0.18,
                     "mood": "sad",
                     "GTM": "medium",
                     "FTS": "easy",
@@ -66,7 +66,7 @@ def DefaultDatabase():
                     "artist": "Instrumental",
                     "display_name": "Happy instrumental 3",
                     "file_name": "happy_3.wav",
-                    "bpm": 60.0,
+                    "bpm": 106.0,
                     "first_beat": 0.1,
                     "mood": "happy",
                     "GTM": "easy",
@@ -81,8 +81,8 @@ def DefaultDatabase():
                     "artist": "Instrumental",
                     "display_name": "Happy instrumental 1",
                     "file_name": "happy_1.wav",
-                    "bpm": 100.0,
-                    "first_beat": 0.0,
+                    "bpm": 96.0,
+                    "first_beat": 0.2,
                     "mood": "happy",
                     "GTM": "easy",
                     "FTS": "hard",
@@ -96,7 +96,7 @@ def DefaultDatabase():
                     "artist": "Beatles",
                     "display_name": "Don't let me down",
                     "file_name": "beetles_dont_let_me_down_short.wav",
-                    "bpm": 76,
+                    "bpm": 78,
                     "first_beat": 0.0,
                     "mood": "sad",
                     "GTM": "medium",
@@ -111,8 +111,8 @@ def DefaultDatabase():
                     "artist": "Instrumental",
                     "display_name": "Sad instrumental 1",
                     "file_name": "sad_1.wav",
-                    "bpm": 100.0,
-                    "first_beat": 0.0,
+                    "bpm": 40.0,
+                    "first_beat": 1.9,
                     "mood": "sad",
                     "GTM": "easy",
                     "FTS": "medium",
@@ -141,8 +141,8 @@ def DefaultDatabase():
                     "artist": "Beatles",
                     "display_name": "Don't let me down",
                     "file_name": "beetles_dont_let_me_down_long.wav",
-                    "bpm": 76,
-                    "first_beat": 0.0,
+                    "bpm": 78,
+                    "first_beat": 1.0,
                     "mood": "sad",
                     "GTM": "n/a",
                     "FTS": "n/a",
@@ -157,8 +157,8 @@ def DefaultDatabase():
                     "artist": "Bob Marley",
                     "display_name": "Could you be loved",
                     "file_name": "bob_marl_could_you_be_loved_short.wav",
-                    "bpm": 76,
-                    "first_beat": 0.0,
+                    "bpm": 104,
+                    "first_beat": 1.15,
                     "mood": "sad",
                     "GTM": "hard",
                     "FTS": "easy",
@@ -173,8 +173,8 @@ def DefaultDatabase():
                     "artist": "Cliff Richard",
                     "display_name": "I Just Don't Have The Heart",
                     "file_name": "full_i_just_don_t_have_the_heart.wav",  # Exact file_name
-                    "bpm": 120.0,
-                    "first_beat": 3.0,
+                    "bpm": 60.0,
+                    "first_beat": 1.35,
                     "mood": "happy",  # happy / sad
                     "GTM": "n/a",
                     "FTS": "n/a",
@@ -187,8 +187,8 @@ def DefaultDatabase():
                     "artist": "Cliff Richard",
                     "display_name": "I Just Don't Have The Heart",
                     "file_name": "long_i_just_don_t_have_the_heart.wav",  # Exact file_name
-                    "bpm": 120.0,
-                    "first_beat": 3.0,
+                    "bpm": 60.0,
+                    "first_beat": 1.40,
                     "mood": "happy",  # happy / sad
                     "GTM": "n/a",
                     "FTS": "n/a",
@@ -201,8 +201,8 @@ def DefaultDatabase():
                     "artist": "Cliff Richard",
                     "display_name": "I Just Don't Have The Heart",
                     "file_name": "short_i_just_don_t_have_the_heart.wav",  # Exact file_name
-                    "bpm": 120.0,
-                    "first_beat": 3.0,
+                    "bpm": 60.0,
+                    "first_beat": 0.9,
                     "mood": "happy",  # happy / sad
                     "GTM": "easy",
                     "FTS": "easy",
@@ -217,7 +217,7 @@ def DefaultDatabase():
                     "artist": "Bob Dylan",
                     "display_name": "Going Going Gone",
                     "file_name": "full_going_going_gone.wav", # Exact file_name
-                    "bpm": 60.0,
+                    "bpm": 73.0,
                     "first_beat": 3.0,
                     "mood": "sad",  # happy / sad
                     "GTM": "n/a",     #easy medium hard
@@ -231,13 +231,13 @@ def DefaultDatabase():
                     "artist": "Bob Dylan",
                     "display_name": "Going Going Gone",
                     "file_name": "long_going_going_gone.wav",  # Exact file_name
-                    "bpm": 60.0,
-                    "first_beat": 3.0,
+                    "bpm": 73.0,
+                    "first_beat": 1.4,
                     "mood": "sad",  # happy / sad
                     "GTM": "n/a",  # easy medium hard
                     "FTS": "n/a",
                     "CTB": "easy",
-                    "SSC": "easy"
+                    "SSC": "medium"
                 },
             "going going gone short":
                 {
@@ -245,7 +245,7 @@ def DefaultDatabase():
                     "artist": "Bob Dylan",
                     "display_name": "Going Going Gone",
                     "file_name": "short_going_going_gone.wav",  # Exact file_name
-                    "bpm": 60.0,
+                    "bpm": 73.0,
                     "first_beat": 3.0,
                     "mood": "sad",  # happy / sad
                     "GTM": "hard",  # easy medium hard
@@ -261,8 +261,8 @@ def DefaultDatabase():
                     "artist": "Elton John",
                     "display_name": "Goodbye Yellow Brick Road",
                     "file_name": "full_goodbye_yellow_brick_road.wav",  # Exact file_name
-                    "bpm": 60.0,
-                    "first_beat": 3.0,
+                    "bpm": 62.0,
+                    "first_beat": 0.0,
                     "mood": "sad",  # happy / sad
                     "GTM": "n/a",  # easy medium hard
                     "FTS": "n/a",
@@ -275,8 +275,8 @@ def DefaultDatabase():
                     "artist": "Elton John",
                     "display_name": "Goodbye Yellow Brick Road",
                     "file_name": "long_goodbye_yellow_brick_road.wav",  # Exact file_name
-                    "bpm": 60.0,
-                    "first_beat": 3.0,
+                    "bpm": 62.0,
+                    "first_beat": 1.3,
                     "mood": "sad",  # happy / sad
                     "GTM": "n/a",  # easy medium hard
                     "FTS": "n/a",
@@ -289,7 +289,7 @@ def DefaultDatabase():
                     "artist": "Elton John",
                     "display_name": "Goodbye Yellow Brick Road",
                     "file_name": "short_goodbye_yellow_brick_road.wav",  # Exact file_name
-                    "bpm": 60.0,
+                    "bpm": 62.0,
                     "first_beat": 3.0,
                     "mood": "sad",  # happy / sad
                     "GTM": "n/a",  # easy medium hard
@@ -319,8 +319,8 @@ def DefaultDatabase():
                     "artist": "David Bowie",
                     "display_name": "Heroes",
                     "file_name": "long_heroes.wav",  # Exact file_name
-                    "bpm": 60.0,
-                    "first_beat": 3.0,
+                    "bpm": 57.0,
+                    "first_beat": 0.7,
                     "mood": "sad",  # happy / sad
                     "GTM": "n/a",  # easy medium hard
                     "FTS": "n/a",
@@ -336,8 +336,8 @@ def DefaultDatabase():
                     "bpm": 60.0,
                     "first_beat": 3.0,
                     "mood": "sad",  # happy / sad
-                    "GTM": "medium",  # easy medium hard
-                    "FTS": "medium",
+                    "GTM": "easy",  # easy medium hard
+                    "FTS": "hard",
                     "CTB": "n/a",
                     "SSC": "n/a"
                 },
@@ -364,13 +364,13 @@ def DefaultDatabase():
                     "artist": "Elvis Presley",
                     "display_name": "Hound Dog",
                     "file_name": "long_hound_dog.wav",  # Exact file_name
-                    "bpm": 60.0,
-                    "first_beat": 3.0,
+                    "bpm": 85.0,
+                    "first_beat": 1.95,
                     "mood": "sad",  # happy / sad
                     "GTM": "n/a",  # easy medium hard
                     "FTS": "n/a",
-                    "CTB": "medium",
-                    "SSC": "medium"
+                    "CTB": "hard",
+                    "SSC": "hard"
                 },
             "short_hound_dog":
                 {
@@ -409,13 +409,13 @@ def DefaultDatabase():
                     "artist": "The Beatles",
                     "display_name": "I Am The Walrus",
                     "file_name": "full_i_am_the_walrus.wav",  # Exact file_name
-                    "bpm": 60.0,
-                    "first_beat": 3.0,
+                    "bpm": 85.0,
+                    "first_beat": 1.2,
                     "mood": "sad",  # happy / sad
-                    "GTM": "hard",  # easy medium hard
-                    "FTS": "medium",
-                    "CTB": "n/a",
-                    "SSC": "n/a"
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "medium",
+                    "SSC": "hard"
                 },
             "short_i_am_the_walrus":
                 {
@@ -453,8 +453,8 @@ def DefaultDatabase():
                     "artist": "The Beatles",
                     "display_name": "Imagine",
                     "file_name": "long_imagine.wav",  # Exact file_name
-                    "bpm": 60.0,
-                    "first_beat": 3.0,
+                    "bpm": 38.0,
+                    "first_beat": 1.0,
                     "mood": "sad",  # happy / sad
                     "GTM": "n/a",  # easy medium hard
                     "FTS": "n/a",
@@ -497,13 +497,13 @@ def DefaultDatabase():
                     "artist": "Elton John",
                     "display_name": "I'm Still Standing",
                     "file_name": "long_im_still_standing.wav",  # Exact file_name
-                    "bpm": 60.0,
-                    "first_beat": 3.0,
+                    "bpm": 90.0,
+                    "first_beat": 0.65,
                     "mood": "happy",  # happy / sad
-                    "GTM": "medium",  # easy medium hard
-                    "FTS": "hard",
-                    "CTB": "n/a",
-                    "SSC": "n/a"
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "hard",
+                    "SSC": "hard"
                 },
             "short_im_still_standing":
                 {
@@ -514,10 +514,10 @@ def DefaultDatabase():
                     "bpm": 60.0,
                     "first_beat": 3.0,
                     "mood": "happy",  # happy / sad
-                    "GTM": "n/a",  # easy medium hard
-                    "FTS": "n/a",
-                    "CTB": "medium",
-                    "SSC": "medium"
+                    "GTM": "happy",  # easy medium hard
+                    "FTS": "medium",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
                 }
         }
 
@@ -606,11 +606,11 @@ def PrintLevelDistribution(data):
 if __name__ == '__main__':
 
     # Save hard coded database to file
-    #data = DefaultDatabase()
-    #SaveDatabase(data)
+    data = DefaultDatabase()
+    SaveDatabase(data)
 
     # Nice readout telling us the distribution of game levels
-    #PrintLevelDistribution(data)
+    PrintLevelDistribution(data)
 
     # Measure BPM of songs and save them to memory
     data = LoadData()
