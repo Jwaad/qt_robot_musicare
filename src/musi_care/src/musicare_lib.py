@@ -768,9 +768,10 @@ class StandardLevels():
     def get_drum(self, run = True, background_colour = (100,100,100)):
         """ 
         QT needs help putting his drum under him.
-        This method QT asks for assitsacnec and waits or you to but the drum under him
+        This method QT asks for assistance and waits or you to but the drum under him
         """
         # init vars
+        self.command_manager.set_arm_vel(100)  # Set robot arm speed to max for this game
         arm_up_right = [20, -59.599998474121094, -40.70000076293945]  # motor pos for right arm to be in air
         arm_up_left = [-20, -59.599998474121094, -40.70000076293945]  # motor pos for right arm to be in air
         arm_right_msg = Float64MultiArray()
@@ -794,6 +795,7 @@ class StandardLevels():
         while not drum_in_place:
             # Have QT lift it's arms
             self.command_manager.qt_actuate(arms_up)
+            time.sleep(0.3)
             # Ask user if drums are ready
             _, drum_in_place = self.yes_or_no_screen("Jwaad, are my drums ready?", run, background_colour=background_colour,
             choice_2 = "Raise your arms, QT", silent = True)
@@ -804,6 +806,7 @@ class StandardLevels():
         This method QT asks for assitsacnec and waits or you to but the drum under him
         """
         # init vars
+        self.command_manager.set_arm_vel(50)  # Set robot arm speed back to 50%
         arm_up_right = [20, -59.599998474121094, -40.70000076293945]  # motor pos for right arm to be in air
         arm_up_left = [-20, -59.599998474121094, -40.70000076293945]  # motor pos for right arm to be in air
         arm_right_msg = Float64MultiArray()
@@ -832,6 +835,7 @@ class StandardLevels():
         while not drum_in_place:
             # Have QT lift it's arms
             self.command_manager.qt_actuate(arms_up)
+            time.sleep(0.3)
             # Ask user if drums are ready
             _, drum_in_place = self.yes_or_no_screen("Jwaad, are my drums ready?", run,
                                                   background_colour=background_colour,
