@@ -8,6 +8,7 @@ import pickle
 import random
 import pygame
 import os
+import datetime
 from musicare_lib import Renderer
 from musicare_lib import Button
 from musicare_lib import AnimationManager
@@ -32,12 +33,12 @@ class GameManager():
     # On start: check if we are connected to robot and decide which nodes to run
     def __init__(self):
         # Init vars
-        self.debug = True
+        self.debug = False
         self.run = True
         self.path_to_music = "game_assets/music/"
         self.this_file_path = os.path.dirname(__file__)
         self.path_to_userdata = os.path.join(self.this_file_path, 'game_assets/data/user_data/')
-        self.session_time = 120 #23 * 60 # Time in seconds that sessions should last for. (Minimum time) # TODO CHANGE BACK
+        self.session_time = 25 * 60 # Time in seconds that sessions should last for. (Minimum time)
         self.session_name = "session_" # this should be appended with a number e.g: session_3
         self.session_data = {}
         self.games = ["GTM", "FTS", "CTB", "SSC"]
@@ -719,6 +720,10 @@ class GameManager():
                 run = self.Levels.QTSpeakingScreen(self.behaviours_manager.get_greetings(), self.run, self.background_colour, should_gesture=True,
                                              gesture="wave")
 
+            #Add date and time to save:
+            date_time = datetime.datetime.now()
+            self.user_data["game_data"][self.session_name]["date_time"] = date_time
+
             # Ask user how they are, save to data
             run, mood_score = self.Levels.how_are_you(run = run, background_colour= self.background_colour)
             self.user_data["game_data"][self.session_name]["mood_pre"] = mood_score
@@ -818,8 +823,8 @@ class GameManager():
         for song in self.song_data.values():
 
             # only care about full length songs
-            # if song["length"] != "full": #TODO uncomment after database added
-            #    continue
+            if song["length"] != "full": #TODO uncomment after database added
+               continue
 
             # If we have this category already, just add to it. otherwise make it
             if song["artist"] in songs_by_category.keys():
@@ -847,7 +852,7 @@ class GameManager():
                           (200, 350),  (1500, 350),
                           (200, 750),  (1500, 750),
                           (200, 1150), (1500, 1150),
-                          (200, 1650), (1500, 1650)  ]
+                          (200, 1550), (1500, 1550)  ]
 
         # Make a button for the first 8 categories
         i = 0
@@ -1197,9 +1202,6 @@ class GameManager():
                 next_level_text = self.behaviours_manager.get_next_level(previous_saying=next_level_text)
                 self.command_manager.qt_say_blocking(next_level_text)
 
-
-
-
         return run
 
     def get_random_song(self,game_name, difficulty, run = True, song_to_skip = None):
@@ -1327,8 +1329,6 @@ class GameManager():
                     # Play game
                     self.run, user_level_data = game.Main(file_name, first_beat, bpm, ask_tut = play_tut)
 
-
-
             # Append data with title and difficulty
             user_level_data["song_title"] = song_title
             user_level_data["difficulty"] = difficulty
@@ -1396,6 +1396,9 @@ class GameManager():
         if self.debug:
             print("Finished logging in")
 
+        # Harmless and convinient to update this here
+        self.data_printout(self.user_data, save_to_file=True)
+
         # Init the session
         if self.run:
             self.user_data["game_data"][self.session_name] = {}
@@ -1427,7 +1430,6 @@ class GameManager():
 if __name__ == '__main__':
     game_manager = GameManager()
     game_manager.Main()
-    #game_manager.song_listening_task()
 
 
 
