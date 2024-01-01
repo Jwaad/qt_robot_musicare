@@ -98,7 +98,7 @@ class Simon_Says_Clap_Game():
         self.debug = debug
         if not self.debug:
             self.pygame.mouse.set_visible(False)  # set to false when not testing
-        self.command_manager.set_arm_vel(100) # Set robot arm speed to max for this game
+        #self.command_manager.set_arm_vel(100) # Set robot arm speed to max for this game
         self.diy_box = False
         # self.music_vol = 1 # change volume of laptop
         # self.qt_voice_vol
