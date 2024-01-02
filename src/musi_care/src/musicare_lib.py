@@ -1926,8 +1926,8 @@ class QTManager():
         command_complete = self.command_controller("actuation", motor_command, command_blocking)
         return command_complete
 
-    def return_arms_home(self):
-        """ Slows robot motors back down, and returns the arms, safely to home pos"""
+    def home_arms(self):
+        """ Slows robot motors back down, and returns the arms, safely to home pos. Blocking"""
         
         # slow robot down
         self.init_robot(20)
