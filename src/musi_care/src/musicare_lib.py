@@ -1926,6 +1926,27 @@ class QTManager():
         command_complete = self.command_controller("actuation", motor_command, command_blocking)
         return command_complete
 
+    def return_arms_home(self):
+        """ Slows robot motors back down, and returns the arms, safely to home pos"""
+        
+        # slow robot down
+        self.init_robot(20)
+
+        # Move arms upwards
+        self.move_right_arm([55.0, -53.400001525878906, -29.0])
+        self.move_left_arm([55.0, -53.400001525878906, -29.0])
+        time.sleep(0.3)
+
+        # Move outwards
+        self.move_right_arm([-3.9000000953674316, -15.899999618530273, 0.30000001192092896])
+        self.move_left_arm([-3.9000000953674316, -15.899999618530273, 0.30000001192092896])
+        time.sleep(0.3)
+        
+        # Move back down
+        self.move_right_arm([-83.69999694824219, -76.5999984741211, -17.200000762939453])
+        self.move_left_arm([-83.69999694824219, -76.5999984741211, -17.200000762939453])
+        time.sleep(0.3)
+
     def move_right_arm(self, joint_angles, command_blocking = False):
         """ Move just right arm """
         if self.debug:
@@ -1942,8 +1963,8 @@ class QTManager():
             print("Moving QT's left arm joint to {}".format(joint_angles))
         #rospy.wait_for_service('/qt_command_service')
         #command_controller = rospy.ServiceProxy('/qt_command_service', qt_command)
-        joint_angles[0] = joint_angles[0] * -1
-        motor_pos = str([["left_arm"], [joint_angles]])
+        left_joint_angles = [joint_angles[0] * -1, joint_angles[1], joint_angles[2]]
+        motor_pos = str([["left_arm"], [left_joint_angles]])
         command_complete = self.command_controller("actuation", motor_pos, command_blocking)
         return command_complete
 
