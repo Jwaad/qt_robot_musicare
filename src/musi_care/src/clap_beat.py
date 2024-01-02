@@ -405,9 +405,6 @@ class Clap_To_Beat_Game():
                     self.command_manager.move_left_arm(hitting_drum)
                 # Move onto next beat
                 i += 1
-                print("hit {} ------------------".format(i))
-
-        print("QT has finished playing")
 
 
     def analyse_performance(self, bpm, claps, beat_timings):
