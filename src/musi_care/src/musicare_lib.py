@@ -1764,6 +1764,7 @@ class QTManager():
         self.left_arm_pos_pub = rospy.Publisher('/qt_robot/left_arm_position/command', Float64MultiArray,
                                                 queue_size=10)
         # Create a persistent connection to command controller so we dont need to wait for it to be free
+        rospy.wait_for_service('/qt_command_service')
         self.command_controller = rospy.ServiceProxy('/qt_command_service', qt_command, persistent=True)
         self.level_loader = levels
         self.talking_anim_time = 4 # How long the talking animation plays for (seconds)
