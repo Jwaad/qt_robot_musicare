@@ -380,16 +380,14 @@ class Clap_To_Beat_Game():
         start_time : time in seconds of the start time of the music. e.g: 14424124 (system time)
         """
         # Set arm pos goals
-        if self.diy_box:
-            hitting_drum = [-50.5, -84.69999694824219, -39.400001525878906]
-            raised_arm = [-16.299999237060547, -85.0, -25.700000762939453]
-        else:
-            raised_arm = [2.9000000953674316, -84.69999694824219, -49.20000076293945]
-            hitting_drum = [-27.0, -85.4000015258789, -56.29999923706055]
+        raised_arm = [2.9000000953674316, -84.69999694824219, -49.20000076293945]
+        hitting_drum = [-27.0, -85.4000015258789, -56.29999923706055]
 
         time_to_hit = 0.3 # est travel time taken for arms to hit drum
         i = 0
-        while i < len(beat_timings) and not rospy.is_shutdown():
+        self.command_manager.init_robot(100)
+
+        while i < (len(beat_timings) - 1) and not rospy.is_shutdown():
             # Update beat hit time
             beat_time = beat_timings[i]
 
@@ -407,6 +405,7 @@ class Clap_To_Beat_Game():
                     self.command_manager.move_left_arm(hitting_drum)
                 # Move onto next beat
                 i += 1
+                print("hit {} ------------------".format(i))
 
         print("QT has finished playing")
 
