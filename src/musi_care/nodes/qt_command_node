@@ -50,6 +50,9 @@ right_arm_pos_pub = rospy.Publisher('/qt_robot/right_arm_position/command', Floa
 left_arm_pos_pub = rospy.Publisher('/qt_robot/left_arm_position/command', Float64MultiArray,
                                                 queue_size=10)
 
+# Give publishers time to init
+time.sleep(2)
+
 def execute_command(data):
     "uses the input to check within a list of things to see which sequence we should perform"
     #---GENERIC---
@@ -98,6 +101,7 @@ def execute_command(data):
         # Move the QT motors
         rospy.loginfo("Received an Actuation request.")
         action_content = ast.literal_eval(action_content)
+        #print(action_content)
         arm_msg = Float64MultiArray()
         if action_blocking:
             print("This feature is not currently supporting blocking") # TODO finish this
@@ -106,11 +110,13 @@ def execute_command(data):
             pos_idx = action_content[0].index("left_arm")
             arm_msg.data = action_content[1][pos_idx]
             left_arm_pos_pub.publish(arm_msg)
+            #print("left_arm:", arm_msg.data) # TEMP
         if "right_arm" in action_content[0]:
             #print("Right arm moving")
             pos_idx = action_content[0].index("right_arm")
             arm_msg.data = action_content[1][pos_idx]
             right_arm_pos_pub.publish(arm_msg)
+            #print("right_arm:", arm_msg.data)  # TEMP
         if "head" in action_content[0]:
             print("This feature is not currently supporting moving the head") # TODO finish this
             pos_idx = action_content[0].index("head")
@@ -150,8 +156,9 @@ def perform_command(message):
     "Callback response, it is really just to help the flow of the code, also handles tts."
     if message.action_type == "tts":  # If we get a TTS request then handle it upfront, it need not be searched for.
         if message.action_blocking:
+            # Use service, as it's blocking
             rospy.wait_for_service('/qt_robot/speech/say')
-            qt_speech = rospy.ServiceProxy('/qt_robot/speech/say', speech_say) #The Service Type / class: speech_say
+            qt_speech = rospy.ServiceProxy('/qt_robot/speech/say', speech_say) # The Service Type / class: speech_say
             qt_speech(message.action_content)
             rospy.loginfo("Finished requested TTS message")
             return True
