@@ -1270,6 +1270,7 @@ class GameManager():
                 # Get drums put away before we play
                 if prev_game == "SSC" or prev_game == "CTB":
                     self.Levels.put_away_drum(run=self.run, background_colour=self.background_colour)
+                    self.command_manager.home_arms()
 
                 # Init game
                 game = GTM(debug=self.debug, screen= self.window)
