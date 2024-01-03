@@ -1796,7 +1796,7 @@ class QTManager():
     def set_arm_vel(self, arm_vel ,command_blocking = False):
         "Set velocity of arm motors"
         # TODO change this to take in list of what motors to change speed of
-        #rospy.wait_for_service('/qt_command_service')
+        rospy.wait_for_service('/qt_command_service')
         #command_controller = rospy.ServiceProxy('/qt_command_service', qt_command)
         command_complete = self.command_controller("velocity", str(arm_vel), command_blocking)
         return command_complete
@@ -1810,17 +1810,17 @@ class QTManager():
         command_status = []
         if speech != None:  # do qt_speak
             # print("sending speech req")
-            #rospy.wait_for_service('/qt_command_service')
+            rospy.wait_for_service('/qt_command_service')
             #command_controller = rospy.ServiceProxy('/qt_command_service', qt_command)
             command_complete = self.command_controller("tts", speech, command_blocking)
             command_status.append(command_complete)
         if gesture != None:  # do qt_speak
-            #rospy.wait_for_service('/qt_command_service')
+            rospy.wait_for_service('/qt_command_service')
             #command_controller = rospy.ServiceProxy('/qt_command_service', qt_command)
             command_complete = self.command_controller("gesture", gesture, command_blocking)
             command_status.append(command_complete)
         if emote != None:  # do qt_speak
-            #rospy.wait_for_service('/qt_command_service')
+            rospy.wait_for_service('/qt_command_service')
             #command_controller = rospy.ServiceProxy('/qt_command_service', qt_command)
             command_complete = self.command_controller("emote", emote, command_blocking)
             command_status.append(command_complete)
@@ -1921,7 +1921,7 @@ class QTManager():
         """
         if self.debug:
             print("QT ACTUATED: {}".format(motor_command))
-        #rospy.wait_for_service('/qt_command_service')
+        rospy.wait_for_service('/qt_command_service')
         #command_controller = rospy.ServiceProxy('/qt_command_service', qt_command)
         command_complete = self.command_controller("actuation", motor_command, command_blocking)
         return command_complete
@@ -1951,7 +1951,7 @@ class QTManager():
         """ Move just right arm """
         if self.debug:
             print("Moving QT's right arm joint to {}".format(joint_angles))
-        #rospy.wait_for_service('/qt_command_service')
+        rospy.wait_for_service('/qt_command_service')
         #command_controller = rospy.ServiceProxy('/qt_command_service', qt_command)
         motor_pos = str( [["right_arm"], [joint_angles] ] )
         command_complete = self.command_controller("actuation", motor_pos, command_blocking)
@@ -1961,7 +1961,7 @@ class QTManager():
         """ Move left arm, but using coordinates for right arm, and flip them automatically"""
         if self.debug:
             print("Moving QT's left arm joint to {}".format(joint_angles))
-        #rospy.wait_for_service('/qt_command_service')
+        rospy.wait_for_service('/qt_command_service')
         #command_controller = rospy.ServiceProxy('/qt_command_service', qt_command)
         left_joint_angles = [joint_angles[0] * -1, joint_angles[1], joint_angles[2]]
         motor_pos = str([["left_arm"], [left_joint_angles]])
