@@ -33,6 +33,7 @@ class GameManager():
     # On start: check if we are connected to robot and decide which nodes to run
     def __init__(self):
         # Init vars
+        print("Starting")
         self.debug = False
         self.run = True
         self.path_to_music = "game_assets/music/"
@@ -48,21 +49,31 @@ class GameManager():
 
         # Init ros side
         rospy.init_node('GameManager', anonymous=False)
+        time.sleep(1)
         self.PingNode = "/qt_motor"
         self.musicarePkgName = "musi_care"
         self.jwaadTestPkgName = "jwaad_test"
         self.ActiveNodes =[] # Store reference to all nodes that we start
 
         # Check robot connected
-        self.command_manager = QTManager(debug=self.debug) # this should happen before startrobotnodes
+        print("Starting nodes")
         self.default_voice_vol = 82
-        robot_connected = self.CheckRobotRunning()
+        print("Checking robot running")
+        self.robot_connected = self.CheckRobotRunning()
         rospy.set_param('/activity_status', 1) # Tell ros this node is starting
-        if robot_connected:
+        if self.robot_connected:
+            print("Starting command manager")
             self.StartRobotNodes()
         else:
             self.StartSimulatedRobotNodes()
+        print("Initialising libs")
+        self.command_manager = QTManager(debug=self.debug)  # this should happen before startrobotnodes
+        print("starting sound manager")
         self.StartLaptopNodes()
+        # This needs to happen after start laptop nodes, which needs to happen after qt_command_service
+        if self.robot_connected:
+            print("changing default volume")
+            self.command_manager.set_voice_vol(self.default_voice_vol)
 
         # Init libraries / tool boxes
         self.InitPygame()
@@ -138,7 +149,6 @@ class GameManager():
         nodeName = 'qt_command_node'
         node = self.StartNode(self.musicarePkgName, nodeName)
         time.sleep(1)
-        self.command_manager.set_voice_vol(self.default_voice_vol)
         self.ActiveNodes.append(node)
 
     # Start the laptop side fake node that just takes in the commands and prints them
@@ -1387,41 +1397,56 @@ class GameManager():
     # Create GUI to control which level to play
     def Main(self):
 
+        # Move robot arms back down
+        if self.robot_connected:
+            print("Homing arms")
+            self.command_manager.home_arms()
+
         # Load all users into memory
+        print("Loading user database")
         self.run, self.user_database = self.LoadUserDatabase(run = self.run)
         if self.debug:
             print("Finished loading database")
 
         # use name and surname to get user data
+        print("Loading log in screen")
         self.run, self.user_data = self.LogInScreen(run = self.run)
         if self.debug:
             print("Finished logging in")
 
         # Harmless and convinient to update this here
+        print("saving user database")
         self.data_printout(self.user_data, save_to_file=True)
 
         # Init the session
         if self.run:
+            print("saving session data")
             self.user_data["game_data"][self.session_name] = {}
 
         # What QT should say to the returning or new user
+        print("PreAmble")
         self.run = self.QTPreamble(user = self.user_data, run = self.run)
         if self.debug:
             print("Finished preamble screen")
 
         # Start sessions with a robot listening task
+        print("Song listening task")
         self.run = self.song_listening_task()
 
         # introduce the start of the games
+        print("Introducing games")
         self.run = self.Levels.QTSpeakingScreen(self.behaviours_manager.get_start_games(), self.run, self.background_colour)
 
         # Start playing games
+        print("starting games")
         self.run = self.play_games(run = self.run)
 
         # QT outro
+        print("post amble")
         self.run = self.QTPostamble(user = self.user_data, run = self.run)
 
         # Close up shop
+        print("Exit")
         self.OnExit()
 
         # Save a copy of data, that's much easier to read for humes
