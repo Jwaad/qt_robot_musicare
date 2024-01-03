@@ -550,7 +550,7 @@ if __name__ == '__main__':
 
     # Run the game
     try:
-        print(game_object.Main("happy_3.wav", 0.1, 60, True, difficulty = "hard"))
+        print(game_object.Main("long_going_going_gone.wav", 1.4, 73, False, difficulty = "hard"))
     except(KeyboardInterrupt or rospy.exceptions.ROSInterruptException):
         game_object.pygame.quit
         SoundManager("").stop_track()
