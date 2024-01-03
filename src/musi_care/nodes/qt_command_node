@@ -51,7 +51,7 @@ left_arm_pos_pub = rospy.Publisher('/qt_robot/left_arm_position/command', Float6
                                                 queue_size=10)
 
 # Give publishers time to init
-time.sleep(2)
+#time.sleep(2)
 
 def execute_command(data):
     "uses the input to check within a list of things to see which sequence we should perform"
