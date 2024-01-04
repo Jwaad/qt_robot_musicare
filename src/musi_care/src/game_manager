@@ -9,6 +9,7 @@ import random
 import pygame
 import os
 import datetime
+import threading
 from musicare_lib import Renderer
 from musicare_lib import Button
 from musicare_lib import AnimationManager
@@ -834,7 +835,7 @@ class GameManager():
         for song in self.song_data.values():
 
             # only care about full length songs
-            if song["length"] != "full": #TODO uncomment after database added
+            if song["length"] != "full":
                continue
 
             # If we have this category already, just add to it. otherwise make it
@@ -868,12 +869,11 @@ class GameManager():
         # Make a button for the first 8 categories
         i = 0
         buttons = []
-        # take a random 8. TODO add method to add additional pages
+        # take a random 8.
         category_list = list(songs_by_category.keys())
         random.shuffle(category_list)
 
         for category in category_list:
-
             if i >= 8:
                 break
             category_button = self.create_button("blank_button.png", category_slots[i], text=category,
@@ -885,7 +885,8 @@ class GameManager():
         sayings = ["Lets relax and listen to a song. Pick one now!",
                    "Before we play, why dont we relax a bit? Pick a song to listen to!",
                    "Pick a song, lets relax a bit first!",
-                   "Lets take a breather to get into the right mood! Pick a song"]
+                   "Lets take a breather to get into the right mood! Pick a song",
+                   "Lets listen to a song, what do you feel like listening to today?"]
         ind = random.randint(0, len(sayings) - 1)
         message = sayings[ind]
         gesture = "explain_right"
@@ -974,6 +975,43 @@ class GameManager():
         else:
             return track_title, elapsed_time_secs, total_track_secs
 
+    def robot_dance(self, song_bpm):
+        """ Multi-threaded function that just loops the robot dancing, until it's condition ends
+        Robot should dance at BPM of song we're listening to"""
+        print(song_bpm)
+        #If bpm is too high to dance to, use every 2nd beat instead
+        if song_bpm > 80:
+            song_bpm = song_bpm / 2
+
+        # Choose a dance to use at random
+        dance1 = [[0,0,0], [0,0,0], [0,0,0]]
+        dance2 = [[0,0,0], [0,0,0], [0,0,0]]
+        dances = [dance1, dance2]
+        chosen_dance = dances[random.randint(0, len(dances)-1)]
+
+        # vars
+        flight_time = 0.2 # est time for robot to move from traj to traj
+        time_between_beats = 1 / (song_bpm / 60)
+        i = 0
+
+        # perform dance
+        while self.run and self.dance and not rospy.is_shutdown():
+
+            # move robot to traj
+            target_pos = chosen_dance[i]
+            self.command_manager.move_right_arm(target_pos)
+            self.command_manager.move_left_arm(target_pos)
+            print("i just hit a move")
+            time.sleep(time_between_beats - flight_time)
+
+            # Start over if we reach the end of the dance
+            if i >= len(chosen_dance)-1:
+                i = 0
+            else:
+                i += 1
+
+        print("Finished dancey dance, returning arms and head to home")
+        self.command_manager.home_arms()
 
     def listen_to_song_screen(self, song, run = True):
 
@@ -990,10 +1028,18 @@ class GameManager():
         self.sound_manager.load_track(song["file_name"])
         _, _, total_track_secs = self.get_track_info()
 
+        self.run = run
+
+        # Start robot dance
+        self.dance = True
+        robot_dance = threading.Thread(target=self.robot_dance, args = ([song["bpm"]]), daemon=True)
+        robot_dance.start()  # Start multi_threaded function
+
         # Play song
         music_playing = True
         self.sound_manager.unpause()
         start_time = rospy.get_time()
+
         while music_playing and not rospy.is_shutdown() and self.run:
 
             # Format song time elapsed to display on screen
@@ -1019,9 +1065,9 @@ class GameManager():
             song_duration_slider.render(self.window, progress)
             self.pygame.display.update()  # Update all drawn objects
 
-        # Robot dance code.
+        self.dance = False
 
-        return
+        return self.run
 
     def song_listening_task(self, run = True):
         
