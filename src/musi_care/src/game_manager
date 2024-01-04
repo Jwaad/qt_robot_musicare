@@ -233,7 +233,7 @@ class GameManager():
         # Format data of new user
         data = {}
         data["name"] = name # first name
-        data["surname"] = surname # surnanme
+        data["surname"] = surname # surname
         data["dob"] = DoB # dob in format dd-mm-yyyy
         data["blacklist"] = [] # songs which receive negative survey
         data["song_preference"] = {}  #
@@ -447,6 +447,7 @@ class GameManager():
                         # Get the corresponding surname
                         ind = self.first_names.index(name_box.get_text())
                         correct_surname = self.surnames[ind]
+                        print(correct_surname)
                     else:
                         # If tick is already in our dict, remove it
                         if "name" in ticks:
