@@ -978,7 +978,10 @@ class GameManager():
     def robot_dance(self, song_bpm):
         """ Multi-threaded function that just loops the robot dancing, until it's condition ends
         Robot should dance at BPM of song we're listening to"""
-        print(song_bpm)
+
+        # TODO this is temp, until i add actual dances
+        return
+
         #If bpm is too high to dance to, use every 2nd beat instead
         if song_bpm > 80:
             song_bpm = song_bpm / 2
