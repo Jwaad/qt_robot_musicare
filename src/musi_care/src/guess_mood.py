@@ -66,10 +66,10 @@ class Guess_The_Mood_Game():
             os.environ['SDL_VIDEO_WINDOW_POS'] = '%d,%d' % (x, y)  # move screen to x and y pos
             res = pygame.display.Info()  # get our screen resolution
             self.window_x = 3000
+            self.window_self.window_y = 2000  # Height of window
             if reduce_screen:
                 self.window_x -= x # Width of window -150 to account for the linux toolbar
                 self.window_y -= y  # height of window - y, to account for top bar
-            self.window_y = 2000  # Height of window
             self.window_center = (int(self.window_x / 2), int(self.window_y / 2))
             self.window = pygame.display.set_mode((self.window_x, self.window_y))  # Create window and set size
         else:
