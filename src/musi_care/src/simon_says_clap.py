@@ -449,13 +449,14 @@ class Simon_Says_Clap_Game():
             # Determine how long and how often to freeze for, depending on difficulty
             if self.difficulty == "easy":
                 freeze_range = (15, 25) # How long they can clap freely, with no pause
-                freeze_length = (5, 10) # How long each freeze should last
+                freeze_length = (6, 8) # How long each freeze should last
             elif self.difficulty == "medium":
-                freeze_range = (4, 12)
+                freeze_range = (8, 12)
                 freeze_length = (5, 7)
             else:
-                freeze_range = (4, 15)
-                freeze_length = (2, 8)
+                # hard mode
+                freeze_range = (4, 9)
+                freeze_length = (2, 4)
 
             # Start parallel thread to record claps simultaneously
             self.Finished = False
@@ -478,7 +479,7 @@ class Simon_Says_Clap_Game():
             self.sound_manager.unpause()
 
             # Update graphics, and decide freeze times, until song is finished
-            while not song_done and len(beat_timings) > 0 and self.run and not rospy.is_shutdown():
+            while not song_done and self.run and not rospy.is_shutdown():
 
                 # Render screen, will fade to black and stay black
                 message = "Please Look At QT Robot"

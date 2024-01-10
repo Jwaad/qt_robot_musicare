@@ -458,7 +458,7 @@ class Clap_To_Beat_Game():
             self.sound_manager.unpause()
 
             # Render screen and wait til song done.
-            while not song_done and len(beat_timings) > 0 and self.run and not rospy.is_shutdown():
+            while not song_done and self.run and not rospy.is_shutdown():
 
                 # Render screen, will fade to black and stay black
                 message = "Please Look At QT Robot"
@@ -467,8 +467,10 @@ class Clap_To_Beat_Game():
                     fade_scalar = (time_left / fade_time)
                 else:
                     fade_scalar = 0
+
                 # the thread that records clapping updates the pygame events and holds them in a buffer.
                 # We use them and then clear the buffer
+                # This is so we can track space bar using pygame in our other thread too
                 # It's not a good system at all, but will do for now.
                 self.run = self.level_loader.fade_to_black_screen(self.run, message, self.background_colour,
                                                                   fade_scalar, passed_in_events= self.py_events )
