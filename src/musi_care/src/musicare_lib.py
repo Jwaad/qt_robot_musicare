@@ -1609,13 +1609,14 @@ class SoundManager():
         # Start track
         operation = "load_track"
         song_data = self.call_sound_player(operation, track_path, track_time)
-        rospy.sleep(0.15)  # requires this to function consistently
+        rospy.sleep(0.1)  # requires this to function consistently
         return song_data
 
     def call_sound_player(self, operation, data_1="", data_2=0.0):
         """makes it easier to call sound_player"""
-        # rospy.wait_for_service('/sound_player_service') #dont wait since our connection is persistent.
+        rospy.wait_for_service('/sound_player_service')
         song_data = self.sound_player(operation, data_1, data_2)
+        rospy.sleep(0.1) # This keeps code running long enough for above operation to finish
         return song_data
 
     def start_track(self, track_title, track_time=0.0):
@@ -1677,7 +1678,7 @@ class SoundManager():
 
         operation = "request_data"
         data = self.call_sound_player(operation)
-        #rospy.sleep(0.2)  # requires this to function consistently
+        rospy.sleep(0.1)  # requires this to function consistently
         return data
 
     def return_wav_lenth(self, song_path):
@@ -1952,7 +1953,6 @@ class QTManager():
         if self.debug:
             print("Moving QT's right arm joint to {}".format(joint_angles))
         rospy.wait_for_service('/qt_command_service')
-        #command_controller = rospy.ServiceProxy('/qt_command_service', qt_command)
         motor_pos = str( [["right_arm"], [joint_angles] ] )
         command_complete = self.command_controller("actuation", motor_pos, command_blocking)
         return command_complete
