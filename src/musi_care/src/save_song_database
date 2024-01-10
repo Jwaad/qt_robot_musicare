@@ -482,7 +482,7 @@ def DefaultDatabase():
                     "artist": "Elton John",
                     "display_name": "I'm Still Standing",
                     "file_name": "full_im_still_standing.wav",  # Exact file_name
-                    "bpm": 60.0,
+                    "bpm": 90.0,
                     "first_beat": 3.0,
                     "mood": "happy",  # happy / sad
                     "GTM": "n/a",  # easy medium hard
@@ -518,21 +518,327 @@ def DefaultDatabase():
                     "CTB": "n/a",
                     "SSC": "n/a"
                 },
+
+
+            "full_smooth_criminal":
+                {
+                    "length": "full",  # full, long, short
+                    "artist": "Michael Jackson",
+                    "display_name": "Smooth Criminal",
+                    "file_name": "full_smooth_criminal.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "happy",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },                      
+            "long_smooth_criminal":
+                {
+                    "length": "long",  # full, long, short
+                    "artist": "Michael Jackson",
+                    "display_name": "Smooth Criminal",
+                    "file_name": "long_smooth_criminal.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 0.2,
+                    "mood": "happy",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "medium",
+                    "SSC": "medium"
+                },                      
+            "short_smooth_criminal":
+                {
+                    "length": "short",  # full, long, short
+                    "artist": "Michael Jackson",
+                    "display_name": "Smooth Criminal",
+                    "file_name": "short_smooth_criminal.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "happy",  # happy / sad
+                    "GTM": "hard",  # easy medium hard
+                    "FTS": "hard",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },
+                
+                                    
+            "full_someone_saved_my_life_tonight":
+                {
+                    "length": "full",  # full, long, short
+                    "artist": "Elton John",
+                    "display_name": "Some Saved my Life Tonight",
+                    "file_name": "full_someone_saved_my_life_tonight.wav",  # Exact file_name
+                    "bpm": 66.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },                     
+            "long_someone_saved_my_life_tonight":
+                {
+                    "length": "long",  # full, long, short
+                    "artist": "Elton John",
+                    "display_name": "Some Saved my Life Tonight",
+                    "file_name": "long_someone_saved_my_life_tonight.wav",  # Exact file_name
+                    "bpm": 66.0,
+                    "first_beat": 2.05,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "easy",
+                    "SSC": "easy"
+                },                     
+            "short_someone_saved_my_life_tonight":
+                {
+                    "length": "short",  # full, long, short
+                    "artist": "Elton John",
+                    "display_name": "Some Saved my Life Tonight",
+                    "file_name": "short_someone_saved_my_life_tonight.wav",  # Exact file_name
+                    "bpm": 66.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "medium",  # easy medium hard
+                    "FTS": "easy",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },
+                
+                                    
+            "full_space_oddity":
+                {
+                    "length": "full",  # full, long, short
+                    "artist": "David Bowie",
+                    "display_name": "Space Oddity",
+                    "file_name": "full_space_oddity.wav",  # Exact file_name
+                    "bpm": 69.0,
+                    "first_beat": 3.0,
+                    "mood": "happy",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },                        
+            "long_space_oddity":
+                {
+                    "length": "long",  # full, long, short
+                    "artist": "David Bowie",
+                    "display_name": "Space Oddity",
+                    "file_name": "long_space_oddity.wav",  # Exact file_name
+                    "bpm": 69.0,
+                    "first_beat": 1.44,
+                    "mood": "happy",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "easy",
+                    "SSC": "easy"
+                },                        
+            "short_space_oddity":
+                {
+                    "length": "short",  # full, long, short
+                    "artist": "David Bowie",
+                    "display_name": "Space Oddity",
+                    "file_name": "short_space_oddity.wav",  # Exact file_name
+                    "bpm": 69.0,
+                    "first_beat": 3.0,
+                    "mood": "happy",  # happy / sad
+                    "GTM": "hard",  # easy medium hard
+                    "FTS": "easy",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },
+                
+                                    
+            "full_starman":
+                {
+                    "length": "full",  # full, long, short
+                    "artist": "David Bowie",
+                    "display_name": "Starman",
+                    "file_name": "full_starman.wav",  # Exact file_name
+                    "bpm": 98.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },                       
+            "long_starman":
+                {
+                    "length": "long",  # full, long, short
+                    "artist": "David Bowie",
+                    "display_name": "Starman",
+                    "file_name": "long_starman.wav",  # Exact file_name
+                    "bpm": 98.0,
+                    "first_beat": 1.52,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "hard",
+                    "SSC": "hard"
+                },                       
+            "short_starman":
+                {
+                    "length": "short",  # full, long, short
+                    "artist": "David Bowie",
+                    "display_name": "Starman",
+                    "file_name": "short_starman.wav",  # Exact file_name
+                    "bpm": 98.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "medium",  # easy medium hard
+                    "FTS": "medium",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },
+                
+                                    
+            "full_strawberry_fields_forever":
+                {
+                    "length": "full",  # full, long, short
+                    "artist": "The Beatles",
+                    "display_name": "Strawberry Fields Forever",
+                    "file_name": "full_strawberry_fields_forever.wav",  # Exact file_name
+                    "bpm": 90.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },                      
+            "long_strawberry_fields_forever":
+                {
+                    "length": "long",  # full, long, short
+                    "artist": "The Beatles",
+                    "display_name": "Strawberry Fields Forever",
+                    "file_name": "long_strawberry_fields_forever.wav",  # Exact file_name
+                    "bpm": 90.0,
+                    "first_beat": 1.23,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "medium",
+                    "SSC": "medium"
+                },                      
+            "short_strawberry_fields_forever":
+                {
+                    "length": "short",  # full, long, short
+                    "artist": "The Beatles",
+                    "display_name": "Strawberry Fields Forever",
+                    "file_name": "short_strawberry_fields_forever.wav",  # Exact file_name
+                    "bpm": 90.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "medium",  # easy medium hard
+                    "FTS": "medium",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                }
                 
                 
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
+        }
+
+    # remove files that dont exist, so we dont crash out of games later
+    this_path = os.path.dirname(__file__)
+    path_to_music = this_path + "/game_assets/music/"
+    songs_to_remove = []
+
+    #Check which songs exist
+    for song_key, song in song_database.items():
+        try:
+            audio = wave.open(path_to_music + song["file_name"], "r")
+            audio.close()
+        except Exception:
+            print("Couldn't open {} removing from database.".format(song["file_name"]))
+            songs_to_remove.append(song_key)
+
+    # Remove songs from database
+    for song_key in songs_to_remove:
+        del song_database[song_key]
+
+    return song_database
+
+
+def SaveDatabase(song_database = None):
+    """
+    Manually written database, saves it in pickle format for other code to read from it easily
+    """
+
+    # Song data
+    if song_database is None or song_database == {}:
+        return
+
+    this_path = os.path.dirname(__file__)
+    save_name = "song_database.p"
+    save_path = os.path.join(this_path, 'game_assets/data/', save_name)
+
+    # Get path and save
+    open(save_path, "w").close()  # Close it if it's in use ? maybe
+    with open(save_path, "wb") as f:
+        pickle.dump(song_database, f)
+    print("Song data saved to {}".format(save_path))
+
+    return song_database
+
+
+def LoadData():
+    this_path = os.path.dirname(__file__)
+    save_name = "song_database.p"
+    save_path = os.path.join(this_path, 'game_assets/data/', save_name)
+
+    # Get path and save
+    open(save_path, "rb").close()  # Close it if it's in use ? maybe
+    with open(save_path, "rb") as f:
+        data = pickle.load(f)
+    return data
+
+
+def measureBPM(data):
+    """
+        Use musicare lib and pygame to measure BPM of songs in the database
+    """
+    rospy.init_node('Measure_BPM', anonymous=False)
+    pygame.init()  # start py engine
+    pygame.freetype.init()
+    window = pygame.display.set_mode((2850,2000))
+    pygame.display.set_caption("Measure BPM")  # Label window
+    win_center = (2850 / 2, 2000 / 2)
+    path_to_music = "/home/jwaad/catkin_ws/src/musi_care/src/game_assets/music/"
+    SL = StandardLevels(window, win_center, pygame, path_to_music)
+    SL.MeasureBPM(data, SaveDatabase)
+
+
+def PrintLevelDistribution(data):
+    # Give distribution of levels for each difficulty for each game
+    games = ["GTM", "FTS", "CTB", "SSC"]
+    diff = ["easy", "medium", "hard"]
+    for game in games:
+        data = General().Load_Song_Data(game)
+
+        print("For {} there is...".format(game))
+        for d in diff:
+            print("{} {} levels:".format(len(data[d]), d))
+            #print(data[d])
+
+if __name__ == '__main__':
+
+    # Save hard coded database to file
+    data = DefaultDatabase()
+    SaveDatabase(data)
+
+    # Nice readout telling us the distribution of game levels
+    PrintLevelDistribution(data)
+
+    # Measure BPM of songs and save them to memory
+    data = LoadData()
+    measureBPM(data)
+
+"""
+   
             #TODO BPM OF THE BELOW SONGS
             "full_goodbye_yellow_brick_road":
                 {
@@ -615,50 +921,6 @@ def DefaultDatabase():
                     "bpm": 60.0,
                     "first_beat": 3.0,
                     "mood": "sad",  # happy / sad
-                    "GTM": "n/a",  # easy medium hard
-                    "FTS": "n/a",
-                    "CTB": "n/a",
-                    "SSC": "n/a"
-                },
-                
-                                    
-            "full_im_still_standing":
-                {
-                    "length": "full",  # full, long, short
-                    "artist": "Elton John",
-                    "display_name": "I'm Still Standing",
-                    "file_name": "full_im_still_standing.wav",  # Exact file_name
-                    "bpm": 60.0,
-                    "first_beat": 3.0,
-                    "mood": "happy",  # happy / sad
-                    "GTM": "n/a",  # easy medium hard
-                    "FTS": "n/a",
-                    "CTB": "n/a",
-                    "SSC": "n/a"
-                },                        
-            "long_im_still_standing":
-                {
-                    "length": "long",  # full, long, short
-                    "artist": "Elton John",
-                    "display_name": "I'm Still Standing",
-                    "file_name": "long_im_still_standing.wav",  # Exact file_name
-                    "bpm": 60.0,
-                    "first_beat": 3.0,
-                    "mood": "happy",  # happy / sad
-                    "GTM": "n/a",  # easy medium hard
-                    "FTS": "n/a",
-                    "CTB": "n/a",
-                    "SSC": "n/a"
-                },                        
-            "short_im_still_standing":
-                {
-                    "length": "short",  # full, long, short
-                    "artist": "Elton John",
-                    "display_name": "I'm Still Standing",
-                    "file_name": "short_im_still_standing.wav",  # Exact file_name
-                    "bpm": 60.0,
-                    "first_beat": 3.0,
-                    "mood": "happy",  # happy / sad
                     "GTM": "n/a",  # easy medium hard
                     "FTS": "n/a",
                     "CTB": "n/a",
@@ -1148,321 +1410,4 @@ def DefaultDatabase():
                     "CTB": "n/a",
                     "SSC": "n/a"
                 },
-                
-                                    
-            "full_smooth_criminal":
-                {
-                    "length": "full",  # full, long, short
-                    "artist": "Michael Jackson",
-                    "display_name": "Smooth Criminal",
-                    "file_name": "full_smooth_criminal.wav",  # Exact file_name
-                    "bpm": 60.0,
-                    "first_beat": 3.0,
-                    "mood": "sad",  # happy / sad
-                    "GTM": "n/a",  # easy medium hard
-                    "FTS": "n/a",
-                    "CTB": "n/a",
-                    "SSC": "n/a"
-                },                      
-            "long_smooth_criminal":
-                {
-                    "length": "long",  # full, long, short
-                    "artist": "Michael Jackson",
-                    "display_name": "Smooth Criminal",
-                    "file_name": "long_smooth_criminal.wav",  # Exact file_name
-                    "bpm": 60.0,
-                    "first_beat": 3.0,
-                    "mood": "sad",  # happy / sad
-                    "GTM": "n/a",  # easy medium hard
-                    "FTS": "n/a",
-                    "CTB": "n/a",
-                    "SSC": "n/a"
-                },                      
-            "short_smooth_criminal":
-                {
-                    "length": "short",  # full, long, short
-                    "artist": "Michael Jackson",
-                    "display_name": "Smooth Criminal",
-                    "file_name": "short_smooth_criminal.wav",  # Exact file_name
-                    "bpm": 60.0,
-                    "first_beat": 3.0,
-                    "mood": "sad",  # happy / sad
-                    "GTM": "n/a",  # easy medium hard
-                    "FTS": "n/a",
-                    "CTB": "n/a",
-                    "SSC": "n/a"
-                },
-                
-                                    
-            "full_someone_saved_my_life_tonight":
-                {
-                    "length": "full",  # full, long, short
-                    "artist": "Elton John",
-                    "display_name": "Some Saved my Life Tonight",
-                    "file_name": "full_someone_saved_my_life_tonight.wav",  # Exact file_name
-                    "bpm": 60.0,
-                    "first_beat": 3.0,
-                    "mood": "sad",  # happy / sad
-                    "GTM": "n/a",  # easy medium hard
-                    "FTS": "n/a",
-                    "CTB": "n/a",
-                    "SSC": "n/a"
-                },                     
-            "long_someone_saved_my_life_tonight":
-                {
-                    "length": "long",  # full, long, short
-                    "artist": "Elton John",
-                    "display_name": "Some Saved my Life Tonight",
-                    "file_name": "long_someone_saved_my_life_tonight.wav",  # Exact file_name
-                    "bpm": 60.0,
-                    "first_beat": 3.0,
-                    "mood": "sad",  # happy / sad
-                    "GTM": "n/a",  # easy medium hard
-                    "FTS": "n/a",
-                    "CTB": "n/a",
-                    "SSC": "n/a"
-                },                     
-            "short_someone_saved_my_life_tonight":
-                {
-                    "length": "short",  # full, long, short
-                    "artist": "Elton John",
-                    "display_name": "Some Saved my Life Tonight",
-                    "file_name": "short_someone_saved_my_life_tonight.wav",  # Exact file_name
-                    "bpm": 60.0,
-                    "first_beat": 3.0,
-                    "mood": "sad",  # happy / sad
-                    "GTM": "n/a",  # easy medium hard
-                    "FTS": "n/a",
-                    "CTB": "n/a",
-                    "SSC": "n/a"
-                },
-                
-                                    
-            "full_space_oddity":
-                {
-                    "length": "full",  # full, long, short
-                    "artist": "David Bowie",
-                    "display_name": "Space Oddity",
-                    "file_name": "full_space_oddity.wav",  # Exact file_name
-                    "bpm": 69.0,
-                    "first_beat": 3.0,
-                    "mood": "happy",  # happy / sad
-                    "GTM": "n/a",  # easy medium hard
-                    "FTS": "n/a",
-                    "CTB": "n/a",
-                    "SSC": "n/a"
-                },                        
-            "long_space_oddity":
-                {
-                    "length": "long",  # full, long, short
-                    "artist": "David Bowie",
-                    "display_name": "Space Oddity",
-                    "file_name": "long_space_oddity.wav",  # Exact file_name
-                    "bpm": 69.0,
-                    "first_beat": 1.44,
-                    "mood": "happy",  # happy / sad
-                    "GTM": "n/a",  # easy medium hard
-                    "FTS": "n/a",
-                    "CTB": "easy",
-                    "SSC": "easy"
-                },                        
-            "short_space_oddity":
-                {
-                    "length": "short",  # full, long, short
-                    "artist": "David Bowie",
-                    "display_name": "Space Oddity",
-                    "file_name": "short_space_oddity.wav",  # Exact file_name
-                    "bpm": 69.0,
-                    "first_beat": 3.0,
-                    "mood": "happy",  # happy / sad
-                    "GTM": "hard",  # easy medium hard
-                    "FTS": "easy",
-                    "CTB": "n/a",
-                    "SSC": "n/a"
-                },
-                
-                                    
-            "full_starman":
-                {
-                    "length": "full",  # full, long, short
-                    "artist": "David Bowie",
-                    "display_name": "Starman",
-                    "file_name": "full_starman.wav",  # Exact file_name
-                    "bpm": 98.0,
-                    "first_beat": 3.0,
-                    "mood": "sad",  # happy / sad
-                    "GTM": "n/a",  # easy medium hard
-                    "FTS": "n/a",
-                    "CTB": "n/a",
-                    "SSC": "n/a"
-                },                       
-            "long_starman":
-                {
-                    "length": "long",  # full, long, short
-                    "artist": "David Bowie",
-                    "display_name": "Starman",
-                    "file_name": "long_starman.wav",  # Exact file_name
-                    "bpm": 98.0,
-                    "first_beat": 1.52,
-                    "mood": "sad",  # happy / sad
-                    "GTM": "n/a",  # easy medium hard
-                    "FTS": "n/a",
-                    "CTB": "hard",
-                    "SSC": "hard"
-                },                       
-            "short_starman":
-                {
-                    "length": "short",  # full, long, short
-                    "artist": "David Bowie",
-                    "display_name": "Starman",
-                    "file_name": "short_starman.wav",  # Exact file_name
-                    "bpm": 98.0,
-                    "first_beat": 3.0,
-                    "mood": "sad",  # happy / sad
-                    "GTM": "medium",  # easy medium hard
-                    "FTS": "medium",
-                    "CTB": "n/a",
-                    "SSC": "n/a"
-                },
-                
-                                    
-            "full_strawberry_fields_forever":
-                {
-                    "length": "full",  # full, long, short
-                    "artist": "The Beatles",
-                    "display_name": "Strawberry Fields Forever",
-                    "file_name": "full_strawberry_fields_forever.wav",  # Exact file_name
-                    "bpm": 90.0,
-                    "first_beat": 3.0,
-                    "mood": "sad",  # happy / sad
-                    "GTM": "n/a",  # easy medium hard
-                    "FTS": "n/a",
-                    "CTB": "n/a",
-                    "SSC": "n/a"
-                },                      
-            "long_strawberry_fields_forever":
-                {
-                    "length": "long",  # full, long, short
-                    "artist": "The Beatles",
-                    "display_name": "Strawberry Fields Forever",
-                    "file_name": "long_strawberry_fields_forever.wav",  # Exact file_name
-                    "bpm": 90.0,
-                    "first_beat": 1.23,
-                    "mood": "sad",  # happy / sad
-                    "GTM": "n/a",  # easy medium hard
-                    "FTS": "n/a",
-                    "CTB": "medium",
-                    "SSC": "medium"
-                },                      
-            "short_strawberry_fields_forever":
-                {
-                    "length": "short",  # full, long, short
-                    "artist": "The Beatles",
-                    "display_name": "Strawberry Fields Forever",
-                    "file_name": "short_strawberry_fields_forever.wav",  # Exact file_name
-                    "bpm": 90.0,
-                    "first_beat": 3.0,
-                    "mood": "sad",  # happy / sad
-                    "GTM": "medium",  # easy medium hard
-                    "FTS": "medium",
-                    "CTB": "n/a",
-                    "SSC": "n/a"
-                }
-                
-                
-        }
-
-    # remove files that dont exist, so we dont crash out of games later
-    this_path = os.path.dirname(__file__)
-    path_to_music = this_path + "/game_assets/music/"
-    songs_to_remove = []
-
-    #Check which songs exist
-    for song_key, song in song_database.items():
-        try:
-            audio = wave.open(path_to_music + song["file_name"], "r")
-            audio.close()
-        except Exception:
-            print("Couldn't open {} removing from database.".format(song["file_name"]))
-            songs_to_remove.append(song_key)
-
-    # Remove songs from database
-    for song_key in songs_to_remove:
-        del song_database[song_key]
-
-    return song_database
-
-
-def SaveDatabase(song_database = None):
-    """
-    Manually written database, saves it in pickle format for other code to read from it easily
-    """
-
-    # Song data
-    if song_database is None or song_database == {}:
-        return
-
-    this_path = os.path.dirname(__file__)
-    save_name = "song_database.p"
-    save_path = os.path.join(this_path, 'game_assets/data/', save_name)
-
-    # Get path and save
-    open(save_path, "w").close()  # Close it if it's in use ? maybe
-    with open(save_path, "wb") as f:
-        pickle.dump(song_database, f)
-    print("Song data saved to {}".format(save_path))
-
-    return song_database
-
-
-def LoadData():
-    this_path = os.path.dirname(__file__)
-    save_name = "song_database.p"
-    save_path = os.path.join(this_path, 'game_assets/data/', save_name)
-
-    # Get path and save
-    open(save_path, "rb").close()  # Close it if it's in use ? maybe
-    with open(save_path, "rb") as f:
-        data = pickle.load(f)
-    return data
-
-
-def measureBPM(data):
-    """
-        Use musicare lib and pygame to measure BPM of songs in the database
-    """
-    rospy.init_node('Measure_BPM', anonymous=False)
-    pygame.init()  # start py engine
-    pygame.freetype.init()
-    window = pygame.display.set_mode((2850,2000))
-    pygame.display.set_caption("Measure BPM")  # Label window
-    win_center = (2850 / 2, 2000 / 2)
-    path_to_music = "/home/jwaad/catkin_ws/src/musi_care/src/game_assets/music/"
-    SL = StandardLevels(window, win_center, pygame, path_to_music)
-    SL.MeasureBPM(data, SaveDatabase)
-
-
-def PrintLevelDistribution(data):
-    # Give distribution of levels for each difficulty for each game
-    games = ["GTM", "FTS", "CTB", "SSC"]
-    diff = ["easy", "medium", "hard"]
-    for game in games:
-        data = General().Load_Song_Data(game)
-
-        print("For {} there is...".format(game))
-        for d in diff:
-            print("{} {} levels:".format(len(data[d]), d))
-            #print(data[d])
-
-if __name__ == '__main__':
-
-    # Save hard coded database to file
-    data = DefaultDatabase()
-    SaveDatabase(data)
-
-    # Nice readout telling us the distribution of game levels
-    PrintLevelDistribution(data)
-
-    # Measure BPM of songs and save them to memory
-    data = LoadData()
-    measureBPM(data)
+"""
