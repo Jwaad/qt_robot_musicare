@@ -65,6 +65,8 @@ def execute_command(data):
         else:
             rospy.loginfo("You have entered in an unknown Emote")
             #NOTE: Add some error handling here
+    elif action_type == "actuation":
+        print("actuated")
     #---OTHER---
     elif action_type == "other":
         #ADD A STOP FUNCTION. ALL THE SERVICES HAVE A "/stop", so we can add in bools which tell us what communication we're in, and stop accordingly.
