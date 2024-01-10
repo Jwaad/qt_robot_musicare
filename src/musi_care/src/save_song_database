@@ -255,50 +255,6 @@ def DefaultDatabase():
                 },
 
 
-            "goodbye yellow brick road full":
-                {
-                    "length": "full",  # full, long, short
-                    "artist": "Elton John",
-                    "display_name": "Goodbye Yellow Brick Road",
-                    "file_name": "full_goodbye_yellow_brick_road.wav",  # Exact file_name
-                    "bpm": 62.0,
-                    "first_beat": 0.0,
-                    "mood": "sad",  # happy / sad
-                    "GTM": "n/a",  # easy medium hard
-                    "FTS": "n/a",
-                    "CTB": "n/a",
-                    "SSC": "n/a"
-                },
-            "goodbye yellow brick road long":
-                {
-                    "length": "long",  # full, long, short
-                    "artist": "Elton John",
-                    "display_name": "Goodbye Yellow Brick Road",
-                    "file_name": "long_goodbye_yellow_brick_road.wav",  # Exact file_name
-                    "bpm": 62.0,
-                    "first_beat": 1.3,
-                    "mood": "sad",  # happy / sad
-                    "GTM": "n/a",  # easy medium hard
-                    "FTS": "n/a",
-                    "CTB": "medium",
-                    "SSC": "medium"
-                },
-            "goodbye yellow brick road short":
-                {
-                    "length": "short",  # full, long, short
-                    "artist": "Elton John",
-                    "display_name": "Goodbye Yellow Brick Road",
-                    "file_name": "short_goodbye_yellow_brick_road.wav",  # Exact file_name
-                    "bpm": 62.0,
-                    "first_beat": 3.0,
-                    "mood": "sad",  # happy / sad
-                    "GTM": "n/a",  # easy medium hard
-                    "FTS": "n/a",
-                    "CTB": "n/a",
-                    "SSC": "n/a"
-                },
-
-
             "heroes full":
                 {
                     "length": "full",  # full, long, short
@@ -342,6 +298,49 @@ def DefaultDatabase():
                     "SSC": "n/a"
                 },
 
+
+            "full_sweet_thing":
+                {
+                    "length": "full",  # full, long, short
+                    "artist": "Mick Jagger",
+                    "display_name": "Sweet Thing",
+                    "file_name": "full_sweet_thing.wav",  # Exact file_name
+                    "bpm": 100.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },
+            "long_sweet_thing":
+                {
+                    "length": "long",  # full, long, short
+                    "artist": "Mick Jagger",
+                    "display_name": "Sweet Thing",
+                    "file_name": "long_sweet_thing.wav",  # Exact file_name
+                    "bpm": 105.0,
+                    "first_beat": 0.87,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "medium",
+                    "SSC": "medium"
+                },
+            "short_sweet_thing":
+                {
+                    "length": "short",  # full, long, short
+                    "artist": "Mick Jagger",
+                    "display_name": "Sweet Thing",
+                    "file_name": "short_sweet_thing.wav",  # Exact file_name
+                    "bpm": 105.0,
+                    "first_beat": 0.6,
+                    "mood": "happy",  # happy / sad
+                    "GTM": "hard",  # easy medium hard
+                    "FTS": "easy",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },
 
 
             "full_hound_dog":
@@ -479,7 +478,7 @@ def DefaultDatabase():
 
             "full_im_still_standing":
                 {
-                    "length": "short",  # full, long, short
+                    "length": "full",  # full, long, short
                     "artist": "Elton John",
                     "display_name": "I'm Still Standing",
                     "file_name": "full_im_still_standing.wav",  # Exact file_name
@@ -518,7 +517,859 @@ def DefaultDatabase():
                     "FTS": "medium",
                     "CTB": "n/a",
                     "SSC": "n/a"
+                },
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+            #TODO BPM OF THE BELOW SONGS
+            "full_goodbye_yellow_brick_road":
+                {
+                    "length": "full",  # full, long, short
+                    "artist": "Elton John",
+                    "display_name": "Goodbye Yellow Brick Road",
+                    "file_name": "full_goodbye_yellow_brick_road.wav",  # Exact file_name
+                    "bpm": 62.0,
+                    "first_beat": 0.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },
+            "long_goodbye_yellow_brick_road":
+                {
+                    "length": "long",  # full, long, short
+                    "artist": "Elton John",
+                    "display_name": "Goodbye Yellow Brick Road",
+                    "file_name": "long_goodbye_yellow_brick_road.wav",  # Exact file_name
+                    "bpm": 62.0,
+                    "first_beat": 1.3,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "medium",
+                    "SSC": "medium"
+                },
+            "short_goodbye_yellow_brick_road":
+                {
+                    "length": "short",  # full, long, short
+                    "artist": "Elton John",
+                    "display_name": "Goodbye Yellow Brick Road",
+                    "file_name": "short_goodbye_yellow_brick_road.wav",  # Exact file_name
+                    "bpm": 62.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },
+                
+                
+            "full_immigrant_song":
+                {
+                    "length": "full",  # full, long, short
+                    "artist": "Led Zeppelin",
+                    "display_name": "Immigrant Song",
+                    "file_name": "full_immigrant_song.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },                
+            "long_immigrant_song":
+                {
+                    "length": "long",  # full, long, short
+                    "artist": "Led Zeppelin",
+                    "display_name": "Immigrant Song",
+                    "file_name": "long_immigrant_song.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },                
+            "short_immigrant_song":
+                {
+                    "length": "short",  # full, long, short
+                    "artist": "Led Zeppelin",
+                    "display_name": "Immigrant Song",
+                    "file_name": "short_immigrant_song.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },
+                
+                                    
+            "full_im_still_standing":
+                {
+                    "length": "full",  # full, long, short
+                    "artist": "Elton John",
+                    "display_name": "I'm Still Standing",
+                    "file_name": "full_im_still_standing.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "happy",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },                        
+            "long_im_still_standing":
+                {
+                    "length": "long",  # full, long, short
+                    "artist": "Elton John",
+                    "display_name": "I'm Still Standing",
+                    "file_name": "long_im_still_standing.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "happy",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },                        
+            "short_im_still_standing":
+                {
+                    "length": "short",  # full, long, short
+                    "artist": "Elton John",
+                    "display_name": "I'm Still Standing",
+                    "file_name": "short_im_still_standing.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "happy",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },
+                
+                                    
+            "full_like_a_rolling_stone":
+                {
+                    "length": "full",  # full, long, short
+                    "artist": "Bob Dylan",
+                    "display_name": "Like a Rolling Stone",
+                    "file_name": "full_like_a_rolling_stone.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },                        
+            "long_like_a_rolling_stone":
+                {
+                    "length": "long",  # full, long, short
+                    "artist": "Bob Dylan",
+                    "display_name": "Like a Rolling Stone",
+                    "file_name": "long_like_a_rolling_stone.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },                        
+            "short_like_a_rolling_stone":
+                {
+                    "length": "short",  # full, long, short
+                    "artist": "Bob Dylan",
+                    "display_name": "Like a Rolling Stone",
+                    "file_name": "short_like_a_rolling_stone.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },
+                
+                                    
+            "full_listen_to_what_the_man_said":
+                {
+                    "length": "full",  # full, long, short
+                    "artist": "Paul McCartney",
+                    "display_name": "Listen to what the man said ",
+                    "file_name": "full_listen_to_what_the_man_said.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "happy",  # happy / sad
+                    "GTM": "hard",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },                        
+            "long_listen_to_what_the_man_said":
+                {
+                    "length": "long",  # full, long, short
+                    "artist": "Paul McCartney",
+                    "display_name": "Listen to what the man said ",
+                    "file_name": "long_listen_to_what_the_man_said.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "happy",  # happy / sad
+                    "GTM": "hard",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },                        
+            "short_listen_to_what_the_man_said":
+                {
+                    "length": "short",  # full, long, short
+                    "artist": "Paul McCartney",
+                    "display_name": "Listen to what the man said ",
+                    "file_name": "short_listen_to_what_the_man_said.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "happy",  # happy / sad
+                    "GTM": "hard",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },
+                
+                                    
+            "full_live_and_let_die":
+                {
+                    "length": "full",  # full, long, short
+                    "artist": "Paul McCartney",
+                    "display_name": "Live and Let Die",
+                    "file_name": "full_live_and_let_die.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },                       
+            "long_live_and_let_die":
+                {
+                    "length": "long",  # full, long, short
+                    "artist": "Paul McCartney",
+                    "display_name": "Live and Let Die",
+                    "file_name": "long_live_and_let_die.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },                       
+            "short_live_and_let_die":
+                {
+                    "length": "short",  # full, long, short
+                    "artist": "Paul McCartney",
+                    "display_name": "Live and Let Die",
+                    "file_name": "short_live_and_let_die.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },
+                
+                                    
+            "full_love_of_my_life":
+                {
+                    "length": "full",  # full, long, short
+                    "artist": "Queen",
+                    "display_name": "Love of my Life",
+                    "file_name": "full_love_of_my_life.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },                       
+            "long_love_of_my_life":
+                {
+                    "length": "long",  # full, long, short
+                    "artist": "Queen",
+                    "display_name": "Love of my Life",
+                    "file_name": "long_love_of_my_life.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },                       
+            "short_love_of_my_life":
+                {
+                    "length": "short",  # full, long, short
+                    "artist": "Queen",
+                    "display_name": "Love of my Life",
+                    "file_name": "short_love_of_my_life.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },
+                
+                                    
+            "full_lucy_in_the_sky_with_diamonds":
+                {
+                    "length": "full",  # full, long, short
+                    "artist": "The Beatles",
+                    "display_name": "Lucy in the Sky with Diamonds",
+                    "file_name": "full_lucy_in_the_sky_with_diamonds.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },                       
+            "long_lucy_in_the_sky_with_diamonds":
+                {
+                    "length": "long",  # full, long, short
+                    "artist": "The Beatles",
+                    "display_name": "Lucy in the Sky with Diamonds",
+                    "file_name": "long_lucy_in_the_sky_with_diamonds.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },                       
+            "short_lucy_in_the_sky_with_diamonds":
+                {
+                    "length": "short",  # full, long, short
+                    "artist": "The Beatles",
+                    "display_name": "Lucy in the Sky with Diamonds",
+                    "file_name": "short_lucy_in_the_sky_with_diamonds.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },
+                
+                                    
+            "full_mistletoe_and_wine":
+                {
+                    "length": "full",  # full, long, short
+                    "artist": "Cliff Richard",
+                    "display_name": "Mistletoe and Wine",
+                    "file_name": "full_mistletoe_and_wine.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },                        
+            "long_mistletoe_and_wine":
+                {
+                    "length": "long",  # full, long, short
+                    "artist": "Cliff Richard",
+                    "display_name": "Mistletoe and Wine",
+                    "file_name": "long_mistletoe_and_wine.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },                        
+            "short_mistletoe_and_wine":
+                {
+                    "length": "short",  # full, long, short
+                    "artist": "Cliff Richard",
+                    "display_name": "Mistletoe and Wine",
+                    "file_name": "short_mistletoe_and_wine.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },
+                
+                                    
+            "full_my_love":
+                {
+                    "length": "full",  # full, long, short
+                    "artist": "Paul McCartney",
+                    "display_name": "My Love",
+                    "file_name": "full_my_love.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },                       
+            "long_my_love":
+                {
+                    "length": "long",  # full, long, short
+                    "artist": "Paul McCartney",
+                    "display_name": "My Love",
+                    "file_name": "long_my_love.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },                       
+            "short_my_love":
+                {
+                    "length": "short",  # full, long, short
+                    "artist": "Paul McCartney",
+                    "display_name": "My Love",
+                    "file_name": "short_my_love.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },
+                
+                                    
+            "full_mystery_train":
+                {
+                    "length": "full",  # full, long, short
+                    "artist": "Elvis Presley",
+                    "display_name": "Mystery Train",
+                    "file_name": "full_mystery_train.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },                        
+            "long_mystery_train":
+                {
+                    "length": "long",  # full, long, short
+                    "artist": "Elvis Presley",
+                    "display_name": "Mystery Train",
+                    "file_name": "long_mystery_train.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },                        
+            "short_mystery_train":
+                {
+                    "length": "short",  # full, long, short
+                    "artist": "Elvis Presley",
+                    "display_name": "Mystery Train",
+                    "file_name": "short_mystery_train.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },
+                
+                                    
+            "full_new_rules":
+                {
+                    "length": "full",  # full, long, short
+                    "artist": "Dua Lipa",
+                    "display_name": "New Rules",
+                    "file_name": "full_new_rules.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },                       
+            "long_new_rules":
+                {
+                    "length": "long",  # full, long, short
+                    "artist": "Dua Lipa",
+                    "display_name": "New Rules",
+                    "file_name": "long_new_rules.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },                       
+            "short_new_rules":
+                {
+                    "length": "short",  # full, long, short
+                    "artist": "Dua Lipa",
+                    "display_name": "New Rules",
+                    "file_name": "short_new_rules.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },
+                
+                                    
+            "full_o_for_a_thousand_tongues_to_sing":
+                {
+                    "length": "full",  # full, long, short
+                    "artist": "Hymn",
+                    "display_name": "O for a Thousand Tongues to Sing",
+                    "file_name": "full_o_for_a_thousand_tongues_to_sing.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },                        
+            "long_o_for_a_thousand_tongues_to_sing":
+                {
+                    "length": "long",  # full, long, short
+                    "artist": "Hymn",
+                    "display_name": "O for a Thousand Tongues to Sing",
+                    "file_name": "long_o_for_a_thousand_tongues_to_sing.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },                        
+            "short_o_for_a_thousand_tongues_to_sing":
+                {
+                    "length": "short",  # full, long, short
+                    "artist": "Hymn",
+                    "display_name": "O for a Thousand Tongues to Sing",
+                    "file_name": "short_o_for_a_thousand_tongues_to_sing.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },
+                
+                                    
+            "full_silly_love_songs":
+                {
+                    "length": "full",  # full, long, short
+                    "artist": "Paul McCartney",
+                    "display_name": "Silly Love Songs",
+                    "file_name": "full_silly_love_songs.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },                        
+            "long_silly_love_songs":
+                {
+                    "length": "long",  # full, long, short
+                    "artist": "Paul McCartney",
+                    "display_name": "Silly Love Songs",
+                    "file_name": "long_silly_love_songs.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },                        
+            "short_silly_love_songs":
+                {
+                    "length": "short",  # full, long, short
+                    "artist": "Paul McCartney",
+                    "display_name": "Silly Love Songs",
+                    "file_name": "short_silly_love_songs.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },
+                
+                                    
+            "full_smooth_criminal":
+                {
+                    "length": "full",  # full, long, short
+                    "artist": "Michael Jackson",
+                    "display_name": "Smooth Criminal",
+                    "file_name": "full_smooth_criminal.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },                      
+            "long_smooth_criminal":
+                {
+                    "length": "long",  # full, long, short
+                    "artist": "Michael Jackson",
+                    "display_name": "Smooth Criminal",
+                    "file_name": "long_smooth_criminal.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },                      
+            "short_smooth_criminal":
+                {
+                    "length": "short",  # full, long, short
+                    "artist": "Michael Jackson",
+                    "display_name": "Smooth Criminal",
+                    "file_name": "short_smooth_criminal.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },
+                
+                                    
+            "full_someone_saved_my_life_tonight":
+                {
+                    "length": "full",  # full, long, short
+                    "artist": "Elton John",
+                    "display_name": "Some Saved my Life Tonight",
+                    "file_name": "full_someone_saved_my_life_tonight.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },                     
+            "long_someone_saved_my_life_tonight":
+                {
+                    "length": "long",  # full, long, short
+                    "artist": "Elton John",
+                    "display_name": "Some Saved my Life Tonight",
+                    "file_name": "long_someone_saved_my_life_tonight.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },                     
+            "short_someone_saved_my_life_tonight":
+                {
+                    "length": "short",  # full, long, short
+                    "artist": "Elton John",
+                    "display_name": "Some Saved my Life Tonight",
+                    "file_name": "short_someone_saved_my_life_tonight.wav",  # Exact file_name
+                    "bpm": 60.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },
+                
+                                    
+            "full_space_oddity":
+                {
+                    "length": "full",  # full, long, short
+                    "artist": "David Bowie",
+                    "display_name": "Space Oddity",
+                    "file_name": "full_space_oddity.wav",  # Exact file_name
+                    "bpm": 69.0,
+                    "first_beat": 3.0,
+                    "mood": "happy",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },                        
+            "long_space_oddity":
+                {
+                    "length": "long",  # full, long, short
+                    "artist": "David Bowie",
+                    "display_name": "Space Oddity",
+                    "file_name": "long_space_oddity.wav",  # Exact file_name
+                    "bpm": 69.0,
+                    "first_beat": 1.44,
+                    "mood": "happy",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "easy",
+                    "SSC": "easy"
+                },                        
+            "short_space_oddity":
+                {
+                    "length": "short",  # full, long, short
+                    "artist": "David Bowie",
+                    "display_name": "Space Oddity",
+                    "file_name": "short_space_oddity.wav",  # Exact file_name
+                    "bpm": 69.0,
+                    "first_beat": 3.0,
+                    "mood": "happy",  # happy / sad
+                    "GTM": "hard",  # easy medium hard
+                    "FTS": "easy",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },
+                
+                                    
+            "full_starman":
+                {
+                    "length": "full",  # full, long, short
+                    "artist": "David Bowie",
+                    "display_name": "Starman",
+                    "file_name": "full_starman.wav",  # Exact file_name
+                    "bpm": 98.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },                       
+            "long_starman":
+                {
+                    "length": "long",  # full, long, short
+                    "artist": "David Bowie",
+                    "display_name": "Starman",
+                    "file_name": "long_starman.wav",  # Exact file_name
+                    "bpm": 98.0,
+                    "first_beat": 1.52,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "hard",
+                    "SSC": "hard"
+                },                       
+            "short_starman":
+                {
+                    "length": "short",  # full, long, short
+                    "artist": "David Bowie",
+                    "display_name": "Starman",
+                    "file_name": "short_starman.wav",  # Exact file_name
+                    "bpm": 98.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "medium",  # easy medium hard
+                    "FTS": "medium",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },
+                
+                                    
+            "full_strawberry_fields_forever":
+                {
+                    "length": "full",  # full, long, short
+                    "artist": "The Beatles",
+                    "display_name": "Strawberry Fields Forever",
+                    "file_name": "full_strawberry_fields_forever.wav",  # Exact file_name
+                    "bpm": 90.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
+                },                      
+            "long_strawberry_fields_forever":
+                {
+                    "length": "long",  # full, long, short
+                    "artist": "The Beatles",
+                    "display_name": "Strawberry Fields Forever",
+                    "file_name": "long_strawberry_fields_forever.wav",  # Exact file_name
+                    "bpm": 90.0,
+                    "first_beat": 1.23,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "n/a",  # easy medium hard
+                    "FTS": "n/a",
+                    "CTB": "medium",
+                    "SSC": "medium"
+                },                      
+            "short_strawberry_fields_forever":
+                {
+                    "length": "short",  # full, long, short
+                    "artist": "The Beatles",
+                    "display_name": "Strawberry Fields Forever",
+                    "file_name": "short_strawberry_fields_forever.wav",  # Exact file_name
+                    "bpm": 90.0,
+                    "first_beat": 3.0,
+                    "mood": "sad",  # happy / sad
+                    "GTM": "medium",  # easy medium hard
+                    "FTS": "medium",
+                    "CTB": "n/a",
+                    "SSC": "n/a"
                 }
+                
+                
         }
 
     # remove files that dont exist, so we dont crash out of games later
@@ -615,141 +1466,3 @@ if __name__ == '__main__':
     # Measure BPM of songs and save them to memory
     data = LoadData()
     measureBPM(data)
-
-
-
-
-
-
-"""
-
-            "Follow the van":
-                {
-                    "artist": "",
-                    "file_name": "follow_the_van.wav",
-                    "bpm": 57.0,
-                    "first_beat": 2.8,
-                    "mood": "happy",
-                    "GTM": "medium",
-                    "FTS": "easy",
-                    "CTB": "easy",
-                    "SSC": "easy"
-                },
-
-            "Don't fence me in":
-                {
-                    "artist": "",
-                    "file_name": "dont_fence_me_in_long.wav",
-                    "bpm": 40.0,
-                    "first_beat": 0.1,
-                    "mood": "sad",
-                    "GTM": "medium",
-                    "FTS": "medium",
-                    "CTB": "easy",
-                    "SSC": "easy"
-                },
-
-            "Jingle bells":
-                {
-                    "artist": "",
-                    "file_name": "jingle_bells.wav",
-                    "bpm": 95.0,
-                    "first_beat": 2.8,
-                    "mood": "happy",
-                    "GTM": "medium",
-                    "FTS": "medium",
-                    "CTB": "easy",
-                    "SSC": "easy"
-                },
-
-            "Happy instrumental 3":
-                {
-                    "artist": "",
-                    "file_name": "happy_3.wav",
-                    "bpm": 60.0,
-                    "first_beat": 0.1,
-                    "mood": "happy",
-                    "GTM": "hard",
-                    "FTS": "hard",
-                    "CTB": "easy",
-                    "SSC": "easy"
-                },
-
-            "Happy instrumental 1":
-                {
-                    "artist": "",
-                    "file_name": "happy_1.wav",
-                    "bpm": 100.0,
-                    "first_beat": 0.0,
-                    "mood": "happy",
-                    "GTM": "easy",
-                    "FTS": "hard",
-                    "CTB": "easy",
-                    "SSC": "easy"
-                },
-
-            "Don't let me down short":
-                {
-                    "artist": "",
-                    "file_name": "beetles_dont_let_me_down_short.wav",
-                    "bpm": 76,
-                    "first_beat": 0.0,
-                    "mood": "sad",
-                    "GTM": "easy",
-                    "FTS": "medium",
-                    "CTB": "easy",
-                    "SSC": "easy"
-                },
-
-            "Sad instrumental 1":
-                {
-                    "artist": "",
-                    "file_name": "sad_1.wav",
-                    "bpm": 100.0,
-                    "first_beat": 0.0,
-                    "mood": "sad",
-                    "GTM": "easy",
-                    "FTS": "easy",
-                    "CTB": "easy",
-                    "SSC": "easy"
-                },
-
-            "Happy instrumental 4":
-                {
-                    "artist": "",
-                    "file_name": "happy_4.wav",
-                    "bpm": 100.0,
-                    "first_beat": 0.0,
-                    "mood": "sad",
-                    "GTM": "hard",
-                    "FTS": "hard",
-                    "CTB": "easy",
-                    "SSC": "easy"
-                },
-
-            "Don't let me down long":
-                {
-                    "artist": "",
-                    "file_name": "beetles_dont_let_me_down_long.wav",
-                    "bpm": 76,
-                    "first_beat": 0.0,
-                    "mood": "sad",
-                    "GTM": "easy",
-                    "FTS": "easy",
-                    "CTB": "easy",
-                    "SSC": "easy"
-                },
-
-            "Could you be loved short":
-                {
-                    "artist": "",
-                    "file_name": "bob_marl_could_you_be_loved_short.wav",
-                    "bpm": 76,
-                    "first_beat": 0.0,
-                    "mood": "sad",
-                    "GTM": "hard",
-                    "FTS": "easy",
-                    "CTB": "easy",
-                    "SSC": "easy"
-                }
-"""
