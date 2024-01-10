@@ -983,7 +983,7 @@ class GameManager():
         return
 
         #If bpm is too high to dance to, use every 2nd beat instead
-        if song_bpm > 80:
+        if song_bpm > 85:
             song_bpm = song_bpm / 2
 
         # Choose a dance to use at random
@@ -1004,7 +1004,6 @@ class GameManager():
             target_pos = chosen_dance[i]
             self.command_manager.move_right_arm(target_pos)
             self.command_manager.move_left_arm(target_pos)
-            print("i just hit a move")
             time.sleep(time_between_beats - flight_time)
 
             # Start over if we reach the end of the dance
@@ -1015,6 +1014,8 @@ class GameManager():
 
         print("Finished dancey dance, returning arms and head to home")
         self.command_manager.home_arms()
+        time.sleep(2)
+        print("arms are home, multi-thread ending")
 
     def listen_to_song_screen(self, song, run = True):
 
@@ -1029,8 +1030,8 @@ class GameManager():
 
         # Load track
         self.sound_manager.load_track(song["file_name"])
+        time.sleep(0.3)
         _, _, total_track_secs = self.get_track_info()
-
         self.run = run
 
         # Start robot dance
@@ -1055,10 +1056,11 @@ class GameManager():
                     break
 
             # elapsed time in percentage completion, so slider can represent that on a bar
-            progress = (rospy.get_time() - start_time) / total_track_secs
-            if progress > 0.99:
+            elapsed_time = rospy.get_time() - start_time
+            progress = elapsed_time / total_track_secs
+            if elapsed_time > total_track_secs:
                 music_playing = False
-            #print(progress, rospy.get_time() - start_time, total_track_secs)
+            print("Progess: {}, Elapsed: {}, Total Track Length: {}".format(progress, elapsed_time, total_track_secs))
 
             # Draw background and objects
             self.renderer.DrawBackground(self.background_colour)
