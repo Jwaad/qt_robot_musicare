@@ -11,6 +11,12 @@ rospy.init_node('Pilot', anonymous=False)
 time.sleep(1)
 rospy.loginfo("Return arms started successfully")
 
+# Reactivate motors
+rospy.wait_for_service('/qt_robot/motors/setControlMode')
+self.set_mode = rospy.ServiceProxy('/qt_robot/motors/setControlMode', set_control_mode)
+mode_changed = self.set_mode(["right_arm", "left_arm"], 1)
+        
+        
 # Establish publishers
 right_arm_pos_pub = rospy.Publisher('/qt_robot/right_arm_position/command', Float64MultiArray,
                                                  queue_size=10)
