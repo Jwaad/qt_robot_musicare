@@ -861,10 +861,10 @@ class GameManager():
 
         # populate buttons for first 8 categories
         category_slots = [
-                          (200, 350),  (1500, 350),
-                          (200, 750),  (1500, 750),
-                          (200, 1150), (1500, 1150),
-                          (200, 1550), (1500, 1550)  ]
+                          (200, 300),  (1500, 300),
+                          (200, 700),  (1500, 700),
+                          (200, 1100), (1500, 1100),
+                          (200, 1500), (1500, 1500)  ]
 
         # Make a button for the first 8 categories
         i = 0
@@ -942,20 +942,20 @@ class GameManager():
         #print(song_selected)
         return self.run, song_selected
 
+    def format_elapsed_time(self, time):
+        "bit of code that converts secs to mins and secs"
+        if time < 60:
+            secs = int(time)
+            mins = str(0)
+        else:
+            secs = int(time % 60)
+            mins = str(int((time - secs) / 60))
+        if secs < 10:
+            secs = "0" + str(secs)
+        return str(mins), str(secs)
+
     def get_track_info(self, formatted_output=False):
         """Subscribe to sound_player publisher and get elapsed track time"""
-
-        def format_elapsed_display(time):
-            "bit of code that converts secs to mins and secs"
-            if time < 60:
-                secs = int(time)
-                mins = str(0)
-            else:
-                secs = int(time % 60)
-                mins = str(int((time - secs) / 60))
-            if secs < 10:
-                secs = "0" + str(secs)
-            return str(mins), str(secs)
 
         song_data = self.sound_manager.request_song_data()
 
@@ -965,8 +965,8 @@ class GameManager():
 
         # Either return the above, or format the secs to be displayed
         if formatted_output:
-            total_mins, total_secs = format_elapsed_display(total_track_secs)
-            elapsed_mins, elapsed_secs = format_elapsed_display(elapsed_time_secs)
+            total_mins, total_secs = self.format_elapsed_display(total_track_secs)
+            elapsed_mins, elapsed_secs = self.format_elapsed_display(elapsed_time_secs)
 
             elapsed_time = elapsed_mins + ":" + elapsed_secs
             total_time = total_mins + ":" + total_secs
@@ -1027,12 +1027,15 @@ class GameManager():
         song_duration_slider = HorizontalSlider(path_to_graphics + "track_duration_slider.png",
                                                 path_to_graphics +"track_cursor.png",
                                                 (slider_x, slider_y), scale=scale)
+        self.skip_button = self.create_button("tut_skip.png", (2500, 0), scale=1, unique_id="skip")
 
         # Load track
         self.sound_manager.load_track(song["file_name"])
         time.sleep(0.3)
         _, _, total_track_secs = self.get_track_info()
+        total_time_display = self.format_elapsed_time(total_track_secs)
         self.run = run
+        skip = False
 
         # Start robot dance
         self.dance = True
@@ -1043,17 +1046,26 @@ class GameManager():
         music_playing = True
         self.sound_manager.unpause()
         start_time = rospy.get_time()
+        elapsed_time = rospy.get_time() - start_time
 
         while music_playing and not rospy.is_shutdown() and self.run:
 
             # Format song time elapsed to display on screen
-            track_time_display, total_time_display = self.get_track_info(formatted_output=True)
+            track_time_display = self.format_elapsed_time(elapsed_time)
 
             # Check if the X was clicked
             for event in self.pygame.event.get():
+                mouse_pos = self.pygame.mouse.get_pos()
+                if event.type == self.inputUp:
+                    self.animation_manager.StartTouchAnimation(mouse_pos)
                 if event.type == self.pygame.QUIT:
                     self.run = False  # Stops the program entirely
-                    break
+                skip = self.skip_button.get_event(event, mouse_pos)
+
+            if not self.run or skip:
+                self.sound_manager.stop_track()
+                time.sleep(0.3)
+                break
 
             # elapsed time in percentage completion, so slider can represent that on a bar
             elapsed_time = rospy.get_time() - start_time
@@ -1067,7 +1079,9 @@ class GameManager():
             self.renderer.DrawText(str(track_time_display), (165*scale, slider_y + 100*scale))  # draw current time
             self.renderer.DrawText(str(total_time_display), (1240*scale, slider_y + 100*scale))  # draw total track time
             self.renderer.DrawTextCentered("{} - {}".format(song["display_name"], song["artist"]), y=300, font_size=120)
+            self.skip_button.render(self.window)
             song_duration_slider.render(self.window, progress)
+            self.animation_manager.DrawTouchAnimation(self.window)  # last so it shows up on top
             self.pygame.display.update()  # Update all drawn objects
 
         self.dance = False
@@ -1080,7 +1094,7 @@ class GameManager():
         run, song = self.song_select_screen(run=run)
 
         #Listen to the song they selected
-        run = self.listen_to_song_screen(song, run=run,)
+        run = self.listen_to_song_screen(song, run=run)
         
         return run
 
