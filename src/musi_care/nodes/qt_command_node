@@ -19,7 +19,7 @@ import ast
 
 #NEW COMMANDS NEED ONLY BE ADDED HERE. NO WHERE ELSE: 
 #Emotes
-emote_dict ={   #Format= {"label":"what luxAI called the emotion"}
+emote_dict ={
 "happy":"QT/showing_smile",
 "grin":"QT/happy",
 "angry":"QT/angry",
@@ -30,8 +30,8 @@ emote_dict ={   #Format= {"label":"what luxAI called the emotion"}
 #Gestures
 gesture_dict = {
 "happy":"QT/emotions/happy",
-"wave": "QT/bye",   #Qt uses right arm to wave
-"angry":"QT/angry", #Qt 
+"wave": "QT/bye",   #QT uses right arm to wave
+"angry":"QT/angry", #QT
 "placeholder":"QT/placeholder",
 "explain_right":"QT/show_right",
 "shake_head":"musi_care/shake_head",
@@ -50,6 +50,7 @@ right_arm_pos_pub = rospy.Publisher('/qt_robot/right_arm_position/command', Floa
 left_arm_pos_pub = rospy.Publisher('/qt_robot/left_arm_position/command', Float64MultiArray,
                                                 queue_size=10)
 
+previous_tts = "" # Keep a global variable to track previous tts so we dont send dupes
 # Give publishers time to init
 #time.sleep(2)
 
@@ -131,6 +132,7 @@ def execute_command(data):
         #ADD A STOP FUNCTION. ALL THE SERVICES HAVE A "/stop", so we can add in bools which tell us what communication we're in, and stop accordingly.
         #some unique actions that aren't numerous enough to have their own categories (such as a single clap)
         #Confused by tha bove, why not just
+        #just what, dude? - 09/01/24
         pass
     #---SETTINGS---
     elif action_type == "velocity":
@@ -147,27 +149,42 @@ def execute_command(data):
             rospy.loginfo("Motor velocity could not be changed.")
     #---ERROR HANDLING---
     else:
-        rospy.loginfo("WE MADE IT", action_type)
         rospy.loginfo("WARNING: An unknown action type ({}) was entered.".format(action_type)) # TODO Make this all fancy and yellow coloured
         #exit callback but dont close node (Maybe put a try in the "wait_for_command" and then an error handle here)
    
 
 def perform_command(message):
     "Callback response, it is really just to help the flow of the code, also handles tts."
+    global previous_tts
+
     if message.action_type == "tts":  # If we get a TTS request then handle it upfront, it need not be searched for.
+
+        # Dont send repeats of commands
+        if message.action_content == previous_tts:
+            print(message.action_content)
+            rospy.loginfo("WARNING: TTS message identical to previous")
+            return False
+        previous_tts = message.action_content
+
+        #TODO maybe this should be threaded, so we can still do other commands, except speech?
+        # I dont think i really use it anyways
+
+        # Perform TTS that blocks
         if message.action_blocking:
+
             # Use service, as it's blocking
             rospy.wait_for_service('/qt_robot/speech/say')
             qt_speech = rospy.ServiceProxy('/qt_robot/speech/say', speech_say) # The Service Type / class: speech_say
             qt_speech(message.action_content)
             rospy.loginfo("Finished requested TTS message")
             return True
+        # non blocking TTS
         else:
             speechSay_pub.publish(message.action_content)
             rospy.loginfo("Finished requested TTS message")
             return True
     else:
-        executed_command = execute_command(message)
+        execute_command(message)
         return True
 
 
@@ -176,7 +193,8 @@ def wait_for_command():
     rospy.init_node('qt_command_node')
     time.sleep(2)
     rospy.loginfo("QT Command Node has been launched")
-    s = rospy.Service('qt_command_service', qt_command, perform_command) 
+    s = rospy.Service('qt_command_service', qt_command, perform_command)
+    rospy.loginfo("QT Command Service has been launched")
     rospy.spin() #Keep code running
     
     
@@ -193,7 +211,7 @@ angry.avi                      cry.avi              kiss.avi                    
 blowing_raspberry.avi          dirty_face.avi       neutral.avi                  surprise.avi
 breathing_exercise.avi         dirty_face_sad.avi   neutral_state_blinking.avi   talking.avi
 brushing_teeth.avi             dirty_face_wash.avi  one_eye_wink.avi             with_a_cold.avi
-brushing_teeth_foam.avi        dirty_teeth.avi      puffing_the_chredo_eeks.avi  with_a_cold_cleaning_nose.avi
+brushing_teeth_foam.avi        dirty_teeth.avi      puffing_the_cheeks.avi  with_a_cold_cleaning_nose.avi
 calmig_down_exercise_nose.avi  disgusted.avi        sad.avi                      with_a_cold_sneezing.avi
 calming_down.avi               happy.avi            scream.avi                   yawn.avi
 """
