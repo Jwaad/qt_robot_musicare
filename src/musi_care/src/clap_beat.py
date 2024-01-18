@@ -480,7 +480,7 @@ class Clap_To_Beat_Game():
                 self.elapsed_time_secs = rospy.get_time() - start_time
 
                 # Check if song done
-                if (self.elapsed_time_secs / self.total_track_secs) > 0.99:
+                if self.elapsed_time_secs >= self.total_track_secs:
                     song_done = True
 
             self.Finished = True
