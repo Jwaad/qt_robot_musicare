@@ -105,7 +105,7 @@ class Behaviours():
         ensure there's no repeat.
     """
 
-    def __init__(self, pygame, path_to_music, inputMode = 2):
+    def __init__(self, pygame, path_to_music, inputMode = 1):
         self.timeout_started = False
         self.timer = TimeFunctions()
         self.sound_manager = SoundManager(path_to_music)
@@ -431,7 +431,7 @@ class Behaviours():
 class StandardLevels():
     """Class to draw basic screens multiple games use, such as yes or no screen """
 
-    def __init__(self, window, window_center, pygame, path_to_music, debug = False, inputMode = 2):
+    def __init__(self, window, window_center, pygame, path_to_music, debug = False, inputMode = 1):
         self.window = window
         self.window_center = window_center
         self.pygame = pygame
@@ -444,7 +444,7 @@ class StandardLevels():
         self.path_to_imgs = 'game_assets/graphics'
         self.this_file_path = os.path.dirname(__file__)
         self.path_to_music = path_to_music
-        rospy.wait_for_service('/sound_player_service')
+        rospy.wait_for_service('/sound_player_service',3)
         self.sound_player = rospy.ServiceProxy('/sound_player_service', sound_player_srv, persistent=True)
 
         # Set inputs to either touch or mouse
@@ -484,12 +484,15 @@ class StandardLevels():
             return first_beat, bpm
 
         def get_beats_list(bpm, track_len, first_beat):
-            bps = float(60 / bpm) #how much time in seconds is between each beat
-            total_beats = math.floor(((track_len - first_beat) / bps) + 2)  # +2 to include a first beat and last
+            # Get total beats in track
+            bps = float(60 / bpm) # how many beats there are per second
+            total_beats = math.floor(((track_len - first_beat) / bps) + 1)  # +2 to include a first beat and last
             beat_timings = np.zeros([total_beats], dtype=float)
             beat_timings[0] = float(first_beat)
+
             # loop through and populate list of beat timings, skipping the first
-            for i in range(beat_timings.shape[0]-1):
+            for i in range(beat_timings.shape[0]):
+                #start from i=1 and use the previous item to populate this 1
                 beat_timings[i + 1] = beat_timings[i] + bps
 
             #print(beat_timings)
@@ -1352,7 +1355,7 @@ class StandardLevels():
 class TextObject():
 
     def __init__(self ,window, window_center, text, wrap_text = False, location=None, cen_x = False, cen_y=False,
-                 font_size=30, font_colour=(255 ,255 ,255), inputMode = 2):
+                 font_size=30, font_colour=(255 ,255 ,255), inputMode = 1):
         """
         Create object that we can manipulate, ie move it's position and change it's parameters
         Also allows text wrapping to screen. This will cause text to be a list instead of a single object internally
@@ -1600,8 +1603,9 @@ class SoundManager():
     def __init__(self, music_filepath, debug = False):
         self.debug = debug
         self.music_filepath = music_filepath
-        rospy.wait_for_service('/sound_player_service')
+        rospy.wait_for_service('/sound_player_service',3)
         self.sound_player = rospy.ServiceProxy('/sound_player_service', sound_player_srv, persistent=True)
+        rospy.sleep(1)
 
     def load_track(self, track_title, track_time=0.0):
         """gives the sound player the song data, has it load it up to return information about the song, this is essentially "start_track" but betteer """
@@ -1609,14 +1613,14 @@ class SoundManager():
         # Start track
         operation = "load_track"
         song_data = self.call_sound_player(operation, track_path, track_time)
-        rospy.sleep(0.1)  # requires this to function consistently
+        rospy.sleep(0.2)  # requires this to function consistently
         return song_data
 
     def call_sound_player(self, operation, data_1="", data_2=0.0):
         """makes it easier to call sound_player"""
-        rospy.wait_for_service('/sound_player_service')
+        rospy.wait_for_service('/sound_player_service',3)
         song_data = self.sound_player(operation, data_1, data_2)
-        rospy.sleep(0.15) # This keeps code running long enough for above operation to finish
+        #rospy.sleep(0.15) # This keeps code running long enough for above operation to finish
         return song_data
 
     def start_track(self, track_title, track_time=0.0):
@@ -1628,7 +1632,7 @@ class SoundManager():
         # Start track
         operation = "start_track"
         callback_data = self.call_sound_player(operation, track_path, track_time)
-        rospy.sleep(0.1)  # requires this to function consistently
+        rospy.sleep(0.2)  # requires this to function consistently
         song_data = self.request_song_data()
         return song_data
 
@@ -1637,7 +1641,7 @@ class SoundManager():
         operation = "stop_track"
         data = self.call_sound_player(
             operation)  # we only need operation, the other variables can default, theyre ignored anyways
-        rospy.sleep(0.1)  # requires this to function consistently
+        rospy.sleep(0.2)  # requires this to function consistently
         return data
 
     def pause_unpause(self):
@@ -1645,7 +1649,7 @@ class SoundManager():
         operation = "pause_resume"
         data = self.call_sound_player(
             operation)  # we only need operation, the other variables can default, theyre ignored anyways
-        rospy.sleep(0.1)  # requires this to function consistently
+        rospy.sleep(0.2)  # requires this to function consistently
         return data
 
     def pause(self):
@@ -1653,7 +1657,7 @@ class SoundManager():
         operation = "pause"
         data = self.call_sound_player(
             operation)  # we only need operation, the other variables can default, theyre ignored anyways
-        rospy.sleep(0.1)  # requires this to function consistently
+        rospy.sleep(0.2)  # requires this to function consistently
         return data
 
     def unpause(self):
@@ -1661,7 +1665,7 @@ class SoundManager():
         operation = "resume"
         data = self.call_sound_player(
             operation)  # we only need operation, the other variables can default, theyre ignored anyways
-        rospy.sleep(0.1)  # requires this to function consistently
+        rospy.sleep(0.2)  # requires this to function consistently
         return data
 
     def volume_change(self, volume_percentage):
@@ -1670,7 +1674,7 @@ class SoundManager():
         volume = volume_percentage * 100  # other methods use decimal percentages, so for consistency this method does too, but then converts it to numerical percentage
         status = self.call_sound_player(operation,
                                         data_2=volume).status  # we only need operation and data_2 the other variable can default, it's ignored anyways
-        rospy.sleep(0.1)  # requires this to function consistently
+        rospy.sleep(0.2)  # requires this to function consistently
         return status
 
     def request_song_data(self):
@@ -1678,7 +1682,7 @@ class SoundManager():
 
         operation = "request_data"
         data = self.call_sound_player(operation)
-        rospy.sleep(0.1)  # requires this to function consistently
+        rospy.sleep(0.2)  # requires this to function consistently
         return data
 
     def return_wav_lenth(self, song_path):
@@ -1765,18 +1769,23 @@ class QTManager():
         self.left_arm_pos_pub = rospy.Publisher('/qt_robot/left_arm_position/command', Float64MultiArray,
                                                 queue_size=10)
         # Create a persistent connection to command controller so we dont need to wait for it to be free
-        rospy.wait_for_service('/qt_command_service')
+        rospy.wait_for_service('/qt_command_service',3)
         self.command_controller = rospy.ServiceProxy('/qt_command_service', qt_command, persistent=True)
         self.level_loader = levels
         self.talking_anim_time = 4 # How long the talking animation plays for (seconds)
         self.debug = debug
         self.latest_threadID = rospy.get_time() # Use this to close current threads if a new one starts
 
+    def call_qt_command(self,command_type, command_data, command_blocking = False):
+        # Call service QT_command
+        rospy.wait_for_service('/qt_command_service', 3)
+        command_successful = self.command_controller(command_type, command_data, command_blocking)
+        return command_successful
 
     def init_robot(self, arm_vel):
         """Method to init robot parameters"""
         # Set control mode, incase they were changed beforehand
-        rospy.wait_for_service('/qt_robot/motors/setControlMode')
+        rospy.wait_for_service('/qt_robot/motors/setControlMode',3)
         self.set_mode = rospy.ServiceProxy('/qt_robot/motors/setControlMode', set_control_mode)
         mode_changed = self.set_mode(["right_arm", "left_arm"], 1)
         if mode_changed:
@@ -1785,7 +1794,7 @@ class QTManager():
             rospy.loginfo("Motor control mode could not be changed")
             self.run = False
         # Set velocity of arms incase they were set differently
-        rospy.wait_for_service('/qt_robot/motors/setVelocity')
+        rospy.wait_for_service('/qt_robot/motors/setVelocity',3)
         set_vel = rospy.ServiceProxy('/qt_robot/motors/setVelocity', set_velocity)
         speed_changed = set_vel(["right_arm", "left_arm"], arm_vel)
         if speed_changed:
@@ -1797,9 +1806,7 @@ class QTManager():
     def set_arm_vel(self, arm_vel ,command_blocking = False):
         "Set velocity of arm motors"
         # TODO change this to take in list of what motors to change speed of
-        rospy.wait_for_service('/qt_command_service')
-        #command_controller = rospy.ServiceProxy('/qt_command_service', qt_command)
-        command_complete = self.command_controller("velocity", str(arm_vel), command_blocking)
+        command_complete = self.call_qt_command("velocity", str(arm_vel), command_blocking)
         return command_complete
 
     def send_qt_command(self, speech=None, gesture=None, emote=None, command_blocking=False):
@@ -1810,20 +1817,13 @@ class QTManager():
         #If any command fails, send false
         command_status = []
         if speech != None:  # do qt_speak
-            # print("sending speech req")
-            rospy.wait_for_service('/qt_command_service')
-            #command_controller = rospy.ServiceProxy('/qt_command_service', qt_command)
-            command_complete = self.command_controller("tts", speech, command_blocking)
+            command_complete = self.call_qt_command("tts", speech, command_blocking)
             command_status.append(command_complete)
         if gesture != None:  # do qt_speak
-            rospy.wait_for_service('/qt_command_service')
-            #command_controller = rospy.ServiceProxy('/qt_command_service', qt_command)
-            command_complete = self.command_controller("gesture", gesture, command_blocking)
+            command_complete = self.call_qt_command("gesture", gesture, command_blocking)
             command_status.append(command_complete)
         if emote != None:  # do qt_speak
-            rospy.wait_for_service('/qt_command_service')
-            #command_controller = rospy.ServiceProxy('/qt_command_service', qt_command)
-            command_complete = self.command_controller("emote", emote, command_blocking)
+            command_complete = self.call_qt_command("emote", emote, command_blocking)
             command_status.append(command_complete)
 
         success = True
@@ -1922,9 +1922,7 @@ class QTManager():
         """
         if self.debug:
             print("QT ACTUATED: {}".format(motor_command))
-        rospy.wait_for_service('/qt_command_service')
-        #command_controller = rospy.ServiceProxy('/qt_command_service', qt_command)
-        command_complete = self.command_controller("actuation", motor_command, command_blocking)
+        command_complete = self.call_qt_command("actuation", motor_command, command_blocking)
         return command_complete
 
     def home_arms(self):
@@ -1936,36 +1934,33 @@ class QTManager():
         # Move arms upwards
         self.move_right_arm([55.0, -53.400001525878906, -29.0])
         self.move_left_arm([55.0, -53.400001525878906, -29.0])
-        time.sleep(0.3)
+        time.sleep(0.5)
 
         # Move outwards
         self.move_right_arm([-3.9000000953674316, -15.899999618530273, 0.30000001192092896])
         self.move_left_arm([-3.9000000953674316, -15.899999618530273, 0.30000001192092896])
-        time.sleep(0.3)
+        time.sleep(0.5)
         
         # Move back down
         self.move_right_arm([-83.69999694824219, -76.5999984741211, -17.200000762939453])
         self.move_left_arm([-83.69999694824219, -76.5999984741211, -17.200000762939453])
-        time.sleep(0.3)
+        time.sleep(0.5)
 
     def move_right_arm(self, joint_angles, command_blocking = False):
         """ Move just right arm """
         if self.debug:
             print("Moving QT's right arm joint to {}".format(joint_angles))
-        rospy.wait_for_service('/qt_command_service')
         motor_pos = str( [["right_arm"], [joint_angles] ] )
-        command_complete = self.command_controller("actuation", motor_pos, command_blocking)
+        command_complete = self.call_qt_command("actuation", motor_pos, command_blocking)
         return command_complete
 
     def move_left_arm(self, joint_angles, command_blocking = False):
         """ Move left arm, but using coordinates for right arm, and flip them automatically"""
         if self.debug:
             print("Moving QT's left arm joint to {}".format(joint_angles))
-        rospy.wait_for_service('/qt_command_service')
-        #command_controller = rospy.ServiceProxy('/qt_command_service', qt_command)
         left_joint_angles = [joint_angles[0] * -1, joint_angles[1], joint_angles[2]]
         motor_pos = str([["left_arm"], [left_joint_angles]])
-        command_complete = self.command_controller("actuation", motor_pos, command_blocking)
+        command_complete = self.call_qt_command("actuation", motor_pos, command_blocking)
         return command_complete
 
     def set_voice_vol(self, volume, int_percent = True):
@@ -1982,7 +1977,7 @@ class QTManager():
             return
 
         service = "/qt_robot/setting/setVolume"
-        rospy.wait_for_service(service)
+        rospy.wait_for_service(service,3)
         set_voice_proxy = rospy.ServiceProxy(service, setting_setVolume)
         set_voice_proxy(newVolume)
         if self.debug:
@@ -2066,7 +2061,7 @@ class Button():
     """
 
     def __init__(self, image_path, x_y_locations, pygame, return_info={}, scale=1.0, unique_id="", on_click=object,
-                 on_release=object, text="", should_grey=True, inputMode = 2, font_size = None, debug = True):
+                 on_release=object, text="", should_grey=True, inputMode = 1, font_size = None, debug = True):
         if not os.path.exists(image_path):
             print("File does not exist. Path = ", image_path)
         #else:
@@ -2219,7 +2214,7 @@ class ToggleButton():
 
     def __init__(self, default_image_path, toggled_image_path, x_y_locations,
                  pygame, scale=1, unique_id="", return_info="", when_toggle_on=object, when_toggle_off=object,
-                 should_grey = True, inputMode = 2):
+                 should_grey = True, inputMode = 1):
         # Set vars
         self.pygame = pygame
         self.highlighted = False
@@ -2349,7 +2344,7 @@ class PausePlayButton():
 
     def __init__(self, pause_path, play_path, rewind_path,
                  x_y_locations, pygame, scale=1, unique_id="", on_pause=object, on_play=object,
-                 should_grey = True, inputMode = 2):
+                 should_grey = True, inputMode = 1):
         # Set vars
         self.pygame = pygame
         self.highlighted = False
@@ -2471,7 +2466,7 @@ class DraggableButton():
 
     def __init__(self, image_path, toggled_image_path, x_y_locations, pygame,
                  scale=1, return_info={}, when_toggle_on=object, when_toggle_off=object, unique_id="",
-                 should_grey = True, inputMode = 2):
+                 should_grey = True, inputMode = 1):
 
         self.pygame = pygame
 
@@ -2597,7 +2592,7 @@ class InputBox():
     """ rect that you can click on and write text in. Text can be read by method get_text"""
 
     def __init__(self, x, y, w, h, default_text='', allowed_chars="", fontsize = -1, max_chars = -1,
-                 force_lowercase = True, force_uppercase= False, inputMode = 2):
+                 force_lowercase = True, force_uppercase= False, inputMode = 1):
         """
         Creates input box, with some grey text in it, that disappears when typing
         x = horizontal placement of text box (bottom left origin)
@@ -2711,7 +2706,7 @@ class HorizontalSlider():
     """Class to handle all functions of the horizontal sliders"""
 
     def __init__(self, image_path_slider, image_path_cursor, x_y_locations, scale=1, on_click=object,
-                 on_release=object, music_filepath="/game_assets/music/", inputMode = 2):
+                 on_release=object, music_filepath="/game_assets/music/", inputMode = 1):
         # init slider
         raw_slider_image = pygame.image.load(image_path_slider).convert_alpha()
         self.img_x = x_y_locations[0]
@@ -2857,7 +2852,7 @@ class VolumeSlider():
     """ Class that generates a slider object using pygame."""
 
     def __init__(self, pygame, location, default_vol = 0,  scale = 1, min_val = 0, max_val=100, on_release=None,
-                 inputMode = 2):
+                 inputMode = 1):
         """ Create the slider object at given location with given scale.
             pygame = pygame, pass in initialised pygame, so we don't reinitialise
             location = list or tuple, x and y pos
