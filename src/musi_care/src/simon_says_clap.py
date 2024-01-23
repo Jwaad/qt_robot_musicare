@@ -379,16 +379,14 @@ class Simon_Says_Clap_Game():
         start_time : time in seconds of the start time of the music. e.g: 14424124 (system time)
         """
         # Set arm pos goals
-        if self.diy_box:
-            hitting_drum = [-50.5, -84.69999694824219, -39.400001525878906]
-            raised_arm = [-16.299999237060547, -85.0, -25.700000762939453]
-        else:
-            raised_arm = [2.9000000953674316, -84.69999694824219, -49.20000076293945]
-            hitting_drum = [-27.0, -85.4000015258789, -56.29999923706055]
+        raised_arm = [2.9000000953674316, -84.69999694824219, -49.20000076293945]
+        hitting_drum = [-27.0, -85.4000015258789, -56.29999923706055]
 
         time_to_hit = 0.3  # est travel time taken for arms to hit drum
         i = 0
-        elapsed_time_secs = 0
+        beats_hit = []  # Track beats hit, to remove beats that were skipped
+        self.command_manager.init_robot(100)
+
         while i < len(beat_timings) and not rospy.is_shutdown():
             # Update beat hit time
             beat_time = beat_timings[i]
@@ -398,13 +396,24 @@ class Simon_Says_Clap_Game():
 
             # Hit the drum if it's time, and we're not in freeze time
             if elapsed_time_secs + time_to_hit >= beat_time and not self.freeze:
+                # Check all next beats which we also are ahead of, incase we are behind
+                for future_beat in beat_timings[i + 1:]:
+                    if self.elapsed_time_secs + time_to_hit >= future_beat:
+                        i += 1
+                    else:
+                        break
+
                 # On even numbers use right arm else, left
-                if i % 2 == 0:
+                if len(beats_hit) % 2 == 0:
                     self.command_manager.move_right_arm(hitting_drum)
                     self.command_manager.move_left_arm(raised_arm)
                 else:
                     self.command_manager.move_right_arm(raised_arm)
                     self.command_manager.move_left_arm(hitting_drum)
+
+                # Add the beat we just hit to our list
+                beats_hit.append(beat_timings[i])
+
                 # Move onto next beat
                 i += 1
 
@@ -509,12 +518,12 @@ class Simon_Says_Clap_Game():
                             freeze_duration = self.timer_manager.CreateTimer("freeze_duration",
                                                     seconds_to_freeze, verbose=False)
                             self.frozen_time += seconds_to_freeze  # track how long we spent frozen
-                            #print("ITS TIME TO FREEZE, FREEZING FOR {}s".format(seconds_to_freeze))
+                            print("ITS TIME TO FREEZE, FREEZING FOR {}s".format(seconds_to_freeze))
 
                     # Unfreeze if it's time
                     if freeze_duration in self.timer_manager.timers.keys():
                         if self.timer_manager.CheckTimer(freeze_duration):
-                            #print("ITS TIME TO UNFREEZE")
+                            print("ITS TIME TO UNFREEZE")
                             self.sound_manager.unpause()
                             self.freeze = False  # This will tell our thread to continue
                             self.command_manager.send_qt_command(speech="Go!")
@@ -529,6 +538,7 @@ class Simon_Says_Clap_Game():
                 # Check if song done
                 if (self.elapsed_time_secs / self.total_track_secs) > 0.99:
                     song_done = True
+
 
             # Tell clap recorder to finish
             self.Finished = True

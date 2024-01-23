@@ -385,9 +385,10 @@ class Clap_To_Beat_Game():
 
         time_to_hit = 0.3 # est travel time taken for arms to hit drum
         i = 0
+        beats_hit = [] # Track beats hit, to remove beats that were skipped
         self.command_manager.init_robot(100)
 
-        while i < (len(beat_timings) - 1) and not rospy.is_shutdown():
+        while i < (len(beat_timings)) and not rospy.is_shutdown():
             # Update beat hit time
             beat_time = beat_timings[i]
 
@@ -396,13 +397,24 @@ class Clap_To_Beat_Game():
 
             # Hit the drum if it's time
             if self.elapsed_time_secs + time_to_hit >= beat_time:
+                # Check all next beats which we also are ahead of, incase we are behind
+                for future_beat in beat_timings[i+1:]:
+                    if self.elapsed_time_secs + time_to_hit >= future_beat:
+                        i += 1
+                    else:
+                        break
+
                 # On even numbers use right arm else, left
-                if i % 2 == 0 :
+                if len(beats_hit) % 2 == 0 :
                     self.command_manager.move_right_arm(hitting_drum)
                     self.command_manager.move_left_arm(raised_arm)
                 else:
                     self.command_manager.move_right_arm(raised_arm)
                     self.command_manager.move_left_arm(hitting_drum)
+
+                # Add the beat we just hit to our list
+                beats_hit.append(beat_timings[i]) # TODO HAVE THIS BE THE GOAL BEATS
+
                 # Move onto next beat
                 i += 1
 
