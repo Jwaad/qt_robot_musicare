@@ -1603,7 +1603,7 @@ class SoundManager():
     def __init__(self, music_filepath, debug = False):
         self.debug = debug
         self.music_filepath = music_filepath
-        rospy.wait_for_service('/sound_player_service',3)
+        self.wait_persistent_service('/sound_player_service',3)
         self.sound_player = rospy.ServiceProxy('/sound_player_service', sound_player_srv, persistent=True)
         rospy.sleep(1)
 
@@ -1616,9 +1616,46 @@ class SoundManager():
         rospy.sleep(0.2)  # requires this to function consistently
         return song_data
 
+    def wait_persistent_service(self, service, wait_time):
+        """ waits for a persistent service, in a safe way
+        If it's frozen, try reestablishing connection """
+        #print("WAITING FOR PERSISTENT SERVICE")
+        def attempt_connection(service, wait_time):
+            success = True
+            try:
+                rospy.wait_for_service(service, wait_time)
+            except Exception as e:
+                success = False
+
+            # If there were no errors, return true, else false
+            if success:
+                return True
+            else:
+                return False
+
+        # Try waiting for service, if we succeed, just return
+        service_connected = attempt_connection(service, wait_time)
+        if service_connected:
+            return True
+
+        # Try to reconnect to service 3x
+        for i in range(1, 4):
+            print("connection with {} timed out, trying to reconnect {} /3".format(service, i))
+
+            self.sound_player = rospy.ServiceProxy('/sound_player_service', sound_player_srv,
+                                                   persistent=True)
+            rospy.sleep(1)
+            service_connected = attempt_connection(service, wait_time)
+            if service_connected:
+                return True
+
+        # If after 3 attempts, we couldnt reconnect, just return false
+        print("Could not reconnect to service".format(i))
+        return False
+
     def call_sound_player(self, operation, data_1="", data_2=0.0):
         """makes it easier to call sound_player"""
-        rospy.wait_for_service('/sound_player_service',3)
+        success = self.wait_persistent_service('/sound_player_service', 1)
         song_data = self.sound_player(operation, data_1, data_2)
         #rospy.sleep(0.15) # This keeps code running long enough for above operation to finish
         return song_data
@@ -1769,23 +1806,60 @@ class QTManager():
         self.left_arm_pos_pub = rospy.Publisher('/qt_robot/left_arm_position/command', Float64MultiArray,
                                                 queue_size=10)
         # Create a persistent connection to command controller so we dont need to wait for it to be free
-        rospy.wait_for_service('/qt_command_service',3)
+        self.wait_persistent_service('/qt_command_service',3)
         self.command_controller = rospy.ServiceProxy('/qt_command_service', qt_command, persistent=True)
         self.level_loader = levels
         self.talking_anim_time = 4 # How long the talking animation plays for (seconds)
         self.debug = debug
         self.latest_threadID = rospy.get_time() # Use this to close current threads if a new one starts
 
+    def wait_persistent_service(self, service, wait_time):
+        """ waits for a persistent service, in a safe way
+        If it's frozen, try reestablishing connection """
+        #print("WAITING FOR PERSISTENT SERVICE")
+        def attempt_connection(service, wait_time):
+            success = True
+            try:
+                rospy.wait_for_service(service, wait_time)
+            except Exception as e:
+                success = False
+
+            # If there were no errors, return true, else false
+            if success:
+                return True
+            else:
+                return False
+
+        # Try waiting for service, if we succeed, just return
+        service_connected = attempt_connection(service, wait_time)
+        if service_connected:
+            return True
+
+        # Try to reconnect to service 3x
+        for i in range(1, 4):
+            print("connection with {} timed out, trying to reconnect {} /3".format(service, i))
+
+            self.sound_player = rospy.ServiceProxy('/sound_player_service', sound_player_srv,
+                                                   persistent=True)
+            rospy.sleep(1)
+            service_connected = attempt_connection(service, wait_time)
+            if service_connected:
+                return True
+
+        # If after 3 attempts, we couldnt reconnect, just return false
+        print("Could not reconnect to service".format(i))
+        return False
+
     def call_qt_command(self,command_type, command_data, command_blocking = False):
         # Call service QT_command
-        rospy.wait_for_service('/qt_command_service', 3)
+        self.wait_persistent_service('/qt_command_service', 3)
         command_successful = self.command_controller(command_type, command_data, command_blocking)
         return command_successful
 
     def init_robot(self, arm_vel):
         """Method to init robot parameters"""
         # Set control mode, incase they were changed beforehand
-        rospy.wait_for_service('/qt_robot/motors/setControlMode',3)
+        self.wait_persistent_service('/qt_robot/motors/setControlMode',3)
         self.set_mode = rospy.ServiceProxy('/qt_robot/motors/setControlMode', set_control_mode)
         mode_changed = self.set_mode(["right_arm", "left_arm"], 1)
         if mode_changed:
@@ -1794,7 +1868,7 @@ class QTManager():
             rospy.loginfo("Motor control mode could not be changed")
             self.run = False
         # Set velocity of arms incase they were set differently
-        rospy.wait_for_service('/qt_robot/motors/setVelocity',3)
+        self.wait_persistent_service('/qt_robot/motors/setVelocity',3)
         set_vel = rospy.ServiceProxy('/qt_robot/motors/setVelocity', set_velocity)
         speed_changed = set_vel(["right_arm", "left_arm"], arm_vel)
         if speed_changed:
@@ -1977,7 +2051,7 @@ class QTManager():
             return
 
         service = "/qt_robot/setting/setVolume"
-        rospy.wait_for_service(service,3)
+        self.wait_persistent_service(service,3)
         set_voice_proxy = rospy.ServiceProxy(service, setting_setVolume)
         set_voice_proxy(newVolume)
         if self.debug:
