@@ -40,7 +40,7 @@ class GameManager():
         self.path_to_music = "game_assets/music/"
         self.this_file_path = os.path.dirname(__file__)
         self.path_to_userdata = os.path.join(self.this_file_path, 'game_assets/data/user_data/')
-        self.session_time = 25 # How many minutes sessions should last
+        self.session_time = 0#25 # How many minutes sessions should last
         self.session_time = self.session_time * 60
         self.session_name = "session_" # this should be appended with a number e.g: session_3
         self.session_data = {}
@@ -966,8 +966,8 @@ class GameManager():
 
         # Either return the above, or format the secs to be displayed
         if formatted_output:
-            total_mins, total_secs = self.format_elapsed_display(total_track_secs)
-            elapsed_mins, elapsed_secs = self.format_elapsed_display(elapsed_time_secs)
+            total_mins, total_secs = self.format_elapsed_time(total_track_secs)
+            elapsed_mins, elapsed_secs = self.format_elapsed_time(elapsed_time_secs)
 
             elapsed_time = elapsed_mins + ":" + elapsed_secs
             total_time = total_mins + ":" + total_secs
@@ -1034,8 +1034,8 @@ class GameManager():
         self.sound_manager.load_track(song["file_name"])
         time.sleep(0.3)
         _, _, total_track_secs = self.get_track_info()
-        total_time_display = self.format_elapsed_time(total_track_secs)
-        self.run = run
+        track_mins, track_secs = self.format_elapsed_time(total_track_secs)
+        total_time_display = "{}:{}".format(track_mins, track_secs)
         skip = False
 
         # Start robot dance
@@ -1052,7 +1052,8 @@ class GameManager():
         while music_playing and not rospy.is_shutdown() and self.run:
 
             # Format song time elapsed to display on screen
-            track_time_display = self.format_elapsed_time(elapsed_time)
+            current_track_mins, current_track_secs = self.format_elapsed_time(elapsed_time)
+            track_time_display = "{}:{}".format(current_track_mins, current_track_secs)
 
             # Check if the X was clicked
             for event in self.pygame.event.get():
@@ -1076,6 +1077,8 @@ class GameManager():
             #print("Progess: {}, Elapsed: {}, Total Track Length: {}".format(progress, elapsed_time, total_track_secs))
 
             # Draw background and objects
+            #             total_time = total_mins + ":" + total_secs
+
             self.renderer.DrawBackground(self.background_colour)
             self.renderer.DrawText(str(track_time_display), (165*scale, slider_y + 100*scale))  # draw current time
             self.renderer.DrawText(str(total_time_display), (1240*scale, slider_y + 100*scale))  # draw total track time
@@ -1250,9 +1253,12 @@ class GameManager():
 
             # If they have played 3 games, ask if they want to continue, or choose a new game
             if (game_num % 3) == 0:
-                # update play time. (only update here, so levels end neatly)
+                # update play time. (only update here, so levels end in multiples of 3)
                 play_time = rospy.get_time() - time_start
 
+                if play_time >= self.session_time:
+                    break
+                    
                 # QT asks if you want to choose another game or continue
                 sayings = ["You have played 3 levels, would you like to choose another game?",
                            "Do you want to change games now?",
