@@ -35,12 +35,13 @@ class GameManager():
     def __init__(self):
         # Init vars
         print("Starting")
-        self.debug = False
+        self.debug = True
         self.run = True
         self.path_to_music = "game_assets/music/"
         self.this_file_path = os.path.dirname(__file__)
         self.path_to_userdata = os.path.join(self.this_file_path, 'game_assets/data/user_data/')
-        self.session_time = 25 * 60 # Time in seconds that sessions should last for. (Minimum time)
+        self.session_time = 25 # How many minutes sessions should last
+        self.session_time = self.session_time * 60
         self.session_name = "session_" # this should be appended with a number e.g: session_3
         self.session_data = {}
         self.games = ["GTM", "FTS", "CTB", "SSC"]
@@ -61,16 +62,16 @@ class GameManager():
         self.default_voice_vol = 82
         print("Checking robot running")
         self.robot_connected = self.CheckRobotRunning()
-        rospy.set_param('/activity_status', 1) # Tell ros this node is starting
-        if self.robot_connected:
-            print("Starting command manager")
-            self.StartRobotNodes()
-        else:
-            self.StartSimulatedRobotNodes()
+        #rospy.set_param('/activity_status', 1) # Tell ros this node is starting
+        #if self.robot_connected:
+        #    print("Starting command manager")
+            #self.StartRobotNodes()
+        #else:
+            #self.StartSimulatedRobotNodes()
         print("Initialising libs")
         self.command_manager = QTManager(debug=self.debug)  # this should happen before startrobotnodes
-        print("starting sound manager")
-        self.StartLaptopNodes()
+        #print("starting sound manager")
+        #self.StartLaptopNodes()
         # This needs to happen after start laptop nodes, which needs to happen after qt_command_service
         if self.robot_connected:
             print("changing default volume")
@@ -937,7 +938,7 @@ class GameManager():
         message = sayings[ind]
         gesture = "explain_right"
         self.command_manager.qt_gesture(gesture)
-        self.command_manager.qt_say_blocking(message)
+        self.Levels.QTSpeakingScreen(message, self.run, self.background_colour)
 
         #print(song_selected)
         return self.run, song_selected
@@ -1072,7 +1073,7 @@ class GameManager():
             progress = elapsed_time / total_track_secs
             if elapsed_time > total_track_secs:
                 music_playing = False
-            print("Progess: {}, Elapsed: {}, Total Track Length: {}".format(progress, elapsed_time, total_track_secs))
+            #print("Progess: {}, Elapsed: {}, Total Track Length: {}".format(progress, elapsed_time, total_track_secs))
 
             # Draw background and objects
             self.renderer.DrawBackground(self.background_colour)
@@ -1171,18 +1172,22 @@ class GameManager():
             message = sayings[ind]
             gesture = "arms_up"
             self.command_manager.qt_gesture(gesture)
-            self.command_manager.qt_say_blocking(message)
+            self.Levels.QTSpeakingScreen(message, self.run, self.background_colour)
         else:
             # QT should comment on the game player chose
             sayings = ["Okay, then! Lets play {}".format(self.game_names[game]),
                        "{} is one of my favorites!".format(self.game_names[game]),
                        "Sure! Lets play {}!".format(self.game_names[game]),
-                       "{} is a great choice!".format(self.game_names[game])]
+                       "{} is a great choice!".format(self.game_names[game]),
+                       "I'm excited! Lets play!",
+                       "Woohoo! lets get right into it!",
+                       "You'll do great, lets go?",
+                       "Okay! Then tap the screen !"]
             ind = random.randint(0, len(sayings) - 1)
             message = sayings[ind]
             gesture = "arms_up"
             self.command_manager.qt_gesture(gesture)
-            self.command_manager.qt_say_blocking(message)
+            self.Levels.QTSpeakingScreen(message, self.run, self.background_colour)
 
         if self.debug:
             print("game selected = {}".format(game))
@@ -1201,7 +1206,7 @@ class GameManager():
         message = "What do you feel like playing today?"
         gesture = "explain_right"
         self.command_manager.qt_gesture(gesture)
-        self.command_manager.qt_say_blocking(message)
+        self.Levels.QTSpeakingScreen(message, self.run, self.background_colour)
 
         # Choose an initial game
         run, game_name = self.home_screen()
@@ -1276,7 +1281,7 @@ class GameManager():
             else:
                 # QT should segway(?) to next level
                 next_level_text = self.behaviours_manager.get_next_level(previous_saying=next_level_text)
-                self.command_manager.qt_say_blocking(next_level_text)
+                self.Levels.QTSpeakingScreen(next_level_text, self.run, self.background_colour)
 
         return run
 
