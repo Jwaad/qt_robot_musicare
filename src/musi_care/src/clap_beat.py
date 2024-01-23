@@ -366,10 +366,10 @@ class Clap_To_Beat_Game():
         Use level data and return a list of the timings of each beat
         track_total_time should be in seconds
         """
-        print("Track time: ",track_total_time)
+        print("Track time: ", track_total_time)
         beat = first_beat
         beat_timings = []
-        while beat < track_total_time:
+        while beat <= track_total_time:
             beat_timings.append(beat)
             beat += 60 / bpm
         return beat_timings

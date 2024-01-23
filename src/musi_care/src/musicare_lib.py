@@ -1603,7 +1603,7 @@ class SoundManager():
     def __init__(self, music_filepath, debug = False):
         self.debug = debug
         self.music_filepath = music_filepath
-        self.wait_persistent_service('/sound_player_service',3)
+        self.wait_persistent_service('/sound_player_service',1)
         self.sound_player = rospy.ServiceProxy('/sound_player_service', sound_player_srv, persistent=True)
         rospy.sleep(1)
 
@@ -1806,7 +1806,7 @@ class QTManager():
         self.left_arm_pos_pub = rospy.Publisher('/qt_robot/left_arm_position/command', Float64MultiArray,
                                                 queue_size=10)
         # Create a persistent connection to command controller so we dont need to wait for it to be free
-        self.wait_persistent_service('/qt_command_service',3)
+        self.wait_persistent_service('/qt_command_service',1)
         self.command_controller = rospy.ServiceProxy('/qt_command_service', qt_command, persistent=True)
         self.level_loader = levels
         self.talking_anim_time = 4 # How long the talking animation plays for (seconds)
@@ -1852,7 +1852,7 @@ class QTManager():
 
     def call_qt_command(self,command_type, command_data, command_blocking = False):
         # Call service QT_command
-        self.wait_persistent_service('/qt_command_service', 3)
+        self.wait_persistent_service('/qt_command_service', 1)
         command_successful = self.command_controller(command_type, command_data, command_blocking)
         return command_successful
 
@@ -2051,7 +2051,7 @@ class QTManager():
             return
 
         service = "/qt_robot/setting/setVolume"
-        self.wait_persistent_service(service,3)
+        self.wait_persistent_service(service,1)
         set_voice_proxy = rospy.ServiceProxy(service, setting_setVolume)
         set_voice_proxy(newVolume)
         if self.debug:
