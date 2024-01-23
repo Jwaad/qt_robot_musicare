@@ -322,10 +322,12 @@ class Simon_Says_Clap_Game():
     def compute_clear_type(self, temporal_accuracy, numerical_accuracy):
         """handles what clear type the level was"""
         # "Perfect clear"
-        if 1.15 > temporal_accuracy > 0.85 and 1.15 > numerical_accuracy > 0.85:
+        if 1.2 > temporal_accuracy > 0.8 and 1.2 > numerical_accuracy > 0.8:
             return "e_clear"
+        # standard clear
         elif 1.3 > temporal_accuracy > 0.7 and 1.3 > numerical_accuracy > 0.7:
             return "clear"
+        # fail
         else:
             return "fail"
 
