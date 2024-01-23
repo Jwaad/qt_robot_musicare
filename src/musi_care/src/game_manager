@@ -1349,7 +1349,7 @@ class GameManager():
             if game_name == "GTM":
 
                 # Get drums put away before we play
-                if prev_game == "SSC" or prev_game == "CTB":
+                if self.prev_game == "SSC" or self.prev_game == "CTB":
                     self.Levels.put_away_drum(run=self.run, background_colour=self.background_colour)
                     self.command_manager.home_arms()
 
@@ -1365,7 +1365,7 @@ class GameManager():
             elif game_name == "FTS":
 
                 # Get drums put away before we play
-                if prev_game == "SSC" or prev_game == "CTB":
+                if self.prev_game == "SSC" or self.prev_game == "CTB":
                     self.Levels.put_away_drum(run=self.run, background_colour=self.background_colour)
 
                 # Init game
@@ -1390,9 +1390,6 @@ class GameManager():
                 self.run, user_level_data = game.Main(file_name, distract_song, slices, ask_tut = play_tut)
             # Play CTB and SSC
             else:
-                # Set up drums before we start
-                if prev_game == "GTM" or prev_game == "FTS" or prev_game == "":
-                    self.Levels.get_drum(run = self.run,background_colour=self.background_colour)
 
                 # Shared vars between SSC and CTB
                 first_beat = level_data["first_beat"]
@@ -1401,15 +1398,16 @@ class GameManager():
                 if game_name == "CTB" :
                     # Init game
                     game = CTB(debug=self.debug, screen= self.window)
-
-                    # Play game
-                    self.run, user_level_data = game.Main(file_name, first_beat, bpm, ask_tut = play_tut)
                 else:
                     # Init game
                     game = SSC(debug=self.debug, screen= self.window)
 
-                    # Play game
-                    self.run, user_level_data = game.Main(file_name, first_beat, bpm, ask_tut = play_tut)
+                # Set up drums before we start
+                if self.prev_game == "GTM" or self.prev_game == "FTS" or self.prev_game == "":
+                    self.Levels.get_drum(run=self.run, background_colour=self.background_colour)
+
+                # Play game
+                self.run, user_level_data = game.Main(file_name, first_beat, bpm, ask_tut = play_tut)
 
             # Append data with title and difficulty
             user_level_data["song_title"] = song_title
