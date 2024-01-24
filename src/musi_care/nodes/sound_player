@@ -43,7 +43,7 @@ class PlayAudio():
         rospy.loginfo("Sound Player Node has been launched")
         self.service = rospy.Service('sound_player_service', sound_player_srv, self.service_callback)
         rospy.loginfo("Sound Player Service has been launched")
-        self.sound_player_fps = 20
+        self.sound_player_fps = 30
         self.idle_rate = rospy.Rate(self.sound_player_fps)   #Decides how often the node sleeps for before checking for new messages. This will also delay the call back that is sent on start_track
         self.file_path = "" #initialise here so we can start the while loop later
         self.paused = False
@@ -57,17 +57,18 @@ class PlayAudio():
         """Get path to music """
         this_path = os.path.dirname(os.path.abspath(__file__)) # path to this file
         file_path = this_path[:-5] + "src" + data.operation_data_1 # relative path #manually altered abs path as script moved
-        print(file_path)
+        #print(file_path)
         return file_path
     
     def service_callback(self, data):
         """Code to handle what to do when service is called"""
         #Set variables
         self.call_back_triggered = False #If this is false, we wont break out of the loop that plays and check the music, set to true when you want the code to start again from the top with new vars
-        song_data_temp = self.get_song_data()
-        track_title= song_data_temp.track_title
-        elapsed_time = song_data_temp.track_elapsed_time
-        total_time = song_data_temp.track_total_time
+        # future me : no idea why i made these local, instead of using them as is.
+        track_title= self.track_title
+        elapsed_time = self.elapsed_time
+        total_time = self.total_track_time
+
         #---LOAD DATA---
         if  data.operation == "load_track":
             rospy.loginfo("Sound Player: Received request to load track")
@@ -123,16 +124,22 @@ class PlayAudio():
             rospy.loginfo("Sound Player: Received request to pause track")
             if self.currently_streaming and not self.paused: #only attempt to pause if it's not already paused
                 self.pause_resume()
+                track_title, elapsed_time, total_time = self.get_song_data()
+                return track_title, elapsed_time, total_time, True
             else:
                 rospy.loginfo("\033[1;33;1mSound Player: Invalid pause request \033[0m")
+                track_title, elapsed_time, total_time = self.get_song_data()
                 return track_title, elapsed_time, total_time, False
         #---RESUME TRACK---
         elif data.operation == "resume":
             rospy.loginfo("Sound Player: Received request to resume track")
             if self.currently_streaming and self.paused: #only attempt to pause if it's not already paused
                 self.pause_resume()
+                track_title, elapsed_time, total_time = self.get_song_data()
+                return track_title, elapsed_time, total_time, True
             else:
                 rospy.loginfo("\033[1;33;1mSound Player: Invalid resume request \033[0m")
+                track_title, elapsed_time, total_time = self.get_song_data()
                 return track_title, elapsed_time, total_time, False
         #---STOP TRACK---
         elif data.operation == "stop_track":
@@ -154,6 +161,7 @@ class PlayAudio():
                 return track_title, elapsed_time, total_time, False
         #---RETURN DATA---
         elif data.operation == "request_data":
+            track_title, elapsed_time, total_time = self.get_song_data()
             return track_title, elapsed_time, total_time, True
         #---UNRECOGNISED COMMAND---
         else:
@@ -161,8 +169,7 @@ class PlayAudio():
             return track_title, elapsed_time, total_time, False
         self.call_back_triggered = True
         return track_title, elapsed_time, total_time, True
-    
-    
+
     def start_audio_steam(self, file_path, start_time):
         """Starts sound stream with the path to the file """
         #log info
@@ -185,13 +192,13 @@ class PlayAudio():
             self.elapsed_time = 0.0 + start_time
             print("--------------- IGNORE THE TORRENT OF ERRORS ABOVE ---------------")    
 
-            #get out required information
+            # get out required information
             self.frame_rate = self.wf.getframerate()
             self.total_frames = self.wf.getnframes()
             self.total_track_time = self.total_frames/ self.frame_rate
 
             #convert start_time from secs to frames
-            if start_time < self.total_track_time: #Check if the use has made a mistake
+            if start_time < self.total_track_time: #Check if the user has made a mistake
                 if start_time > 0.1: # dont bother if start time == 0
                     start_frame = start_time*self.frame_rate
                     self.wf.setpos(int(start_frame))
@@ -211,8 +218,11 @@ class PlayAudio():
             if self.paused:
                 self.stream.stop_stream()
             else:
+                self.track_start_time = rospy.get_time()
                 self.stream.start_stream()
+                self.paused = False
             self.currently_streaming = True #stream is ready
+
             return True
                 
                    
@@ -257,11 +267,21 @@ class PlayAudio():
             
 
     def get_song_data(self):
-        song_data = SongData() #import msg type
-        song_data.track_title = self.track_title
-        song_data.track_elapsed_time = self.elapsed_time   # time elapsed in seconds, in seconds with 1 decimal place. Floored ie 0.1999 = 0.1.
-        song_data.track_total_time = self.total_track_time # total track time in seconds
-        return song_data 
+        # track title cant be retrieved again, but it should already be in memory
+
+        # track total length, if it exists
+        try:
+            frame_rate = self.wf.getframerate()
+            total_frames = self.wf.getnframes()
+            total_track_time = total_frames / frame_rate
+        except:
+            total_track_time = 999
+            rospy.loginfo("\033[1;33;1mSound Player: Could not get track length. Track is likely not loaded into memory while calling track info \033[0m")
+
+        # elapsed time is updated in while loop. just read that
+        # update parameters and return
+        self.total_track_time = total_track_time
+        return self.track_title, self.elapsed_time ,total_track_time
         
 
     def pause_resume(self):
@@ -297,17 +317,17 @@ class PlayAudio():
                     self.currently_streaming = True
                 else:
                     self.currently_streaming = False
-                track_ended = (self.elapsed_time > self.total_track_time)    
+                # quick (pointless) track end check
+                track_ended = (self.elapsed_time > self.total_track_time)
                     
                 #Wait for stream to end and listen out for certain messages such as pause, resume etc
                 while self.currently_streaming and (not rospy.is_shutdown()) and not track_ended :
                     self.idle_rate.sleep()  #Save processing and have this loop sleep  
+                    if not self.paused:  # Don't add to the stream time while the stream is paused
+                        self.elapsed_time += 1 / self.sound_player_fps  # Is equal to the FPS of sound_player
                     track_ended = (self.elapsed_time >= self.total_track_time)
                     if track_ended:
                         rospy.loginfo("Sound Player: Track has ended")
-                    if not self.paused:             #Don't add to the stream time while the stream is paused 
-                        self.elapsed_time += 1/self.sound_player_fps    #Is equal to the FPS of sound_player
-                
                 #end stream
                 if self.currently_streaming:
                     rospy.loginfo("Sound Player: Ending audio stream...")

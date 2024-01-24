@@ -444,8 +444,8 @@ class StandardLevels():
         self.path_to_imgs = 'game_assets/graphics'
         self.this_file_path = os.path.dirname(__file__)
         self.path_to_music = path_to_music
-        rospy.wait_for_service('/sound_player_service',3)
-        self.sound_player = rospy.ServiceProxy('/sound_player_service', sound_player_srv, persistent=True)
+        #rospy.wait_for_service('/sound_player_service',1)
+        #self.sound_player = rospy.ServiceProxy('/sound_player_service', sound_player_srv, persistent=True)
 
         # Set inputs to either touch or mouse
         self.input_mode = inputMode  # input mode 1 for touch, 2 for mouse
@@ -1605,7 +1605,7 @@ class SoundManager():
         self.music_filepath = music_filepath
         self.wait_persistent_service('/sound_player_service',1)
         self.sound_player = rospy.ServiceProxy('/sound_player_service', sound_player_srv, persistent=True)
-        rospy.sleep(1)
+        #rospy.sleep(1)
 
     def load_track(self, track_title, track_time=0.0):
         """gives the sound player the song data, has it load it up to return information about the song, this is essentially "start_track" but betteer """
@@ -1613,7 +1613,7 @@ class SoundManager():
         # Start track
         operation = "load_track"
         song_data = self.call_sound_player(operation, track_path, track_time)
-        rospy.sleep(0.2)  # requires this to function consistently
+        #rospy.sleep(0.2)  # requires this to function consistently
         return song_data
 
     def wait_persistent_service(self, service, wait_time):
@@ -1650,35 +1650,29 @@ class SoundManager():
                 return True
 
         # If after 3 attempts, we couldnt reconnect, just return false
-        print("Could not reconnect to service".format(i))
+        print("Could not reconnect to service")
         return False
 
-    def call_sound_player(self, operation, data_1="", data_2=0.0):
+    def call_sound_player(self, operation, data_1="", data_2=0.0, time_out = 1):
         """makes it easier to call sound_player"""
         success = self.wait_persistent_service('/sound_player_service', 1)
         song_data = self.sound_player(operation, data_1, data_2)
-        #rospy.sleep(0.15) # This keeps code running long enough for above operation to finish
         return song_data
 
     def start_track(self, track_title, track_time=0.0):
         """Starts a track and also saves the information returned as previous song, so we can replay songs without sending a new request"""
         # store default path to music
-
         track_path = os.path.join(self.music_filepath, track_title)
-        # print(track_path)
-        # Start track
         operation = "start_track"
         callback_data = self.call_sound_player(operation, track_path, track_time)
-        rospy.sleep(0.2)  # requires this to function consistently
-        song_data = self.request_song_data()
-        return song_data
+        return callback_data
 
     def stop_track(self):
         """Stop track, dont hold any data in memory"""
         operation = "stop_track"
         data = self.call_sound_player(
             operation)  # we only need operation, the other variables can default, theyre ignored anyways
-        rospy.sleep(0.2)  # requires this to function consistently
+        #rospy.sleep(0.2)  # requires this to function consistently
         return data
 
     def pause_unpause(self):
@@ -1686,7 +1680,7 @@ class SoundManager():
         operation = "pause_resume"
         data = self.call_sound_player(
             operation)  # we only need operation, the other variables can default, theyre ignored anyways
-        rospy.sleep(0.2)  # requires this to function consistently
+        #rospy.sleep(0.2)  # requires this to function consistently
         return data
 
     def pause(self):
@@ -1694,7 +1688,7 @@ class SoundManager():
         operation = "pause"
         data = self.call_sound_player(
             operation)  # we only need operation, the other variables can default, theyre ignored anyways
-        rospy.sleep(0.2)  # requires this to function consistently
+        #rospy.sleep(0.2)  # requires this to function consistently
         return data
 
     def unpause(self):
@@ -1702,7 +1696,7 @@ class SoundManager():
         operation = "resume"
         data = self.call_sound_player(
             operation)  # we only need operation, the other variables can default, theyre ignored anyways
-        rospy.sleep(0.2)  # requires this to function consistently
+        #rospy.sleep(0.2)  # requires this to function consistently
         return data
 
     def volume_change(self, volume_percentage):
@@ -1711,7 +1705,7 @@ class SoundManager():
         volume = volume_percentage * 100  # other methods use decimal percentages, so for consistency this method does too, but then converts it to numerical percentage
         status = self.call_sound_player(operation,
                                         data_2=volume).status  # we only need operation and data_2 the other variable can default, it's ignored anyways
-        rospy.sleep(0.2)  # requires this to function consistently
+        #rospy.sleep(0.2)  # requires this to function consistently
         return status
 
     def request_song_data(self):
@@ -1719,7 +1713,8 @@ class SoundManager():
 
         operation = "request_data"
         data = self.call_sound_player(operation)
-        rospy.sleep(0.2)  # requires this to function consistently
+        print(data) # TODO TEMP
+        #rospy.sleep(0.2)  # requires this to function consistently
         return data
 
     def return_wav_lenth(self, song_path):
