@@ -562,6 +562,7 @@ class Guess_The_Mood_Game():
             track_total_time = ""
             fps = "0"
 
+            time.sleep(1)
             self.sound_manager.unpause()  # start track
             music_playing = True
             song_interrupt = False  # track if we stopped song
