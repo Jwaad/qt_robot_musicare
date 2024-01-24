@@ -77,7 +77,7 @@ class PlayAudio():
                 self.end_audio_steam()
                 self.currently_streaming = False
             file_path = self.get_path(data)
-            self.start_time = 0
+            self.start_time = data.operation_data_2
             #check filepath
             file_path_valid = self.check_valid_filepath(file_path)
             if file_path_valid:
@@ -85,6 +85,7 @@ class PlayAudio():
                 rospy.loginfo("Sound Player: File path to audio confirmed")
                 self.track_title = data.operation_data_1
                 self.paused=True
+                self.elapsed_time = self.start_time
                 self.call_back_triggered = True
                 return track_title, elapsed_time, total_time, True
             else:
@@ -215,12 +216,10 @@ class PlayAudio():
                     stream_callback=self.audio_callback)   
             
             #start stream if we should
-            if self.paused:
+            if self.paused: # Start the stream, but in paused state
                 self.stream.stop_stream()
             else:
-                self.track_start_time = rospy.get_time()
                 self.stream.start_stream()
-                self.paused = False
             self.currently_streaming = True #stream is ready
 
             return True
@@ -302,11 +301,13 @@ class PlayAudio():
         """main """ #TODO GET RID OF THIS AND TURN THIS INTO SERVICE ONLY
         while not rospy.is_shutdown():
             
-            #Wait until this service is called
+            #Wait until this service is calledcall_back_triggered
             while not self.call_back_triggered and not rospy.is_shutdown():
+                #print("idling")
                 self.idle_rate.sleep()  # Save processing and have this loop sleep often
+            #print("Initiating a callback")
             self.call_back_triggered = False # we have dealt with the call back being raised, so return it to false 
-            
+
             #Rest of code goes in here, such that if rospy shuts down in the above loop, this code doesn't occur
             if not rospy.is_shutdown():
                 
@@ -317,13 +318,16 @@ class PlayAudio():
                     self.currently_streaming = True
                 else:
                     self.currently_streaming = False
-                # quick (pointless) track end check
-                track_ended = (self.elapsed_time > self.total_track_time)
+                # quick track end check to restart track bool
+                track_ended = (self.elapsed_time >= self.total_track_time)
+                #print(track_ended, self.elapsed_time, self.total_track_time)
                     
                 #Wait for stream to end and listen out for certain messages such as pause, resume etc
                 while self.currently_streaming and (not rospy.is_shutdown()) and not track_ended :
                     self.idle_rate.sleep()  #Save processing and have this loop sleep  
+                    #print(self.paused)
                     if not self.paused:  # Don't add to the stream time while the stream is paused
+                        #print(self.elapsed_time)
                         self.elapsed_time += 1 / self.sound_player_fps  # Is equal to the FPS of sound_player
                     track_ended = (self.elapsed_time >= self.total_track_time)
                     if track_ended:
