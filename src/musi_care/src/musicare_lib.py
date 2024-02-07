@@ -2057,7 +2057,7 @@ class QTManager():
         right_joint_angles = joint_angles[0]
         left_joint_angles = [joint_angles[1][0] * -1, joint_angles[1][1], joint_angles[1][2]]
 
-        motor_pos = str([["right_arm","left_arm"], [right_joint_angles, left_joint_angles]])
+        motor_pos = str( [ ["right_arm", "left_arm"], [right_joint_angles, left_joint_angles] ] )
         command_complete = self.call_qt_command("actuation", motor_pos, command_blocking)
         return command_complete
 
