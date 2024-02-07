@@ -1657,6 +1657,7 @@ class SoundManager():
         """makes it easier to call sound_player"""
         success = self.wait_persistent_service('/sound_player_service', 1)
         song_data = self.sound_player(operation, data_1, data_2)
+        time.sleep(0.1)
         return song_data
 
     def start_track(self, track_title, track_time=0.0):
@@ -1828,6 +1829,7 @@ class QTManager():
         # Try waiting for service, if we succeed, just return
         service_connected = attempt_connection(service, wait_time)
         if service_connected:
+            #print("connected with service on first try")
             return True
 
         # Try to reconnect to service 3x
@@ -1847,8 +1849,12 @@ class QTManager():
 
     def call_qt_command(self,command_type, command_data, command_blocking = False):
         # Call service QT_command
+        t1 = rospy.get_time()
         self.wait_persistent_service('/qt_command_service', 1)
+        t2 = rospy.get_time()
         command_successful = self.command_controller(command_type, command_data, command_blocking)
+        t3 = rospy.get_time()
+        print("Waited {:.2f}ms for service, Waited {:.2f}ms to complete command".format((t2-t1)*1000, (t3-t2)*1000))
         return command_successful
 
     def init_robot(self, arm_vel):
