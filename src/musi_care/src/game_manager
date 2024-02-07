@@ -804,7 +804,8 @@ class GameManager():
         current_difficulty = self.user_data["game_data"]["difficulty"][game_name]
 
         # Guard statement # 3: if they've just changed difficulty, skip
-        prev_difficulty = prev_game["game_data"]["difficulty"][game_name]
+        #print(prev_game)
+        prev_difficulty = prev_game["difficulty"]
         if prev_difficulty != current_difficulty:
             return
 
@@ -1229,7 +1230,7 @@ class GameManager():
         self.session_start = rospy.get_time()
         self.session_elapsed_time = 0
         run, game_name = self.home_screen()
-        if self.session_elapsed_time < self.session_time:
+        if self.session_elapsed_time > self.session_time:
             return True
 
         # Loop vars
