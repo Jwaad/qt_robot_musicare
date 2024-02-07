@@ -407,7 +407,7 @@ def DefaultDatabase():
                     "length": "long",  # full, long, short
                     "artist": "The Beatles",
                     "display_name": "I Am The Walrus",
-                    "file_name": "full_i_am_the_walrus.wav",  # Exact file_name
+                    "file_name": "long_i_am_the_walrus.wav",  # Exact file_name
                     "bpm": 85.0,
                     "first_beat": 1.2,
                     "mood": "sad",  # happy / sad
@@ -421,7 +421,7 @@ def DefaultDatabase():
                     "length": "short",  # full, long, short
                     "artist": "The Beatles",
                     "display_name": "I Am The Walrus",
-                    "file_name": "full_i_am_the_walrus.wav",  # Exact file_name
+                    "file_name": "short_i_am_the_walrus.wav",  # Exact file_name
                     "bpm": 60.0,
                     "first_beat": 3.0,
                     "mood": "sad",  # happy / sad
