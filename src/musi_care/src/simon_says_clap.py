@@ -416,7 +416,7 @@ class Simon_Says_Clap_Game():
                     # self.command_manager.move_left_arm(hitting_drum)
 
                 # Add the beat we just hit to our list
-                #beats_hit.append(beat_timings[i])
+                beats_hit.append(beat_timings[i])
 
                 # Move onto next beat
                 i += 1
