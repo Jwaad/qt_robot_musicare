@@ -407,14 +407,16 @@ class Simon_Says_Clap_Game():
 
                 # On even numbers use right arm else, left
                 if len(beats_hit) % 2 == 0:
-                    self.command_manager.move_right_arm(hitting_drum)
-                    self.command_manager.move_left_arm(raised_arm)
+                    self.command_manager.move_both_arms([hitting_drum, raised_arm])
+                    # self.command_manager.move_right_arm(hitting_drum) # 80ms
+                    # self.command_manager.move_left_arm(raised_arm) # Another 80ms
                 else:
-                    self.command_manager.move_right_arm(raised_arm)
-                    self.command_manager.move_left_arm(hitting_drum)
+                    self.command_manager.move_both_arms([raised_arm, hitting_drum])
+                    # self.command_manager.move_right_arm(raised_arm)
+                    # self.command_manager.move_left_arm(hitting_drum)
 
                 # Add the beat we just hit to our list
-                beats_hit.append(beat_timings[i])
+                #beats_hit.append(beat_timings[i])
 
                 # Move onto next beat
                 i += 1
