@@ -40,7 +40,7 @@ class GameManager():
         self.path_to_music = "game_assets/music/"
         self.this_file_path = os.path.dirname(__file__)
         self.path_to_userdata = os.path.join(self.this_file_path, 'game_assets/data/user_data/')
-        self.session_time = 25 # How many minutes sessions should last
+        self.session_time = 10 # How many minutes sessions should last
         self.session_time = self.session_time * 60
         self.session_name = "session_" # this should be appended with a number e.g: session_3
         self.session_data = {}
@@ -1238,7 +1238,7 @@ class GameManager():
         next_level_text = ""
         # Keep selecting games to be played until full time has passed
         while self.session_elapsed_time < (self.session_time) and run and not rospy.is_shutdown():
-            # Keep track of what how many games we've played.
+            # Keep track of how many games we've played.
             game_num += 1
 
             # Get difficulty from user profile
@@ -1310,7 +1310,7 @@ class GameManager():
                     message = sayings[ind]
                     self.command_manager.qt_say(message)
                     run, game_name = self.home_screen(previous_game = game_name)
-                    if self.session_elapsed_time < self.session_time:
+                    if self.session_elapsed_time > self.session_time:
                         return True
             else:
                 # QT should segway(?) to next level
