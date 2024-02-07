@@ -1251,10 +1251,6 @@ class GameManager():
             # Play game
             run, user_level_data = self.play_game(game_name, difficulty, play_tut)
 
-            # Check if difficulty should increase or decrease
-            clear_type = user_level_data["clear_type"]
-            self.change_difficulty(game_name, clear_type)
-
             # Add user_level_data to data and save
             game_save_name = "game_" + str(game_num)
             self.user_data["game_data"][self.session_name][game_save_name] = user_level_data
@@ -1268,11 +1264,18 @@ class GameManager():
                     should_gesture = False
                 run, song_rating = self.Levels.did_you_like_song(run = self.run,
                                         background_colour= self.background_colour, gesture = should_gesture)
+                # Run method with no text, to update screen while loading game
+                self.run = self.Levels.QTSpeakingScreen("   ", self.run, self.background_colour,
+                                                              on_screen_text="Please Wait")
                 self.user_data["song_preference"][song_title] = song_rating
                 # If negative score, black_list song
                 if song_rating < 3 :
                     self.user_data["blacklist"].append(song_title)
                 self.SaveExistingUserData()
+
+            # Check if difficulty should increase or decrease
+            clear_type = user_level_data["clear_type"]
+            self.change_difficulty(game_name, clear_type)
 
             # If they have played 3 games, ask if they want to continue, or choose a new game
             if (game_num % 3) == 0:
