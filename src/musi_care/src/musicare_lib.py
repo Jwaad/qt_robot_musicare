@@ -1622,6 +1622,7 @@ class SoundManager():
         """ waits for a persistent service, in a safe way
         If it's frozen, try reestablishing connection """
         #print("WAITING FOR PERSISTENT SERVICE")
+        
         def attempt_connection(service, wait_time):
             success = True
             try:
@@ -1634,6 +1635,10 @@ class SoundManager():
                 return True
             else:
                 return False
+        
+        # If we're quitting skip
+        if rospy.is_shutdown():
+            return False
 
         # Try waiting for service, if we succeed, just return
         service_connected = attempt_connection(service, wait_time)
@@ -1827,6 +1832,10 @@ class QTManager():
                 return True
             else:
                 return False
+
+        # If we're quitting skip
+        if rospy.is_shutdown():
+            return False
 
         # Try waiting for service, if we succeed, just return
         service_connected = attempt_connection(service, wait_time)
