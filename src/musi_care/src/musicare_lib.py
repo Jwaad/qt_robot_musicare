@@ -848,7 +848,8 @@ class StandardLevels():
         self.command_manager.qt_gesture("arms_up")
         self.command_manager.qt_say_blocking("Thank you very much!")
 
-    def did_you_like_song(self, run = True, on_screen_text = "Did you like the song?", prev_dialogue = "", background_colour = (200, 200, 200)):
+    def did_you_like_song(self, run = True, on_screen_text = "Did you like the song?", prev_dialogue = "",
+                          background_colour = (200, 200, 200), gesture = True):
         """ 
             Displays 5 point emoji scale. EAch emoji is a clickable button, which has text underneath it,
             aswell as a main question hovering at the top
@@ -860,7 +861,8 @@ class StandardLevels():
             # Ask how was the song
             question = self.behaviour_manager.get_how_was_song(previous_saying=prev_dialogue)
             self.command_manager.qt_say(question)  # says text we give it, and starts an internal timer that we can check on
-            self.command_manager.qt_gesture("explain_right")
+            if gesture:
+                self.command_manager.qt_gesture("explain_right")
 
             # Create emoji scale buttons
             path_to_png = os.path.join(self.this_file_path, self.path_to_imgs)

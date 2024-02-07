@@ -790,18 +790,25 @@ class GameManager():
         # Get the data of the previous game played, in this session
         prev_game = self.get_latest_data(game_name = game_name)
 
-        # Guard statement #1
+        # Guard statement # 1
         if prev_game is None:
             #print("no previous game data, skipping")
             return
 
-        # Guard statement #2
+        # Guard statement # 2: if they somehow have data, but no clear type, just skip
         prev_clear = prev_game["clear_type"]
         if prev_clear != clear_type:
             return
 
-        # Increase or decrease difficulty
+        # Get the difficulty they're on now
         current_difficulty = self.user_data["game_data"]["difficulty"][game_name]
+
+        # Guard statement # 3: if they've just changed difficulty, skip
+        prev_difficulty = prev_game["game_data"]["difficulty"][game_name]
+        if prev_difficulty != current_difficulty:
+            return
+
+        # Increase or decrease difficulty
         if clear_type == "clear":
             return
         elif clear_type == "fail":
@@ -1236,7 +1243,8 @@ class GameManager():
             # Get difficulty from user profile
             difficulty = self.user_data["game_data"]["difficulty"][game_name]
             play_tut = False
-            if difficulty == "easy":
+            # If they're on easy, and it's their first game of the 3
+            if difficulty == "easy" and ((game_num - 1) % 3) == 0:
                 play_tut = True
 
             # Play game
@@ -1254,7 +1262,11 @@ class GameManager():
             # Ask if they liked the song (if we haven't asked about this song before)
             song_title = user_level_data["song_title"]
             if song_title not in self.user_data["song_preference"]:
-                run, song_rating = self.Levels.did_you_like_song(run = self.run, background_colour= self.background_colour)
+                should_gesture = True
+                if game_name == "CTB" or game_name == "SSC":
+                    should_gesture = False
+                run, song_rating = self.Levels.did_you_like_song(run = self.run,
+                                        background_colour= self.background_colour, gesture = should_gesture)
                 self.user_data["song_preference"][song_title] = song_rating
                 # If negative score, black_list song
                 if song_rating < 3 :
