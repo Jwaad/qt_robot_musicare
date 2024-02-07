@@ -725,6 +725,10 @@ class Guess_The_Mood_Game():
         # Tap to continue screen to slow pacing
         self.run = self.level_loader.tap_to_continue(self.run, self.background_colour)
 
+        # Run method with no text, to update screen while loading game
+        self.run = self.level_loader.QTSpeakingScreen("   ", self.run, self.background_color,
+                                                      on_screen_text= "Please Wait")
+
         # Countdown
         # self.run = self.level_loader.countdown(3, self.run, self.background_colour, prelim_msg="Get ready to play!")
 
