@@ -40,7 +40,7 @@ class GameManager():
         self.path_to_music = "game_assets/music/"
         self.this_file_path = os.path.dirname(__file__)
         self.path_to_userdata = os.path.join(self.this_file_path, 'game_assets/data/user_data/')
-        self.session_time = 10 # How many minutes sessions should last
+        self.session_time = 25 # How many minutes sessions should last
         self.session_time = self.session_time * 60
         self.session_name = "session_" # this should be appended with a number e.g: session_3
         self.session_data = {}
