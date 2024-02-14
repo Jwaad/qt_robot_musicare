@@ -59,7 +59,7 @@ class GameManager():
 
         # Check robot connected
         print("Starting nodes")
-        self.default_voice_vol = 82
+        self.default_voice_vol = 84
         print("Checking robot running")
         self.robot_connected = self.CheckRobotRunning()
         #rospy.set_param('/activity_status', 1) # Tell ros this node is starting
