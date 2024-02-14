@@ -40,7 +40,7 @@ class GameManager():
         self.path_to_music = "game_assets/music/"
         self.this_file_path = os.path.dirname(__file__)
         self.path_to_userdata = os.path.join(self.this_file_path, 'game_assets/data/user_data/')
-        self.session_time = 25 # How many minutes sessions should last
+        self.session_time = 20 # How many minutes sessions should last
         self.session_time = self.session_time * 60
         self.session_name = "session_" # this should be appended with a number e.g: session_3
         self.session_data = {}
@@ -1294,7 +1294,8 @@ class GameManager():
                 ind = random.randint(0, len(sayings) - 1)
                 message = sayings[ind]
                 gesture = "explain_right"
-                self.command_manager.qt_gesture(gesture)
+                if game_name == "GTM" or game_name == "FTS":
+                    self.command_manager.qt_gesture(gesture)
                 self.command_manager.qt_say(message)
                 self.run, new_game = self.Levels.yes_or_no_screen("Choose another game?",
                                                         self.run, self.background_colour,
